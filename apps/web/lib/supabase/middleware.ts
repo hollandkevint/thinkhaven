@@ -9,8 +9,8 @@ export async function updateSession(request: NextRequest) {
     })
   }
 
-  // Special handling for post-OAuth dashboard access - bypass session check on OAuth success
-  if (request.nextUrl.pathname === '/dashboard' && request.nextUrl.searchParams.get('auth_success') === 'true') {
+  // Special handling for post-OAuth app access - bypass session check on OAuth success
+  if (request.nextUrl.pathname === '/app' && request.nextUrl.searchParams.get('auth_success') === 'true') {
     return NextResponse.next({
       request,
     })
@@ -133,7 +133,7 @@ export async function updateSession(request: NextRequest) {
   if (user && authPages.includes(request.nextUrl.pathname)) {
     const redirectParam = request.nextUrl.searchParams.get('redirect')
     const url = request.nextUrl.clone()
-    url.pathname = redirectParam || '/dashboard'
+    url.pathname = redirectParam || '/app'
     url.search = '' // Clear search params to avoid redirect loops
     return NextResponse.redirect(url)
   }

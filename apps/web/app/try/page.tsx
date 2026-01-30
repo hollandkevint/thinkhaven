@@ -34,8 +34,8 @@ export default function TryPage() {
           }
         }
 
-        // Redirect authenticated users to dashboard
-        router.push('/dashboard')
+        // Redirect authenticated users to app
+        router.push('/app')
       }
 
       migrateSession()
