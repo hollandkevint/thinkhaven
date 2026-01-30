@@ -33,8 +33,8 @@ Progress: [███░░░░░░░] 30%
 | 4. Analytics | 0 | 0 | - |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2min), 01-02 (skipped - no changes needed), 01-03 (1min)
-- Trend: Fast execution (codebase already compliant in 01-03)
+- Last 5 plans: 01-01 (2min), 01-02 (2min), 01-03 (1min)
+- Trend: Fast execution, consistent auth redirect fixes
 
 *Updated after each plan completion*
 
@@ -51,6 +51,7 @@ Recent decisions affecting current work:
 - [01-01] Zero redirect logic in middleware (all route protection in API routes)
 - [01-01] Use getUser() for JWT validation (not getSession() which only validates locally)
 - [01-03] Verified all API routes already use getUser() - no changes needed
+- [01-02] All auth success redirects use /app (not /dashboard)
 - [01-03] GuestSessionStore.getSession() is custom localStorage method, not Supabase auth
 
 ### Pending Todos
