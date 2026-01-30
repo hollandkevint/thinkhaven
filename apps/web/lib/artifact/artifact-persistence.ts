@@ -4,7 +4,7 @@
  * Handles saving and loading artifacts to/from Supabase.
  */
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import type { Artifact, ArtifactType, ArtifactViewMode, ArtifactRenderMode } from './artifact-types';
 
 // Database row type
@@ -26,7 +26,10 @@ interface ArtifactRow {
  * Uses upsert to handle both create and update
  */
 export async function saveArtifact(artifact: Artifact, sessionId: string): Promise<void> {
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const { error } = await supabase
     .from('session_artifacts')
@@ -54,7 +57,10 @@ export async function saveArtifact(artifact: Artifact, sessionId: string): Promi
  * Load all artifacts for a session
  */
 export async function loadArtifacts(sessionId: string): Promise<Artifact[]> {
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const { data, error } = await supabase
     .from('session_artifacts')
@@ -74,7 +80,10 @@ export async function loadArtifacts(sessionId: string): Promise<Artifact[]> {
  * Delete an artifact from the database
  */
 export async function deleteArtifact(artifactId: string): Promise<void> {
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const { error } = await supabase
     .from('session_artifacts')
@@ -110,7 +119,10 @@ function rowToArtifact(row: ArtifactRow): Artifact {
 export async function saveArtifacts(artifacts: Artifact[], sessionId: string): Promise<void> {
   if (artifacts.length === 0) return;
 
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const rows = artifacts.map(artifact => ({
     id: artifact.id,
