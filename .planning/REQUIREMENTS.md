@@ -9,13 +9,13 @@ Requirements for beta launch. Each maps to roadmap phases.
 
 ### Authentication Fix
 
-- [ ] **AUTH-01**: Remove deprecated `@supabase/auth-helpers-nextjs` package and migrate to `@supabase/ssr`
-- [ ] **AUTH-02**: Create minimal middleware.ts that refreshes Supabase session tokens
-- [ ] **AUTH-03**: Replace all `getSession()` calls with `getUser()` in API routes for security
-- [ ] **AUTH-04**: Fix OAuth callback route to redirect to `/app` instead of legacy `/dashboard`
-- [ ] **AUTH-05**: User can log in with email/password and stay logged in across browser refresh
-- [ ] **AUTH-06**: User can log in with Google OAuth and access the app
-- [ ] **AUTH-07**: User can log out from any page
+- [x] **AUTH-01**: Remove deprecated `@supabase/auth-helpers-nextjs` package and migrate to `@supabase/ssr`
+- [x] **AUTH-02**: Create minimal middleware.ts that refreshes Supabase session tokens
+- [x] **AUTH-03**: Replace all `getSession()` calls with `getUser()` in API routes for security
+- [x] **AUTH-04**: Fix OAuth callback route to redirect to `/app` instead of legacy `/dashboard`
+- [x] **AUTH-05**: User can log in with email/password and stay logged in across browser refresh
+- [x] **AUTH-06**: User can log in with Google OAuth and access the app
+- [x] **AUTH-07**: User can log out from any page
 
 ### Beta Access Control
 
@@ -80,13 +80,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| AUTH-05 | Phase 1 | Pending |
-| AUTH-06 | Phase 1 | Pending |
-| AUTH-07 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
+| AUTH-04 | Phase 1 | Complete |
+| AUTH-05 | Phase 1 | Complete |
+| AUTH-06 | Phase 1 | Complete |
+| AUTH-07 | Phase 1 | Complete |
 | GATE-01 | Phase 2 | Pending |
 | GATE-02 | Phase 2 | Pending |
 | GATE-03 | Phase 2 | Pending |

@@ -10,7 +10,7 @@ Fix authentication issues, implement waitlist-based access control, add error/lo
 - Integer phases (1, 2, 3, 4): Planned milestone work
 - Decimal phases (1.1, 2.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Auth Infrastructure Fix** - Fix broken authentication so users can log in reliably
+- [x] **Phase 1: Auth Infrastructure Fix** - Fix broken authentication so users can log in reliably
 - [ ] **Phase 2: Beta Access Control** - Gate access via waitlist + manual approval
 - [ ] **Phase 3: Error/Loading States** - No blank screens, clear error messages, retry options
 - [ ] **Phase 4: Feedback/Analytics** - Track signups, sessions, and messages for beta validation
@@ -30,10 +30,10 @@ Fix authentication issues, implement waitlist-based access control, add error/lo
 **Plans**: 4 plans in 3 waves
 
 Plans:
-- [ ] 01-01-PLAN.md — Remove deprecated package, create minimal token-refresh middleware
-- [ ] 01-02-PLAN.md — Fix OAuth callback to redirect to /app (not /dashboard)
-- [ ] 01-03-PLAN.md — Replace getSession() with getUser() in all server code
-- [ ] 01-04-PLAN.md — End-to-end auth verification (human checkpoint)
+- [x] 01-01-PLAN.md — Remove deprecated package, create minimal token-refresh middleware
+- [x] 01-02-PLAN.md — Fix OAuth callback to redirect to /app (not /dashboard)
+- [x] 01-03-PLAN.md — Replace getSession() with getUser() in all server code
+- [x] 01-04-PLAN.md — End-to-end auth verification (human checkpoint)
 
 ### Phase 2: Beta Access Control
 **Goal**: Only approved waitlist users can access /app/* routes
@@ -84,8 +84,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth Infrastructure Fix | 0/4 | Ready to execute | - |
-| 2. Beta Access Control | 0/? | Not started | - |
+| 1. Auth Infrastructure Fix | 4/4 | Complete | 2026-01-30 |
+| 2. Beta Access Control | 0/? | Ready to plan | - |
 | 3. Error/Loading States | 0/? | Not started | - |
 | 4. Feedback/Analytics | 0/? | Not started | - |
 

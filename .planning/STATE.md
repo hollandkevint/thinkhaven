@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 
 ## Current Position
 
-Phase: 1 of 4 (Auth Infrastructure Fix)
-Plan: 4 of 4 in current phase
-Status: Phase 1 COMPLETE - all auth flows verified
-Last activity: 2026-01-30 — Completed 01-04-PLAN.md (verification gate)
+Phase: 2 of 4 (Beta Access Control)
+Plan: 0 of ? in current phase (not yet planned)
+Status: Phase 2 ready to plan
+Last activity: 2026-01-30 — Phase 1 complete, dashboard button fix committed
 
 Progress: [████░░░░░░] 40%
 
@@ -68,6 +68,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-30 14:11 UTC
-Stopped at: Completed 01-04-PLAN.md (Phase 1 verified and complete)
+Last session: 2026-01-30
+Stopped at: Phase 1 complete, fixed dashboard button visibility issue
 Resume file: None
+Note: Dashboard buttons were invisible due to CSS var misuse; fixed with Tailwind classes
