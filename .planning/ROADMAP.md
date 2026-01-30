@@ -27,10 +27,13 @@ Fix authentication issues, implement waitlist-based access control, add error/lo
   3. User can log out from any page and is redirected to landing
   4. OAuth callback redirects to /app (not legacy /dashboard)
   5. No "session expired" errors during normal usage
-**Plans**: TBD
+**Plans**: 4 plans in 3 waves
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Remove deprecated package, create minimal token-refresh middleware
+- [ ] 01-02-PLAN.md — Fix OAuth callback to redirect to /app (not /dashboard)
+- [ ] 01-03-PLAN.md — Replace getSession() with getUser() in all server code
+- [ ] 01-04-PLAN.md — End-to-end auth verification (human checkpoint)
 
 ### Phase 2: Beta Access Control
 **Goal**: Only approved waitlist users can access /app/* routes
@@ -81,7 +84,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth Infrastructure Fix | 0/? | Not started | - |
+| 1. Auth Infrastructure Fix | 0/4 | Ready to execute | - |
 | 2. Beta Access Control | 0/? | Not started | - |
 | 3. Error/Loading States | 0/? | Not started | - |
 | 4. Feedback/Analytics | 0/? | Not started | - |
