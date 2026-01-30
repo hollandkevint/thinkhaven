@@ -111,8 +111,8 @@ export async function GET(request: NextRequest) {
         data.user.app_metadata?.provider
       )
 
-      console.log('OAuth callback: Redirecting to dashboard')
-      return NextResponse.redirect(`${requestUrl.origin}/dashboard`)
+      console.log('OAuth callback: Redirecting to app')
+      return NextResponse.redirect(`${requestUrl.origin}/app`)
 
     } catch (err) {
       const latencyMs = Date.now() - startTime
