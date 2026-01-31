@@ -5,36 +5,36 @@
 See: .planning/PROJECT.md (updated 2026-01-29)
 
 **Core value:** 100 users can reliably sign up via waitlist, get approved, and use Mary without auth issues
-**Current focus:** Phase 1 - Auth Infrastructure Fix
+**Current focus:** Phase 2 - Beta Access Control
 
 ## Current Position
 
 Phase: 2 of 4 (Beta Access Control)
-Plan: 0 of ? in current phase (not yet planned)
-Status: Phase 2 ready to plan
-Last activity: 2026-01-30 — Phase 1 complete, dashboard button fix committed
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-01-30 — Completed 02-01-PLAN.md (database foundation)
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 2.0 min
-- Total execution time: 0.13 hours
+- Total plans completed: 5
+- Average duration: 1.8 min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Auth Fix | 4 | 8min | 2.0min |
-| 2. Beta Access | 0 | 0 | - |
+| 2. Beta Access | 1 | 1min | 1.0min |
 | 3. Error/Loading | 0 | 0 | - |
 | 4. Analytics | 0 | 0 | - |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2min), 01-02 (2min), 01-03 (1min), 01-04 (3min)
-- Trend: Phase 1 complete with all auth flows verified
+- Last 5 plans: 01-02 (2min), 01-03 (1min), 01-04 (3min), 02-01 (1min)
+- Trend: Database foundation laid for beta access control
 
 *Updated after each plan completion*
 
@@ -54,10 +54,13 @@ Recent decisions affecting current work:
 - [01-02] All auth success redirects use /app (not /dashboard)
 - [01-03] GuestSessionStore.getSession() is custom localStorage method, not Supabase auth
 - [01-04] All 7 AUTH requirements verified via manual testing (email/password, OAuth, logout, session)
+- [02-01] NULL approved_at = pending, timestamp = approved (no separate status column)
+- [02-01] jose v6 for JWT verification (Edge Runtime compatible)
 
 ### Pending Todos
 
-None yet.
+- Run migration 013_beta_access.sql in Supabase Dashboard
+- Configure Custom Access Token Hook in Supabase Dashboard
 
 ### Blockers/Concerns
 
@@ -69,6 +72,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Phase 1 complete, fixed dashboard button visibility issue
+Stopped at: Completed 02-01-PLAN.md (database foundation)
 Resume file: None
-Note: Dashboard buttons were invisible due to CSS var misuse; fixed with Tailwind classes
+Note: Migration ready but needs manual execution in Supabase Dashboard + hook configuration
