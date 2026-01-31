@@ -1,52 +1,13 @@
 'use client'
 
-import { useAuth } from '../lib/auth/AuthContext'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { WaitlistForm } from '@/components/waitlist/WaitlistForm'
 
 export default function Home() {
-  const { user, loading } = useAuth()
   const router = useRouter()
-  const [checkoutLoading, setCheckoutLoading] = useState(false)
-
-  const handleCheckout = async () => {
-    if (!user) {
-      router.push('/login?redirect=/&checkout=true')
-      return
-    }
-
-    setCheckoutLoading(true)
-    try {
-      const response = await fetch('/api/checkout/idea-validation', {
-        method: 'POST',
-      })
-      const data = await response.json()
-
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        console.error('No checkout URL returned:', data)
-        setCheckoutLoading(false)
-      }
-    } catch (error) {
-      console.error('Checkout error:', error)
-      setCheckoutLoading(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="loading-shimmer h-8 w-48 rounded mb-4"></div>
-          <p className="text-secondary">Loading ThinkHaven...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -54,7 +15,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-5xl mx-auto text-center">
           <Badge variant="secondary" className="px-4 py-2 text-sm font-semibold mb-6">
-            🚀 Validate Your Startup Idea in 30 Minutes
+            🚀 Join the Beta - Limited Spots Available
           </Badge>
 
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
@@ -67,16 +28,12 @@ export default function Home() {
             Get your startup idea validated by AI in 30 minutes. <strong>Know if you should build it</strong> before you invest your time and money.
           </p>
 
-          {/* Primary CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
-            <Button
-              size="lg"
-              className="px-12 py-6 text-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              onClick={handleCheckout}
-              disabled={checkoutLoading}
-            >
-              {checkoutLoading ? 'Loading...' : '🎯 Validate My Idea - $99'}
-            </Button>
+          {/* Primary CTA - Waitlist Form */}
+          <div className="mb-8">
+            <WaitlistForm />
+          </div>
+
+          <div className="flex justify-center mb-4">
             <Button
               size="lg"
               variant="outline"
@@ -88,7 +45,7 @@ export default function Home() {
           </div>
 
           <p className="text-sm text-gray-600 mb-12">
-            ✓ 30-minute AI session • ✓ 10 critical questions answered • ✓ Professional validation report • ✓ Money-back guarantee
+            ✓ 30-minute AI validation session • ✓ 10 critical questions answered • ✓ Professional report
           </p>
 
           {/* Value Proposition - What You Get */}
@@ -179,23 +136,15 @@ export default function Home() {
               Stop guessing. Start validating.
             </h2>
             <p className="text-xl text-blue-100 mb-8">
-              73% of startups fail because they build something nobody wants. Don&apos;t be one of them.
+              73% of startups fail because they build something nobody wants. Join the beta and validate before you build.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-              <Button
-                size="lg"
-                variant="secondary"
-                className="px-12 py-6 text-xl font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all"
-                onClick={handleCheckout}
-                disabled={checkoutLoading}
-              >
-                {checkoutLoading ? 'Loading...' : '🎯 Validate My Idea - $99'}
-              </Button>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+              <WaitlistForm />
             </div>
 
             <p className="text-blue-200 text-sm">
-              ✓ 30-minute session • ✓ Professional validation report • ✓ Money-back guarantee
+              ✓ Limited beta spots • ✓ Early access pricing • ✓ Direct founder support
             </p>
 
             <div className="mt-8 pt-8 border-t border-blue-400">
