@@ -20,6 +20,16 @@
 - Achieve 10-message trial gate with partial output at conversion point
 - Polish Lean Canvas + PRD/Spec output generation
 
+### Design Principles
+Derived from research synthesis (see Vault literature notes):
+
+1. **Problem First** - Help users design the problem before designing solutions. "The ur-problem is to define the problem" - most people skip problem design entirely
+2. **Respect Exhaustion** - Users are tired; 30 minutes forces clarity, not sprawl. Build for the most exhausted version of your user
+3. **Truth Over Comfort** - Anti-sycophancy is the feature, not a bug. LLMs default to sycophancy; we override that
+4. **Process IS Learning** - The collaborative framing creates shared understanding. The methodology itself is the value
+5. **Cognitive Mode Matching** - Match session pathway to the thinking required (Value, Constraints, People, Time)
+6. **Constraint as Catalyst** - Time limits and enforced steps force clarity and prevent analysis paralysis
+
 ## Background Context
 
 ### Product Vision

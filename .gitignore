@@ -43,6 +43,7 @@ yarn-error.log*
 # IDE files
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 

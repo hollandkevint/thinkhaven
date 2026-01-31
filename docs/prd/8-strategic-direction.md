@@ -8,6 +8,7 @@ ThinkHaven is a **decision accelerator** that applies structured methodology to 
 
 **What ThinkHaven IS:**
 - A strategic thinking partner with opinionated pushback
+- A problem design partner that helps articulate *what problem you're solving* before evaluating solutions
 - An enforced methodology that can't be skipped
 - A system that delivers polished, portable outputs
 
@@ -25,6 +26,8 @@ ThinkHaven is a **decision accelerator** that applies structured methodology to 
 ### The Problem We Solve
 
 Most people don't know what they don't know about prompting. They accept sycophantic AI responses because they don't realize they should demand better. They build first, validate later, and waste months on the wrong thing.
+
+Most people skip problem design entirely. They have a solution idea and work backwards to justify it. ThinkHaven forces the problem design work that LLMs cannot do alone—the collaborative framing that creates genuine understanding. As the research notes: "The ur-problem is to define the problem."
 
 ### Our Solution
 

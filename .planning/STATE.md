@@ -62,8 +62,9 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Run migration 013_beta_access.sql in Supabase Dashboard
-- Configure Custom Access Token Hook in Supabase Dashboard
+- ~~Run migration 013_beta_access.sql~~ (done via `supabase db push`)
+- ~~Configure Custom Access Token Hook~~ (done in dashboard)
+- Complete manual verification tests (02-04-PLAN.md, Task 2)
 
 ### Blockers/Concerns
 
@@ -75,6 +76,6 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-01-31
-Stopped at: Completed 02-02-PLAN.md (beta access gate)
+Stopped at: Ran Playwright tests (13/14 pass), verified beta gate via curl
 Resume file: None
-Note: Beta access gate active on /app/*. Unapproved users redirect to /waitlist. Next: 02-04 (final verification)
+Note: Awaiting manual verification of complete beta access flow (Tests 1-6 in 02-04-PLAN.md). Dev server running at localhost:3000.

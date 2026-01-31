@@ -102,6 +102,14 @@ Transform the existing foundation into a fully functional **decision accelerator
 *I want* honest feedback including kill recommendations when warranted,
 *so that* I don't waste time building the wrong thing.
 
+#### **Story 1.6: Devil's Advocate Lateral Provocation Techniques** ✅ *Ready for Development*
+*As a* user receiving Devil's Advocate mode feedback,
+*I want* Mary to use specific lateral thinking techniques (Provocation, Reversal, Challenge, Dominant Idea Escape) to challenge my assumptions,
+*so that* I break out of confirmation bias and discover blind spots in my thinking.
+
+**Techniques:** Provocation (PO), Reversal, Challenge, Dominant Idea Escape
+**Ref:** `docs/stories/story-devils-advocate-techniques.md`
+
 ### Integration Requirements
 
 **Sub-Persona Architecture:**
@@ -178,6 +186,26 @@ Implement three distinct pathways that guide users through 10-30 minute strategi
 *I want* the AI to dynamically shift modes based on my state,
 *so that* I get encouragement when defensive and challenge when overconfident.
 
+#### **Story 2.6: Cognitive Framework Alignment** ✅ *Ready for Development*
+*As a* user selecting a strategic pathway,
+*I want* the AI coaching approach to align with the cognitive mode required for my challenge,
+*so that* I receive thinking techniques appropriate to my problem type.
+
+**Cognitive Modes:**
+- New Idea → "Thinking about Value" (JTBD, Value Prop Canvas)
+- Business Model → "Thinking through Constraints" (Assumption Testing, Feasibility Matrix)
+- Feature Refinement → "Thinking with People" (Co-Design, Research Synthesis)
+
+**Ref:** `docs/stories/story-cognitive-framework-alignment.md`
+
+#### **Story 2.7: Value Articulation Prompts** ✅ *Ready for Development*
+*As a* user progressing through a strategic session,
+*I want* Mary to naturally ask me to articulate my solution's value without technology references,
+*so that* I clarify the core value proposition and expected behavior change.
+
+**Approach:** Behavioral pattern in Mary's questioning, not formal UI checkpoint
+**Ref:** `docs/stories/story-value-articulation-behavioral.md`
+
 ---
 
 ## Epic 3: Polished Output Generation & Export
@@ -219,14 +247,22 @@ Build the **output generation system** that transforms session insights into pol
 *I want* my export to include the viability score and reasoning,
 *so that* I have documentation of why the idea should be reconsidered.
 
+#### **Story 3.5: Assumption Tracking in Export** ✅ *Ready for Development*
+*As a* user exporting my session outputs,
+*I want* key assumptions from my session to be captured and included in my PRD/Spec export,
+*so that* I have a clear list of what needs validation before building.
+
+**Scope:** Extract assumptions from conversation at export time (no UI during session)
+**Ref:** `docs/stories/story-assumption-tracking-simplified.md`
+
 ### Post-MVP Outputs
 
-#### **Story 3.5: HTML Presentation Export** (Post-MVP)
+#### **Story 3.6: HTML Presentation Export** (Post-MVP)
 *As a* consultant presenting to clients,
 *I want* a single-file HTML presentation generated from my session,
 *so that* I have a shareable, professional presentation format.
 
-#### **Story 3.6: Low-Fi Visual Generation** (Post-MVP)
+#### **Story 3.7: Low-Fi Visual Generation** (Post-MVP)
 *As a* user who needs visual diagrams,
 *I want* Excalidraw-style sketches for workflows and concept maps,
 *so that* I have thinking tools (not polished deliverables).

@@ -20,10 +20,19 @@
   - New Idea: Inquisitive 40%, Devil's Advocate 20%, Encouraging 25%, Realistic 15%
   - Business Model: Inquisitive 20%, Devil's Advocate 35%, Encouraging 15%, Realistic 30%
   - Feature Refinement: Inquisitive 25%, Devil's Advocate 30%, Encouraging 15%, Realistic 30%
+- **FR-AC7a:** Pathway modes shall align with cognitive frameworks:
+  - New Idea pathway: "Thinking about Value" (JTBD, Value Prop Canvas techniques)
+  - Business Model pathway: "Thinking through Constraints" (Assumption Testing, Feasibility Matrix)
+  - Feature Refinement pathway: "Thinking with People" (Co-Design, Research Synthesis)
 - **FR-AC8:** System shall dynamically shift between modes based on user responses:
   - User defensive → shift to Encouraging before returning to challenge
   - User overconfident → lean into Devil's Advocate
   - User spinning → bring in Realistic to ground
+- **FR-AC8a:** Devil's Advocate mode shall use lateral provocation techniques:
+  - Provocation (PO): Deliberately provocative statements to break patterns
+  - Reversal: Invert assumptions ("What if the opposite were true?")
+  - Challenge: "Why is this done this way?"
+  - Dominant Idea Escape: "What assumption does everyone share?"
 - **FR-AC9:** System shall surface explicit mode control options after ~10 exchanges ("Challenge me" / "Be realistic" / "Help me explore")
 
 #### Kill Decision Framework
@@ -50,6 +59,17 @@
 - **FR-AC20:** Guest trial shall allow 10 messages before conversion gate (up from 5)
 - **FR-AC21:** Trial shall provide partial output at gate (value first, then ask for signup)
 - **FR-AC22:** Trial session shall be preserved and migrate to user account on signup
+
+### Assumption & Value Tracking
+- **FR-AC23:** System shall track and surface assumptions made during session:
+  - Assumptions logged with source statement
+  - Testability rating (1-5) for each assumption
+  - Export assumptions list with PRD/Spec output
+  - Devil's Advocate mode specifically targets low-testability assumptions
+- **FR-AC24:** System shall include mid-session value articulation checkpoint:
+  - Prompt user to describe solution value without technology references
+  - Prompt user to describe expected behavior change from their intervention
+  - Use responses to calibrate remaining session direction
 
 ## Strategic Workspace Foundation Requirements (Existing)
 

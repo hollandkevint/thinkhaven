@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kevin Holland Portfolio - Component Examples</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Link to the design system CSS -->
+  <link rel="stylesheet" href="lovable-portfolio-styles.css">
+  
+  <style>
+    /* Demo-only styles to show component sections */
+    .demo-section {
+      border-bottom: 2px dashed var(--border-color);
+      padding-bottom: var(--space-12);
+      margin-bottom: var(--space-12);
+    }
+    .demo-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--slate-blue);
+      background: var(--parchment);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--space-4);
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================
+     NAVIGATION COMPONENT
+     ============================================ -->
+<div class="demo-section">
+  <div class="container">
+    <span class="demo-label">COMPONENT: Navigation</span>
+    
+    <nav class="nav">
+      <a href="#" class="nav-brand">Kevin Holland</a>
+      <ul class="nav-links">
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#work" class="nav-link">Work</a></li>
+        <li><a href="#writing" class="nav-link">Writing</a></li>
+        <li><a href="#contact" class="nav-link active">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+
+<!-- ============================================
+     HERO SECTION
+     ============================================ -->
+<section class="demo-section section-lg" style="background: var(--cream);">
+  <div class="container">
+    <span class="demo-label">COMPONENT: Hero Section</span>
+    
+    <div class="hero text-center" style="max-width: 800px; margin: 0 auto;">
+      <span class="badge badge-terracotta" style="margin-bottom: var(--space-4);">Healthcare Data Product Leader</span>
+      
+      <h1 class="display" style="margin-bottom: var(--space-6);">
+        Turning Healthcare Data<br>Into Strategic Advantage
+      </h1>
+      
+      <p class="lead" style="margin-bottom: var(--space-8);">
+        I help healthcare organizations transform complex data into actionable insights 
+        and build products that improve patient outcomes. Former Naval Officer with 15+ years 
+        leading data-driven initiatives.
+      </p>
+      
+      <div class="flex justify-center gap-4">
+        <a href="#work" class="btn btn-primary btn-lg">View My Work</a>
+        <a href="#contact" class="btn btn-secondary btn-lg">Get in Touch</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================
+     ABOUT SECTION
+     ============================================ -->
+<section class="demo-section section" style="background: var(--parchment);">
+  <div class="container">
+    <span class="demo-label">COMPONENT: About Section</span>
+    
+    <div class="grid" style="grid-template-columns: 1fr 2fr; gap: var(--space-12); align-items: start;">
+      <!-- Photo placeholder -->
+      <div style="background: var(--cream); border-radius: var(--radius-lg); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
+        <span style="color: var(--slate-blue); font-family: var(--font-display);">Photo</span>
+      </div>
+      
+      <!-- Bio content -->
+      <div>
+        <h6 style="color: var(--terracotta); margin-bottom: var(--space-2);">About Me</h6>
+        <h2 style="margin-bottom: var(--space-6);">Building at the Intersection of Healthcare and Data</h2>
+        
+        <p>
+          With over a decade of experience in healthcare analytics and data product development, 
+          I specialize in translating complex medical and operational data into strategic business 
+          value. My background as a Naval Flight Officer taught me to make critical decisions under 
+          pressure, a skill that translates directly to navigating the complexities of healthcare data.
+        </p>
+        
+        <p>
+          Currently, I focus on helping healthcare organizations build data products that drive 
+          measurable outcomes, from improving patient care quality to optimizing operational efficiency.
+        </p>
+        
+        <div class="highlight">
+          <p style="margin: 0; font-style: italic;">
+            "Kevin has an exceptional ability to see the strategic picture while maintaining 
+            attention to the details that matter."
+          </p>
+          <p style="margin-top: var(--space-2); margin-bottom: 0; font-size: var(--text-sm); color: var(--ink-light);">
+            — Former Colleague, Healthcare Analytics Executive
+          </p>
+        </div>
+        
+        <div class="flex gap-4" style="margin-top: var(--space-6);">
+          <span class="badge">Data Products</span>
+          <span class="badge">Healthcare Analytics</span>
+          <span class="badge">Strategic Leadership</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================
+     EXPERTISE/SKILLS SECTION
+     ============================================ -->
+<section class="demo-section section" style="background: var(--cream);">
+  <div class="container">
+    <span class="demo-label">COMPONENT: Expertise Grid</span>
+    
+    <div class="text-center" style="max-width: 600px; margin: 0 auto var(--space-12);">
+      <h6 style="color: var(--terracotta); margin-bottom: var(--space-2);">What I Do</h6>
+      <h2>Areas of Expertise</h2>
+    </div>
+    
+    <div class="grid grid-cols-3 gap-6">
+      <!-- Expertise Card 1 -->
+      <div class="card card-interactive">
+        <div style="width: 48px; height: 48px; background: rgba(196, 120, 92, 0.1); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+          <span style="font-size: 24px;">📊</span>
+        </div>
+        <h4 style="margin-bottom: var(--space-2);">Healthcare Analytics</h4>
+        <p style="color: var(--ink-light); font-size: var(--text-sm); margin: 0;">
+          Transforming clinical and operational data into actionable insights that improve 
+          patient outcomes and organizational performance.
+        </p>
+      </div>
+      
+      <!-- Expertise Card 2 -->
+      <div class="card card-interactive">
+        <div style="width: 48px; height: 48px; background: rgba(74, 103, 65, 0.1); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+          <span style="font-size: 24px;">🏗️</span>
+        </div>
+        <h4 style="margin-bottom: var(--space-2);">Data Product Strategy</h4>
+        <p style="color: var(--ink-light); font-size: var(--text-sm); margin: 0;">
+          Building data products from concept to launch, with a focus on user needs, 
+          business value, and technical feasibility.
+        </p>
+      </div>
+      
+      <!-- Expertise Card 3 -->
+      <div class="card card-interactive">
+        <div style="width: 48px; height: 48px; background: rgba(212, 168, 75, 0.1); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+          <span style="font-size: 24px;">🎯</span>
+        </div>
+        <h4 style="margin-bottom: var(--space-2);">Strategic Leadership</h4>
+        <p style="color: var(--ink-light); font-size: var(--text-sm); margin: 0;">
+          Leading cross-functional teams through complex initiatives, from stakeholder 
+          alignment to execution and measurement.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================
+     PROJECTS/WORK SECTION
+     ============================================ -->
+<section class="demo-section section" style="background: var(--parchment);">
+  <div class="container">
+    <span class="demo-label">COMPONENT: Projects/Work Section</span>
+    
+    <div class="text-center" style="max-width: 600px; margin: 0 auto var(--space-12);">
+      <h6 style="color: var(--terracotta); margin-bottom: var(--space-2);">Selected Work</h6>
+      <h2>Projects That Made an Impact</h2>
+    </div>
+    
+    <!-- Project Card - Full Width -->
+    <div class="card-elevated" style="margin-bottom: var(--space-6);">
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center;">
+        <div>
+          <div class="flex gap-2" style="margin-bottom: var(--space-3);">
+            <span class="badge badge-forest">Healthcare</span>
+            <span class="badge badge-slate">Data Product</span>
+          </div>
+          <h3 style="margin-bottom: var(--space-3);">Clinical Quality Dashboard</h3>
+          <p style="color: var(--ink-light); margin-bottom: var(--space-4);">
+            Led the development of a real-time clinical quality monitoring system that reduced 
+            adverse events by 23% across 12 hospital facilities. Integrated data from multiple 
+            EHR systems and built predictive models for early intervention.
+          </p>
+          <div style="font-size: var(--text-sm); color: var(--ink-light); margin-bottom: var(--space-4);">
+            <strong>Impact:</strong> 23% reduction in adverse events, $2.1M annual savings
+          </div>
+          <a href="#" class="btn btn-secondary btn-sm">View Case Study</a>
+        </div>
+        <div style="background: var(--parchment); border-radius: var(--radius-md); aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
+          <span style="color: var(--slate-blue); font-family: var(--font-display);">Project Screenshot</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Project Cards - Two Column -->
+    <div class="grid grid-cols-2 gap-6">
+      <div class="card card-interactive">
+        <div style="background: var(--cream); border-radius: var(--radius); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4); border: 1px solid var(--border-color);">
+          <span style="color: var(--slate-blue); font-family: var(--font-display);">Screenshot</span>
+        </div>
+        <div class="flex gap-2" style="margin-bottom: var(--space-2);">
+          <span class="badge badge-mustard">Analytics</span>
+        </div>
+        <h4 style="margin-bottom: var(--space-2);">Population Health Platform</h4>
+        <p style="color: var(--ink-light); font-size: var(--text-sm); margin: 0;">
+          Designed and launched a population health analytics platform serving 500K+ patients.
+        </p>
+      </div>
+      
+      <div class="card card-interactive">
+        <div style="background: var(--cream); border-radius: var(--radius); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4); border: 1px solid var(--border-color);">
+          <span style="color: var(--slate-blue); font-family: var(--font-display);">Screenshot</span>
+        </div>
+        <div class="flex gap-2" style="margin-bottom: var(--space-2);">
+          <span class="badge badge-terracotta">Strategy</span>
+        </div>
+        <h4 style="margin-bottom: var(--space-2);">Data Governance Framework</h4>
+        <p style="color: var(--ink-light); font-size: var(--text-sm); margin: 0;">
+          Established enterprise data governance that improved data quality scores by 40%.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================
+     WRITING/BLOG SECTION
+     ============================================ -->
+<section class="demo-section section" style="background: var(--cream);">
+  <div class="container">
+    <span class="demo-label">COMPONENT: Writing/Blog Section</span>
+    
+    <div class="flex justify-between items-center" style="margin-bottom: var(--space-8);">
+      <div>
+        <h6 style="color: var(--terracotta); margin-bottom: var(--space-2);">Insights & Ideas</h6>
+        <h2 style="margin-bottom: 0;">Recent Writing</h2>
+      </div>
+      <a href="#" class="btn btn-ghost">View All Articles</a>
+    </div>
+    
+    <div class="grid grid-cols-3 gap-6">
+      <!-- Article Card 1 -->
+      <article class="card card-interactive" style="padding: 0; overflow: hidden;">
+        <div style="background: var(--terracotta); height: 160px; display: flex; align-items: center; justify-content: center;">
+          <span style="color: var(--cream); font-family: var(--font-display);">Article Image</span>
+        </div>
+        <div style="padding: var(--space-6);">
+          <span class="caption" style="display: block; margin-bottom: var(--space-2);">Healthcare Data</span>
+          <h4 style="margin-bottom: var(--space-3);">The Future of Clinical Decision Support</h4>
+          <p style="color: var(--ink-light); font-size: var(--text-sm); margin: 0;">
+            How AI and real-time data are transforming how clinicians make decisions at the point of care.
+          </p>
+        </div>
+      </article>
+      
+      <!-- Article Card 2 -->
+      <article class="card card-interactive" style="padding: 0; overflow: hidden;">
+        <div style="background: var(--forest); height: 160px; display: flex; align-items: center; justify-content: center;">
+          <span style="color: var(--cream); font-family: var(--font-display);">Article Image</span>
+        </div>
+        <div style="padding: var(--space-6);">
+          <span class="caption" style="display: block; margin-bottom: var(--space-2);">Product Strategy</span>
+          <h4 style="margin-bottom: var(--space-3);">Building Data Products That Users Actually Want</h4>
+          <p style="color: var(--ink-light); font-size: var(--text-sm); margin: 0;">
+            Lessons learned from a decade of shipping healthcare data products.
+          </p>
+        </div>
+      </article>
+      
+      <!-- Article Card 3 -->
+      <article class="card card-interactive" style="padding: 0; overflow: hidden;">
+        <div style="background: var(--mustard); height: 160px; display: flex; align-items: center; justify-content: center;">
+          <span style="color: var(--cream); font-family: var(--font-display);">Article Image</span>
+        </div>
+        <div style="padding: var(--space-6);">
+          <span class="caption" style="display: block; margin-bottom: var(--space-2);">Leadership</span>
+          <h4 style="margin-bottom: var(--space-3);">From Navy to Healthcare: Lessons in Leadership</h4>
+          <p style="color: var(--ink-light); font-size: var(--text-sm); margin: 0;">
+            How military leadership principles apply to building healthcare data teams.
+          </p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================
+     TESTIMONIALS SECTION
+     ============================================ -->
+<section class="demo-section section" style="background: var(--ink);">
+  <div class="container">
+    <span class="demo-label" style="background: var(--ink-light); color: var(--cream);">COMPONENT: Testimonials (Dark)</span>
+    
+    <div class="text-center" style="max-width: 700px; margin: 0 auto;">
+      <h6 style="color: var(--terracotta); margin-bottom: var(--space-2);">What Others Say</h6>
+      <h2 style="color: var(--cream); margin-bottom: var(--space-8);">Trusted by Leaders</h2>
+      
+      <blockquote style="font-size: var(--text-xl); color: var(--cream); font-style: italic; line-height: var(--leading-relaxed); margin-bottom: var(--space-6);">
+        "Kevin brings a rare combination of deep technical understanding and strategic thinking. 
+        He doesn't just analyze data; he translates it into narratives that drive executive action."
+      </blockquote>
+      
+      <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-4);">
+        <div style="width: 48px; height: 48px; background: var(--parchment); border-radius: var(--radius-full);"></div>
+        <div style="text-align: left;">
+          <p style="color: var(--cream); margin: 0; font-weight: var(--font-medium); font-family: var(--font-display);">Sarah Chen</p>
+          <p style="color: var(--slate-blue); margin: 0; font-size: var(--text-sm);">VP of Analytics, Major Health System</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================
+     CONTACT SECTION
+     ============================================ -->
+<section class="demo-section section" style="background: var(--parchment);">
+  <div class="container">
+    <span class="demo-label">COMPONENT: Contact Section</span>
+    
+    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-12);">
+      <!-- Contact Info -->
+      <div>
+        <h6 style="color: var(--terracotta); margin-bottom: var(--space-2);">Get in Touch</h6>
+        <h2 style="margin-bottom: var(--space-4);">Let's Work Together</h2>
+        <p class="lead" style="margin-bottom: var(--space-6);">
+          I'm always interested in discussing healthcare data challenges, 
+          consulting opportunities, or just connecting with fellow data enthusiasts.
+        </p>
+        
+        <div style="margin-bottom: var(--space-4);">
+          <h5 style="margin-bottom: var(--space-2);">Email</h5>
+          <a href="mailto:kevin@kevintholland.com" style="font-size: var(--text-lg);">kevin@kevintholland.com</a>
+        </div>
+        
+        <div style="margin-bottom: var(--space-4);">
+          <h5 style="margin-bottom: var(--space-2);">Location</h5>
+          <p style="color: var(--ink-light); margin: 0;">Charleston, SC</p>
+        </div>
+        
+        <div>
+          <h5 style="margin-bottom: var(--space-2);">Connect</h5>
+          <div class="flex gap-4">
+            <a href="#" class="btn btn-ghost btn-sm">LinkedIn</a>
+            <a href="#" class="btn btn-ghost btn-sm">Twitter</a>
+            <a href="#" class="btn btn-ghost btn-sm">GitHub</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contact Form -->
+      <div class="card-elevated">
+        <form>
+          <div class="form-group">
+            <label class="label" for="name">Name</label>
+            <input type="text" id="name" class="input" placeholder="Your name">
+          </div>
+          
+          <div class="form-group">
+            <label class="label" for="email">Email</label>
+            <input type="email" id="email" class="input" placeholder="your@email.com">
+          </div>
+          
+          <div class="form-group">
+            <label class="label" for="subject">Subject</label>
+            <input type="text" id="subject" class="input" placeholder="How can I help?">
+          </div>
+          
+          <div class="form-group">
+            <label class="label" for="message">Message</label>
+            <textarea id="message" class="textarea" placeholder="Tell me about your project or question..."></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================
+     FOOTER COMPONENT
+     ============================================ -->
+<footer style="background: var(--ink); padding: var(--space-12) 0;">
+  <div class="container">
+    <span class="demo-label" style="background: var(--ink-light); color: var(--cream);">COMPONENT: Footer</span>
+    
+    <div class="grid" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--space-8); margin-top: var(--space-8);">
+      <!-- Brand Column -->
+      <div>
+        <h3 style="color: var(--cream); margin-bottom: var(--space-4);">Kevin Holland</h3>
+        <p style="color: var(--slate-blue); margin-bottom: var(--space-4);">
+          Healthcare data product leader helping organizations transform data into strategic advantage.
+        </p>
+        <p style="color: var(--slate-blue); font-size: var(--text-sm); margin: 0;">
+          Charleston, SC
+        </p>
+      </div>
+      
+      <!-- Links Column 1 -->
+      <div>
+        <h6 style="color: var(--cream); margin-bottom: var(--space-4);">Navigation</h6>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">About</a></li>
+          <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">Work</a></li>
+          <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">Writing</a></li>
+          <li><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">Contact</a></li>
+        </ul>
+      </div>
+      
+      <!-- Links Column 2 -->
+      <div>
+        <h6 style="color: var(--cream); margin-bottom: var(--space-4);">Connect</h6>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">LinkedIn</a></li>
+          <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">Twitter</a></li>
+          <li><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">GitHub</a></li>
+        </ul>
+      </div>
+      
+      <!-- Links Column 3 -->
+      <div>
+        <h6 style="color: var(--cream); margin-bottom: var(--space-4);">Resources</h6>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">Newsletter</a></li>
+          <li><a href="#" style="color: var(--slate-blue); font-size: var(--text-sm);">Resume</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <hr class="divider" style="background: var(--ink-light); margin: var(--space-8) 0;">
+    
+    <div class="flex justify-between items-center">
+      <p style="color: var(--slate-blue); font-size: var(--text-sm); margin: 0;">
+        &copy; 2026 Kevin Holland. All rights reserved.
+      </p>
+      <p style="color: var(--slate-blue); font-size: var(--text-sm); margin: 0;">
+        Built with the ThinkHaven Design System
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
