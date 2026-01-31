@@ -10,31 +10,31 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 2 of 4 (Beta Access Control)
-Plan: 1 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-30 — Completed 02-01-PLAN.md (database foundation)
+Last activity: 2026-01-31 — Completed 02-03-PLAN.md (waitlist UI)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 1.8 min
-- Total execution time: 0.15 hours
+- Total plans completed: 6
+- Average duration: 2.0 min
+- Total execution time: 0.20 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Auth Fix | 4 | 8min | 2.0min |
-| 2. Beta Access | 1 | 1min | 1.0min |
+| 2. Beta Access | 2 | 4min | 2.0min |
 | 3. Error/Loading | 0 | 0 | - |
 | 4. Analytics | 0 | 0 | - |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (2min), 01-03 (1min), 01-04 (3min), 02-01 (1min)
-- Trend: Database foundation laid for beta access control
+- Last 5 plans: 01-03 (1min), 01-04 (3min), 02-01 (1min), 02-03 (3min)
+- Trend: Waitlist UI complete, ready for middleware integration
 
 *Updated after each plan completion*
 
@@ -56,6 +56,7 @@ Recent decisions affecting current work:
 - [01-04] All 7 AUTH requirements verified via manual testing (email/password, OAuth, logout, session)
 - [02-01] NULL approved_at = pending, timestamp = approved (no separate status column)
 - [02-01] jose v6 for JWT verification (Edge Runtime compatible)
+- [02-03] Components go in /components/ not /app/components/ to match @/ alias
 
 ### Pending Todos
 
@@ -71,7 +72,7 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-01-30
-Stopped at: Completed 02-01-PLAN.md (database foundation)
+Last session: 2026-01-31
+Stopped at: Completed 02-03-PLAN.md (waitlist UI)
 Resume file: None
-Note: Migration ready but needs manual execution in Supabase Dashboard + hook configuration
+Note: Waitlist page and form complete. Next: 02-04 (middleware to check beta_approved claim)
