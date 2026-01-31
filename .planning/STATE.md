@@ -10,31 +10,31 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 2 of 4 (Beta Access Control)
-Plan: 3 of 4 in current phase
+Plan: 4 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-31 — Completed 02-03-PLAN.md (waitlist UI)
+Last activity: 2026-01-31 — Completed 02-02-PLAN.md (beta access gate)
 
-Progress: [██████░░░░] 60%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 2.0 min
-- Total execution time: 0.20 hours
+- Total execution time: 0.23 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Auth Fix | 4 | 8min | 2.0min |
-| 2. Beta Access | 2 | 4min | 2.0min |
+| 2. Beta Access | 3 | 6min | 2.0min |
 | 3. Error/Loading | 0 | 0 | - |
 | 4. Analytics | 0 | 0 | - |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (1min), 01-04 (3min), 02-01 (1min), 02-03 (3min)
-- Trend: Waitlist UI complete, ready for middleware integration
+- Last 5 plans: 01-04 (3min), 02-01 (1min), 02-03 (3min), 02-02 (2min)
+- Trend: Beta access gate complete, /app/* routes now protected
 
 *Updated after each plan completion*
 
@@ -57,6 +57,8 @@ Recent decisions affecting current work:
 - [02-01] NULL approved_at = pending, timestamp = approved (no separate status column)
 - [02-01] jose v6 for JWT verification (Edge Runtime compatible)
 - [02-03] Components go in /components/ not /app/components/ to match @/ alias
+- [02-02] getSession() safe when followed by jose JWT verification
+- [02-02] Server component pattern for instant redirects (no loading flicker)
 
 ### Pending Todos
 
@@ -73,6 +75,6 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-01-31
-Stopped at: Completed 02-03-PLAN.md (waitlist UI)
+Stopped at: Completed 02-02-PLAN.md (beta access gate)
 Resume file: None
-Note: Waitlist page and form complete. Next: 02-04 (middleware to check beta_approved claim)
+Note: Beta access gate active on /app/*. Unapproved users redirect to /waitlist. Next: 02-04 (final verification)
