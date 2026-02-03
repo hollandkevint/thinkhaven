@@ -6,6 +6,7 @@ import SignupPromptModal from './SignupPromptModal'
 import StreamingMessage from '../chat/StreamingMessage'
 import MessageInput from '../chat/MessageInput'
 import TypingIndicator from '../chat/TypingIndicator'
+import ChatErrorDisplay from '../chat/ChatErrorDisplay'
 import { useRouter } from 'next/navigation'
 
 interface Message {
@@ -22,6 +23,7 @@ export default function GuestChatInterface() {
   const [currentInput, setCurrentInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
   const [remainingMessages, setRemainingMessages] = useState(5)
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [showSavePrompt, setShowSavePrompt] = useState(false)
@@ -210,18 +212,10 @@ export default function GuestChatInterface() {
         reader.releaseLock()
       }
     } catch (error: any) {
-      setError(`Failed to send message: ${error.message}`)
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === assistantMessage.id
-            ? {
-              ...msg,
-              content: 'I encountered an error processing your message. Please try again.',
-              isStreaming: false
-            }
-            : msg
-        )
-      )
+      setLastFailedMessage(messageContent)
+      setError(error.message || 'Unknown error occurred')
+      // Remove the failed assistant message placeholder
+      setMessages(prev => prev.filter(msg => msg.id !== assistantMessage.id))
     } finally {
       setIsLoading(false)
     }
@@ -229,6 +223,14 @@ export default function GuestChatInterface() {
 
   const handleMessageComplete = () => {
     scrollToBottom()
+  }
+
+  const retryLastMessage = () => {
+    if (lastFailedMessage) {
+      setError(null)
+      setLastFailedMessage(null)
+      sendMessage(lastFailedMessage)
+    }
   }
 
   const handleSignupClick = () => {
@@ -352,23 +354,15 @@ export default function GuestChatInterface() {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-              </svg>
-              <div className="flex-1">
-                <h4 className="text-red-800 font-medium mb-1">Error</h4>
-                <p className="text-red-700 text-sm">{error}</p>
-                <button
-                  onClick={() => setError(null)}
-                  className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          </div>
+          <ChatErrorDisplay
+            error={error}
+            onRetry={lastFailedMessage ? retryLastMessage : undefined}
+            onDismiss={() => {
+              setError(null)
+              setLastFailedMessage(null)
+            }}
+            isRetrying={isLoading}
+          />
         )}
 
         <div ref={messagesEndRef} />
