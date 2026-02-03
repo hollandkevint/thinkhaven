@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
@@ -21,6 +21,8 @@ import {
   Folder,
   Home,
 } from 'lucide-react';
+import Link from 'next/link';
+import { ErrorState } from '@/app/components/ui/ErrorState';
 
 interface BmadSession {
   id: string;
@@ -32,33 +34,106 @@ interface BmadSession {
   updated_at: string;
 }
 
+function DashboardSkeleton() {
+  return (
+    <div className="flex h-screen bg-background">
+      {/* Sidebar skeleton */}
+      <aside className="fixed left-0 top-0 h-full w-60 border-r border-border bg-card">
+        <div className="px-4 py-6">
+          <div className="h-7 w-28 bg-muted rounded animate-pulse" />
+        </div>
+        <div className="px-4 mb-6">
+          <div className="h-10 w-full bg-muted rounded animate-pulse" />
+        </div>
+        <div className="px-4">
+          <div className="h-4 w-24 bg-muted rounded animate-pulse mb-3" />
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-10 w-full bg-muted/50 rounded animate-pulse" />
+            ))}
+          </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 border-t border-border px-4 py-4 space-y-2">
+          <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
+          <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
+          <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
+        </div>
+      </aside>
+      {/* Main content skeleton */}
+      <main className="ml-60 flex-1 overflow-y-auto">
+        <div className="max-w-[1400px] mx-auto px-12 py-8">
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="h-9 w-64 bg-muted rounded animate-pulse mb-2" />
+                <div className="h-5 w-48 bg-muted/50 rounded animate-pulse" />
+              </div>
+              <div className="h-11 w-36 bg-muted rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="h-7 w-32 bg-muted rounded animate-pulse mb-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-48 bg-card border border-border rounded-lg animate-pulse">
+                <div className="p-6">
+                  <div className="h-6 w-3/4 bg-muted rounded mb-4" />
+                  <div className="h-4 w-full bg-muted/50 rounded mb-2" />
+                  <div className="h-4 w-2/3 bg-muted/50 rounded mb-4" />
+                  <div className="flex justify-between mt-8">
+                    <div className="h-4 w-20 bg-muted/30 rounded" />
+                    <div className="h-4 w-16 bg-muted/30 rounded" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
 export default function AppDashboardPage() {
   const router = useRouter();
   const { user, signOut } = useAuth();
   const [sessions, setSessions] = useState<BmadSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchSessions();
-    }
-  }, [user]);
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchError } = await supabase
         .from('bmad_sessions')
         .select('*')
         .eq('user_id', user?.id)
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       setSessions(data || []);
-    } catch (error) {
-      console.error('Error fetching sessions:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
+      console.error('Error fetching sessions:', err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
+      setIsRetrying(false);
     }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      fetchSessions();
+    }
+  }, [user, fetchSessions]);
+
+  const handleRetry = () => {
+    setIsRetrying(true);
+    setRetryCount(c => c + 1);
+    setLoading(true);
+    fetchSessions();
   };
 
   const handleNewSession = () => {
@@ -117,6 +192,33 @@ export default function AppDashboardPage() {
 
   if (!user) {
     return null;
+  }
+
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen bg-background">
+        {/* Sidebar skeleton for context */}
+        <aside className="fixed left-0 top-0 h-full w-60 border-r border-border bg-card">
+          <div className="px-4 py-6">
+            <Link href="/" className="text-xl font-bold text-foreground">ThinkHaven</Link>
+          </div>
+        </aside>
+        <main className="ml-60 flex-1 flex items-center justify-center">
+          <ErrorState
+            error={error}
+            onRetry={handleRetry}
+            onSignOut={signOut}
+            retryCount={retryCount}
+            isRetrying={isRetrying}
+            showSignOut={true}
+          />
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -213,11 +315,7 @@ export default function AppDashboardPage() {
           </div>
 
           {/* Session Grid or Empty State */}
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : sessions.length === 0 ? (
+          {sessions.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center justify-center py-24">
               <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
