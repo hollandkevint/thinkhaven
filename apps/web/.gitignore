@@ -46,6 +46,16 @@ yarn-error.log*
 *.swp
 *.swo
 
+# AI tool agent directories (keep .agents/skills/ for committed skills)
+.agent/
+.claude/
+.codex/
+.cursor/
+.factory/
+.gemini/
+.opencode/
+.windsurf/
+
 # OS files
 .DS_Store
 Thumbs.db
