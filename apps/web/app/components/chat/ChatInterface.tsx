@@ -8,6 +8,7 @@ import StreamingMessage from './StreamingMessage'
 import MessageInput from './MessageInput'
 import QuickActions from './QuickActions'
 import TypingIndicator from './TypingIndicator'
+import ChatErrorDisplay from './ChatErrorDisplay'
 
 export interface Message {
   id: string
@@ -50,6 +51,7 @@ export default function ChatInterface({
   const [totalCost, setTotalCost] = useState(0)
   const [retryCount, setRetryCount] = useState(0)
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected' | 'retrying'>('connected')
+  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const connectionManager = useRef(new StreamConnectionManager())
@@ -283,27 +285,17 @@ I'm here to help you think through strategic challenges, validate your assumptio
       )
     } catch (error: any) {
       setConnectionStatus('disconnected')
-      
+
       if (error.name === 'AbortError') {
         // Request was cancelled
         setMessages(prev => prev.filter(msg => msg.id !== assistantMessage.id))
       } else {
-        // Handle error
-        const isRetryable = !error.message.toLowerCase().includes('unauthorized') && 
-                          !error.message.toLowerCase().includes('forbidden')
-        
-        setError(`Failed to send message: ${error.message}${isRetryable ? ' (Click to retry)' : ''}`)
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === assistantMessage.id 
-              ? { 
-                  ...msg, 
-                  content: '⚠️ I encountered an error processing your message. Please try again.',
-                  isStreaming: false
-                }
-              : msg
-          )
-        )
+        // Track failed message for retry
+        setLastFailedMessage(messageContent)
+        setError(error.message || 'Unknown error occurred')
+
+        // Remove the failed assistant message placeholder
+        setMessages(prev => prev.filter(msg => msg.id !== assistantMessage.id))
       }
     } finally {
       setIsLoading(false)
@@ -323,14 +315,15 @@ I'm here to help you think through strategic challenges, validate your assumptio
   const clearConversation = () => {
     // Cancel any ongoing streams
     connectionManager.current.abort()
-    
+
     setMessages([])
     setError(null)
+    setLastFailedMessage(null)
     setTotalTokens(0)
     setTotalCost(0)
     setRetryCount(0)
     setConnectionStatus('connected')
-    
+
     // Re-add welcome message
     if (coachingContext) {
       const welcomeMessage: Message = {
@@ -341,6 +334,14 @@ I'm here to help you think through strategic challenges, validate your assumptio
         coachingContext
       }
       setMessages([welcomeMessage])
+    }
+  }
+
+  const retryLastMessage = () => {
+    if (lastFailedMessage) {
+      setError(null)
+      setLastFailedMessage(null)
+      sendMessage(lastFailedMessage)
     }
   }
 
@@ -434,40 +435,15 @@ I'm here to help you think through strategic challenges, validate your assumptio
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-              </svg>
-              <div className="flex-1">
-                <h4 className="text-red-800 font-medium mb-1">Connection Error</h4>
-                <p className="text-red-700 text-sm">{error}</p>
-                <div className="mt-3 flex items-center gap-3">
-                  {error.includes('(Click to retry)') && (
-                    <button
-                      onClick={() => {
-                        const lastUserMessage = messages.filter(m => m.role === 'user').pop()
-                        if (lastUserMessage) {
-                          setError(null)
-                          sendMessage(lastUserMessage.content)
-                        }
-                      }}
-                      className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
-                      disabled={isLoading}
-                    >
-                      Retry Message
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setError(null)}
-                    className="text-red-600 hover:text-red-800 text-sm underline"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ChatErrorDisplay
+            error={error}
+            onRetry={lastFailedMessage ? retryLastMessage : undefined}
+            onDismiss={() => {
+              setError(null)
+              setLastFailedMessage(null)
+            }}
+            isRetrying={isLoading}
+          />
         )}
         
         <div ref={messagesEndRef} />
