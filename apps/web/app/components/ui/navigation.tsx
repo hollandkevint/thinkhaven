@@ -45,18 +45,18 @@ export default function Navigation({ className = '' }: NavigationProps) {
 
   if (loading) {
     return (
-      <nav className={`flex items-center justify-between p-4 bg-white border-b ${className}`}>
-        <div className="font-bold text-xl text-gray-900">Thinkhaven</div>
-        <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+      <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
+        <div className="font-bold text-xl text-ink">Thinkhaven</div>
+        <div className="w-8 h-8 bg-parchment rounded-full animate-pulse"></div>
       </nav>
     )
   }
 
   return (
-    <nav className={`flex items-center justify-between p-4 bg-white border-b ${className}`}>
+    <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
       {/* Logo/Brand */}
-      <div 
-        className="font-bold text-xl text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+      <div
+        className="font-bold text-xl text-ink cursor-pointer hover:text-terracotta transition-colors"
         onClick={() => router.push('/')}
       >
         Thinkhaven
@@ -67,7 +67,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
         <Button
           variant="ghost"
           onClick={() => router.push('/demo')}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-ink-light hover:text-ink"
         >
           Demo
         </Button>
@@ -101,20 +101,20 @@ export default function Navigation({ className = '' }: NavigationProps) {
             <Button
               variant="ghost"
               onClick={handleLogin}
-              className="text-gray-700 hover:text-gray-900"
+              className="text-ink-light hover:text-ink"
             >
               Login
             </Button>
             <Button
               variant="outline"
               onClick={() => router.push('/try')}
-              className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-medium"
+              className="border-terracotta text-terracotta hover:bg-terracotta hover:text-white font-medium"
             >
               Try Free
             </Button>
             <Button
               onClick={handleSignup}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              className="bg-terracotta hover:bg-terracotta-hover text-white font-medium"
             >
               Sign Up
             </Button>
