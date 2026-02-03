@@ -308,7 +308,7 @@ export default function Home() {
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-4 gap-12">
               <div className="md:col-span-2">
-                <h3 className="text-2xl font-medium font-display mb-3">ThinkHaven</h3>
+                <h3 className="text-2xl font-medium font-display mb-3 text-cream">ThinkHaven</h3>
                 <p className="text-cream/60 font-body mb-6 max-w-sm">
                   Transform strategic analysis from art into science. Make better decisions, faster.
                 </p>
