@@ -42,15 +42,15 @@ export default function AnimatedLoader({
       {/* Animated Logo/Icon */}
       <div className="relative mb-8">
         {/* Outer ring */}
-        <div className="w-20 h-20 rounded-full border-4 border-blue-100 animate-pulse" />
+        <div className="w-20 h-20 rounded-full border-4 border-parchment animate-pulse" />
 
         {/* Spinning ring */}
-        <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-transparent border-t-blue-600 animate-spin" />
+        <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-transparent border-t-terracotta animate-spin" />
 
         {/* Center icon */}
         <div className="absolute inset-0 flex items-center justify-center">
           <svg
-            className="w-8 h-8 text-blue-600"
+            className="w-8 h-8 text-terracotta"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -66,18 +66,18 @@ export default function AnimatedLoader({
       </div>
 
       {/* Progress bar */}
-      <div className="w-64 h-1.5 bg-gray-200 rounded-full overflow-hidden mb-6">
-        <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full animate-progress" />
+      <div className="w-64 h-1.5 bg-parchment rounded-full overflow-hidden mb-6">
+        <div className="h-full bg-gradient-to-r from-terracotta to-forest rounded-full animate-progress" />
       </div>
 
       {/* Animated message */}
-      <p className="text-lg text-gray-700 font-medium min-h-[28px] transition-opacity duration-300">
+      <p className="text-lg text-ink font-medium min-h-[28px] transition-opacity duration-300">
         {messages[messageIndex]}
         <span className="inline-block w-6 text-left">{dots}</span>
       </p>
 
       {/* Subtitle */}
-      <p className="text-sm text-gray-500 mt-2">
+      <p className="text-sm text-ink-light mt-2">
         This usually takes just a moment
       </p>
 
