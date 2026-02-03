@@ -152,11 +152,11 @@ export default function Home() {
                 return (
                   <div
                     key={index}
-                    className="group relative animate-fadeIn"
+                    className="group relative animate-fadeIn h-full"
                     style={{ animationDelay: feature.delay }}
                   >
                     {/* Card with decorative corner */}
-                    <div className="relative bg-parchment rounded-lg p-6 border border-ink/8 shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div className="relative h-full bg-parchment rounded-lg p-6 border border-ink/8 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
                       {/* Decorative corner accent */}
                       <div className={`absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-lg ${
                         feature.color === 'terracotta' ? 'border-terracotta/30' :
@@ -167,7 +167,7 @@ export default function Home() {
                         <Icon className="w-6 h-6" />
                       </div>
                       <h3 className="text-lg font-medium font-display text-ink mb-2">{feature.title}</h3>
-                      <p className="text-ink-light font-body text-sm leading-relaxed">{feature.description}</p>
+                      <p className="text-ink-light font-body text-sm leading-relaxed flex-grow">{feature.description}</p>
                     </div>
                   </div>
                 )
@@ -288,11 +288,11 @@ export default function Home() {
             </p>
 
             <div className="pt-6 border-t border-cream/20">
-              <p className="text-cream/90 text-sm">
+              <p className="text-cream text-sm">
                 Not ready to commit?{' '}
                 <a
                   href="/assessment"
-                  className="underline underline-offset-2 font-medium hover:text-cream transition-colors"
+                  className="text-cream underline underline-offset-4 font-semibold hover:text-parchment transition-colors"
                 >
                   Take the free 5-minute assessment first
                 </a>
