@@ -19,6 +19,7 @@ import ExportPanel from '@/app/components/workspace/ExportPanel'
 import dynamic from 'next/dynamic'
 import { ArtifactProvider } from '@/lib/artifact'
 import { ArtifactPanel, ArtifactList, ArtifactKeyboardHandler } from '@/app/components/artifact'
+import { ErrorState } from '@/app/components/ui/ErrorState'
 
 // Dynamically import canvas components (SSR-safe)
 const EnhancedCanvasWorkspace = dynamic(
@@ -65,18 +66,21 @@ export default function WorkspacePage() {
   } | null>(null)
   const [limitStatus, setLimitStatus] = useState<MessageLimitStatus | null>(null)
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const [isRetrying, setIsRetrying] = useState(false)
   const isOnline = useOnlineStatus()
   const { preserveInput, hasPreservedInput, peekPreservedInput, clearPreservedInput } = useSharedInput(params.id as string)
 
   const fetchWorkspace = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      setError('')
+      const { data, error: fetchError } = await supabase
         .from('user_workspace')
         .select('user_id, workspace_state, updated_at')
         .eq('user_id', params.id)
         .single()
 
-      if (error) throw error
+      if (fetchError) throw fetchError
 
       // Transform user_workspace data to Workspace format
       const transformedWorkspace: Workspace = {
@@ -89,13 +93,22 @@ export default function WorkspacePage() {
       }
 
       setWorkspace(transformedWorkspace)
-    } catch (error) {
-      console.error('Error fetching workspace:', error)
-      setError('Workspace not found or you do not have access to it')
+    } catch (err) {
+      console.error('Error fetching workspace:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Workspace not found or you do not have access to it'
+      setError(errorMessage)
     } finally {
       setLoading(false)
+      setIsRetrying(false)
     }
   }, [params.id])
+
+  const handleRetry = () => {
+    setIsRetrying(true)
+    setRetryCount(c => c + 1)
+    setLoading(true)
+    fetchWorkspace()
+  }
 
   useEffect(() => {
     if (user && params.id) {
@@ -377,10 +390,78 @@ export default function WorkspacePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="loading-shimmer h-8 w-48 rounded mb-4"></div>
-          <p className="text-secondary">Loading your strategic workspace...</p>
+      <div className="flex h-screen bg-background">
+        {/* Chat pane skeleton */}
+        <div className="flex-[6] border-r border-border flex flex-col">
+          {/* Header skeleton */}
+          <header className="h-14 mb-4 flex justify-between items-center px-4 border-b border-border">
+            <div className="flex items-center gap-2">
+              <div className="h-5 w-5 bg-muted rounded animate-pulse" />
+              <div className="h-6 w-48 bg-muted rounded animate-pulse" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-24 bg-muted/50 rounded animate-pulse" />
+              <div className="h-6 w-20 bg-muted/50 rounded animate-pulse" />
+              <div className="h-6 w-16 bg-muted/50 rounded animate-pulse" />
+            </div>
+          </header>
+          {/* Tab navigation skeleton */}
+          <div className="mb-4 px-4 border-b border-border">
+            <div className="flex gap-4 pb-3">
+              <div className="h-5 w-24 bg-muted rounded animate-pulse" />
+              <div className="h-5 w-28 bg-muted/50 rounded animate-pulse" />
+            </div>
+          </div>
+          {/* Chat messages skeleton */}
+          <div className="flex-1 overflow-y-auto p-8">
+            <div className="max-w-4xl mx-auto space-y-6">
+              {/* Welcome card skeleton */}
+              <div className="bg-muted/20 p-6 rounded-lg border border-border">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-muted rounded-full animate-pulse" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-5 w-48 bg-muted rounded animate-pulse" />
+                    <div className="h-4 w-full bg-muted/50 rounded animate-pulse" />
+                    <div className="h-4 w-3/4 bg-muted/50 rounded animate-pulse" />
+                  </div>
+                </div>
+              </div>
+              {/* Message skeletons */}
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                  <div className="flex items-start gap-3 max-w-[70%]">
+                    {i % 2 !== 0 && <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />}
+                    <div className="px-5 py-4 rounded-xl bg-muted/30 min-w-[200px]">
+                      <div className="h-4 w-full bg-muted/50 rounded animate-pulse mb-2" />
+                      <div className="h-4 w-2/3 bg-muted/50 rounded animate-pulse" />
+                    </div>
+                    {i % 2 === 0 && <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Input skeleton */}
+          <div className="mt-4 px-4 pb-4">
+            <div className="flex gap-2">
+              <div className="flex-1 h-12 bg-muted/30 border border-border rounded-lg animate-pulse" />
+              <div className="h-12 w-20 bg-muted rounded-lg animate-pulse" />
+            </div>
+          </div>
+        </div>
+        {/* Canvas pane skeleton */}
+        <div className="flex-[4] p-4 flex flex-col">
+          <header className="h-14 mb-4 flex justify-between items-center border-b border-border">
+            <div>
+              <div className="h-6 w-32 bg-muted rounded animate-pulse mb-1" />
+              <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />
+            </div>
+            <div className="space-y-1">
+              <div className="h-3 w-20 bg-muted/30 rounded animate-pulse" />
+              <div className="h-3 w-16 bg-muted/30 rounded animate-pulse" />
+            </div>
+          </header>
+          <div className="flex-1 bg-muted/10 rounded-lg border border-border animate-pulse" />
         </div>
       </div>
     )
@@ -402,14 +483,21 @@ export default function WorkspacePage() {
 
   if (error || !workspace) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-primary mb-4">Workspace Not Found</h1>
-          <p className="text-secondary mb-4">{error}</p>
-          <Link href="/app" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover">
-            Back to Dashboard
-          </Link>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <ErrorState
+          error={error || 'Workspace not found'}
+          onRetry={handleRetry}
+          onSignOut={signOut}
+          retryCount={retryCount}
+          isRetrying={isRetrying}
+          showSignOut={false}
+        />
+        <Link
+          href="/app"
+          className="mt-4 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Back to Dashboard
+        </Link>
       </div>
     )
   }
