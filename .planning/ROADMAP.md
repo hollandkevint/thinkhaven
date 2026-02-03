@@ -11,7 +11,7 @@ Fix authentication issues, implement waitlist-based access control, add error/lo
 - Decimal phases (1.1, 2.1): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Auth Infrastructure Fix** - Fix broken authentication so users can log in reliably
-- [ ] **Phase 2: Beta Access Control** - Gate access via waitlist + manual approval
+- [x] **Phase 2: Beta Access Control** - Gate access via waitlist + manual approval
 - [ ] **Phase 3: Error/Loading States** - No blank screens, clear error messages, retry options
 - [ ] **Phase 4: Feedback/Analytics** - Track signups, sessions, and messages for beta validation
 
@@ -48,10 +48,10 @@ Plans:
 **Plans**: 4 plans in 3 waves
 
 Plans:
-- [ ] 02-01-PLAN.md — Database migration (beta_access table, hook function) + jose install
-- [ ] 02-02-PLAN.md — JWT verification utilities + /app/* layout beta gate
-- [ ] 02-03-PLAN.md — Waitlist UI (pending page + landing page form)
-- [ ] 02-04-PLAN.md — Enable hook in Supabase + verify complete flow (checkpoint)
+- [x] 02-01-PLAN.md — Database migration (beta_access table, hook function) + jose install
+- [x] 02-02-PLAN.md — JWT verification utilities + /app/* layout beta gate
+- [x] 02-03-PLAN.md — Waitlist UI (pending page + landing page form)
+- [x] 02-04-PLAN.md — Enable hook in Supabase + verify complete flow (checkpoint)
 
 ### Phase 3: Error/Loading States
 **Goal**: No blank screens — every async state has visual feedback
@@ -88,8 +88,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth Infrastructure Fix | 4/4 | Complete | 2026-01-30 |
-| 2. Beta Access Control | 0/4 | Ready to execute | - |
-| 3. Error/Loading States | 0/? | Not started | - |
+| 2. Beta Access Control | 4/4 | Complete | 2026-02-02 |
+| 3. Error/Loading States | 0/? | In Progress | - |
 | 4. Feedback/Analytics | 0/? | Not started | - |
 
 ---
