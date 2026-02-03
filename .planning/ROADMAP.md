@@ -12,7 +12,7 @@ Fix authentication issues, implement waitlist-based access control, add error/lo
 
 - [x] **Phase 1: Auth Infrastructure Fix** - Fix broken authentication so users can log in reliably
 - [x] **Phase 2: Beta Access Control** - Gate access via waitlist + manual approval
-- [ ] **Phase 3: Error/Loading States** - No blank screens, clear error messages, retry options
+- [x] **Phase 3: Error/Loading States** - No blank screens, clear error messages, retry options
 - [ ] **Phase 4: Feedback/Analytics** - Track signups, sessions, and messages for beta validation
 
 ## Phase Details
@@ -62,10 +62,10 @@ Plans:
   2. All errors show clear message explaining what went wrong
   3. Failed operations show retry button for recovery
   4. Navigating to any route shows content within 2 seconds (loading or real)
-**Plans**: TBD
+**Plans**: 1 plan (parallel worktrees)
 
 Plans:
-- [ ] 03-01: TBD
+- [x] 03-01-PLAN.md — Loading skeletons, error states, chat retry (parallel worktrees)
 
 ### Phase 4: Feedback/Analytics
 **Goal**: Track core user actions for beta validation
@@ -89,7 +89,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Auth Infrastructure Fix | 4/4 | Complete | 2026-01-30 |
 | 2. Beta Access Control | 4/4 | Complete | 2026-02-02 |
-| 3. Error/Loading States | 0/? | In Progress | - |
+| 3. Error/Loading States | 1/1 | Complete | 2026-02-02 |
 | 4. Feedback/Analytics | 0/? | Not started | - |
 
 ---
