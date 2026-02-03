@@ -337,7 +337,7 @@ export default function Home() {
                     </a>
                   </li>
                   <li>
-                    <span className="text-cream/30">Blog (Coming Soon)</span>
+                    <a href="/blog" className="text-cream/60 hover:text-cream transition-colors">Blog</a>
                   </li>
                 </ul>
               </div>
