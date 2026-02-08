@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 *Last Updated: 2026-01-19*
 
 ## Project Context
-**ThinkHaven** - Decision accelerator that validates or kills business ideas before users waste time building
-- **Positioning**: More structured than Claude, faster/cheaper than consultants, more strategic than Miro
-- **Core Value**: Enforced methodology + sub-persona balancing + anti-sycophancy + polished outputs
+**ThinkHaven** - Decision accelerator that moves people from ideas and data to clear decisions through structured AI sessions
+- **Positioning**: More structured than Claude, faster/cheaper than consultants, more strategic than Miro. Serves both idea validation (solo entrepreneurs) and decision architecture (executives stress-testing strategy before high-stakes meetings)
+- **Core Value**: Enforced methodology + sub-persona balancing + anti-sycophancy + polished outputs + decision documentation
 - **Tech Stack**: Next.js 15.5, React 19, TypeScript, Supabase, Stripe, Anthropic Claude
 - **Architecture**: Monorepo with Next.js app in `apps/web/`
 - **Deployment**: Vercel project `thinkhaven` (https://thinkhaven.co)

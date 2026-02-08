@@ -160,7 +160,21 @@ vercel --prod            # Deploy to production
 
 ---
 
-*Last Updated: December 28, 2025*
+## Strategic Direction (Feb 2026)
+
+**Expanded Positioning:** ThinkHaven is evolving from pure idea validation into a **decision architecture** platform. The core insight: when build cost approaches zero, the bottleneck isn't ideas or even coding — it's specification and decision-making. ThinkHaven owns the gap between "I have information" and "I know what to do."
+
+**Two Audience Tiers:**
+- **Entry (Solo Entrepreneurs):** Validation sessions — "should I build this?" Structured methodology that produces artifacts, not just conversation. Competes with free prompt kits by offering persistent outputs and session continuity.
+- **Growth (Executives & Product Leaders):** Strategy stress-testing — "will this hold up in the room?" Higher willingness to pay, less competition from free alternatives. Natural fit for anti-sycophancy positioning.
+
+**"Dashboards to Decisions" Thesis:** Both audiences share the same problem — converting inputs (ideas, data, dashboards, market signals) into outputs (decisions, specs, go/no-go calls). The methodology is the same. The framing and pricing change.
+
+**Full strategic context:** See vault note `Nate-Jones-Play-vs-Strategy-ThinkHaven-Analysis.md` in the Obsidian vault.
+
+---
+
+*Last Updated: February 8, 2026*
 
 ## CI/CD Status
 
