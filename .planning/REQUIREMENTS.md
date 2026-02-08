@@ -58,6 +58,27 @@ Deferred to after beta feedback. Tracked but not in current roadmap.
 - **GATE-07**: Capture additional waitlist fields (company, use case)
 - **GATE-08**: Admin dashboard for user management
 
+## Post-Alpha: Visual Artifact Generation
+
+Future development option — not in current milestone. Tracked for planning when session output quality becomes a priority.
+
+### Excalidraw MCP Integration
+
+- **VIZ-01**: Integrate Excalidraw MCP server for real-time diagram generation during Mary sessions
+- **VIZ-02**: Generate visual session artifacts (decision trees, strategy maps, assumption maps) as downloadable outputs
+- **VIZ-03**: Visual outputs as differentiator vs ChatGPT — clients get diagrams, not just text
+
+**Context:**
+- Source: [excalidraw-mcp-app](https://github.com/antonpk1/excalidraw-mcp-app) (v0.2.0) — cloned locally at `~/Documents/GitHub/excalidraw-mcp-app`
+- MCP server generates streaming SVG with interactive editing and visual feedback loop
+- Already installed in Claude Desktop for Kevin's personal use (local build from source)
+- Complements existing BMAD Excalidraw workflows (static vault diagrams) — this would be real-time session visuals
+
+**Why post-alpha:**
+- Beta milestone is fix-and-polish only, no new features
+- Requires MCP integration into Thinkhaven's session architecture (Mary ↔ Excalidraw tool calls)
+- Best evaluated after validating core session value with beta users first
+
 ## Out of Scope
 
 Explicitly excluded. Documented to prevent scope creep.
