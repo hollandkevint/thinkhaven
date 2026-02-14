@@ -1,31 +1,36 @@
 # Current Implementation Status
 
-*Updated January 2026 - Aligned with Strategic Direction*
+*Updated February 2026 — Decision Architecture Evolution*
 
 ## Build Status Summary
 
-### Already Built
+### Completed
 | Component | Status | Details |
 |-----------|--------|---------|
-| **Next.js 15 Foundation** | ✅ Working | App Router, Turbopack, TypeScript integration |
-| **Authentication System** | ✅ Production Ready | Supabase Auth with user management and RLS |
-| **Claude Integration** | ✅ Complete | Streaming responses with Mary persona |
-| **Session Persistence** | ✅ Working | Conversation and session state management |
-| **Guest Flow** | ✅ Working | 5 messages (needs bump to 10) |
-| **Credit System Infrastructure** | ✅ Complete | Database schema, Stripe integration ready |
-| **Lean Canvas Output** | ⚠️ Partial | Generator exists, needs polish |
-| **PRD/Spec Generation** | ⚠️ Partial | Generator exists, needs polish |
+| **Next.js 15 Foundation** | ✅ Done | App Router, Turbopack, TypeScript integration |
+| **Authentication System** | ✅ Done | Supabase Auth with @supabase/ssr (migrated from deprecated auth-helpers) |
+| **Claude Integration** | ✅ Done | Streaming responses with Mary persona, Claude Sonnet 4 |
+| **Session Persistence** | ✅ Done | Conversation and session state management |
+| **Guest Flow** | ✅ Done | 5 messages (needs bump to 10) |
+| **Credit System Infrastructure** | ✅ Done | Database schema, Stripe integration ready |
+| **Sub-Persona System** | ✅ Partially Complete | 4/6 stories done, 67 tests. Types, weights, state detection implemented. |
+| **Dynamic Mode Shifting** | ✅ Done | `switch_persona_mode` tool enables AI-controlled mode changes |
+| **Anti-Sycophancy Logic** | ✅ Done | `recommend_action` tool with proceed/pivot/kill recommendations |
+| **Kill Recommendation** | ✅ Done | `recommend_action` tool with viability scoring |
+| **Output Polish (Lean Canvas + PRD)** | ✅ Done | `generate_document` tool for structured output generation |
+| **Agent-Native Tool System** | ✅ Done | 9 tools, agentic loop (max 5 rounds per message) |
+| **Beta Access Control** | ✅ Done | Waitlist signup, JWT gating via Custom Access Token Hook, manual approval |
+| **Error/Loading States** | ✅ Done | Skeleton loaders, retry buttons, error display, no blank screens |
+| **MDX Blog** | ✅ Done | 2 articles published on thinkhaven.co |
+| **Design System** | ✅ Done | Wes Anderson palette (cream, parchment, terracotta, forest, ink). Jost + Libre Baskerville + JetBrains Mono typography. |
 
-### Must Build for MVP
+### Remaining for MVP
 | Component | Status | Priority |
 |-----------|--------|----------|
-| **Sub-Persona System** | ❌ Not Started | Highest |
-| **Dynamic Mode Shifting** | ❌ Not Started | Highest |
-| **Anti-Sycophancy Logic** | ❌ Not Started | Highest |
-| **Kill Recommendation** | ❌ Not Started | High |
-| **Viability Score** | ❌ Not Started | High |
-| **10-Message Trial Gate** | ❌ Not Started | High |
-| **Output Polish** | ⚠️ In Progress | High |
+| **10-Message Trial Gate** | ❌ Pending | High (Epic 6.5) |
+| **Mode Indicator UI** | ❌ Pending | Medium (Epic 6.6) |
+| **Enable Tool Mode in UI** | ❌ Pending | High |
+| **E2E Tests for Agentic Flow** | ❌ Pending | Medium |
 
 ### Post-MVP (Nice-to-Have)
 | Component | Status | Notes |
@@ -33,7 +38,8 @@
 | **User Mode Control** | ❌ Not Started | Explicit sub-persona selection |
 | **HTML Presentation** | ❌ Not Started | Single-file shareable output |
 | **Low-Fi Visuals** | ❌ Not Started | Excalidraw-style sketches |
-| **Canvas Workspace** | ⚠️ Partial | Not critical path - de-prioritized |
+| **Canvas Workspace** | ⚠️ Partial | Not critical path — de-prioritized |
+| **Executive Tier Pricing** | ❌ Not Started | $150-300/session for growth tier |
 
 ## Technical Foundation
 
@@ -43,83 +49,110 @@ apps/web/
 ├── app/
 │   ├── app/session/[id]/page.tsx   ✅ Workspace with Claude integration
 │   ├── components/
-│   │   ├── ui/                     ✅ Foundation components ready
+│   │   ├── ui/                     ✅ Foundation components + design system
 │   │   ├── chat/                   ✅ Complete chat interface with streaming
 │   │   ├── bmad/                   ✅ BMad interface and generators
 │   │   └── guest/                  ✅ Guest session components
 │   └── api/
-│       ├── chat/stream/route.ts    ✅ Claude streaming integration
+│       ├── chat/stream/route.ts    ✅ Claude streaming + agentic tool loop
 │       └── chat/guest/route.ts     ✅ Guest streaming (no auth)
 ├── lib/
-│   ├── ai/                         ✅ Claude client, Mary persona
-│   │   └── mary-persona.ts         ⚠️ Needs sub-persona system
-│   ├── bmad/generators/            ✅ Lean Canvas, PRD generators
+│   ├── ai/                         ✅ Claude client, Mary persona, sub-persona system
+│   │   ├── mary-persona.ts         ✅ Sub-persona types, weights, state detection (67 tests)
+│   │   ├── tool-executor.ts        ✅ Tool execution engine
+│   │   ├── tools/                  ✅ 9 agent-native tools
+│   │   │   ├── index.ts            ✅ Tool registry (MARY_TOOLS array)
+│   │   │   ├── discovery-tools.ts  ✅ Pathway, phase action, document discovery
+│   │   │   ├── document-tools.ts   ✅ Document generation tools
+│   │   │   └── session-tools.ts    ✅ Session state management tools
+│   │   ├── context-builder.ts      ✅ Dynamic context enrichment (Phase 2)
+│   │   └── context-manager.ts      ✅ Conversation history management
+│   ├── bmad/
+│   │   ├── session-orchestrator.ts ✅ Session lifecycle with credit integration
+│   │   ├── session-primitives.ts   ✅ Atomic session operations (Phase 4)
+│   │   ├── capability-discovery.ts ✅ Runtime capability discovery (Phase 5)
+│   │   ├── pathway-router.ts       ✅ Pathway routing
+│   │   └── generators/             ✅ All output generators
+│   ├── auth/                       ✅ @supabase/ssr auth context
 │   └── monetization/               ✅ Credit system infrastructure
-├── tests/                          ✅ Unit + E2E tests passing
+├── tests/                          ✅ Unit (67 persona tests) + E2E (7 smoke tests)
 └── types/                          ✅ Complete TypeScript coverage
 ```
 
+### Agent-Native Tool System
+
+Mary has 9 tools that enable agent-controlled session progression:
+
+| Tool | Purpose | Status |
+|------|---------|--------|
+| `discover_pathways` | List all available strategic pathways | ✅ Done |
+| `discover_phase_actions` | List actions available in a phase | ✅ Done |
+| `discover_document_types` | List available document generators | ✅ Done |
+| `read_session_state` | Read current session phase/progress/mode | ✅ Done |
+| `complete_phase` | Signal phase completion and advance | ✅ Done |
+| `switch_persona_mode` | Change coaching mode dynamically | ✅ Done |
+| `recommend_action` | Provide viability recommendation (proceed/pivot/kill) | ✅ Done |
+| `generate_document` | Generate Lean Canvas, PRD, or other documents | ✅ Done |
+| `update_session_context` | Record insights for later document generation | ✅ Done |
+
+**Agentic Loop:** `/api/chat/stream/route.ts` — max 5 tool rounds per message, sequential tool execution within rounds, results passed back to Claude for continued reasoning.
+
 ### Database Schema Status
-- **Users & Authentication:** ✅ Complete with Supabase Auth
-- **Sessions:** ✅ Working with session state management
+- **Users & Authentication:** ✅ Complete with Supabase Auth + @supabase/ssr
+- **Sessions:** ✅ Working with session state management + sub-persona state (migration 011)
 - **Conversations:** ✅ Fully integrated with persistence
 - **Credits:** ✅ Credit system tables ready
-- **Sub-Persona State:** ❌ Needs schema for mode tracking
+- **Beta Access:** ✅ `beta_access` table with RLS, JWT claims via Custom Access Token Hook (migration 013)
 
-### Key Files for MVP Work
-1. **mary-persona.ts:** Add sub-persona weights and mode selection
-2. **session-orchestrator.ts:** Add pathway weight configuration
-3. **Guest components:** Bump from 5 to 10 message limit
-4. **Output generators:** Polish Lean Canvas and PRD/Spec templates
+### Beta Infrastructure Status
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| Waitlist Signup | ✅ Done | Landing page form creates `beta_access` row |
+| JWT Gating | ✅ Done | Custom Access Token Hook injects `beta_approved` claim |
+| Route Protection | ✅ Done | Middleware + API routes block unapproved users |
+| Pending Page | ✅ Done | "You're on the list" message for unapproved users |
+| Manual Approval | ✅ Done | Admin sets `approved_at` in Supabase Table Editor |
+| Auth Migration | ✅ Done | @supabase/ssr replaces deprecated @supabase/auth-helpers-nextjs |
 
 ## Technical Debt Assessment
 
 ### High Priority (Block MVP)
-- **Sub-Persona System:** Core differentiator - must implement before launch
-- **Anti-Sycophancy Logic:** Kill recommendation flow not implemented
 - **Trial Gate:** Still at 5 messages, needs bump to 10
-- **Output Polish:** Lean Canvas and PRD generators need professional formatting
+- **Tool Mode UI:** Need toggle to enable `useTools: true` in sessions
+- **Mode Indicators:** No UI for showing current sub-persona mode
 
 ### Medium Priority (Pre-Launch)
-- **Mode Indicators:** No UI for showing current sub-persona mode
-- **Pathway Weights:** Need to configure weights per pathway
 - **Session Duration:** No enforcement of 10-30 minute sessions
+- **E2E Tests:** Only smoke tests exist; need agentic flow coverage
 
 ### Low Priority (Post-MVP)
 - **Canvas Functionality:** De-prioritized, not critical path
 - **User Mode Control:** Let users select mode explicitly
 - **HTML Presentation:** Export format for consultants
-
-## Known Technical Constraints
-
-### AI Integration
-- **System Prompt Size:** Sub-persona weights add complexity to prompts
-- **Mode Shifting:** Dynamic detection of user state requires prompt engineering
-- **Kill Recommendations:** Need careful escalation sequence to earn trust
-
-### Output Generation
-- **PDF Formatting:** @react-pdf/renderer works but needs template polish
-- **Viability Scoring:** No algorithm for kill score calculation yet
-- **Export Branding:** Need professional styling for exported documents
+- **Executive Tier Pricing:** Stripe products for $150-300 sessions
 
 ## Current Platform Status
 
-### Overall Assessment: **Foundation Complete, MVP Work Remaining (January 2026)**
+### Overall Assessment: **Beta Live, MVP Work Remaining (February 2026)**
 
 **What's Working:**
-- Solid technical foundation with modern tech stack
-- Claude integration with streaming responses
-- Session persistence and conversation management
-- Credit system infrastructure ready
-- Guest flow working (needs 10-message bump)
+- Agent-native architecture complete (9 tools, agentic loop, session primitives, capability discovery)
+- Sub-persona system implemented with 67 tests (4/6 stories)
+- Beta access control live (waitlist → approval → access)
+- Error/loading states implemented (no blank screens)
+- Design system applied (Wes Anderson palette)
+- MDX blog live with 2 articles
+- Auth stabilized on @supabase/ssr
 
 **What's Needed for MVP:**
-1. **Sub-Persona System** - Four modes with pathway-specific weights
-2. **Anti-Sycophancy** - Kill recommendations with escalation sequence
-3. **Output Polish** - Professional Lean Canvas and PRD/Spec templates
-4. **10-Message Trial** - Bump guest limit, partial output at gate
+1. **10-Message Trial Gate** — Bump guest limit, partial output at gate
+2. **Tool Mode UI** — Enable agentic tools in sessions
+3. **Mode Indicator** — Show current sub-persona mode to users
+4. **E2E Tests** — Coverage for agentic tool flow
 
 **What's Post-MVP:**
+- Executive tier pricing ($150-300/session)
 - Canvas/visual workspace (nice-to-have, not critical)
 - User-triggered mode control
 - HTML presentation export

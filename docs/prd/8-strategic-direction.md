@@ -1,13 +1,16 @@
 # Strategic Direction
 
-*Refined through structured interview - January 2026*
+*Updated February 2026 — Decision Architecture Evolution*
 
 ## Core Positioning
 
-ThinkHaven is a **decision accelerator** that applies structured methodology to validate or kill business ideas before users waste time building.
+ThinkHaven is a **decision architecture platform** that owns the gap between "I have information" and "I know what to do." When build cost approaches zero, the bottleneck shifts from execution to specification and decision-making. ThinkHaven applies structured methodology to that bottleneck.
+
+**The "Dashboards to Decisions" Thesis:**
+Everyone has data, dashboards, ideas, and now GenAI agents that can build anything overnight. What they don't have is a structured way to decide what's worth building, whether their strategy holds up under pressure, or when to kill an idea before wasting months on it. ThinkHaven owns that decision layer.
 
 **What ThinkHaven IS:**
-- A strategic thinking partner with opinionated pushback
+- A decision architecture platform with opinionated pushback
 - A problem design partner that helps articulate *what problem you're solving* before evaluating solutions
 - An enforced methodology that can't be skipped
 - A system that delivers polished, portable outputs
@@ -27,7 +30,9 @@ ThinkHaven is a **decision accelerator** that applies structured methodology to 
 
 Most people don't know what they don't know about prompting. They accept sycophantic AI responses because they don't realize they should demand better. They build first, validate later, and waste months on the wrong thing.
 
-Most people skip problem design entirely. They have a solution idea and work backwards to justify it. ThinkHaven forces the problem design work that LLMs cannot do alone—the collaborative framing that creates genuine understanding. As the research notes: "The ur-problem is to define the problem."
+GenAI agents make this worse, not better. They let you build on bad ideas faster. A cool mechanic doesn't make a great game — and a weekend prototype doesn't make a viable business.
+
+Most people skip problem design entirely. They have a solution idea and work backwards to justify it. ThinkHaven forces the problem design work that LLMs cannot do alone — the collaborative framing that creates genuine understanding.
 
 ### Our Solution
 
@@ -42,26 +47,49 @@ ThinkHaven packages expert methodology into an AI-powered system that:
 | Competitor | What they offer | ThinkHaven's edge |
 |------------|-----------------|-------------------|
 | **Claude (skills/projects/Code)** | General AI with context management | Structured methodology + opinionated pushback + polished output |
-| **Strategy consultants** | Human expertise, high-touch | 10-30 min vs. weeks, $20 vs. $5K+, available on-demand |
+| **Strategy consultants** | Human expertise, high-touch | 10-30 min vs. weeks, $25 vs. $5K+, available on-demand |
 | **Miro/Figjam/Balsamiq** | Visual collaboration + AI features | Strategy-first with visuals as output, not canvas-first |
+| **Free prompt kits / GPTs** | Templates without persistence | Persistent sessions, structured artifacts, session continuity |
 
 **Moat:** Enforced methodology + sub-persona balancing + anti-sycophancy + polished portable outputs. Hard to DIY.
 
-## Target Users
+## Target Users — Two-Tier Model
 
-### Primary: Builders & Strategists
-
-**Who:** Solo founders, product managers, strategy team members
-**Job-to-be-done:** Vet problems, get feedback, red-team ideas before committing time
-**Pain when skipped:** Months wasted building the wrong thing
+### Entry Tier: Solo Entrepreneurs
+**Who:** Solo founders, indie hackers, vibe coders shipping fast
+**Job-to-be-done:** "Should I build this?" — validate before committing time
+**Pain when skipped:** Months wasted building something nobody wants
 **Success feeling:** "I pressure-tested this, I'm confident, I'm ready to build"
+**Pricing:** $25/session
+**Competitive frame:** Competes with free prompt kits by offering persistent outputs and session continuity
 
-### Secondary: Consultants
-
-**Who:** Independent consultants who need to look structured for clients
-**Job-to-be-done:** Produce strategic deliverables fast, apply frameworks without setup overhead
-**Pain when skipped:** Manual framework application, inconsistent outputs, time pressure
+### Growth Tier: Executives & Product Leaders
+**Who:** CPOs, VPs of Product, strategy team leads, consultants
+**Job-to-be-done:** "Will this hold up in the room?" — stress-test strategy before high-stakes meetings
+**Pain when skipped:** Walking into a board meeting with untested assumptions
 **Success feeling:** "I have a partner that makes me sharper"
+**Pricing:** $150-300/session
+**Competitive frame:** Less competition from free alternatives. Higher willingness to pay. Natural fit for anti-sycophancy positioning.
+
+### Shared Thesis
+
+Both tiers share the same core problem: converting inputs (ideas, data, dashboards, market signals) into outputs (decisions, specs, go/no-go calls). The methodology is the same. The framing and pricing change.
+
+## Market Validation Signals
+
+### LinkedIn Thread Evidence (February 2026)
+
+Alex Gutwillig's thread on "building on bad ideas faster with GenAI" generated strong engagement and directly validates ThinkHaven's positioning:
+
+**Key quotes:**
+- **Eduardo M.** shared "Monsieur Vibe" — an idea that sounds fun, builds fast in a weekend, and nobody needs. Exactly the pattern ThinkHaven's kill recommendation system addresses.
+- **Jeff Arnold:** "A cool mechanic doesn't make a great game" — execution quality without validation is waste.
+
+**What this signals:**
+- Builders recognize the "bad ideas faster" problem in their own work
+- The language people use maps directly to ThinkHaven's anti-sycophancy positioning
+- Nobody in the thread proposes a structured solution — the gap ThinkHaven fills
+- The pain is felt and articulated, but no tool addresses it yet
 
 ## Sub-Persona System
 
@@ -158,18 +186,56 @@ The canvas/visual workspace is **nice-to-have**, not critical. Text outputs carr
 
 ## Pricing Strategy
 
-### Phase 1: Lifetime Deal
-- Price: $199-499 one-time
-- Goal: Early adopters, cash + feedback + testimonials
-- Typical MicroSaaS launch pattern
+### Two-Tier Session Pricing
 
-### Phase 2: Subscription + Credits
-- Subscription: Monthly access with session limits
-- Credits: Pay-as-you-go for overflow or light users
-- Goal: Sustainable recurring revenue
+| Tier | Price | Audience | Value Prop |
+|------|-------|----------|------------|
+| **Entry** | $25/session | Solo entrepreneurs | "Should I build this?" — idea validation |
+| **Growth** | $150-300/session | Executives / product leaders | "Will this hold up in the room?" — strategy stress-test |
+
+### Launch Strategy
+
+**Phase 1: Beta (Current)**
+- Free beta access via waitlist + approval
+- Goal: Validate methodology, collect feedback, build testimonials
+
+**Phase 2: Entry Tier Launch**
+- $25/session for solo entrepreneurs
+- LTD option ($199-499) for early adopters
+
+**Phase 3: Executive Tier**
+- $150-300/session with premium positioning
+- Consultants as a channel (they use it with clients)
 
 ### Future Consideration
 - BYOK (Bring Your Own Key) tier for cost-conscious power users
+- Subscription model for frequent users
+
+## Build Status (February 2026)
+
+### Completed
+
+| Component | Status |
+|-----------|--------|
+| Sub-Persona System (types, weights, state detection) | 4/6 stories done, 67 tests |
+| Dynamic Mode Shifting | Done (`switch_persona_mode` tool) |
+| Anti-Sycophancy / Kill Recommendations | Done (`recommend_action` tool) |
+| Output Polish (Lean Canvas + PRD) | Done (`generate_document` tool) |
+| Agent-Native Tool System (9 tools, agentic loop) | Done |
+| Beta Access Control (waitlist, JWT gating, approval) | Done |
+| Error/Loading States (skeletons, retry, error display) | Done |
+| MDX Blog (2 articles) | Done |
+| Design System (Wes Anderson palette) | Done |
+| Auth Migration to @supabase/ssr | Done |
+
+### Remaining for MVP
+
+| Component | Status |
+|-----------|--------|
+| 10-Message Trial Gate | Pending (Epic 6.5) |
+| Mode Indicator UI | Pending (Epic 6.6) |
+| Enable Tool Mode in UI | Pending |
+| E2E Tests for Agentic Flow | Pending |
 
 ## Success Metrics (90-Day)
 
@@ -184,39 +250,6 @@ The canvas/visual workspace is **nice-to-have**, not critical. Text outputs carr
 - Users report feeling "challenged but confident"
 - Output is portable (users take it to prototyping tools)
 - Consultants use it for multiple client engagements
-
-## Implementation Priority
-
-### Highest Leverage (Do First)
-
-**Sub-persona system + polished output**
-
-This is THE thing. If users feel encouraged AND challenged, if they feel pressure-testing was useful and invigorating, if they want to do it again and feel more confident in building - everything else follows.
-
-### Build Status
-
-**Already Built:**
-- Claude integration with streaming
-- Mary persona (basic questioning styles)
-- Session persistence
-- Guest flow (needs bump from 5 to 10 messages)
-- Credit system infrastructure
-- Lean Canvas output (partial)
-- Spec/PRD generation (partial)
-
-**Must Build for MVP:**
-- Sub-persona balancing (all four modes, weighted by pathway)
-- Dynamic mode shifting within session
-- Anti-sycophancy / kill recommendation logic
-- Kill score / viability rating
-- Full output polish
-- 10-message trial gate
-
-**Post-MVP:**
-- User-triggered mode control
-- HTML presentation export
-- Low-fi visual generation
-- Canvas workspace integration
 
 ## Anti-Goals
 
@@ -233,4 +266,4 @@ Explicit decisions about what NOT to build:
 
 ---
 
-*This document reflects strategic direction refined through structured interview on January 4, 2026.*
+*This document reflects strategic direction updated February 13, 2026, incorporating decision architecture evolution, two-tier audience model, and market validation signals.*

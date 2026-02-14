@@ -3,7 +3,7 @@
 **Start Here:** [Strategic Direction](./8-strategic-direction.md) - Source of truth for product positioning
 
 ## For Product Management
-- [Strategic Direction](./8-strategic-direction.md) - Decision accelerator positioning, sub-persona system
+- [Strategic Direction](./8-strategic-direction.md) - Decision architecture positioning, two-tier audience, sub-persona system
 - [Goals & Context](./1-goals-context.md) for vision alignment
 - [Epic Structure](./5-epic-structure.md) for delivery planning with strategic priorities
 

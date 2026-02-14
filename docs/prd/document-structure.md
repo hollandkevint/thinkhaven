@@ -6,7 +6,7 @@ This PRD is organized into sharded components for better maintainability and age
 
 ## Core PRD Shards
 - [Executive Summary](./executive-summary.md) - Core positioning and 90-day targets
-- [Strategic Direction](./8-strategic-direction.md) - **PRIMARY REFERENCE** - Decision accelerator positioning, sub-persona system, output strategy
+- [Strategic Direction](./8-strategic-direction.md) - **PRIMARY REFERENCE** - Decision architecture positioning, two-tier audience, sub-persona system, output strategy
 - [Goals & Background Context](./1-goals-context.md) - Product vision, goals, and foundational context
 - [Requirements](./2-requirements.md) - Functional, non-functional requirements including sub-persona specs
 - [User Interface Design Goals](./3-ui-goals.md) - Conversation-first design, output focus

@@ -1,16 +1,17 @@
 # Integration Requirements
 
-*Updated January 2026 - Aligned with Strategic Direction*
+*Updated February 2026 — Decision Architecture Evolution*
 
 ## Claude API Integration
 
 ### API Configuration
-- **Model**: claude-3-sonnet or claude-3-opus (depending on complexity)
+- **Model**: Claude Sonnet 4 (via @anthropic-ai/sdk)
 - **Max Tokens**: 4096 for strategic responses
 - **Temperature**: 0.7 for balanced creativity and consistency
 - **System Prompts**: Sub-persona weighted prompts with pathway-specific behavior
+- **Tool Calling**: 9 agent-native tools with agentic loop (max 5 rounds per message)
 
-### Sub-Persona System Integration
+### Sub-Persona System Integration (Implemented)
 
 **System Prompt Structure:**
 ```
@@ -25,6 +26,28 @@
 - User defensive → shift to Encouraging before returning to challenge
 - User overconfident → lean into Devil's Advocate
 - User spinning → bring in Realistic to ground
+
+### Agent-Native Tool Integration (Implemented)
+
+Mary has 9 tools that enable agent-controlled session progression:
+
+| Tool | Purpose |
+|------|---------|
+| `discover_pathways` | List available strategic pathways |
+| `discover_phase_actions` | List actions available in a phase |
+| `discover_document_types` | List available document generators |
+| `read_session_state` | Read current session phase/progress/mode |
+| `complete_phase` | Signal phase completion and advance |
+| `switch_persona_mode` | Change coaching mode dynamically |
+| `recommend_action` | Provide viability recommendation (proceed/pivot/kill) |
+| `generate_document` | Generate Lean Canvas, PRD, or other documents |
+| `update_session_context` | Record insights for later document generation |
+
+**Architecture:**
+- Tool definitions in `lib/ai/tools/index.ts` (MARY_TOOLS array)
+- Execution via `lib/ai/tool-executor.ts`
+- Agentic loop in `/api/chat/stream/route.ts` (max 5 rounds)
+- Results formatted via `ToolExecutor.formatResultsForClaude()`
 
 ### Conversation Management
 - **Context Window**: Last 10-15 conversation turns

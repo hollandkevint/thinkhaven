@@ -1,6 +1,6 @@
 # ThinkHaven - Product Requirements Document (PRD)
 
-**ThinkHaven** is a decision accelerator that validates or kills business ideas before users waste time building.
+**ThinkHaven** is a decision architecture platform that owns the gap between "I have information" and "I know what to do."
 
 ## Table of Contents
 

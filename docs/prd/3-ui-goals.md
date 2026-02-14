@@ -3,7 +3,7 @@
 ## Overall UX Vision
 
 ### Primary UX Principles
-The ThinkHaven interface embodies **"Decision Acceleration"** - providing sophisticated strategic thinking capabilities through a conversation-first experience that delivers polished, portable outputs.
+The ThinkHaven interface embodies **"Decision Architecture"** - providing sophisticated strategic thinking capabilities through a conversation-first experience that delivers polished, portable outputs.
 
 **Core Experience Goals:**
 - **Conversational Depth:** AI interactions feel like pressure-testing with an expert who provides genuine pushback
@@ -12,7 +12,7 @@ The ThinkHaven interface embodies **"Decision Acceleration"** - providing sophis
 - **Confident Guidance:** Interface provides clear direction while challenging assumptions when warranted
 
 ### User Mental Model
-Users should experience the platform as a **"Decision Accelerator"** rather than a tool:
+Users should experience the platform as a **"Decision Architecture Platform"** rather than a tool:
 - Conversation feels like a strategic partner that challenges AND encourages
 - Sub-persona modes (Inquisitive, Devil's Advocate, Encouraging, Realistic) provide balanced feedback
 - Session progression feels structured with enforced methodology
@@ -97,11 +97,17 @@ Users should experience the platform as a **"Decision Accelerator"** rather than
 - **Collaborative Feel:** Design suggests partnership rather than tool usage
 - **Growth Orientation:** Visual metaphors suggest progress, development, and strategic advancement
 
-### Color Palette & Typography
-- **Primary Colors:** Professional blues and warm grays that suggest trust and intelligence
+### Color Palette & Typography (Implemented)
+- **Design System:** Wes Anderson-inspired palette — cream, parchment, terracotta, forest, ink
+- **Typography:** Jost (display), Libre Baskerville (body), JetBrains Mono (code) — loaded via `next/font`
 - **Accent Colors:** Strategic use of color to guide attention and indicate status/progress
-- **Typography:** Clear, readable fonts that work well for both conversational text and business diagrams
 - **Iconography:** Simple, consistent icons that support rather than distract from strategic thinking
+
+### Beta Waitlist UX (Implemented)
+- **Waitlist Signup:** Landing page form captures email, creates `beta_access` row
+- **Pending State:** "You're on the list" page for unapproved users (no blank screens)
+- **Approval Flow:** Admin sets `approved_at` → JWT claim updates → user gains `/app/*` access
+- **Error States:** Skeleton loaders, retry buttons, clear error messages across all async operations
 
 ## Target Device and Platforms
 
