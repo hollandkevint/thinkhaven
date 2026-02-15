@@ -1,368 +1,321 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-01-29
+**Analysis Date:** 2026-02-14
 
 ## Directory Layout
 
 ```
-/Users/kthkellogg/Documents/GitHub/thinkhaven/
-├── apps/
-│   └── web/                           # Next.js app (primary codebase)
-│       ├── app/                       # Next.js App Router (file-based routes)
-│       │   ├── layout.tsx             # Root layout with providers
-│       │   ├── page.tsx               # Landing page (/)
-│       │   ├── api/                   # API routes (server-side)
-│       │   ├── app/                   # Protected dashboard routes (/app/*)
-│       │   ├── auth/                  # OAuth callback handler
-│       │   ├── components/            # Page-specific React components
-│       │   ├── try/                   # Guest trial chat (/try)
-│       │   ├── assessment/            # Strategic assessment quiz
-│       │   ├── demo/                  # Pre-configured demo scenarios
-│       │   ├── login/                 # Login form
-│       │   ├── signup/                # Signup form
-│       │   └── ...                    # Other routes
-│       ├── lib/                       # Core business logic
-│       │   ├── ai/                    # Claude API + persona + tools
-│       │   ├── bmad/                  # BMad Method engine (session, pathways, generators)
-│       │   ├── canvas/                # tldraw integration
-│       │   ├── export/                # PDF + Markdown generation
-│       │   ├── auth/                  # Auth context + utilities
-│       │   ├── supabase/              # Database client + queries
-│       │   ├── monetization/          # Credit system + Stripe
-│       │   ├── monitoring/            # Error + auth logging
-│       │   ├── workspace/             # Session context
-│       │   ├── hooks/                 # React hooks
-│       │   ├── demo/                  # Demo data
-│       │   ├── guest/                 # Guest session management
-│       │   ├── security/              # CORS, security utilities
-│       │   └── utils.ts               # Shared utilities
-│       ├── public/                    # Static assets (icons, fonts, images)
-│       ├── supabase/
-│       │   └── migrations/            # Database migrations (001-011)
-│       ├── types/                     # Global TypeScript types
-│       ├── tests/                     # Test files (Vitest, Playwright)
-│       ├── playwright/                # Playwright config and test reports
-│       ├── package.json               # Dependencies
-│       ├── tsconfig.json              # TypeScript config
-│       ├── next.config.ts             # Next.js config
-│       ├── tailwind.config.cjs        # Tailwind CSS config
-│       ├── vitest.config.ts           # Unit test config
-│       └── playwright.config.ts       # E2E test config
-├── docs/                              # Project documentation
-│   ├── prd/                           # Product requirements
-│   ├── design/                        # Design system, wireframes
-│   ├── stories/                       # Feature stories
-│   └── ...
-├── .planning/                         # GSD planning artifacts
-│   └── codebase/                      # Architecture/codebase docs (THIS LOCATION)
-└── .claude/                           # Claude Code custom commands
-
+thinkhaven/
+├── app/                          # Next.js 15 App Router pages and API routes
+│   ├── api/                      # Server-side API endpoints
+│   ├── components/               # Page-specific React components
+│   ├── dashboard/                # Dashboard page
+│   ├── workspace/[id]/           # Dynamic workspace detail page
+│   ├── login/                    # Authentication pages
+│   ├── signup/
+│   ├── account/
+│   ├── layout.tsx                # Root layout with AuthProvider
+│   ├── page.tsx                  # Landing page
+│   └── globals.css               # Global styles
+├── lib/                          # Domain services and business logic
+│   ├── ai/                       # AI integration (Claude API)
+│   ├── auth/                     # Authentication context
+│   ├── bmad/                     # BMad Method engine
+│   ├── supabase/                 # Database client factories
+│   └── workspace/                # Workspace state management
+├── packages/                     # Monorepo workspace packages
+│   ├── ui/                       # Shared UI components (minimal)
+│   ├── canvas-engine/            # Canvas integration (minimal)
+│   ├── shared/                   # Shared types (minimal)
+│   └── bmad-engine/              # BMad engine package (minimal)
+├── supabase/                     # Database schema and migrations
+│   ├── migrations/               # SQL migration files
+│   └── schema.sql                # Full schema definition
+├── docs/                         # Product documentation and PRD
+│   ├── prd/                      # Product requirements (13 shards)
+│   ├── architecture/
+│   ├── testing/
+│   └── guides/
+├── .bmad-core/                   # BMAD Method expansion pack (synced)
+├── .bmad-kevin-creator/          # Kevin creator expansion pack (synced)
+├── .bmad-pmf-validation/         # PMF validation expansion pack (synced)
+├── .bmad-product-leadership/     # Product leadership expansion pack (synced)
+├── .planning/                    # GSD planning artifacts
+│   ├── codebase/                 # Codebase analysis documents
+│   ├── phases/                   # Phase plans
+│   └── research/                 # Research notes
+├── scripts/                      # Setup and utility scripts
+├── public/                       # Static assets
+├── package.json                  # Monorepo root package
+├── tsconfig.json                 # TypeScript config
+├── next.config.ts                # Next.js config
+├── CLAUDE.md                     # Claude Code instructions
+└── PROJECT.md                    # Project overview
 ```
 
 ## Directory Purposes
 
-**`apps/web/app/`** - Next.js App Router (file-based routing)
-- Purpose: Define all HTTP routes and pages
-- Pattern: Directories = route segments, `page.tsx`/`layout.tsx`/`route.ts` = handlers
-- Public routes: `/`, `/login`, `/signup`, `/try`, `/assessment`, `/demo`
-- Protected routes: `/app/*` (auth required)
-- API routes: `/api/*` (server-side handlers)
+**app/ (Next.js App Router):**
+- Purpose: Page routes, layouts, and API endpoints
+- Contains: Route-based file structure (`page.tsx`, `layout.tsx`, `route.ts`)
+- Key files:
+  - `app/layout.tsx`: Root layout with AuthProvider wrapper
+  - `app/page.tsx`: Landing page with auth redirect logic
+  - `app/dashboard/page.tsx`: Workspace list and creation
+  - `app/workspace/[id]/page.tsx`: Dual-pane workspace interface
 
-**`apps/web/lib/ai/`** - AI Integration & Persona
-- Purpose: Claude API interaction, persona management, tool execution
-- Contains:
-  - `claude-client.ts`: Anthropic SDK wrapper with tool calling support
-  - `mary-persona.ts`: Coaching persona with 4 sub-modes (1,200 lines)
-  - `tools/`: Tool implementations (discovery, session control, document generation)
-  - `context-builder.ts`: Dynamic system prompt enrichment
-  - `context-manager.ts`: Conversation context state
-  - `streaming.ts`: Server-sent events infrastructure
-  - `conversation-*.ts`: Chat persistence + export + search
+**app/api/ (API Routes):**
+- Purpose: Server-side request handlers
+- Contains: POST/GET handlers as `route.ts` files
+- Key files:
+  - `app/api/chat/stream/route.ts`: Streaming AI chat endpoint
+  - `app/api/bmad/route.ts`: BMad session management endpoint
 
-**`apps/web/lib/bmad/`** - BMad Method Strategic Engine
-- Purpose: Core strategic methodology implementation
-- Structure:
-  - `session-orchestrator.ts`: Session lifecycle manager with bundled operations
-  - `session-primitives.ts`: Atomic session operations (Phase 4)
-  - `pathway-router.ts`: Maps pathway types to configurations
-  - `capability-discovery.ts`: Runtime capability discovery (Phase 5)
-  - `template-engine.ts`: Phase template execution
-  - `pathways/`: Pathway implementations (new-idea, business-model, etc.)
-  - `generators/`: Document generators (Lean Canvas, Product Brief, Feature Brief)
-  - `analysis/`: Domain-specific analysis (market positioning, etc.)
-  - `types.ts`: Core type definitions (BmadSession, BmadPathway, etc.)
+**app/components/ (Page Components):**
+- Purpose: React components scoped to specific pages
+- Contains: Component files organized by feature
+- Key files:
+  - `app/components/bmad/BmadInterface.tsx`: BMad session UI
+  - `app/components/bmad/PathwaySelector.tsx`: Pathway selection UI
+  - `app/components/bmad/ElicitationPanel.tsx`: Phase elicitation UI
+  - `app/components/bmad/SessionManager.tsx`: Session state management
+  - `app/components/bmad/useBmadSession.ts`: Session hook
 
-**`apps/web/lib/canvas/`** - Visual Workspace
-- Purpose: tldraw integration + Mermaid diagram rendering
-- Contains:
-  - `canvas-manager.ts`: tldraw instance pooling
-  - `visual-suggestion-parser.ts`: Parse AI suggestions into Mermaid
-  - `canvas-export.ts`: Export to PNG/SVG
-  - `useCanvasSync.ts`: Bidirectional AI↔Canvas sync
+**lib/ (Domain Services):**
+- Purpose: Business logic decoupled from UI
+- Contains: Service modules organized by domain
+- Key files:
+  - `lib/ai/claude-client.ts`: Anthropic API wrapper
+  - `lib/ai/streaming.ts`: SSE encoding utilities
+  - `lib/bmad/session-orchestrator.ts`: Session lifecycle manager
+  - `lib/bmad/pathway-router.ts`: Pathway routing logic
+  - `lib/bmad/template-engine.ts`: Template loading and execution
+  - `lib/bmad/database.ts`: BMad-specific database operations
+  - `lib/bmad/types.ts`: Core type definitions
+  - `lib/auth/AuthContext.tsx`: Authentication React Context
+  - `lib/supabase/client.ts`: Browser Supabase client factory
+  - `lib/supabase/server.ts`: Server Supabase client factory
 
-**`apps/web/lib/export/`** - Document Export
-- Purpose: Generate professional outputs (PDF, Markdown, JSON)
-- Contains:
-  - `pdf-generator.ts`: @react-pdf/renderer integration
-  - `pdf-templates/`: PDF layout components
-  - `chat-export.ts`: Chat conversation export
+**supabase/ (Database):**
+- Purpose: Database schema versioning and migrations
+- Contains: SQL files numbered sequentially
+- Key files:
+  - `supabase/schema.sql`: Full schema (users, workspaces, chat tables)
+  - `supabase/migrations/000_enable_extensions.sql`: UUID extension
+  - `supabase/migrations/001_bmad_method_schema.sql`: BMad tables
+  - `supabase/migrations/002_new_idea_pathway_schema.sql`: Pathway-specific tables
 
-**`apps/web/lib/monetization/`** - Credit System & Payments
-- Purpose: Session access control via credits
-- Contains:
-  - `credit-manager.ts`: Balance checks, atomic deduction
-  - `stripe-service.ts`: Stripe webhook + checkout
-  - Database: `user_credits`, `credit_transactions`, `credit_packages`, `payment_history`
+**packages/ (Monorepo Workspaces):**
+- Purpose: Shared code for future multi-app architecture
+- Contains: Package.json files with minimal exports
+- Key files:
+  - `packages/ui/index.ts`: UI component exports (empty)
+  - `packages/shared/index.ts`: Shared types (empty)
+  - `packages/canvas-engine/index.ts`: Canvas logic (empty)
+  - `packages/bmad-engine/index.ts`: BMad engine (empty)
+- **Note:** Packages defined but not populated (future refactor target)
 
-**`apps/web/lib/auth/`** - Authentication
-- Purpose: User auth + session management
-- Contains:
-  - `AuthContext.tsx`: React context for auth state (32% code reduction)
-  - `supabase/server.ts`: Server-side Supabase client
-  - `supabase/client.ts`: Browser Supabase client
+**docs/ (Documentation):**
+- Purpose: Product requirements and technical documentation
+- Contains: Markdown files organized by topic
+- Key files:
+  - `docs/prd/`: 13 PRD shards (positioning, features, roadmap)
+  - `docs/architecture/`: Architecture decision records
+  - `docs/testing/`: Test plans and reports
+  - `docs/guides/`: Setup and usage guides
 
-**`apps/web/lib/supabase/`** - Database Client & Queries
-- Purpose: Supabase (Postgres) integration
-- Contains:
-  - `server.ts`: Server-side client with service role key
-  - `client.ts`: Browser client with anon key
-  - `conversation-queries.ts`: Chat history queries
-  - `conversation-schema.ts`: Message/conversation types
-  - `middleware*.ts`: Auth middleware (mostly disabled)
+**.bmad-* (Expansion Packs):**
+- Purpose: BMAD Method framework content (templates, agents, workflows)
+- Contains: YAML files synced from external repos
+- Generated: Yes (via `npx bmad-method install`)
+- Committed: Yes (for version tracking)
+- **DO NOT EDIT:** Source of truth is external BMAD-METHOD repo
 
-**`apps/web/lib/monitoring/`** - Logging & Observability
-- Purpose: Error tracking, auth metrics, service health
-- Contains:
-  - `error-monitor.ts`: Centralized error tracking
-  - `auth-logger.ts`: Auth event logging (success, provider, timestamp)
-  - `service-status.ts`: Health checks for Anthropic, Supabase
+**.planning/ (GSD Artifacts):**
+- Purpose: Planning documents created by GSD commands
+- Contains: Codebase maps, phase plans, research notes
+- Key files:
+  - `.planning/codebase/ARCHITECTURE.md`: This document
+  - `.planning/codebase/STRUCTURE.md`: Directory structure
+  - `.planning/phases/`: Phase implementation plans
 
-**`apps/web/lib/workspace/`** - Session Context
-- Purpose: Workspace state management
-- Contains:
-  - `WorkspaceContext.tsx`: React context for session/workspace state
-  - `WorkspaceContextBuilder`: Builds rich context for AI
+**scripts/ (Utilities):**
+- Purpose: Setup and maintenance scripts
+- Contains: Shell scripts and docs
+- Key files:
+  - `scripts/setup-mcp.sh`: MCP server configuration
+  - `scripts/setup-supabase.md`: Database setup instructions
 
-**`apps/web/app/components/`** - React Components
-- Purpose: UI components organized by domain
-- Structure:
-  - `ui/`: Shadcn/ui components (Button, Card, Input, etc.)
-  - `bmad/`: BMad Method UI (PathwaySelector, OutputTypeSelector)
-  - `chat/`: Chat interface components (MessageList, InputBox)
-  - `canvas/`: Canvas workspace (DualPaneLayout, TldrawCanvas)
-  - `guest/`: Guest chat UI (GuestChatInterface, SignupPromptModal)
-  - `artifact/`: Output artifact components
-  - `assessment/`: Quiz components
-  - `monetization/`: Credit guard, feedback forms
-  - `workspace/`: Session controls, export panels
-  - `monitoring/`: Status indicators
-
-**`apps/web/supabase/migrations/`** - Database Schema
-- Purpose: Sequential Postgres migrations
-- Files: `001_*.sql` through `011_*.sql`
-- Pattern: Sequential execution (never skip), cumulative state
-- Latest: `011_add_sub_persona_state.sql`
-- Key tables: `bmad_sessions`, `conversations`, `messages`, `user_credits`, `credit_transactions`
-
-**`apps/web/public/`** - Static Assets
-- Contains: Icons (SVG), fonts, images, logos
-- Example: `apple-icon.svg`, `icon.svg`, favicon
-
-**`apps/web/types/`** - Global Type Definitions
-- Purpose: Shared TypeScript types used across the app
-- Examples: Route types, API response types
-
-**`tests/`** - Test Files
-- Structure:
-  - `e2e/`: Playwright end-to-end tests (smoke tests only)
-  - `lib/`: Unit tests for lib modules (Vitest)
-  - `setup.ts`: Test environment configuration
-
-**`docs/`** - Project Documentation (Not source code)
-- Structure:
-  - `prd/`: Product requirements
-  - `design/`: Design system, wireframes
-  - `stories/`: Feature stories
-  - `qa/`: QA checklists
-  - `troubleshooting/`: Debugging guides
+**public/ (Static Assets):**
+- Purpose: Images, fonts, and other static files served directly
+- Contains: Files accessible at `/filename` in browser
+- Committed: Yes
 
 ## Key File Locations
 
 **Entry Points:**
-- `apps/web/app/layout.tsx`: Root layout with AuthProvider, WorkspaceProvider, fonts
-- `apps/web/app/page.tsx`: Landing page (/)
-- `apps/web/app/app/page.tsx`: Dashboard redirect
-- `apps/web/app/app/session/[id]/page.tsx`: Session workspace
+- `app/layout.tsx`: Root layout, AuthProvider initialization
+- `app/page.tsx`: Landing page with auth redirect
+- `app/dashboard/page.tsx`: Main app entry after login
+- `app/workspace/[id]/page.tsx`: Workspace detail page
 
 **Configuration:**
-- `apps/web/next.config.ts`: Next.js config
-- `apps/web/tailwind.config.cjs`: Tailwind CSS (CommonJS format)
-- `apps/web/tsconfig.json`: TypeScript config
-- `apps/web/package.json`: Dependencies + scripts
-- `.env.example`: Environment variable template
+- `package.json`: Monorepo scripts and dependencies
+- `next.config.ts`: Next.js configuration (headers, security)
+- `tsconfig.json`: TypeScript compiler options
+- `.env.local`: Environment variables (Supabase URL, API keys) - NOT COMMITTED
+- `.env.example`: Example environment template
 
 **Core Logic:**
-- `apps/web/lib/bmad/session-orchestrator.ts`: Session management
-- `apps/web/lib/bmad/session-primitives.ts`: Atomic operations
-- `apps/web/lib/ai/claude-client.ts`: Claude API integration
-- `apps/web/lib/ai/mary-persona.ts`: Coaching persona (4 sub-modes)
-- `apps/web/lib/ai/tool-executor.ts`: Tool execution engine
-- `apps/web/lib/ai/tools/`: Tool implementations (9 tools)
-- `apps/web/lib/monetization/credit-manager.ts`: Credit operations
+- `lib/bmad/session-orchestrator.ts`: BMad session state machine
+- `lib/ai/claude-client.ts`: AI API integration
+- `lib/supabase/server.ts`: Server-side database client
+- `lib/auth/AuthContext.tsx`: Authentication state
 
 **Testing:**
-- `apps/web/vitest.config.ts`: Unit test config
-- `apps/web/playwright.config.ts`: E2E test config
-- `apps/web/tests/e2e/smoke/health.spec.ts`: Smoke tests (7 route tests)
+- `apps/web/tests/integration/`: Integration tests (Playwright)
+- `apps/web/tests/bmad/`: BMad-specific tests (Vitest)
+- `apps/web/tests/components/`: Component tests
+- `apps/web/tests/canvas/`: Canvas tests
 
 ## Naming Conventions
 
 **Files:**
-- PascalCase for React components: `SessionManager.tsx`, `BmadInterface.tsx`
-- camelCase for utilities: `session-orchestrator.ts`, `credit-manager.ts`
-- UPPERCASE for constants: `PHASE_ORDER`, `MARY_TOOLS`
-- Lowercase for directories: `lib/`, `app/`, `components/`
+- Pages: `page.tsx` (Next.js convention)
+- Layouts: `layout.tsx` (Next.js convention)
+- API routes: `route.ts` (Next.js convention)
+- Components: `ComponentName.tsx` (PascalCase)
+- Hooks: `useHookName.ts` (camelCase with "use" prefix)
+- Services: `service-name.ts` (kebab-case)
+- Types: `types.ts` (often co-located with service)
 
 **Directories:**
-- kebab-case for multi-word dirs: `lib/user-workspace/`, `components/dual-pane/`
-- Feature-scoped subdirs: `lib/bmad/generators/`, `lib/ai/tools/`
-- Route pattern: `app/api/chat/stream/` for `/api/chat/stream` endpoint
+- App routes: `kebab-case` (e.g., `workspace/[id]/`)
+- Dynamic routes: `[param]` (Next.js convention)
+- Domain modules: `kebab-case` (e.g., `lib/bmad/`)
+- Components: `camelCase` or component name (e.g., `app/components/bmad/`)
 
-**Functions:**
-- camelCase: `createSessionRecord()`, `deductCredit()`, `hasCredits()`
-- Async functions return Promises: `async function executeAgenticLoop()...`
-- Handler suffixes: `route.ts` for API handlers, `page.tsx` for pages
-- Hook prefix: `useAuth()`, `useCanvasSync()`
+**Variables/Functions:**
+- React components: `PascalCase`
+- Functions: `camelCase`
+- Constants: `SCREAMING_SNAKE_CASE` (not consistently applied)
+- Types/Interfaces: `PascalCase`
 
-**TypeScript Types:**
-- PascalCase for interfaces: `SessionRecord`, `CoachingContext`, `BmadSession`
-- UPPERCASE for enums: `PathwayType`, `BmadPhase`
-- Type unions: `'active' | 'paused' | 'completed'` for status values
-
-**Database:**
-- snake_case for tables: `bmad_sessions`, `user_credits`, `credit_transactions`
-- snake_case for columns: `user_id`, `workspace_id`, `created_at`
-- Foreign keys: `{table}_id` pattern
+**Imports:**
+- Absolute imports use `@/` alias (mapped to project root via `tsconfig.json`)
+- Relative imports for co-located files
+- Example: `import { createClient } from '@/lib/supabase/server'`
 
 ## Where to Add New Code
 
-**New Feature in Existing Pathway:**
-- Pathway logic: `apps/web/lib/bmad/pathways/[pathway-name].ts`
-- Types: Add to `apps/web/lib/bmad/types.ts`
-- Tests: `apps/web/tests/lib/bmad/pathways/[pathway-name].test.ts`
-- Example: Adding validation step to New Idea pathway
+**New Page:**
+- Primary code: `app/your-page/page.tsx`
+- Layout (if custom): `app/your-page/layout.tsx`
+- Tests: `apps/web/tests/components/your-page.test.tsx`
 
-**New AI Tool (Agent-Native):**
-- Tool definition: Add to `apps/web/lib/ai/tools/index.ts` (MARY_TOOLS array)
-- Implementation: Create file in `apps/web/lib/ai/tools/` (e.g., `custom-tools.ts`)
-- Executor: Register in `apps/web/lib/ai/tool-executor.ts` switch statement
-- Tests: `apps/web/tests/lib/ai/tools/[tool-name].test.ts`
-- Example: New discovery tool for user preferences
-
-**New Document Generator:**
-- Generator class: `apps/web/lib/bmad/generators/[document]-generator.ts`
-- Export: Add to `apps/web/lib/bmad/generators/index.ts`
-- Type: Extend `GeneratedDocument` interface in `apps/web/lib/bmad/types.ts`
-- PDF template: `apps/web/lib/export/pdf-templates/[Document]PDF.tsx` (optional)
-- Example: Custom RFP generator
+**New API Endpoint:**
+- Implementation: `app/api/your-endpoint/route.ts`
+- Tests: `apps/web/tests/integration/your-endpoint.test.ts`
 
 **New Component:**
-- Feature components: `apps/web/app/components/[domain]/[ComponentName].tsx`
-- Shared UI: `apps/web/app/components/ui/[component].tsx` (shadcn pattern)
-- Hooks: `apps/web/lib/hooks/use[Feature].ts`
-- Example: New user profile editor
+- Shared component: `app/components/your-component/YourComponent.tsx`
+- Page-specific: `app/your-page/components/YourComponent.tsx`
+- Export: `app/components/your-component/index.ts` (optional barrel)
 
-**New API Route:**
-- Handler: `apps/web/app/api/[endpoint]/route.ts`
-- Pattern: Export `GET`, `POST`, `PUT`, `DELETE` functions
-- Auth: Call `createClient()` from `apps/web/lib/supabase/server.ts`
-- Example: New pricing tier checkout at `/api/checkout/pro-plan`
+**New Domain Service:**
+- Implementation: `lib/your-domain/service-name.ts`
+- Types: `lib/your-domain/types.ts` (if substantial)
+- Tests: `apps/web/tests/lib/your-domain/service-name.test.ts`
 
-**Database Migration:**
-- File: `apps/web/supabase/migrations/[next-number]_[description].sql`
-- Pattern: Sequential naming (012_*, 013_*, etc.)
-- Must be idempotent (handle if already applied)
-- Example: `012_add_feature_flags.sql`
+**New Database Table:**
+- Migration: `supabase/migrations/NNN_description.sql` (increment number)
+- Update: `supabase/schema.sql` (append new table definition)
+- Types: `lib/your-domain/types.ts` (TypeScript interfaces)
 
-**New Test:**
-- Unit test: `apps/web/tests/lib/[path]/[module].test.ts` (matches lib structure)
-- E2E test: `apps/web/tests/e2e/[feature]/[scenario].spec.ts`
-- Fixtures: `apps/web/tests/fixtures/[type]/[name].ts`
-- Example: Test new persona mode logic
+**New BMad Feature:**
+- Template: `.bmad-core/templates/your-template.yaml` (edit in source repo)
+- Generator: `lib/bmad/generators/your-generator.ts`
+- Pathway config: Update `lib/bmad/pathway-router.ts` pathway definitions
+- Tests: `apps/web/tests/bmad/your-feature.test.tsx`
 
-**New Environment Variable:**
-- Add to `apps/web/.env.example` with description
-- Load in relevant file (e.g., `claude-client.ts` for `ANTHROPIC_API_KEY`)
-- Document in CLAUDE.md (project instructions)
-- Never commit actual values to `.env.local`
+**Utilities:**
+- Shared helpers: `lib/utils/` (create if needed)
+- BMad-specific: `lib/bmad/utils/` (if domain-specific)
 
 ## Special Directories
 
-**`.next/`:**
+**.next/:**
 - Purpose: Next.js build output
-- Generated: Yes (created by `npm run build`)
+- Generated: Yes (on `npm run build` or `npm run dev`)
 - Committed: No (.gitignore)
 
-**`node_modules/`:**
-- Purpose: NPM dependencies
-- Generated: Yes (created by `npm install`)
-- Committed: No (.gitignore)
-- Lock file: `package-lock.json` (committed)
-
-**`playwright-report/`:**
-- Purpose: E2E test results and screenshots
-- Generated: Yes (created by Playwright runner)
-- Committed: No (.gitignore)
-- View: Open `index.html` in browser after test run
-
-**`logs/`:**
-- Purpose: Application logs (development)
-- Generated: Yes (created at runtime)
+**node_modules/:**
+- Purpose: npm package installations
+- Generated: Yes (on `npm install`)
 - Committed: No (.gitignore)
 
-**`supabase/migrations/`:**
-- Purpose: Database schema migrations
-- Generated: No (manually written)
+**.vercel/:**
+- Purpose: Vercel deployment configuration
+- Generated: Yes (on deployment)
+- Committed: No (.gitignore)
+
+**.git/:**
+- Purpose: Git version control
+- Generated: Yes (on `git init`)
+- Committed: No (internal Git data)
+
+**thinkhaven-artifacts/:**
+- Purpose: Unknown (appears to be a nested git repo)
+- Generated: Unknown
+- Committed: Yes (has own .git directory)
+- **Note:** May be legacy or accidental inclusion
+
+**archived/:**
+- Purpose: Old migrations and releases
+- Contains: `legacy-migrations/`, `releases/`
 - Committed: Yes
-- Important: Must be applied sequentially, never skip
+- **Note:** Historical data, not actively used
 
-**`types/`:**
-- Purpose: Global TypeScript definitions
-- Generated: No
-- Committed: Yes
-- Use for: Types shared across multiple features
+**naming-project/:**
+- Purpose: Unknown (empty or minimal content)
+- Committed: Likely (in directory listing)
+- **Note:** May be legacy or temporary
 
-## Monorepo Structure
+## Import Path Aliases
 
-**Location:** `apps/web/` contains the entire web application
-- Root: `/Users/kthkellogg/Documents/GitHub/thinkhaven/`
-- App: `/Users/kthkellogg/Documents/GitHub/thinkhaven/apps/web/`
-- No other apps in monorepo (all code is in `apps/web/`)
+**Configured in tsconfig.json:**
+- `@/*`: Maps to project root
+- Example: `import { createClient } from '@/lib/supabase/server'`
 
-**Imports:** Use path aliases defined in `tsconfig.json`:
-- `@/` → `apps/web/` (root of Next.js app)
-- `@/lib/` → `apps/web/lib/`
-- `@/components/` → `apps/web/app/components/`
+**Common patterns:**
+- `@/lib/`: Domain services
+- `@/app/`: App router files (rarely imported, mostly for API routes)
+- `@/public/`: Static assets (use `/filename` in browser, not imports)
 
-Example import:
-```typescript
-import { createClient } from '@/lib/supabase/server'
-import { AuthProvider } from '@/lib/auth/AuthContext'
+## Monorepo Workspaces
+
+**Defined in root package.json:**
+```json
+"workspaces": [
+  "apps/*",
+  "packages/*"
+]
 ```
 
-## Build Output
+**Active workspace:**
+- `apps/web/`: Main Next.js application (only populated workspace)
 
-**Development:** `npm run dev`
-- Starts Turbopack dev server on localhost:3000
-- Hot module reloading enabled
-- Uses `.env.local` for secrets
+**Dormant workspaces:**
+- `packages/ui/`, `packages/canvas-engine/`, `packages/shared/`, `packages/bmad-engine/`
+- Defined in package.json but not implemented
+- Future refactor target for shared code extraction
 
-**Production:** `npm run build && npm start`
-- Runs TypeScript compilation
-- Generates `.next/` optimized bundle
-- Requires `NODE_ENV=production`
-- Deployed via Vercel (auto-deploy on push to main)
+**Workspace commands:**
+```bash
+npm run dev --workspace=apps/web       # Run dev server
+npm run build --workspace=apps/web     # Build app
+```
 
 ---
 
-*Structure analysis: 2026-01-29*
+*Structure analysis: 2026-02-14*
