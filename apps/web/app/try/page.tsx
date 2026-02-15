@@ -5,6 +5,7 @@ import GuestChatInterface from '../components/guest/GuestChatInterface'
 import { SessionMigration } from '@/lib/guest/session-migration'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { useRouter } from 'next/navigation'
+import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 
 export default function TryPage() {
   const router = useRouter()
@@ -69,13 +70,7 @@ export default function TryPage() {
           ThinkHaven
         </a>
         <nav className="flex items-center gap-4">
-          <a
-            href="mailto:kevin@kevintholland.com?subject=ThinkHaven%20Beta%20Feedback"
-            className="text-sm font-medium"
-            style={{ color: 'var(--slate-blue)' }}
-          >
-            Send Feedback
-          </a>
+          <FeedbackButton variant="nav" />
           <a href="/demo" className="text-sm font-medium" style={{ color: 'var(--slate-blue)' }}>
             Learn more
           </a>
