@@ -180,7 +180,7 @@ The current system can't express this because modes have no identity, no persist
 
 **Tasks:**
 
-- [ ] Modify message rendering in `apps/web/app/app/session/[id]/page.tsx`
+- [x] Modify message rendering in `apps/web/app/app/session/[id]/page.tsx`
   - Read `metadata.speaker` from each `ChatMessage`
   - Apply per-speaker visual treatment:
     - Colored left border (3px, board member's color)
@@ -188,18 +188,18 @@ The current system can't express this because modes have no identity, no persist
     - Name + role subtitle below avatar: "Victoria (Investor Lens)"
   - If no `metadata.speaker`, render as current Mary style (backward compat)
 
-- [ ] Create `apps/web/app/components/board/SpeakerMessage.tsx`
+- [x] Create `apps/web/app/components/board/SpeakerMessage.tsx`
   - Props: `{ message: ChatMessage, boardMember: BoardMember }`
   - Renders: avatar, name label, colored border, markdown content
   - Uses existing ReactMarkdown pipeline for content
 
-- [ ] Create `apps/web/app/components/board/HandoffAnnotation.tsx`
+- [x] Create `apps/web/app/components/board/HandoffAnnotation.tsx`
   - Props: `{ fromSpeaker: string, toSpeaker: string, reason: string }`
   - Renders: subtle divider line with italic facilitator text
   - Example: *"Mary brought in Victoria — your market sizing needs scrutiny"*
   - Style: muted text, thin horizontal rule, board member color accent
 
-- [ ] Add board member color tokens to `apps/web/app/globals.css`
+- [x] Add board member color tokens to `apps/web/app/globals.css`
   - `--board-victoria: #D4A84B;` (mustard)
   - `--board-casey: #4A6741;` (forest)
   - `--board-elaine: #6B7B8C;` (slate blue)
@@ -207,19 +207,14 @@ The current system can't express this because modes have no identity, no persist
   - `--board-taylor: #C9A9A6;` (dusty rose)
   - `--board-mary: #C4785C;` (terracotta — already exists as primary accent)
 
-- [ ] Create `apps/web/app/components/board/BoardAssemblyWelcome.tsx`
-  - Wes Anderson title card sequence at session start
-  - Shows each board member briefly: name, role, one-liner
-  - Auto-dismisses after 3 seconds or on user click/type
-  - Only renders for `sessionVersion: 2` sessions
-  - Renders as inline message block (not modal), above chat input
+- [ ] ~~Create `apps/web/app/components/board/BoardAssemblyWelcome.tsx`~~ (DEFERRED per review — Wes Anderson title card)
 
 **Acceptance Criteria:**
-- [ ] Each board member's messages have distinct visual treatment matching the color palette
-- [ ] Handoff annotations appear between speaker changes
-- [ ] Welcome sequence renders at session start and dismisses cleanly
-- [ ] Messages without speaker metadata render normally (backward compat)
-- [ ] Visuals work at both desktop (60% pane width) and narrow widths
+- [x] Each board member's messages have distinct visual treatment matching the color palette
+- [x] Handoff annotations appear between speaker changes
+- [ ] ~~Welcome sequence renders at session start and dismisses cleanly~~ (DEFERRED)
+- [x] Messages without speaker metadata render normally (backward compat)
+- [ ] Visuals work at both desktop (60% pane width) and narrow widths (needs runtime verification)
 
 #### Phase 4: Board Overview Sidebar (Frontend)
 
@@ -227,34 +222,35 @@ The current system can't express this because modes have no identity, no persist
 
 **Tasks:**
 
-- [ ] Create `apps/web/app/components/board/BoardOverview.tsx`
-  - Lists all board members with: avatar, name, role, current stance (text), disposition indicator
-  - Disposition indicators: supportive (green dot), cautious (yellow), opposed (red), neutral (gray)
+- [x] Create `apps/web/app/components/board/BoardOverview.tsx`
+  - Lists all board members with: avatar, name, role
+  - ~~Disposition indicators~~ (CUT per review)
   - Taylor row shows "[Opt-in]" badge when dormant, full status when active
   - Empty state: "Board members will share their perspectives as the conversation develops"
   - Read-only in v1 (no click interactions)
 
-- [ ] Modify dual-pane layout in session page
-  - When `sessionVersion: 2`: right pane renders `BoardOverview` instead of `EnhancedCanvasWorkspace`
-  - When `sessionVersion: 1`: right pane renders canvas (existing behavior)
-  - Feature flag: `NEXT_PUBLIC_ENABLE_BOARD_OVERVIEW` (defaults to true for new sessions)
+- [x] Modify dual-pane layout in session page
+  - When `boardState` present: right pane renders `BoardOverview` instead of `EnhancedCanvasWorkspace`
+  - When no `boardState`: right pane renders canvas (existing behavior)
+  - ~~Feature flag~~ (CUT per review — boardState presence is the switch)
 
-- [ ] Wire sidebar updates to streaming metadata
-  - On `assess_board_sentiment` tool result, update `BoardOverview` state
-  - Parse sentiment from `boardState` in stream metadata
-  - Use Zustand store or local state for real-time updates during streaming
+- [x] Wire sidebar updates to streaming metadata
+  - ~~On `assess_board_sentiment` tool result~~ (CUT per review — tool removed)
+  - Parse boardState from stream metadata
+  - Local state for real-time updates during streaming (no Zustand needed)
 
-- [ ] Create `apps/web/app/components/board/BoardMemberCard.tsx`
+- [x] Create `apps/web/app/components/board/BoardMemberCard.tsx`
   - Compact card component for each board member in the sidebar
-  - Shows: color-coded avatar, name, role subtitle, stance text, disposition dot
-  - Stance text truncated with tooltip for full text
+  - Shows: color-coded avatar, name, role subtitle
+  - Active speaker dot indicator
+  - ~~Stance text, disposition dot~~ (CUT per review)
 
 **Acceptance Criteria:**
-- [ ] Board Overview renders in right pane for new sessions
-- [ ] Each member shows stance and disposition that updates after they speak
-- [ ] Taylor shows opt-in state correctly
-- [ ] Canvas pane still works for legacy sessions
-- [ ] Empty state renders cleanly before any board member has spoken
+- [x] Board Overview renders in right pane when boardState active
+- [ ] ~~Each member shows stance and disposition~~ (CUT — shows active speaker only)
+- [x] Taylor shows opt-in state correctly
+- [x] Canvas pane still works for legacy sessions (no boardState)
+- [x] Empty state renders cleanly before any board member has spoken
 
 #### Phase 5: Taylor Opt-In + User Invocation (Interactive Features)
 
