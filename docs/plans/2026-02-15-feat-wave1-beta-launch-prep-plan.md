@@ -13,10 +13,10 @@ Ship the minimum prep needed to send ThinkHaven to 3-5 trusted knowledge workers
 
 - [x] In-app feedback button accessible during normal session use
 - [x] Feedback button visible on dashboard sidebar AND session workspace header
-- [ ] Invite message drafted and approved
+- [x] Invite message drafted and approved
 - [x] LAUNCH_MODE verified active in Vercel production
 - [ ] Self-test checklist completed on production with fresh account
-- [ ] Testers recommended to sign up directly (not guest mode)
+- [x] Testers recommended to sign up directly (not guest mode)
 
 ## Phase A: Add Feedback Button (Code Change)
 
