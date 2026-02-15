@@ -87,6 +87,19 @@ export interface SwitchModeInput {
   reason: string;
 }
 
+export interface SwitchSpeakerInput {
+  speaker_key: string;
+  handoff_reason: string;
+}
+
+export interface SwitchSpeakerResult extends ToolResult {
+  data?: {
+    previousSpeaker: string;
+    newSpeaker: string;
+    handoffReason: string;
+  };
+}
+
 export interface RecommendActionInput {
   concerns: string[];
   strengths: string[];
@@ -263,6 +276,25 @@ export const MARY_TOOLS: Tool[] = [
     },
   },
   {
+    name: 'switch_speaker',
+    description: 'Switch the active speaker to a different board member. Use this when you want a board member to weigh in on the conversation. Provide a handoff reason explaining why this perspective is relevant. The speaker_key must be one of: victoria, casey, elaine, omar, taylor, mary.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        speaker_key: {
+          type: 'string',
+          enum: ['mary', 'victoria', 'casey', 'elaine', 'omar', 'taylor'],
+          description: 'The board member to switch to',
+        },
+        handoff_reason: {
+          type: 'string',
+          description: 'Why this board member should speak now (shown to the user as a handoff annotation)',
+        },
+      },
+      required: ['speaker_key', 'handoff_reason'],
+    },
+  },
+  {
     name: 'recommend_action',
     description: 'Provide a strategic recommendation about whether to proceed, pivot, validate further, or kill the idea. Only use after thorough exploration (at least 5 exchanges and genuine probing). This is a key differentiator - earn the right to recommend by doing the work first.',
     input_schema: {
@@ -344,6 +376,7 @@ export const TOOL_NAMES = {
   READ_SESSION_STATE: 'read_session_state',
   COMPLETE_PHASE: 'complete_phase',
   SWITCH_PERSONA_MODE: 'switch_persona_mode',
+  SWITCH_SPEAKER: 'switch_speaker',
   RECOMMEND_ACTION: 'recommend_action',
   GENERATE_DOCUMENT: 'generate_document',
   UPDATE_SESSION_CONTEXT: 'update_session_context',

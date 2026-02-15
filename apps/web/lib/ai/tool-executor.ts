@@ -10,6 +10,7 @@ import {
   type ToolResult,
   type CompletePhaseInput,
   type SwitchModeInput,
+  type SwitchSpeakerInput,
   type RecommendActionInput,
   type GenerateDocumentInput,
   type UpdateContextInput,
@@ -21,6 +22,7 @@ import {
   readSessionState,
   completePhase,
   switchPersonaMode,
+  switchSpeaker,
   recommendAction,
   updateSessionContext,
 } from './tools/session-tools';
@@ -115,6 +117,13 @@ export class ToolExecutor {
           result = await switchPersonaMode(
             this.context.sessionId,
             toolCall.input as SwitchModeInput
+          );
+          break;
+
+        case TOOL_NAMES.SWITCH_SPEAKER:
+          result = await switchSpeaker(
+            this.context.sessionId,
+            toolCall.input as SwitchSpeakerInput
           );
           break;
 
