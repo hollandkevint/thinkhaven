@@ -17,11 +17,14 @@ import {
   getSessionInsights,
   PHASE_ORDER,
 } from '@/lib/bmad/session-primitives';
+import { resolveSpeakerKey } from '../board-members';
 import type {
   CompletePhaseInput,
   CompletePhaseResult,
   SwitchModeInput,
   SwitchModeResult,
+  SwitchSpeakerInput,
+  SwitchSpeakerResult,
   RecommendActionInput,
   RecommendActionResult,
   ReadSessionStateResult,
@@ -189,6 +192,73 @@ export async function switchPersonaMode(
     return {
       success: false,
       error: `Error switching mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    };
+  }
+}
+
+/**
+ * Switch the active board member speaker.
+ * Resolves the speaker key against the registry (falls back to Mary).
+ * Updates board_state in the session record.
+ */
+export async function switchSpeaker(
+  sessionId: string,
+  input: SwitchSpeakerInput
+): Promise<SwitchSpeakerResult> {
+  try {
+    const supabase = await createClient();
+
+    // Resolve and validate the speaker key
+    const newMember = resolveSpeakerKey(input.speaker_key);
+
+    // Get current board state
+    const { data: session, error: fetchError } = await supabase
+      .from('bmad_sessions')
+      .select('board_state')
+      .eq('id', sessionId)
+      .single();
+
+    if (fetchError || !session) {
+      return {
+        success: false,
+        error: `Failed to fetch session: ${fetchError?.message || 'Session not found'}`,
+      };
+    }
+
+    const currentBoardState = (session.board_state as { activeSpeaker?: string }) || {};
+    const previousSpeaker = currentBoardState.activeSpeaker || 'mary';
+
+    // Update board state
+    const { error: updateError } = await supabase
+      .from('bmad_sessions')
+      .update({
+        board_state: {
+          ...currentBoardState,
+          activeSpeaker: newMember.id,
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', sessionId);
+
+    if (updateError) {
+      return {
+        success: false,
+        error: `Failed to switch speaker: ${updateError.message}`,
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        previousSpeaker,
+        newSpeaker: newMember.id,
+        handoffReason: input.handoff_reason,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: `Error switching speaker: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }

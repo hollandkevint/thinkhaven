@@ -154,6 +154,14 @@
   --canvas-grid: rgba(44, 36, 22, 0.06);
   --canvas-selection: #C4785C;
 
+  /* Board of Directors - Per-member accent colors */
+  --board-mary: #C4785C;
+  --board-victoria: #D4A84B;
+  --board-casey: #4A6741;
+  --board-elaine: #6B7B8C;
+  --board-omar: #4A3D2E;
+  --board-taylor: #C9A9A6;
+
   /* Charts - Wes Anderson palette */
   --chart-1: #C4785C;  /* terracotta */
   --chart-2: #4A6741;  /* forest */
@@ -447,6 +455,56 @@
 
   .input::placeholder {
     color: var(--slate-blue);
+  }
+
+  /* Board of Directors - Speaker Messages */
+  .board-speaker-message {
+    @apply flex items-start gap-3 max-w-[70%];
+    border-left: 3px solid var(--board-mary);
+    padding-left: var(--space-4);
+  }
+
+  .board-speaker-avatar {
+    @apply w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0;
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    color: var(--cream);
+  }
+
+  .board-handoff {
+    @apply flex items-center gap-3 my-4 px-4;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--slate-blue);
+  }
+
+  .board-handoff::before,
+  .board-handoff::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(44, 36, 22, 0.1);
+  }
+
+  .board-member-card {
+    @apply flex items-center gap-3 p-3 rounded-lg;
+    transition: background var(--transition-fast);
+  }
+
+  .board-member-card:hover {
+    background: rgba(44, 36, 22, 0.04);
+  }
+
+  .board-member-card.active {
+    background: rgba(44, 36, 22, 0.06);
+  }
+
+  .board-overview {
+    @apply flex flex-col h-full;
+    background: var(--canvas-pane);
+    padding: var(--space-6);
   }
 
   /* Error Boundary */

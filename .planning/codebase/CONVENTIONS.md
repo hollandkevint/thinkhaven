@@ -1,262 +1,318 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-01-29
+**Analysis Date:** 2026-02-14
 
 ## Naming Patterns
 
 **Files:**
-- Components: `PascalCase.tsx` (e.g., `BmadInterface.tsx`, `StreamingMessage.tsx`)
-- Utilities/Services: `camelCase.ts` (e.g., `session-orchestrator.ts`, `claude-client.ts`)
-- Tests: `filename.test.ts` or `filename.spec.ts` (e.g., `mary-persona.test.ts`, `health.spec.ts`)
-- Directories: `kebab-case` (e.g., `lib/ai/`, `app/components/chat/`)
+- Components: PascalCase (`BmadInterface.tsx`, `PathwaySelector.tsx`)
+- Libraries/utilities: kebab-case (`claude-client.ts`, `workspace-context.ts`)
+- Tests: Match source file name + `.test.ts` or `.test.tsx`
+- Types: kebab-case for files (`types.ts`), PascalCase for interfaces/types
 
 **Functions:**
-- `camelCase` for function names
-- Async functions return descriptive names: `async function executeAgenticLoop()`, `async function generateFeatureBriefPDF()`
-- Handler functions prefixed with verb: `handleSubmit`, `handleClick`, `checkMessageLimit`
-- Factory functions prefixed with `create`: `createAnthropicClient()`, `createSessionRecord()`, `createSubPersonaState()`
-- Getter/query functions: `hasCredits()`, `getSession()`, `getLimitReachedMessage()`
+- camelCase for all functions (`handlePathwaySelected`, `createSession`, `analyzeRevenueOptimization`)
+- React components: PascalCase (`BmadInterface`, `ErrorBoundary`)
+- Factory functions: `create` prefix (`createNewIdeaPathway`, `createServerClient`)
 
 **Variables:**
-- `camelCase` throughout
-- Boolean flags prefixed with `is`, `has`, `can`: `isLoading`, `hasCredits`, `canAdvancePhase`
-- Array/collection variables use plural: `toolsExecuted`, `messages`, `pathways`
-- Ref objects: `useRef<Type>()` with descriptive names: `intervalRef`, `indexRef`
+- camelCase for all variables (`currentSession`, `mockElicitationData`, `isLoading`)
+- SCREAMING_SNAKE_CASE for constants (`STRIPE_WEBHOOK_SECRET`, `NEW_IDEA_PHASES`)
 
 **Types:**
-- `PascalCase` for interfaces and types (e.g., `BmadSession`, `ConversationMessage`, `SubPersonaMode`)
-- Union types lowercase: `'inquisitive' | 'devil_advocate' | 'encouraging' | 'realistic'`
-- Enum values `UPPERCASE_SNAKE_CASE`: `ElicitationType.NUMBERED_OPTIONS`, `PathwayType.NEW_IDEA`
-- Callback/handler types: `OnXxx` (e.g., `onComplete`, `onBookmark`, `onCreateReference`)
+- PascalCase for interfaces and types (`BmadTemplate`, `PathwayType`, `ElicitationConfig`)
+- Enum values: SCREAMING_SNAKE_CASE (`PathwayType.NEW_IDEA`, `ElicitationType.NUMBERED_OPTIONS`)
 
 ## Code Style
 
 **Formatting:**
-- Tool: Not enforced at build time (ESLint only)
-- No Prettier config found — rely on editor defaults and manual consistency
-- 2-space indentation (standard for TypeScript/React projects)
-- Line length: No hard limit enforced, but aim for readability
+- Tool: Prettier (inferred from code style, no `.prettierrc` present)
+- Indent: 2 spaces
+- Quotes: Single quotes for strings, double quotes for JSX attributes
+- Semicolons: Present
+- Trailing commas: Yes
 
 **Linting:**
-- Tool: ESLint 9 with `eslint-config-next` + TypeScript support
-- Config: `apps/web/eslint.config.mjs` (Flat Config format)
-- Extends: `next/core-web-vitals` and `next/typescript`
-- Ignored paths: `node_modules`, `.next`, `out`, `build`
-- Enforcement: Manual via `npm run lint` (not enforced in CI)
+- Tool: ESLint
+- Config: `eslint.config.mjs`
+- Extends: `next/core-web-vitals`, `next/typescript`
+- Ignores: `node_modules`, `.next`, `out`, `build`, `next-env.d.ts`
 
 ## Import Organization
 
 **Order:**
-1. Third-party libraries (`react`, `next/`, `@anthropic-ai/sdk`, etc.)
-2. Relative absolute path imports (`@/lib/`, `@/app/`, `@/components/`)
-3. Type imports (`import type { }`)
-
-**Example (from `apps/web/app/api/chat/stream/route.ts`):**
-```typescript
-// External
-import { NextRequest } from 'next/server';
-
-// Absolute path imports
-import { claudeClient, type ConversationMessage } from '@/lib/ai/claude-client';
-import { StreamEncoder, createStreamHeaders } from '@/lib/ai/streaming';
-import { createClient } from '@/lib/supabase/server';
-import { CoachingContext, SubPersonaSessionState } from '@/lib/ai/mary-persona';
-
-// Type imports grouped with others
-import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
-```
+1. External libraries (`react`, `@anthropic-ai/sdk`, `@supabase/ssr`)
+2. Next.js specific (`next/navigation`, `next/headers`)
+3. Absolute imports via path aliases (`@/lib/bmad/types`, `@/app/components/bmad/BmadInterface`)
+4. Relative imports (`./PathwaySelector`, `../../lib/bmad/types`)
 
 **Path Aliases:**
-- `@/*` → `/` (project root, maps to `apps/web/`)
-- Monorepo imports use full paths: `@ideally/shared`, `@ideally/ui`, `@ideally/bmad-engine`
-- Always use `@/` for app code, never relative imports like `../../../`
+- `@/*` → Root of app (`apps/web`)
+- `~/*` → Root of app (test alias)
+- `@ideally/shared` → `packages/shared/index.ts`
+- `@ideally/ui` → `packages/ui/index.ts`
+- `@ideally/bmad-engine` → `packages/bmad-engine/index.ts`
+- `@ideally/canvas-engine` → `packages/canvas-engine/index.ts`
+
+## TypeScript Conventions
+
+**Type Definitions:**
+- Prefer interfaces for object shapes that may be extended
+- Use type aliases for unions, intersections, mapped types
+- Enum values use SCREAMING_SNAKE_CASE
+- Export types from centralized type files (`lib/bmad/types.ts`, `lib/bmad/types/index.ts`)
+
+**Type Safety:**
+- `strict: true` in tsconfig
+- No implicit any
+- Use explicit return types for public APIs
+- Type imports: `import type { CoachingContext } from '@/lib/ai/mary-persona'`
+
+**Patterns:**
+```typescript
+// Barrel exports with both class and instance
+export { PricingModelAnalyzer, pricingModelAnalyzer } from './pricing-model-analyzer';
+
+// Optional parameters with defaults
+export async function runGrowthStrategyPlanning(
+  businessData: any,
+  currentMetrics?: any,
+  timeframe: '1-year' | '2-year' | '3-year' | '5-year' = '1-year',
+  aggressiveness: 'conservative' | 'moderate' | 'aggressive' = 'moderate'
+)
+
+// Const enums for runtime values
+export enum PathwayType {
+  NEW_IDEA = 'new-idea',
+  BUSINESS_MODEL = 'business-model',
+}
+```
 
 ## Error Handling
 
 **Patterns:**
-- Custom error class for domain errors: `BmadMethodError`, `SessionStateError`
-- Try-catch wraps async operations with meaningful error logging
-- Example (`pdf-generator.ts`):
+- Try/catch blocks with `console.error()` for logging
+- Error boundaries wrap React components
+- Fallback UI for error states
+- Graceful degradation (return partial results on non-critical failures)
+
+**Example from `BmadInterface.tsx`:**
 ```typescript
 try {
-  const buffer = await renderToBuffer(doc);
-  return { success: true, buffer, fileName };
+  await createSession(workspaceId, pathway, userInput, recommendation)
+  setCurrentStep('session-active')
+  generateMockElicitationData()
+
+  if (onInputConsumed) {
+    onInputConsumed()
+  }
 } catch (error) {
-  console.error('PDF generation error:', error);
-  return {
-    success: false,
-    fileName: options.fileName || 'feature-brief.pdf',
-    error: error instanceof Error ? error.message : 'Unknown error',
-  };
+  console.error('Error creating session:', error)
+  // Error handling is done in the hook
 }
 ```
-- Result objects return `{ success: boolean, error?: string }` for graceful degradation
-- Validation errors in types: `ValidationRule[]` with `errorMessage` field
-- Route handlers return appropriate HTTP status codes and error shapes
+
+**Example from analysis engines:**
+```typescript
+if (!segment || !revenueStream) {
+  throw new Error('Business data must include at least one customer segment and revenue stream');
+}
+
+// Handle partial failures gracefully
+if (competitorData?.length > 0) {
+  competitive = await competitivePricingAnalyzer.analyzeCompetitivePricing({...});
+}
+```
+
+## React Patterns
+
+**Component Structure:**
+- Use `'use client'` directive for client components
+- Functional components with hooks
+- Props interfaces defined inline or imported
+- State management: Local `useState`, global Zustand stores
+
+**Hooks Usage:**
+- Custom hooks prefixed with `use` (`useBmadSession`, `useCanvasSync`)
+- `useCallback` for functions passed as props
+- `useEffect` for side effects and lifecycle
+
+**Component Patterns:**
+```typescript
+interface BmadInterfaceProps {
+  workspaceId: string
+  className?: string
+  preservedInput?: string
+  onInputConsumed?: () => void
+}
+
+export default function BmadInterface({
+  workspaceId,
+  className = '',
+  preservedInput,
+  onInputConsumed
+}: BmadInterfaceProps) {
+  // Component implementation
+}
+```
+
+## State Management
+
+**Local State:**
+- `useState` for component-specific state
+- `useRef` for mutable refs that don't trigger re-renders
+
+**Global State:**
+- Zustand stores (`dualPaneStore.ts`)
+- Custom selectors exported (`useChatMessages`, `useCanvasElements`)
+
+**Pattern:**
+```typescript
+export const useDualPaneStore = create<DualPaneState & DualPaneActions>((set, get) => ({
+  // State and actions
+}))
+
+// Selector hooks
+export const useChatMessages = () => useDualPaneStore(state => state.chat.messages)
+```
 
 ## Logging
 
-**Framework:** `console` (no logging library detected)
+**Framework:** console (built-in)
 
 **Patterns:**
-- Structured logging with context: `console.log('[Claude Client] DEBUG: Getting Anthropic client', { ... })`
-- Prefix logs with module name in brackets: `[Claude Client]`, `[Agentic Loop]`, `[Tool Executor]`
-- Debug logs for initialization and state changes
-- Error logs with `console.error()` for exceptions
-- Example from `claude-client.ts`:
-```typescript
-console.log('[Claude Client] DEBUG: Getting Anthropic client', {
-  hasRawKey: !!rawApiKey,
-  apiKeyLength: apiKey?.length || 0,
-  nodeEnv: process.env.NODE_ENV,
-  timestamp: new Date().toISOString()
-});
-
-console.error('[Claude Client] FATAL: ANTHROPIC_API_KEY environment variable is not set');
-```
+- `console.error()` for errors in catch blocks
+- `console.log()` for debugging (should be removed before commit)
+- No structured logging library detected
 
 ## Comments
 
 **When to Comment:**
-- Explain "why" not "what" — code should be self-documenting
-- Complex algorithms or non-obvious logic paths
-- Constraints or requirements from specifications (reference FR-AC6 style)
-- Edge cases and workarounds
-- Example from `mary-persona.ts`:
-```typescript
-/**
- * The four coaching modes that operate in every session
- * FR-AC6: System shall implement four coaching modes
- */
-export type SubPersonaMode = 'inquisitive' | 'devil_advocate' | 'encouraging' | 'realistic';
-```
+- File-level JSDoc for module purpose
+- Complex business logic requiring explanation
+- TODOs for incomplete features
 
 **JSDoc/TSDoc:**
-- Required for exported functions and types
-- Include parameter descriptions and return type
-- Add examples for complex functions
-- Format: Standard JSDoc with `/**` opening
+- Used for public APIs and exported functions
+- Inline comments for complex logic
+
+**Example:**
 ```typescript
 /**
- * Generate PDF buffer from Feature Brief
- * Server-side generation for API endpoints
+ * BMad Analysis Engines - Consolidated Exports
+ *
+ * This file provides a single entry point for all BMad analysis engines,
+ * making it easy to import and use the complete Monetization Strategy Engine suite.
+ *
+ * Usage:
+ *   import { pricingModelAnalyzer, revenueOptimizationEngine } from '@/lib/bmad/analysis';
  */
-export async function generateFeatureBriefPDF(
-  brief: FeatureBrief,
-  options: PDFGenerationOptions = {}
-): Promise<PDFGenerationResult>
 ```
 
 ## Function Design
 
 **Size:**
-- Keep functions < 50 lines where possible
-- Classes like `SessionOrchestrator` can be larger (100+ lines) if cohesive
-- Use helper functions to break down complex logic
+- Keep functions focused and single-purpose
+- Extract complex logic into helper functions
+- Large components use helper functions for rendering subsections
 
 **Parameters:**
-- Max 3-4 parameters; use object/interface for more
-- Example from `pdf-generator.ts`:
-```typescript
-export async function generateFeatureBriefPDF(
-  brief: FeatureBrief,
-  options: PDFGenerationOptions = {}
-): Promise<PDFGenerationResult>
-```
-- Destructure options interface rather than spreading parameters
+- Use objects for functions with >3 parameters
+- Optional parameters come last
+- Provide defaults where appropriate
 
 **Return Values:**
-- Use `Result<T, E>` pattern for operations that can fail
-- Return interfaces for complex objects: `PDFGenerationResult { success, buffer?, error? }`
-- Async functions always return `Promise<T>`
-- Use nullable returns sparingly; prefer empty collections or error objects
+- Explicit return types for exported functions
+- Use type inference for internal functions
+- Return early for error conditions
+
+**Example:**
+```typescript
+export async function runCompleteMonetizationAnalysis(
+  businessData: any,
+  competitorData?: any[],
+  historicalData?: any[],
+  clvData?: any,
+  cacData?: any
+) {
+  const segment = businessData.customerSegments?.[0];
+  const revenueStream = businessData.revenueStreams?.[0];
+
+  if (!segment || !revenueStream) {
+    throw new Error('Business data must include at least one customer segment and revenue stream');
+  }
+
+  // Implementation
+}
+```
 
 ## Module Design
 
 **Exports:**
-- Named exports for functions and types (not default)
-- Factory functions for creating instances: `createMarketPositioningAnalyzer()`
-- Singleton instances exported as named constants: `export const maryPersona = MaryPersona.getInstance()`
-- Example from `mary-persona.ts`:
+- Named exports preferred over default exports (except for Next.js page components)
+- Barrel exports in `index.ts` files
+- Export both class and singleton instance for analysis engines
+
+**Pattern:**
 ```typescript
-export const maryPersona = new MaryPersona();
-export type SubPersonaMode = 'inquisitive' | 'devil_advocate' | ...;
-export const PATHWAY_WEIGHTS: Record<string, PathwayWeights> = { ... };
+// In pricing-model-analyzer.ts
+export class PricingModelAnalyzer { /* ... */ }
+export const pricingModelAnalyzer = new PricingModelAnalyzer();
+
+// In index.ts
+export { PricingModelAnalyzer, pricingModelAnalyzer } from './pricing-model-analyzer';
+export type { PricingModelAnalysis, PricingModel } from './pricing-model-analyzer';
 ```
 
 **Barrel Files:**
-- `index.ts` used to aggregate exports from sibling modules
-- Example from `lib/ai/tools/index.ts`:
-```typescript
-export const MARY_TOOLS: Tool[] = [
-  discoveryTools.discover_pathways,
-  discoveryTools.discover_phase_actions,
-  // ... other tools
-];
-```
-- Single barrel file per directory, not nested
-
-**File Organization:**
-- One primary export per file (class, major function, or types group)
-- Related utilities in same module (e.g., `session-orchestrator.ts` exports `SessionOrchestrator` + `SessionConfiguration`)
-- Helper/internal functions stay in the same file unless used by 3+ consumers
+- Used extensively for re-exports (`lib/bmad/analysis/index.ts`)
+- Group related types and implementations
 
 ## Async Patterns
 
-**Async Functions:**
-- Use `async/await` throughout (no `.then()` chains)
-- Wrap in try-catch at call sites, not within helpers
-- Mark functions as `async` when they use `await` internally
-- Example from `session-orchestrator.ts`:
+**Promises:**
+- Use `async/await` syntax (no raw `.then()` chains)
+- Try/catch for error handling
+- Parallel operations when independent
+
+**Example:**
 ```typescript
-async createSession(config: SessionConfiguration): Promise<BmadSession> {
+const handlePathwaySelected = async (
+  pathway: PathwayType,
+  userInput?: string,
+  recommendation?: {...}
+) => {
   try {
-    const userHasCredits = await hasCredits(config.userId, 1);
-    if (!userHasCredits) {
-      throw new BmadMethodError(...);
+    await createSession(workspaceId, pathway, userInput, recommendation)
+    setCurrentStep('session-active')
+    generateMockElicitationData()
+
+    if (onInputConsumed) {
+      onInputConsumed()
     }
-    // ... more awaits
   } catch (error) {
-    // handle
+    console.error('Error creating session:', error)
   }
 }
 ```
 
-**Streaming:**
-- Use `AsyncIterable<string>` for streaming responses
-- Example from `claude-client.ts`:
-```typescript
-export interface StreamingResponse {
-  id: string;
-  content: AsyncIterable<string>;
-  usage?: TokenUsage;
-}
-```
+## Next.js Conventions
 
-## TypeScript Patterns
+**File Structure:**
+- App Router: `app/` directory
+- API routes: `app/api/[route]/route.ts`
+- Pages: `app/[route]/page.tsx`
+- Layouts: `app/[route]/layout.tsx`
 
-**Strict Mode:** Enabled (`"strict": true`)
+**Server vs Client:**
+- Mark client components with `'use client'`
+- Server components by default
+- Middleware: `middleware.ts` at root
 
-**Type Safety:**
-- Always type function parameters and return values
-- Use `Record<string, Type>` for object maps
-- Use `Array<T>` or `T[]` — both acceptable, use `T[]` for consistency
-- Union types for variants: `'success' | 'error'` or `Literal | Literal`
-
-**Generics:**
-- Use for reusable data structures and functions
-- Example from `session-orchestrator.ts`:
-```typescript
-private activeSessions = new Map<string, BmadSession>();
-```
-
-**Narrowing:**
-- Use `instanceof` for error type checking
-- Example from `pdf-generator.ts`:
-```typescript
-error: error instanceof Error ? error.message : 'Unknown error'
-```
+**Data Fetching:**
+- Server components: Direct database access
+- Client components: API routes via `fetch()`
 
 ---
 
-*Convention analysis: 2026-01-29*
+*Convention analysis: 2026-02-14*

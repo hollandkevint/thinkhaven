@@ -1,8 +1,9 @@
 import { CoachingContext } from './mary-persona';
 import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager';
+import type { BoardMemberId } from './board-types';
 
 export interface StreamChunk {
-  type: 'metadata' | 'content' | 'complete' | 'error' | 'typing';
+  type: 'metadata' | 'content' | 'complete' | 'error' | 'typing' | 'speaker_change';
   content?: string;
   error?: string;
   metadata?: {
@@ -16,6 +17,12 @@ export interface StreamChunk {
       exchangeCount: number;
       userControlEnabled: boolean;
     };
+    boardState?: {
+      activeSpeaker: BoardMemberId;
+      taylorOptedIn: boolean;
+    };
+    speaker?: BoardMemberId;
+    handoffReason?: string;
   };
   errorDetails?: {
     retryable?: boolean;
@@ -45,8 +52,20 @@ export class StreamEncoder {
     return this.encodeChunk(chunk);
   }
 
-  encodeContent(content: string): Uint8Array {
-    const chunk: StreamChunk = { type: 'content', content };
+  encodeContent(content: string, speaker?: BoardMemberId): Uint8Array {
+    const chunk: StreamChunk = {
+      type: 'content',
+      content,
+      metadata: speaker ? { speaker } : undefined,
+    };
+    return this.encodeChunk(chunk);
+  }
+
+  encodeSpeakerChange(speaker: BoardMemberId, handoffReason: string): Uint8Array {
+    const chunk: StreamChunk = {
+      type: 'speaker_change',
+      metadata: { speaker, handoffReason },
+    };
     return this.encodeChunk(chunk);
   }
 

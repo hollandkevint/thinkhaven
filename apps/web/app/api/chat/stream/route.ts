@@ -12,6 +12,14 @@ import {
 } from '@/lib/bmad/message-limit-manager';
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
 import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
+import type { BoardMemberId } from '@/lib/ai/board-types';
+
+/** A segment of text attributed to a specific speaker */
+interface SpeakerSegment {
+  speaker: BoardMemberId;
+  content: string;
+  handoffReason?: string;
+}
 
 // Maximum number of tool execution rounds to prevent infinite loops
 const MAX_TOOL_ROUNDS = 5;
@@ -30,11 +38,14 @@ async function executeAgenticLoop(
   finalText: string;
   toolsExecuted: Array<{ name: string; success: boolean }>;
   rounds: number;
+  segments: SpeakerSegment[];
 }> {
   const toolExecutor = new ToolExecutor({ sessionId, userId });
   const toolsExecuted: Array<{ name: string; success: boolean }> = [];
   let rounds = 0;
   let accumulatedText = '';
+  const segments: SpeakerSegment[] = [];
+  let currentSpeaker: BoardMemberId = 'mary';
 
   // Build conversation for multi-turn tool use
   const conversation: Array<{
@@ -57,6 +68,14 @@ async function executeAgenticLoop(
 
   accumulatedText += response.textContent;
 
+  // Attribute initial text to Mary (facilitator)
+  if (response.textContent) {
+    segments.push({
+      speaker: 'mary',
+      content: response.textContent,
+    });
+  }
+
   // Agentic loop: keep going while Claude wants to use tools
   while (response.stopReason === 'tool_use' && rounds < MAX_TOOL_ROUNDS) {
     rounds++;
@@ -73,12 +92,21 @@ async function executeAgenticLoop(
     // Execute all tools
     const results = await toolExecutor.executeAll(toolCalls);
 
-    // Track what was executed
+    // Track what was executed and detect speaker changes
     results.forEach(result => {
       toolsExecuted.push({
         name: result.toolName,
         success: result.result.success
       });
+
+      // Track speaker switches from switch_speaker tool
+      if (result.toolName === 'switch_speaker' && result.result.success && result.result.data) {
+        const speakerData = result.result.data as {
+          newSpeaker: string;
+          handoffReason: string;
+        };
+        currentSpeaker = speakerData.newSpeaker as BoardMemberId;
+      }
     });
 
     // Format results for Claude
@@ -110,6 +138,21 @@ async function executeAgenticLoop(
       coachingContext
     );
 
+    // Attribute text from this round to the current speaker
+    if (response.textContent) {
+      // Find the handoff reason from the most recent switch_speaker in this round
+      const lastSwitch = results.find(r => r.toolName === 'switch_speaker' && r.result.success);
+      const handoffReason = lastSwitch?.result.data
+        ? (lastSwitch.result.data as { handoffReason: string }).handoffReason
+        : undefined;
+
+      segments.push({
+        speaker: currentSpeaker,
+        content: response.textContent,
+        handoffReason,
+      });
+    }
+
     accumulatedText += response.textContent;
   }
 
@@ -121,7 +164,8 @@ async function executeAgenticLoop(
   return {
     finalText: accumulatedText,
     toolsExecuted,
-    rounds
+    rounds,
+    segments,
   };
 }
 
@@ -324,7 +368,7 @@ export async function POST(request: NextRequest) {
         // Try to get current BMad session data (including sub_persona_state)
         const { data: bmadSession } = await supabase
           .from('bmad_sessions')
-          .select('id, pathway, current_phase, overall_completion, sub_persona_state')
+          .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state')
           .eq('workspace_id', workspaceId)
           .eq('status', 'active')
           .order('created_at', { ascending: false })
@@ -340,6 +384,17 @@ export async function POST(request: NextRequest) {
             progress: bmadSession.overall_completion || 0,
             context: {},
             sub_persona_state: bmadSession.sub_persona_state as SubPersonaSessionState | null,
+          };
+        }
+
+        // Pass board state to coaching context if present
+        if (bmadSession?.board_state) {
+          if (!finalCoachingContext) {
+            finalCoachingContext = {};
+          }
+          finalCoachingContext.boardState = bmadSession.board_state as {
+            activeSpeaker: BoardMemberId;
+            taylorOptedIn: boolean;
           };
         }
 
@@ -447,16 +502,40 @@ export async function POST(request: NextRequest) {
             console.log('[Chat Stream] Agentic loop complete:', {
               textLength: fullContent.length,
               toolsExecuted: toolsExecuted.length,
-              rounds: agenticRounds
+              rounds: agenticRounds,
+              segments: agenticResult.segments.length,
             });
 
-            // Simulate streaming the accumulated text for better UX
-            const words = fullContent.split(' ');
-            for (let i = 0; i < words.length; i++) {
-              controller.enqueue(encoder.encodeContent(words[i] + (i < words.length - 1 ? ' ' : '')));
-              // Variable delay based on word length for natural feel
-              const delay = Math.max(10, Math.min(50, words[i].length * 5));
-              await new Promise(resolve => setTimeout(resolve, delay));
+            // Stream segments with speaker attribution
+            if (agenticResult.segments.length > 0) {
+              for (const segment of agenticResult.segments) {
+                // Emit speaker change event if there is a handoff
+                if (segment.handoffReason) {
+                  controller.enqueue(encoder.encodeSpeakerChange(
+                    segment.speaker,
+                    segment.handoffReason
+                  ));
+                }
+
+                // Stream the segment content word-by-word with speaker tag
+                const words = segment.content.split(' ');
+                for (let i = 0; i < words.length; i++) {
+                  controller.enqueue(encoder.encodeContent(
+                    words[i] + (i < words.length - 1 ? ' ' : ''),
+                    segment.speaker
+                  ));
+                  const delay = Math.max(10, Math.min(50, words[i].length * 5));
+                  await new Promise(resolve => setTimeout(resolve, delay));
+                }
+              }
+            } else {
+              // Fallback: stream as plain text (no segments)
+              const words = fullContent.split(' ');
+              for (let i = 0; i < words.length; i++) {
+                controller.enqueue(encoder.encodeContent(words[i] + (i < words.length - 1 ? ' ' : '')));
+                const delay = Math.max(10, Math.min(50, words[i].length * 5));
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
             }
 
           } else {

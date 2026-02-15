@@ -1,5 +1,7 @@
 import { PathwayType } from '../bmad/types';
 import { PATHWAY_COGNITIVE_MODES, CognitiveMode } from '../bmad/pathway-router';
+import { generateBoardSystemPrompt } from './board-members';
+import type { BoardState } from './board-types';
 
 // =============================================================================
 // Sub-Persona System Types (FR-AC6 through FR-AC14)
@@ -313,6 +315,8 @@ export interface CoachingContext {
   }>;
   // Dynamic context markdown (Phase 2: Context Injection)
   dynamicContextMarkdown?: string;
+  // Board of Directors state
+  boardState?: BoardState;
 }
 
 export class MaryPersona {
@@ -367,6 +371,11 @@ export class MaryPersona {
       sections.push(this.generateSubPersonaSection(context));
       sections.push(this.generateKillDecisionSection(context));
       sections.push(this.generateAntiSycophancySection());
+    }
+
+    // Add Board of Directors prompt when board mode is active
+    if (context?.boardState) {
+      sections.push(generateBoardSystemPrompt(context.boardState));
     }
 
     // Add dynamic context if available (Phase 2: Context Injection)
