@@ -15,7 +15,11 @@ import { useSharedInput } from '@/app/components/workspace/useSharedInput'
 import CanvasContextSync from '@/components/canvas/CanvasContextSync'
 import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
 import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager'
-import type { ChatMessage } from '@/lib/ai/board-types'
+import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
+import { getBoardMember } from '@/lib/ai/board-members'
+import SpeakerMessage from '@/app/components/board/SpeakerMessage'
+import HandoffAnnotation from '@/app/components/board/HandoffAnnotation'
+import BoardOverview from '@/app/components/board/BoardOverview'
 import ExportPanel from '@/app/components/workspace/ExportPanel'
 import dynamic from 'next/dynamic'
 import { ArtifactProvider } from '@/lib/artifact'
@@ -57,6 +61,7 @@ export default function WorkspacePage() {
   } | null>(null)
   const [limitStatus, setLimitStatus] = useState<MessageLimitStatus | null>(null)
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
+  const [boardState, setBoardState] = useState<BoardState | null>(null)
   const workspaceRef = useRef<Workspace | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
@@ -231,8 +236,10 @@ export default function WorkspacePage() {
       const decoder = new TextDecoder()
       
       let assistantContent = ''
-      const assistantMessageId = crypto.randomUUID()
+      let assistantMessageId = crypto.randomUUID()
       let chunkCount = 0;
+      let currentSpeaker: string | undefined = undefined;
+      let previousSpeaker: string | undefined = undefined;
 
       console.log('[Workspace] Starting to read stream...');
 
@@ -260,23 +267,84 @@ export default function WorkspacePage() {
             try {
               const data = JSON.parse(dataStr)
 
-              if (data.type === 'content') {
+              if (data.type === 'speaker_change') {
+                // A new board member is about to speak
+                const newSpeaker = data.metadata?.speaker
+                const handoffReason = data.metadata?.handoffReason
+
+                if (newSpeaker && newSpeaker !== currentSpeaker) {
+                  // Finalize current message if there's content
+                  if (assistantContent.trim()) {
+                    await finalizeAssistantMessage(assistantContent, assistantMessageId)
+                  }
+
+                  // Insert handoff annotation
+                  if (currentSpeaker && handoffReason) {
+                    const fromMember = getBoardMember(currentSpeaker as any)
+                    const toMember = getBoardMember(newSpeaker as any)
+                    const annotationId = crypto.randomUUID()
+                    const current = workspaceRef.current
+                    if (current) {
+                      const updatedContext = [...current.chat_context, {
+                        id: annotationId,
+                        role: 'system' as const,
+                        content: `__handoff__${fromMember.name}__${toMember.name}__${handoffReason}`,
+                        timestamp: new Date().toISOString(),
+                        metadata: {
+                          speaker: currentSpeaker as any,
+                          handoff_reason: handoffReason,
+                        },
+                      }]
+                      const updated = { ...current, chat_context: updatedContext }
+                      workspaceRef.current = updated
+                      setWorkspace(updated)
+                    }
+                  }
+
+                  // Start new message for new speaker
+                  previousSpeaker = currentSpeaker
+                  currentSpeaker = newSpeaker
+                  assistantContent = ''
+                  assistantMessageId = crypto.randomUUID()
+
+                  // Update board state
+                  setBoardState(prev => prev
+                    ? { ...prev, activeSpeaker: newSpeaker as any }
+                    : { activeSpeaker: newSpeaker as any, taylorOptedIn: false }
+                  )
+                }
+              } else if (data.type === 'content') {
+                // Track speaker from content metadata if present
+                const contentSpeaker = data.metadata?.speaker
+                if (contentSpeaker && !currentSpeaker) {
+                  currentSpeaker = contentSpeaker
+                }
+
                 assistantContent += data.content
-                // Update streaming message in UI
-                updateStreamingMessage(assistantMessageId, assistantContent)
+                updateStreamingMessage(
+                  assistantMessageId,
+                  assistantContent,
+                  currentSpeaker as any
+                )
               } else if (data.type === 'complete') {
                 console.log('[Workspace] Stream marked complete');
-                // Extract limitStatus from completion metadata
                 if (data.limitStatus) {
                   setLimitStatus(data.limitStatus);
                 }
-                // Finalize the message in database (pass the messageId)
+                // Update board state from completion metadata
+                if (data.additionalData?.boardState) {
+                  setBoardState(data.additionalData.boardState as BoardState)
+                }
                 await finalizeAssistantMessage(assistantContent, assistantMessageId)
               } else if (data.type === 'error') {
                 console.error('[Workspace] Received error from stream:', data);
                 throw new Error(data.error || 'Stream error')
               } else if (data.type === 'metadata') {
                 console.log('[Workspace] Received metadata:', data);
+                // Initialize board state from metadata if present
+                if (data.metadata?.boardState) {
+                  setBoardState(data.metadata.boardState as BoardState)
+                }
               }
             } catch (parseError) {
               console.error('[Workspace] Failed to parse stream data:', {
@@ -301,7 +369,7 @@ export default function WorkspacePage() {
     workspaceRef.current = workspace
   }, [workspace])
 
-  const updateStreamingMessage = (messageId: string, content: string) => {
+  const updateStreamingMessage = (messageId: string, content: string, speaker?: string) => {
     const current = workspaceRef.current
     if (!current) return
 
@@ -312,14 +380,19 @@ export default function WorkspacePage() {
     if (existingIndex >= 0) {
       updatedChatContext[existingIndex] = {
         ...updatedChatContext[existingIndex],
-        content: content
+        content: content,
+        metadata: {
+          ...updatedChatContext[existingIndex].metadata,
+          ...(speaker ? { speaker: speaker as any } : {}),
+        },
       }
     } else {
       updatedChatContext.push({
         id: messageId,
         role: 'assistant',
         content: content,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        metadata: speaker ? { speaker: speaker as any } : undefined,
       })
     }
 
@@ -535,7 +608,9 @@ export default function WorkspacePage() {
               style={{ border: '1px solid var(--border)', color: 'var(--foreground)' }}
             >
               <LayoutTemplate className="w-3 h-3" />
-              {isCanvasOpen ? 'Hide Canvas' : 'Show Canvas'}
+              {boardState
+                ? (isCanvasOpen ? 'Hide Board' : 'Show Board')
+                : (isCanvasOpen ? 'Hide Canvas' : 'Show Canvas')}
             </button>
             <ArtifactList mode="badge" />
             <ExportPanel
@@ -686,7 +761,25 @@ export default function WorkspacePage() {
                   </div>
                 )}
                 
-                {workspace.chat_context.map((message) => (
+                {workspace.chat_context.map((message) => {
+                  // Handoff annotation (encoded as system message)
+                  if (message.role === 'system' && message.content.startsWith('__handoff__')) {
+                    const parts = message.content.split('__')
+                    // Format: __handoff__FromName__ToName__reason
+                    const fromName = parts[2] || 'Mary'
+                    const toName = parts[3] || ''
+                    const reason = parts[4] || ''
+                    return (
+                      <HandoffAnnotation
+                        key={message.id}
+                        fromSpeaker={fromName}
+                        toSpeaker={toName}
+                        reason={reason}
+                      />
+                    )
+                  }
+
+                  return (
                   <div key={message.id} className="mb-6">
                     {message.role === 'user' ? (
                       <div className="flex justify-end">
@@ -700,6 +793,11 @@ export default function WorkspacePage() {
                           </div>
                         </div>
                       </div>
+                    ) : message.role === 'assistant' && message.metadata?.speaker ? (
+                      <SpeakerMessage
+                        message={message}
+                        boardMember={getBoardMember(message.metadata.speaker)}
+                      />
                     ) : message.role === 'assistant' ? (
                       <div className="flex justify-start">
                         <div className="flex items-start gap-3 max-w-[70%]">
@@ -792,7 +890,8 @@ export default function WorkspacePage() {
                       </div>
                     )}
                   </div>
-                ))}
+                  )
+                })}
                 
                 {sendingMessage && (
                   <div className="flex justify-start mb-6 opacity-50">
@@ -897,45 +996,49 @@ export default function WorkspacePage() {
         </div>
       </PaneErrorBoundary>
 
-      {/* Canvas Pane - 40% */}
-      <PaneErrorBoundary paneName="canvas">
-        <div className="canvas-pane">
-        <header className="h-14 mb-4 flex justify-between items-center" style={{ borderBottom: '1px solid var(--border)' }}>
-          <div>
-            <h2 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>Visual Canvas</h2>
-            <p className="text-sm" style={{ color: 'var(--muted)' }}>Sketches & diagrams</p>
+      {/* Right Pane - 40% (Board Overview or Canvas) */}
+      <PaneErrorBoundary paneName={boardState ? 'board' : 'canvas'}>
+        {boardState ? (
+          <BoardOverview boardState={boardState} />
+        ) : (
+          <div className="canvas-pane">
+          <header className="h-14 mb-4 flex justify-between items-center" style={{ borderBottom: '1px solid var(--border)' }}>
+            <div>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>Visual Canvas</h2>
+              <p className="text-sm" style={{ color: 'var(--muted)' }}>Sketches & diagrams</p>
+            </div>
+            <div className="text-right text-xs">
+              <div className="mb-1">
+                <span style={{ color: 'var(--muted)' }}>Messages:</span>
+                <span className="font-medium ml-1" style={{ color: 'var(--foreground)' }}>{workspace.chat_context.length}</span>
+              </div>
+              <div className="mb-1">
+                <span style={{ color: 'var(--muted)' }}>Elements:</span>
+                <span className="font-medium ml-1" style={{ color: 'var(--foreground)' }}>{workspace.canvas_elements.length}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#10b981' }}></div>
+                <span style={{ color: 'var(--muted)' }}>Auto-saved</span>
+              </div>
+            </div>
+          </header>
+
+          <div className="canvas-container">
+            <EnhancedCanvasWorkspace
+              workspaceId={workspace.id}
+              initialMode={canvasState?.mode || 'draw'}
+              initialDiagramCode={canvasState?.diagramCode}
+              initialDiagramType={canvasState?.diagramType as any}
+              onStateChange={(newState) => {
+                setCanvasState({
+                  ...newState,
+                  lastModified: new Date()
+                })
+              }}
+            />
           </div>
-          <div className="text-right text-xs">
-            <div className="mb-1">
-              <span style={{ color: 'var(--muted)' }}>Messages:</span>
-              <span className="font-medium ml-1" style={{ color: 'var(--foreground)' }}>{workspace.chat_context.length}</span>
-            </div>
-            <div className="mb-1">
-              <span style={{ color: 'var(--muted)' }}>Elements:</span>
-              <span className="font-medium ml-1" style={{ color: 'var(--foreground)' }}>{workspace.canvas_elements.length}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#10b981' }}></div>
-              <span style={{ color: 'var(--muted)' }}>Auto-saved</span>
-            </div>
           </div>
-        </header>
-        
-        <div className="canvas-container">
-          <EnhancedCanvasWorkspace
-            workspaceId={workspace.id}
-            initialMode={canvasState?.mode || 'draw'}
-            initialDiagramCode={canvasState?.diagramCode}
-            initialDiagramType={canvasState?.diagramType as any}
-            onStateChange={(newState) => {
-              setCanvasState({
-                ...newState,
-                lastModified: new Date()
-              })
-            }}
-          />
-        </div>
-        </div>
+        )}
       </PaneErrorBoundary>
     </div>
     </ArtifactProvider>
