@@ -108,39 +108,35 @@ The current system can't express this because modes have no identity, no persist
 
 **Tasks:**
 
-- [ ] Create `apps/web/lib/ai/board-members.ts` — `BoardMemberRegistry`
+- [x] Create `apps/web/lib/ai/board-members.ts` — `BoardMemberRegistry`
   - Type: `BoardMember { id, name, role, worldview, bias, voiceDescription, color, isOptIn }`
-  - Export: `BOARD_MEMBERS: Record<string, BoardMember>` with victoria, casey, elaine, omar, taylor
-  - Export: `getActiveBoardMembers(taylorOptedIn: boolean): BoardMember[]`
-  - Export: `resolveSpeakerKey(key: string): BoardMember | null` (validates against registry)
+  - Export: `BOARD_MEMBERS: readonly BoardMember[]` with mary, victoria, casey, elaine, omar, taylor
+  - Export: `getActiveBoardMembers(taylorOptedIn: boolean): readonly BoardMember[]`
+  - Export: `resolveSpeakerKey(key: string): BoardMember` (validates against registry, falls back to Mary)
 
-- [ ] Extend `apps/web/lib/ai/mary-persona.ts` — `generateSystemPrompt()`
-  - Add board member character definitions to system prompt (name, role, worldview, bias, voice style)
-  - Add speaker tag protocol instructions: "When speaking as a board member, prefix your response with [SPEAKER:key]. When returning to facilitator, use [SPEAKER:mary]."
-  - Add facilitation rules: when to bring in each member, how to name tensions, handoff annotation format
-  - Keep system prompt under 3,000 tokens total (measure and optimize)
-  - Add Taylor opt-in conditional: only include Taylor's definition if opted in
+- [x] Extend `apps/web/lib/ai/mary-persona.ts` — `generateSystemPrompt()`
+  - Board prompt injected via `generateBoardSystemPrompt()` when `boardState` present
+  - Uses tool-call approach (not speaker tags) per review recommendation
+  - Add facilitation rules: when to bring in each member, how to name tensions
+  - Taylor opt-in conditional: only include Taylor's definition if opted in
 
-- [ ] Evolve `switch_persona_mode` → `switch_speaker` in `apps/web/lib/ai/tools/index.ts`
+- [x] Add `switch_speaker` tool in `apps/web/lib/ai/tools/index.ts`
   - New tool: `switch_speaker` — input: `{ speaker_key: string, handoff_reason: string }`
-  - Keep `switch_persona_mode` as alias (backward compat for existing sessions)
-  - Add tool: `assess_board_sentiment` — input: `{ context_summary: string }`, output: array of `{ member_key, stance, concern, disposition }`
-  - Add tool: `offer_taylor_optin` — no input, triggers inline opt-in card via metadata
+  - `switch_persona_mode` kept as-is (backward compat for existing sessions)
+  - Cut: `assess_board_sentiment`, `offer_taylor_optin` (per review simplification)
 
-- [ ] Extend streaming metadata in `apps/web/app/api/chat/stream/route.ts`
-  - Add `boardState` to `StreamChunk.metadata`: `{ activeSpeaker, taylorOptedIn, exchangeCount, userInvocationEnabled }`
-  - Persist board member stances to `workspace_state.chat_context.boardState`
+- [x] Extend streaming metadata in `apps/web/app/api/chat/stream/route.ts`
+  - Add `boardState` to `StreamChunk.metadata`: `{ activeSpeaker, taylorOptedIn }`
+  - Speaker segments tracked through agentic loop
+  - `speaker_change` event type for handoff annotations
 
-- [ ] Add `sessionVersion` flag to session creation
-  - New sessions: `sessionVersion: 2` (board mode)
-  - Existing sessions: `sessionVersion: 1` (legacy sub-persona mode)
-  - Route to appropriate system prompt based on version
+- ~~Add `sessionVersion` flag~~ — Cut per review simplification. Board mode activates when boardState is present in session.
 
 **Acceptance Criteria:**
-- [ ] Claude produces responses with `[SPEAKER:xxx]` tags when board members speak
-- [ ] `switch_speaker` tool works and Mary uses it to transition between members
-- [ ] System prompt fits within 3,000 tokens
-- [ ] Existing sessions with `sessionVersion: 1` continue working unchanged
+- ~~Claude produces responses with `[SPEAKER:xxx]` tags~~ → Uses tool-call approach instead
+- [x] `switch_speaker` tool works and Mary uses it to transition between members
+- [ ] System prompt fits within 3,000 tokens (needs measurement)
+- [x] Existing sessions continue working unchanged (no sessionVersion needed)
 - [ ] `assess_board_sentiment` returns structured stance data
 
 #### Phase 2: Streaming Parser — Speaker Tag Parsing + Message Splitting
@@ -477,8 +473,8 @@ Before starting Phase A:
 - [x] Fix IDOR at `page.tsx:80`
 - [x] Fix MermaidRenderer security level
 - [x] Extract `board-types.ts` with `BoardMemberId`, `BoardMember`, `Disposition`
-- [ ] Extract board-specific logic from `mary-persona.ts` (1,477 lines) into `board-members.ts`
+- [x] Create `board-members.ts` with board-specific logic (separate from mary-persona.ts)
 - [x] Extract `ChatMessage` to shared types file
 - [x] Fix stale closure pattern in `updateStreamingMessage` (use `useRef`)
 - [x] Decide: tool-call approach vs tag parser (recommendation: tool-call) → tool-call chosen
-- [ ] Measure current system prompt token count (baseline for 3K target)
+- [ ] Measure current system prompt token count (baseline for 3K target — needs runtime check)
