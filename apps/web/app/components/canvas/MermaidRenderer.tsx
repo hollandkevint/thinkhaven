@@ -19,7 +19,7 @@ export interface MermaidRendererProps {
 mermaid.initialize({
   startOnLoad: false,
   theme: 'default',
-  securityLevel: 'loose',
+  securityLevel: 'strict',
   fontFamily: 'ui-sans-serif, system-ui, sans-serif',
 });
 

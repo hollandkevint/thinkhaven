@@ -474,11 +474,11 @@ Board Overview updates from streaming metadata while chat messages render simult
 
 Before starting Phase A:
 
-- [ ] Fix IDOR at `page.tsx:80`
-- [ ] Fix MermaidRenderer security level
-- [ ] Extract `board-types.ts` with `BoardMemberId`, `BoardMember`, `Disposition`
+- [x] Fix IDOR at `page.tsx:80`
+- [x] Fix MermaidRenderer security level
+- [x] Extract `board-types.ts` with `BoardMemberId`, `BoardMember`, `Disposition`
 - [ ] Extract board-specific logic from `mary-persona.ts` (1,477 lines) into `board-members.ts`
-- [ ] Extract `ChatMessage` to shared types file
-- [ ] Fix stale closure pattern in `updateStreamingMessage` (use `useRef`)
-- [ ] Decide: tool-call approach vs tag parser (recommendation: tool-call)
+- [x] Extract `ChatMessage` to shared types file
+- [x] Fix stale closure pattern in `updateStreamingMessage` (use `useRef`)
+- [x] Decide: tool-call approach vs tag parser (recommendation: tool-call) → tool-call chosen
 - [ ] Measure current system prompt token count (baseline for 3K target)

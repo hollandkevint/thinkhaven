@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -15,6 +15,7 @@ import { useSharedInput } from '@/app/components/workspace/useSharedInput'
 import CanvasContextSync from '@/components/canvas/CanvasContextSync'
 import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
 import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager'
+import type { ChatMessage } from '@/lib/ai/board-types'
 import ExportPanel from '@/app/components/workspace/ExportPanel'
 import dynamic from 'next/dynamic'
 import { ArtifactProvider } from '@/lib/artifact'
@@ -26,16 +27,6 @@ const EnhancedCanvasWorkspace = dynamic(
   () => import('@/app/components/canvas/EnhancedCanvasWorkspace'),
   { ssr: false }
 )
-
-interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  timestamp: string
-  metadata?: {
-    strategic_tags?: string[]
-  }
-}
 
 interface Workspace {
   id: string
@@ -66,18 +57,20 @@ export default function WorkspacePage() {
   } | null>(null)
   const [limitStatus, setLimitStatus] = useState<MessageLimitStatus | null>(null)
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
+  const workspaceRef = useRef<Workspace | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
   const isOnline = useOnlineStatus()
   const { preserveInput, hasPreservedInput, peekPreservedInput, clearPreservedInput } = useSharedInput(params.id as string)
 
   const fetchWorkspace = useCallback(async () => {
+    if (!user) return
     try {
       setError('')
       const { data, error: fetchError } = await supabase
         .from('user_workspace')
         .select('user_id, workspace_state, updated_at')
-        .eq('user_id', params.id)
+        .eq('user_id', user.id)
         .single()
 
       if (fetchError) throw fetchError
@@ -101,7 +94,7 @@ export default function WorkspacePage() {
       setLoading(false)
       setIsRetrying(false)
     }
-  }, [params.id])
+  }, [user])
 
   const handleRetry = () => {
     setIsRetrying(true)
@@ -303,13 +296,19 @@ export default function WorkspacePage() {
     }
   }
 
+  // Keep ref in sync with state for use in streaming callbacks
+  useEffect(() => {
+    workspaceRef.current = workspace
+  }, [workspace])
+
   const updateStreamingMessage = (messageId: string, content: string) => {
-    if (!workspace) return
-    
+    const current = workspaceRef.current
+    if (!current) return
+
     // Update the workspace state with streaming content
-    const updatedChatContext = [...workspace.chat_context]
+    const updatedChatContext = [...current.chat_context]
     const existingIndex = updatedChatContext.findIndex(msg => msg.id === messageId)
-    
+
     if (existingIndex >= 0) {
       updatedChatContext[existingIndex] = {
         ...updatedChatContext[existingIndex],
@@ -323,11 +322,13 @@ export default function WorkspacePage() {
         timestamp: new Date().toISOString()
       })
     }
-    
-    setWorkspace({
-      ...workspace,
+
+    const updated = {
+      ...current,
       chat_context: updatedChatContext
-    })
+    }
+    workspaceRef.current = updated
+    setWorkspace(updated)
   }
 
   const finalizeAssistantMessage = async (content: string, messageId: string) => {
