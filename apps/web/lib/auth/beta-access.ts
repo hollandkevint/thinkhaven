@@ -10,6 +10,10 @@ export interface BetaAccessResult {
 export async function checkBetaAccess(): Promise<BetaAccessResult> {
   const supabase = await createClient();
 
+  if (!supabase) {
+    return { user: null, betaApproved: false, error: 'No Supabase client' };
+  }
+
   // Get session which contains the access_token
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 

@@ -11,24 +11,27 @@ import { fileURLToPath } from 'url'
 async function globalSetup(config: FullConfig) {
   console.log('\n🔧 Running global test setup...\n')
 
-  // Load .env.test file if it exists
+  // Load env file if it exists (.env.local takes precedence over .env.test)
   const __filename = fileURLToPath(import.meta.url)
   const __dirname = path.dirname(__filename)
-  const envTestPath = path.join(__dirname, '../../.env.test')
-  if (fs.existsSync(envTestPath)) {
-    console.log('📄 Loading .env.test file...')
-    const envContent = fs.readFileSync(envTestPath, 'utf-8')
-    envContent.split('\n').forEach(line => {
-      // Skip comments and empty lines
-      if (line.trim() && !line.trim().startsWith('#')) {
-        const [key, ...valueParts] = line.split('=')
-        const value = valueParts.join('=')
-        if (key && value) {
-          process.env[key.trim()] = value.trim()
+  const envFiles = ['.env.test', '.env.local']
+  for (const envFile of envFiles) {
+    const envPath = path.join(__dirname, '../../', envFile)
+    if (fs.existsSync(envPath)) {
+      console.log(`📄 Loading ${envFile} file...`)
+      const envContent = fs.readFileSync(envPath, 'utf-8')
+      envContent.split('\n').forEach(line => {
+        // Skip comments and empty lines
+        if (line.trim() && !line.trim().startsWith('#')) {
+          const [key, ...valueParts] = line.split('=')
+          const value = valueParts.join('=')
+          if (key && value) {
+            process.env[key.trim()] = value.trim()
+          }
         }
-      }
-    })
-    console.log('✅ .env.test loaded\n')
+      })
+      console.log(`✅ ${envFile} loaded\n`)
+    }
   }
 
   // 1. Validate required environment variables
@@ -37,14 +40,14 @@ async function globalSetup(config: FullConfig) {
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     errors.push('❌ NEXT_PUBLIC_SUPABASE_URL is required')
-    errors.push('   Add it to apps/web/.env.test')
+    errors.push('   Add it to apps/web/.env.local or .env.test')
   } else {
     console.log(`✅ NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`)
   }
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     errors.push('❌ NEXT_PUBLIC_SUPABASE_ANON_KEY is required')
-    errors.push('   Add it to apps/web/.env.test')
+    errors.push('   Add it to apps/web/.env.local or .env.test')
   } else {
     console.log(`✅ NEXT_PUBLIC_SUPABASE_ANON_KEY: ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20)}...`)
   }
@@ -52,8 +55,7 @@ async function globalSetup(config: FullConfig) {
   if (errors.length > 0) {
     console.error('\n❌ Test environment validation failed:\n')
     errors.forEach(err => console.error(`  ${err}`))
-    console.error('\nPlease configure apps/web/.env.test with your Supabase credentials.')
-    console.error('See apps/web/.env.test for instructions.\n')
+    console.error('\nPlease configure apps/web/.env.local with your Supabase credentials.\n')
     process.exit(1)
   }
 

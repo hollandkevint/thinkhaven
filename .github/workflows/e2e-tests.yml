@@ -11,7 +11,7 @@ permissions:
   checks: write
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
 
 jobs:
   e2e-tests:
@@ -42,11 +42,6 @@ jobs:
           npx playwright install-deps chromium
 
       - name: Setup test environment
-        run: |
-          cd apps/web
-          cp .env.example .env.test
-
-      - name: Set test environment variables
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_TEST }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL_TEST }}
@@ -55,11 +50,14 @@ jobs:
           NEXTAUTH_URL: http://localhost:3000
         run: |
           cd apps/web
-          echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> .env.test
-          echo "SUPABASE_URL=$SUPABASE_URL" >> .env.test
-          echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> .env.test
-          echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.test
-          echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.test
+          cp .env.example .env.local
+          echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> .env.local
+          echo "SUPABASE_URL=$SUPABASE_URL" >> .env.local
+          echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> .env.local
+          echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.local
+          echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.local
 
       - name: Build application
         run: |
