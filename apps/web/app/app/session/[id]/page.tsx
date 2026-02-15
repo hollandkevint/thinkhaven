@@ -25,6 +25,7 @@ import dynamic from 'next/dynamic'
 import { ArtifactProvider } from '@/lib/artifact'
 import { ArtifactPanel, ArtifactList, ArtifactKeyboardHandler } from '@/app/components/artifact'
 import { ErrorState } from '@/app/components/ui/ErrorState'
+import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 
 // Dynamically import canvas components (SSR-safe)
 const EnhancedCanvasWorkspace = dynamic(
@@ -618,6 +619,7 @@ export default function WorkspacePage() {
               workspaceName={workspace.name}
               workspaceId={workspace.id}
             />
+            <FeedbackButton variant="header" />
             <span style={{ color: 'var(--muted)' }}>{user.email}</span>
             <Link
               href="/app/account"

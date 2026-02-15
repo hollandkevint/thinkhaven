@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { ErrorState } from '@/app/components/ui/ErrorState';
+import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
 
 interface BmadSession {
   id: string;
@@ -280,6 +281,7 @@ export default function AppDashboardPage() {
             <Settings className="w-4 h-4" />
             <span className="text-sm">Settings</span>
           </button>
+          <FeedbackButton variant="sidebar" />
           <button
             onClick={() => signOut()}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-foreground"
