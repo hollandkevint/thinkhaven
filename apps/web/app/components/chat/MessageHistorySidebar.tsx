@@ -315,7 +315,7 @@ export default function MessageHistorySidebar({
           <h2 className="text-lg font-semibold text-primary">Conversations</h2>
           <button
             onClick={handleNewConversation}
-            className="p-2 text-secondary hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+            className="p-2 text-secondary hover:text-primary hover:bg-parchment rounded-lg transition-colors"
             title="New conversation"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,11 +338,11 @@ export default function MessageHistorySidebar({
             onChange={(e) => handleSearchChange(e.target.value)}
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
-            className="w-full pl-10 pr-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
           />
           {searchLoading && (
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-              <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+              <div className="animate-spin w-4 h-4 border-2 border-terracotta border-t-transparent rounded-full"></div>
             </div>
           )}
           
@@ -354,10 +354,10 @@ export default function MessageHistorySidebar({
                   <button
                     key={index}
                     onClick={() => handleSuggestionSelect(suggestion)}
-                    className="w-full px-3 py-2 text-left text-sm text-secondary hover:bg-gray-50 hover:text-primary transition-colors"
+                    className="w-full px-3 py-2 text-left text-sm text-secondary hover:bg-parchment hover:text-primary transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-slate-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                       <span>{suggestion}</span>
@@ -370,7 +370,7 @@ export default function MessageHistorySidebar({
         </div>
 
         {/* View Mode Tabs */}
-        <div className="flex mt-3 bg-gray-100 rounded-lg p-1">
+        <div className="flex mt-3 bg-parchment rounded-lg p-1">
           <button
             onClick={() => setViewMode('conversations')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
@@ -404,8 +404,8 @@ export default function MessageHistorySidebar({
                 <div className="animate-pulse space-y-3">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-ink/10 rounded w-3/4"></div>
+                      <div className="h-3 bg-ink/10 rounded w-1/2"></div>
                     </div>
                   ))}
                 </div>
@@ -414,7 +414,7 @@ export default function MessageHistorySidebar({
               <div className="p-4 text-center">
                 <div className="text-secondary text-sm">
                   <div className="mb-2">
-                    <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-12 h-12 mx-auto text-ink/15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
@@ -430,8 +430,8 @@ export default function MessageHistorySidebar({
                       onClick={() => handleConversationClick(conversation.id)}
                       className={`block p-3 rounded-lg cursor-pointer transition-colors ${
                         selectedConversation === conversation.id
-                          ? 'bg-blue-50 border border-blue-200'
-                          : 'hover:bg-gray-50 border border-transparent'
+                          ? 'bg-terracotta/5 border border-terracotta/20'
+                          : 'hover:bg-parchment border border-transparent'
                       }`}
                     >
                       <div className="flex items-start justify-between">
@@ -441,7 +441,7 @@ export default function MessageHistorySidebar({
                               {conversation.title}
                             </h3>
                             {conversation.isActive && (
-                              <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                              <div className="w-2 h-2 bg-forest rounded-full flex-shrink-0"></div>
                             )}
                           </div>
                           
@@ -466,7 +466,7 @@ export default function MessageHistorySidebar({
                         </div>
                         
                         <button
-                          className="ml-2 p-1 hover:bg-gray-100 rounded flex-shrink-0"
+                          className="ml-2 p-1 hover:bg-parchment rounded flex-shrink-0"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleConversationClick(conversation.id)
@@ -488,12 +488,12 @@ export default function MessageHistorySidebar({
 
                     {/* Expanded Message Preview */}
                     {expandedConversations.has(conversation.id) && (
-                      <div className="ml-4 pl-3 border-l-2 border-gray-200 space-y-2 pb-2">
+                      <div className="ml-4 pl-3 border-l-2 border-ink/10 space-y-2 pb-2">
                         {messages.slice(0, 3).map((message) => (
                           <div key={message.id} className="py-1">
                             <div className="flex items-center gap-2 mb-1">
                               <span className={`text-xs font-medium ${
-                                message.role === 'assistant' ? 'text-blue-600' : 'text-gray-600'
+                                message.role === 'assistant' ? 'text-terracotta' : 'text-ink-light'
                               }`}>
                                 {message.role === 'assistant' ? 'Mary' : 'You'}
                               </span>
@@ -523,7 +523,7 @@ export default function MessageHistorySidebar({
           <div className="h-full flex flex-col">
             {/* Search Stats */}
             {searchStats && (
-              <div className="flex-shrink-0 px-3 py-2 bg-blue-50 border-b border-blue-200 text-xs text-blue-700">
+              <div className="flex-shrink-0 px-3 py-2 bg-terracotta/5 border-b border-terracotta/20 text-xs text-terracotta">
                 <div className="flex items-center justify-between">
                   <span>
                     {searchStats.totalCount} result{searchStats.totalCount !== 1 ? 's' : ''} found
@@ -560,17 +560,17 @@ export default function MessageHistorySidebar({
                         handleConversationClick(message.conversationId)
                       }
                     }}
-                    className="p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="p-3 rounded-lg border border-ink/8 hover:bg-parchment cursor-pointer transition-colors"
                   >
                     {/* Conversation Context Header for Search Results */}
                     {message.conversationTitle && (
-                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
-                        <div className="w-4 h-4 rounded bg-blue-100 flex items-center justify-center">
-                          <svg className="w-2 h-2 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-ink/5">
+                        <div className="w-4 h-4 rounded bg-terracotta/10 flex items-center justify-center">
+                          <svg className="w-2 h-2 text-terracotta" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                           </svg>
                         </div>
-                        <span className="text-xs text-blue-600 font-medium truncate">
+                        <span className="text-xs text-terracotta font-medium truncate">
                           {message.conversationTitle}
                         </span>
                       </div>
@@ -579,8 +579,8 @@ export default function MessageHistorySidebar({
                     <div className="flex items-center gap-2 mb-2">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
                         message.role === 'assistant' 
-                          ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
-                          : 'bg-gray-200 text-gray-600'
+                          ? 'bg-terracotta text-cream'
+                          : 'bg-ink/10 text-ink-light'
                       }`}>
                         {message.role === 'assistant' ? 'M' : 'U'}
                       </div>
@@ -609,7 +609,7 @@ export default function MessageHistorySidebar({
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 p-3 border-t border-divider bg-gray-50">
+      <div className="flex-shrink-0 p-3 border-t border-divider bg-parchment">
         <div className="text-xs text-secondary text-center">
           {conversations.length} conversations • {messages.length} messages
         </div>

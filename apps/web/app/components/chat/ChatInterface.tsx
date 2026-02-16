@@ -358,17 +358,17 @@ I'm here to help you think through strategic challenges, validate your assumptio
       <div className="flex-shrink-0 px-6 py-4 bg-white border-b border-divider">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">M</span>
+            <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center">
+              <span className="text-cream font-bold text-lg font-display">M</span>
             </div>
             <div>
               <h1 className="text-xl font-bold text-primary">Mary</h1>
               <p className="text-sm text-secondary">AI Business Strategist</p>
             </div>
             {coachingContext?.currentBmadSession && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 rounded-full">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-xs text-blue-700 font-medium capitalize">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-terracotta/10 rounded-full">
+                <div className="w-2 h-2 bg-terracotta rounded-full"></div>
+                <span className="text-xs text-terracotta font-medium capitalize">
                   {coachingContext.currentBmadSession.pathway.replace('-', ' ')} • {coachingContext.currentBmadSession.phase}
                 </span>
               </div>
@@ -379,10 +379,10 @@ I'm here to help you think through strategic challenges, validate your assumptio
             {/* Connection Status */}
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${
-                connectionStatus === 'connected' ? 'bg-green-500' :
-                connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-                connectionStatus === 'retrying' ? 'bg-orange-500 animate-pulse' :
-                'bg-red-500'
+                connectionStatus === 'connected' ? 'bg-forest' :
+                connectionStatus === 'connecting' ? 'bg-mustard animate-pulse' :
+                connectionStatus === 'retrying' ? 'bg-mustard animate-pulse' :
+                'bg-rust'
               }`} />
               <span className="text-xs text-secondary capitalize">
                 {connectionStatus === 'retrying' ? `Retrying (${retryCount}/3)` : connectionStatus}
@@ -391,7 +391,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
             
             {/* Token Usage Display */}
             {totalTokens > 0 && (
-              <div className="text-xs text-secondary bg-gray-50 rounded-lg px-3 py-1.5">
+              <div className="text-xs text-secondary bg-parchment rounded-lg px-3 py-1.5">
                 <span className="font-mono">{totalTokens.toLocaleString()}</span> tokens • 
                 <span className="font-mono ml-1">
                   ${totalCost.toFixed(4)}
@@ -403,7 +403,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
             {messages.length > 1 && (
               <button
                 onClick={clearConversation}
-                className="text-secondary hover:text-primary p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                className="text-secondary hover:text-primary p-2 rounded-lg hover:bg-parchment transition-colors"
                 title="Clear conversation"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -450,7 +450,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
       </div>
 
       {/* Quick Actions */}
-      <div className="flex-shrink-0 px-6 py-4 bg-gray-50 border-t border-divider">
+      <div className="flex-shrink-0 px-6 py-4 bg-parchment border-t border-divider">
         <QuickActions
           onActionSelect={handleQuickAction}
           coachingContext={coachingContext}

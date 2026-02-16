@@ -230,7 +230,7 @@ export default function MessageInput({
             <button
               key={action.id}
               onClick={action.action}
-              className="p-2 text-secondary hover:text-primary hover:bg-gray-50 rounded transition-colors"
+              className="p-2 text-secondary hover:text-primary hover:bg-parchment rounded transition-colors"
               title={`${action.label}${action.shortcut ? ` (${action.shortcut})` : ''}`}
               type="button"
             >
@@ -252,7 +252,7 @@ export default function MessageInput({
       )}
 
       {/* Input Container */}
-      <div className="relative bg-white border border-divider rounded-lg focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-300 transition-colors">
+      <div className="relative bg-white border border-divider rounded-lg focus-within:ring-2 focus-within:ring-terracotta/20 focus-within:border-terracotta/30 transition-colors">
         {/* Textarea */}
         <textarea
           ref={textareaRef}
@@ -263,7 +263,7 @@ export default function MessageInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="w-full px-4 py-3 pr-20 resize-none bg-transparent border-none outline-none text-secondary placeholder:text-gray-400 min-h-[50px] max-h-[200px]"
+          className="w-full px-4 py-3 pr-20 resize-none bg-transparent border-none outline-none text-secondary placeholder:text-slate-blue/60 min-h-[50px] max-h-[200px]"
           style={{ 
             scrollbarWidth: 'thin',
             scrollbarColor: '#CBD5E1 transparent'
@@ -277,9 +277,9 @@ export default function MessageInput({
             <button
               onClick={() => setShowToolbar(!showToolbar)}
               className={`p-1.5 rounded transition-colors ${
-                showToolbar 
-                  ? 'text-primary bg-blue-50' 
-                  : 'text-gray-400 hover:text-secondary hover:bg-gray-50'
+                showToolbar
+                  ? 'text-primary bg-terracotta/10'
+                  : 'text-slate-blue/60 hover:text-secondary hover:bg-parchment'
               }`}
               title="Format text"
               type="button"
@@ -291,7 +291,7 @@ export default function MessageInput({
 
             {/* Character Count */}
             <span className={`text-xs ${
-              value.length > maxLength * 0.9 ? 'text-orange-500' : 'text-gray-400'
+              value.length > maxLength * 0.9 ? 'text-mustard' : 'text-slate-blue/60'
             }`}>
               {value.length}/{maxLength}
             </span>
@@ -304,7 +304,7 @@ export default function MessageInput({
             className={`p-2 rounded-lg transition-colors ${
               value.trim() && !disabled
                 ? 'text-white bg-primary hover:bg-primary-hover shadow-sm' 
-                : 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                : 'text-slate-blue/60 bg-parchment cursor-not-allowed'
             }`}
             title="Send message (Enter)"
             type="button"
@@ -317,7 +317,7 @@ export default function MessageInput({
       </div>
 
       {/* Help Text */}
-      <div className="mt-2 text-xs text-gray-500 flex items-center gap-4">
+      <div className="mt-2 text-xs text-slate-blue flex items-center gap-4">
         <span>Press Enter to send, Shift+Enter for new line</span>
         <span>•</span>
         <span>Use Ctrl+B for bold, Ctrl+I for italic</span>
