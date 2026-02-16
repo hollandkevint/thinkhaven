@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { getScenarioByIndex } from '../../../lib/demo/demoData'
 import { DemoScenario, DemoMessage } from '../../../types/demo'
 import { MessageCircle, ArrowLeft, Clock, Target, Play, Pause } from 'lucide-react'
-import { MarkdownRenderer } from '@/app/components/chat/MarkdownRenderer'
+import MarkdownRenderer from '@/app/components/chat/MarkdownRenderer'
 
 export default function DemoScenarioViewer() {
   const params = useParams()
@@ -41,10 +41,10 @@ export default function DemoScenarioViewer() {
 
   if (!scenario) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-cream">
         <div className="text-center">
           <div className="loading-shimmer h-8 w-48 rounded mb-4"></div>
-          <p className="text-secondary">Loading strategic session...</p>
+          <p className="text-slate-blue">Loading strategic session...</p>
         </div>
       </div>
     )
@@ -53,26 +53,27 @@ export default function DemoScenarioViewer() {
   const progress = (visibleMessages / scenario.chat_context.length) * 100
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-cream">
       {/* Demo Navigation Header */}
-      <div className="bg-white border-b sticky top-0 z-40">
+      <div className="bg-parchment border-b border-ink/8 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => router.push('/demo')}
+                className="text-ink hover:bg-cream"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Demo Hub
               </Button>
-              <div className="h-6 w-px bg-gray-300"></div>
+              <div className="h-6 w-px bg-ink/15"></div>
               <div>
-                <h1 className="font-semibold text-gray-900 text-sm">
+                <h1 className="font-semibold text-ink text-sm font-display">
                   {scenario.name}
                 </h1>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-xs text-slate-blue">
                   <MessageCircle className="w-3 h-3" />
                   <span>{visibleMessages}/{scenario.chat_context.length} messages</span>
                 </div>
@@ -81,18 +82,19 @@ export default function DemoScenarioViewer() {
 
             <div className="flex items-center gap-3">
               {/* Progress Bar */}
-              <div className="w-32 bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              <div className="w-32 bg-ink/10 rounded-full h-2">
+                <div
+                  className="bg-terracotta h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
-              
+
               {/* Auto-advance Toggle */}
               <Button
                 variant={autoAdvance ? "default" : "outline"}
                 size="sm"
                 onClick={() => setAutoAdvance(!autoAdvance)}
+                className={autoAdvance ? '' : 'border-ink/15 text-ink hover:bg-cream'}
               >
                 {autoAdvance ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </Button>
@@ -104,22 +106,22 @@ export default function DemoScenarioViewer() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <div className="grid lg:grid-cols-4 gap-8">
-            
+
             {/* Main Conversation Display */}
             <div className="lg:col-span-3">
-              <Card className="shadow-lg">
-                <CardHeader className="border-b bg-gray-50">
+              <Card className="shadow-lg bg-white border-ink/8">
+                <CardHeader className="border-b border-ink/8 bg-parchment">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">M</span>
+                    <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center">
+                      <span className="text-cream font-bold text-sm font-display">M</span>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Strategic Analysis Session</h3>
-                      <p className="text-sm text-gray-600">{scenario.description}</p>
+                      <h3 className="font-semibold text-ink font-display">Strategic Analysis Session</h3>
+                      <p className="text-sm text-ink-light">{scenario.description}</p>
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="p-6">
                   <div className="space-y-6 max-h-[600px] overflow-y-auto">
                     {scenario.chat_context.slice(0, visibleMessages).map((message, index) => (
@@ -128,43 +130,43 @@ export default function DemoScenarioViewer() {
                           message.role === 'user' ? 'flex-row-reverse' : ''
                         }`}>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            message.role === 'user' 
-                              ? 'bg-green-500 text-white' 
-                              : 'bg-blue-500 text-white'
+                            message.role === 'user'
+                              ? 'bg-forest text-cream'
+                              : 'bg-terracotta text-cream'
                           }`}>
-                            <span className="text-xs font-semibold">
+                            <span className="text-xs font-semibold font-display">
                               {message.role === 'user' ? 'Y' : 'M'}
                             </span>
                           </div>
-                          
+
                           <div className={`flex-1 ${message.role === 'user' ? 'text-right' : ''}`}>
                             <div className={`inline-block p-4 rounded-lg max-w-4xl ${
                               message.role === 'user'
-                                ? 'bg-green-50 border border-green-200'
-                                : 'bg-blue-50 border border-blue-200'
+                                ? 'bg-forest/5 border border-forest/15'
+                                : 'bg-parchment border border-ink/8'
                             }`}>
-                              <div className={`text-sm font-medium mb-2 ${
-                                message.role === 'user' ? 'text-green-700' : 'text-blue-700'
+                              <div className={`text-sm font-medium mb-2 font-display ${
+                                message.role === 'user' ? 'text-forest' : 'text-terracotta'
                               }`}>
                                 {message.role === 'user' ? 'You' : 'Mary (Strategic AI)'}
                               </div>
-                              <div className="text-gray-700">
+                              <div className="text-ink">
                                 <MarkdownRenderer content={message.content} />
                               </div>
-                              
+
                               {/* Strategic Tags */}
                               {message.metadata?.strategic_tags && (
                                 <div className="flex flex-wrap gap-1 mt-3">
                                   {message.metadata.strategic_tags.map(tag => (
-                                    <Badge key={tag} variant="outline" className="text-xs">
+                                    <Badge key={tag} className="text-xs px-2.5 py-0.5 bg-ink text-cream font-normal">
                                       {tag}
                                     </Badge>
                                   ))}
                                 </div>
                               )}
                             </div>
-                            
-                            <div className="text-xs text-gray-500 mt-2">
+
+                            <div className="text-xs text-slate-blue mt-2">
                               {new Date(message.timestamp).toLocaleTimeString()}
                             </div>
                           </div>
@@ -175,14 +177,14 @@ export default function DemoScenarioViewer() {
 
                   {/* Load More Button */}
                   {visibleMessages < scenario.chat_context.length && (
-                    <div className="text-center mt-6 pt-6 border-t">
-                      <Button 
+                    <div className="text-center mt-6 pt-6 border-t border-ink/8">
+                      <Button
                         onClick={() => setVisibleMessages(prev => Math.min(prev + 1, scenario.chat_context.length))}
                         variant="outline"
-                        className="px-6"
+                        className="px-6 border-ink/15 text-ink hover:bg-parchment"
                       >
                         Continue Session
-                        <span className="ml-2 text-xs text-gray-500">
+                        <span className="ml-2 text-xs text-slate-blue">
                           ({scenario.chat_context.length - visibleMessages} more messages)
                         </span>
                       </Button>
@@ -195,63 +197,63 @@ export default function DemoScenarioViewer() {
             {/* Strategic Insights Panel */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
-                
+
                 {/* Strategic Analysis Tracker */}
-                <Card>
+                <Card className="bg-white border-ink/8">
                   <CardHeader>
                     <div className="flex items-center gap-2">
-                      <Target className="w-4 h-4 text-blue-600" />
-                      <h4 className="font-semibold text-sm">Strategic Analysis</h4>
+                      <Target className="w-4 h-4 text-terracotta" />
+                      <h4 className="font-semibold text-sm font-display text-ink">Strategic Analysis</h4>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="text-xs">
                       <div className="flex items-center justify-between mb-1">
-                        <span>Structured Inquiry</span>
+                        <span className="text-ink-light">Structured Inquiry</span>
                         <Badge variant="secondary" className="text-xs">Active</Badge>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-1">
-                        <div className="bg-blue-600 h-1 rounded-full w-3/4"></div>
-                      </div>
-                    </div>
-                    
-                    <div className="text-xs">
-                      <div className="flex items-center justify-between mb-1">
-                        <span>Evidence-Based</span>
-                        <Badge variant="outline" className="text-xs">75%</Badge>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-1">
-                        <div className="bg-green-600 h-1 rounded-full w-3/4"></div>
+                      <div className="w-full bg-ink/10 rounded-full h-1">
+                        <div className="bg-terracotta h-1 rounded-full w-3/4"></div>
                       </div>
                     </div>
 
                     <div className="text-xs">
                       <div className="flex items-center justify-between mb-1">
-                        <span>Numbered Options</span>
+                        <span className="text-ink-light">Evidence-Based</span>
+                        <Badge variant="outline" className="text-xs">75%</Badge>
+                      </div>
+                      <div className="w-full bg-ink/10 rounded-full h-1">
+                        <div className="bg-forest h-1 rounded-full w-3/4"></div>
+                      </div>
+                    </div>
+
+                    <div className="text-xs">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-ink-light">Numbered Options</span>
                         <Badge variant="secondary" className="text-xs">In Use</Badge>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-1">
-                        <div className="bg-purple-600 h-1 rounded-full w-full"></div>
+                      <div className="w-full bg-ink/10 rounded-full h-1">
+                        <div className="bg-mustard h-1 rounded-full w-full"></div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Session Stats */}
-                <Card>
+                <Card className="bg-white border-ink/8">
                   <CardContent className="pt-6">
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Session Length</span>
-                        <span className="font-medium">~5 minutes</span>
+                        <span className="text-slate-blue">Session Length</span>
+                        <span className="font-medium text-ink">~5 minutes</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Strategic Depth</span>
-                        <span className="font-medium">Advanced</span>
+                        <span className="text-slate-blue">Strategic Depth</span>
+                        <span className="font-medium text-ink">Advanced</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Framework Used</span>
-                        <span className="font-medium">Strategic Analysis</span>
+                        <span className="text-slate-blue">Framework Used</span>
+                        <span className="font-medium text-ink">Strategic Analysis</span>
                       </div>
                     </div>
                   </CardContent>
@@ -259,12 +261,12 @@ export default function DemoScenarioViewer() {
 
                 {/* Next Steps CTA */}
                 {progress > 50 && (
-                  <Card className="border-blue-200 bg-blue-50">
+                  <Card className="border-terracotta/20 bg-terracotta/5">
                     <CardContent className="pt-6 text-center">
-                      <h4 className="font-semibold text-blue-900 mb-2">
+                      <h4 className="font-semibold text-ink mb-2 font-display">
                         Ready for Your Session?
                       </h4>
-                      <p className="text-sm text-blue-700 mb-4">
+                      <p className="text-sm text-ink-light mb-4">
                         Start your strategic analysis with Mary's guidance
                       </p>
                       <Button size="sm" className="w-full" onClick={() => router.push('/signup')}>
@@ -282,22 +284,22 @@ export default function DemoScenarioViewer() {
       {/* Conversion Overlay */}
       {showConversion && progress > 80 && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-md w-full">
+          <Card className="max-w-md w-full bg-white border-ink/8">
             <CardContent className="pt-6 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Target className="w-8 h-8 text-green-600" />
+              <div className="w-16 h-16 bg-forest/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Target className="w-8 h-8 text-forest" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Impressed with Mary's Analysis?</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-xl font-bold mb-2 text-ink font-display">Impressed with Mary's Analysis?</h3>
+              <p className="text-ink-light mb-6">
                 This is just one example of systematic strategic thinking. Get personalized analysis for your business challenge.
               </p>
               <div className="space-y-3">
                 <Button className="w-full" size="lg" onClick={() => router.push('/signup')}>
-                  🚀 Start My Strategic Session
+                  Start My Strategic Session
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
+                <Button
+                  variant="outline"
+                  className="w-full border-ink/15 text-ink hover:bg-parchment"
                   onClick={() => setShowConversion(false)}
                 >
                   Continue Demo
