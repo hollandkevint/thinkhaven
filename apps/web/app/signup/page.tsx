@@ -92,10 +92,10 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream">
       {/* Minimal Navigation - Logo only */}
       <div className="absolute top-8 left-8">
-        <Link href="/" className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+        <Link href="/" className="text-2xl font-bold font-display text-foreground">
           Thinkhaven
         </Link>
       </div>
@@ -109,12 +109,7 @@ export default function SignUpPage() {
             type="button"
             onClick={handleGoogleSignUp}
             disabled={googleLoading || loading}
-            className="w-full h-11 flex items-center justify-center gap-3 px-4 border rounded-lg transition-all disabled:opacity-50 hover:border-gray-400"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'white',
-              color: 'var(--foreground)'
-            }}
+            className="w-full h-11 flex items-center justify-center gap-3 px-4 border border-border rounded-lg transition-all disabled:opacity-50 hover:border-ink/20 bg-white text-foreground"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -130,10 +125,10 @@ export default function SignUpPage() {
           {/* OR Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t" style={{ borderColor: 'var(--border)' }} />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white" style={{ color: 'var(--muted)' }}>OR</span>
+              <span className="px-2 bg-cream text-muted-foreground">OR</span>
             </div>
           </div>
 
@@ -143,8 +138,7 @@ export default function SignUpPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-semibold mb-1"
-                style={{ color: 'var(--foreground)' }}
+                className="block text-sm font-semibold mb-1 text-foreground"
               >
                 Work email
               </label>
@@ -155,11 +149,7 @@ export default function SignUpPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 px-4 border rounded-lg focus:outline-none focus:ring-2 transition-all"
-                style={{
-                  borderColor: 'var(--border)',
-                  '--tw-ring-color': 'var(--primary)'
-                } as React.CSSProperties}
+                className="w-full h-11 px-4 border border-border rounded-lg focus:outline-none focus:ring-2 ring-primary transition-all"
                 placeholder="your@company.com"
               />
             </div>
@@ -168,8 +158,7 @@ export default function SignUpPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-semibold mb-1"
-                style={{ color: 'var(--foreground)' }}
+                className="block text-sm font-semibold mb-1 text-foreground"
               >
                 Password
               </label>
@@ -180,14 +169,10 @@ export default function SignUpPage() {
                 required
                 value={password}
                 onChange={(e) => handlePasswordChange(e.target.value)}
-                className="w-full h-11 px-4 border rounded-lg focus:outline-none focus:ring-2 transition-all"
-                style={{
-                  borderColor: 'var(--border)',
-                  '--tw-ring-color': 'var(--primary)'
-                } as React.CSSProperties}
+                className="w-full h-11 px-4 border border-border rounded-lg focus:outline-none focus:ring-2 ring-primary transition-all"
                 placeholder="••••••••"
               />
-              <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+              <p className="text-xs mt-1 text-muted-foreground">
                 At least 8 characters
               </p>
 
@@ -195,30 +180,28 @@ export default function SignUpPage() {
               {passwordStrength && (
                 <div className="mt-2">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-ink/10 rounded-full overflow-hidden">
                       <div
-                        className="h-full transition-all duration-300"
+                        className={`h-full transition-all duration-300 ${
+                          passwordStrength.level === 'weak'
+                            ? 'bg-rust'
+                            : passwordStrength.level === 'medium'
+                            ? 'bg-mustard'
+                            : 'bg-forest'
+                        }`}
                         style={{
                           width: `${(passwordStrength.score / 5) * 100}%`,
-                          backgroundColor:
-                            passwordStrength.level === 'weak'
-                              ? '#ef4444'
-                              : passwordStrength.level === 'medium'
-                              ? '#f59e0b'
-                              : '#10b981',
                         }}
                       />
                     </div>
                     <span
-                      className="text-xs font-medium capitalize"
-                      style={{
-                        color:
-                          passwordStrength.level === 'weak'
-                            ? '#ef4444'
-                            : passwordStrength.level === 'medium'
-                            ? '#f59e0b'
-                            : '#10b981',
-                      }}
+                      className={`text-xs font-medium capitalize ${
+                        passwordStrength.level === 'weak'
+                          ? 'text-rust'
+                          : passwordStrength.level === 'medium'
+                          ? 'text-mustard'
+                          : 'text-forest'
+                      }`}
                     >
                       {passwordStrength.level}
                     </span>
@@ -230,12 +213,7 @@ export default function SignUpPage() {
             {/* Success Message */}
             {message && (
               <div
-                className="p-3 rounded-lg text-sm"
-                style={{
-                  backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                  border: '1px solid #10b981',
-                  color: '#10b981'
-                }}
+                className="p-3 rounded-lg text-sm bg-forest/5 border border-forest text-forest"
               >
                 {message}
               </div>
@@ -244,12 +222,7 @@ export default function SignUpPage() {
             {/* Error Message */}
             {error && (
               <div
-                className="p-3 rounded-lg text-sm"
-                style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.05)',
-                  border: '1px solid #ef4444',
-                  color: '#ef4444'
-                }}
+                className="p-3 rounded-lg text-sm bg-rust/5 border border-rust text-rust"
               >
                 {error}
               </div>
@@ -259,18 +232,14 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={loading || !!message}
-              className="w-full h-11 rounded-lg font-semibold transition-all disabled:opacity-50"
-              style={{
-                backgroundColor: 'var(--primary)',
-                color: 'white'
-              }}
+              className="w-full h-11 rounded-lg font-semibold transition-all disabled:opacity-50 bg-primary text-cream"
             >
               {loading ? 'Creating account...' : 'Sign up'}
             </button>
           </form>
 
           {/* Terms and Privacy */}
-          <div className="text-center text-xs" style={{ color: 'var(--muted)' }}>
+          <div className="text-center text-xs text-muted-foreground">
             By signing up, you agree to our{' '}
             <a href="#" className="underline hover:opacity-75">
               Terms of Service
@@ -283,11 +252,10 @@ export default function SignUpPage() {
 
           {/* Account Toggle Link */}
           <div className="text-center text-sm">
-            <span style={{ color: 'var(--muted)' }}>Already have an account? </span>
+            <span className="text-muted-foreground">Already have an account? </span>
             <Link
               href="/login"
-              className="font-semibold hover:underline"
-              style={{ color: 'var(--primary)' }}
+              className="font-semibold hover:underline text-primary"
             >
               Log in
             </Link>

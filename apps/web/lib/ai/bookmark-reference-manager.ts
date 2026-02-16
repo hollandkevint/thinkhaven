@@ -273,13 +273,13 @@ export class BookmarkReferenceManager {
 
 // Utility functions for colors and reference types
 export const BOOKMARK_COLORS = {
-  blue: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
-  green: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
-  yellow: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
-  red: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
-  purple: { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200' },
-  pink: { bg: 'bg-pink-100', text: 'text-pink-800', border: 'border-pink-200' },
-  indigo: { bg: 'bg-indigo-100', text: 'text-indigo-800', border: 'border-indigo-200' }
+  blue: { bg: 'bg-terracotta/10', text: 'text-terracotta', border: 'border-terracotta/20' },
+  green: { bg: 'bg-forest/10', text: 'text-forest', border: 'border-forest/20' },
+  yellow: { bg: 'bg-mustard/10', text: 'text-mustard', border: 'border-mustard/20' },
+  red: { bg: 'bg-rust/10', text: 'text-rust', border: 'border-rust/20' },
+  purple: { bg: 'bg-dusty-rose/20', text: 'text-ink', border: 'border-dusty-rose/30' },
+  pink: { bg: 'bg-dusty-rose/10', text: 'text-ink', border: 'border-dusty-rose/20' },
+  indigo: { bg: 'bg-slate-blue/10', text: 'text-slate-blue', border: 'border-slate-blue/20' }
 } as const
 
 export const REFERENCE_TYPES = {

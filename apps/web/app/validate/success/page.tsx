@@ -22,10 +22,10 @@ function ValidateSuccessContent() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex items-center justify-center bg-cream">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Confirming your purchase...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terracotta mx-auto mb-4"></div>
+          <p className="text-ink-light">Confirming your purchase...</p>
         </div>
       </div>
     )
@@ -33,12 +33,12 @@ function ValidateSuccessContent() {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-cream p-4">
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
             <div className="text-5xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h1>
-            <p className="text-gray-600 mb-6">
+            <h1 className="text-2xl font-bold text-ink mb-2">Something went wrong</h1>
+            <p className="text-ink-light mb-6">
               We couldn&apos;t confirm your purchase. If you were charged, please contact support.
             </p>
             <Button onClick={() => router.push('/')}>
@@ -51,30 +51,30 @@ function ValidateSuccessContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-cream p-4">
       <Card className="max-w-lg w-full">
         <CardContent className="p-8 text-center">
           <div className="text-6xl mb-4">🎉</div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-ink mb-2">
             You&apos;re all set!
           </h1>
-          <p className="text-xl text-gray-600 mb-6">
+          <p className="text-xl text-ink-light mb-6">
             Your Idea Validation session is ready.
           </p>
 
-          <div className="bg-blue-50 rounded-lg p-4 mb-6 text-left">
-            <h2 className="font-semibold text-gray-900 mb-2">What happens next:</h2>
-            <ul className="space-y-2 text-gray-700">
+          <div className="bg-parchment rounded-lg p-4 mb-6 text-left">
+            <h2 className="font-semibold text-ink mb-2">What happens next:</h2>
+            <ul className="space-y-2 text-ink-light">
               <li className="flex items-start">
-                <span className="text-green-600 mr-2">1.</span>
+                <span className="text-forest mr-2">1.</span>
                 Start your 30-minute validation session
               </li>
               <li className="flex items-start">
-                <span className="text-green-600 mr-2">2.</span>
+                <span className="text-forest mr-2">2.</span>
                 Answer 10 critical questions about your idea
               </li>
               <li className="flex items-start">
-                <span className="text-green-600 mr-2">3.</span>
+                <span className="text-forest mr-2">3.</span>
                 Get your validation scorecard and PDF report
               </li>
             </ul>
@@ -88,7 +88,7 @@ function ValidateSuccessContent() {
             Start My Validation Session
           </Button>
 
-          <p className="text-sm text-gray-500 mt-4">
+          <p className="text-sm text-slate-blue mt-4">
             A receipt has been sent to your email.
           </p>
         </CardContent>
@@ -99,10 +99,10 @@ function ValidateSuccessContent() {
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen flex items-center justify-center bg-cream">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terracotta mx-auto mb-4"></div>
+        <p className="text-ink-light">Loading...</p>
       </div>
     </div>
   )

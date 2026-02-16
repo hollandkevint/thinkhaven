@@ -46,20 +46,15 @@ export default function SpeakerMessage({ message, boardMember }: SpeakerMessageP
                 code({ inline, className, children, ...props }: any) {
                   return inline ? (
                     <code
-                      className="px-1.5 py-0.5 rounded text-sm"
-                      style={{
-                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                        fontFamily: 'var(--font-mono)',
-                      }}
+                      className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono"
                     >
                       {children}
                     </code>
                   ) : (
                     <pre
-                      className="p-4 rounded-lg overflow-x-auto"
-                      style={{ backgroundColor: '#f9f9f9' }}
+                      className="p-4 rounded-lg overflow-x-auto bg-parchment"
                     >
-                      <code style={{ fontFamily: 'var(--font-mono)' }}>
+                      <code className="font-mono">
                         {children}
                       </code>
                     </pre>
@@ -67,8 +62,7 @@ export default function SpeakerMessage({ message, boardMember }: SpeakerMessageP
                 },
                 p: ({ children }) => (
                   <p
-                    className="mb-3 leading-relaxed last:mb-0"
-                    style={{ color: 'var(--foreground)' }}
+                    className="mb-3 leading-relaxed last:mb-0 text-ink"
                   >
                     {children}
                   </p>
@@ -80,7 +74,7 @@ export default function SpeakerMessage({ message, boardMember }: SpeakerMessageP
                   <ol className="list-decimal pl-6 mb-3 space-y-1">{children}</ol>
                 ),
                 li: ({ children }) => (
-                  <li style={{ color: 'var(--foreground)' }}>{children}</li>
+                  <li className="text-ink">{children}</li>
                 ),
                 strong: ({ children }) => (
                   <strong className="font-semibold">{children}</strong>

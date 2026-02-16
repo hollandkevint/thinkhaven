@@ -15,38 +15,38 @@ export default function PriorityMatrix({
     switch (quadrant) {
       case 'Quick Wins':
         return {
-          bg: 'bg-green-50',
-          border: 'border-green-200',
-          text: 'text-green-800',
-          dotColor: '#10b981'
+          bg: 'bg-forest/5',
+          border: 'border-forest/20',
+          text: 'text-forest',
+          dotColor: '#4A6741'
         }
       case 'Major Projects':
         return {
-          bg: 'bg-blue-50',
-          border: 'border-blue-200',
-          text: 'text-blue-800',
-          dotColor: '#3b82f6'
+          bg: 'bg-terracotta/5',
+          border: 'border-terracotta/20',
+          text: 'text-ink',
+          dotColor: '#C4785C'
         }
       case 'Fill-ins':
         return {
-          bg: 'bg-yellow-50',
-          border: 'border-yellow-200',
-          text: 'text-yellow-800',
-          dotColor: '#f59e0b'
+          bg: 'bg-mustard/5',
+          border: 'border-mustard/20',
+          text: 'text-mustard',
+          dotColor: '#D4A84B'
         }
       case 'Time Wasters':
         return {
-          bg: 'bg-red-50',
-          border: 'border-red-200',
-          text: 'text-red-800',
-          dotColor: '#ef4444'
+          bg: 'bg-rust/5',
+          border: 'border-rust/20',
+          text: 'text-rust',
+          dotColor: '#8B4D3B'
         }
       default:
         return {
-          bg: 'bg-gray-50',
-          border: 'border-gray-200',
-          text: 'text-gray-800',
-          dotColor: '#6b7280'
+          bg: 'bg-parchment',
+          border: 'border-ink/8',
+          text: 'text-ink',
+          dotColor: '#6B7B8C'
         }
     }
   }
@@ -62,58 +62,58 @@ export default function PriorityMatrix({
 
   return (
     <div className={`priority-matrix ${className}`}>
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+      <div className="bg-white rounded-lg border border-ink/8 p-6">
+        <h3 className="text-xl font-semibold text-ink mb-4">
           Priority Matrix
         </h3>
-        <p className="text-gray-600 mb-6">
+        <p className="text-ink-light mb-6">
           Visual representation of your feature's position based on effort and impact scores.
         </p>
 
         <div className="relative">
           {/* Matrix Grid */}
-          <div className="grid grid-cols-2 gap-2 h-96 border-2 border-gray-300 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-2 gap-2 h-96 border-2 border-ink/8 rounded-lg overflow-hidden">
             {/* Top Left: Fill-ins (Low Impact, Low Effort) */}
-            <div className="bg-yellow-50 border-yellow-200 border-r border-b p-4 relative">
+            <div className="bg-mustard/5 border-mustard/20 border-r border-b p-4 relative">
               <div className="absolute top-2 left-2">
-                <h4 className="font-semibold text-yellow-800 text-sm">Fill-ins</h4>
-                <p className="text-xs text-yellow-600">Low Impact, Low Effort</p>
+                <h4 className="font-semibold text-mustard text-sm">Fill-ins</h4>
+                <p className="text-xs text-mustard">Low Impact, Low Effort</p>
               </div>
               <div className="absolute bottom-2 right-2">
-                <span className="text-xs text-yellow-600">⏰ Nice-to-have</span>
+                <span className="text-xs text-mustard">⏰ Nice-to-have</span>
               </div>
             </div>
 
             {/* Top Right: Quick Wins (High Impact, Low Effort) */}
-            <div className="bg-green-50 border-green-200 border-b p-4 relative">
+            <div className="bg-forest/5 border-forest/20 border-b p-4 relative">
               <div className="absolute top-2 left-2">
-                <h4 className="font-semibold text-green-800 text-sm">Quick Wins</h4>
-                <p className="text-xs text-green-600">High Impact, Low Effort</p>
+                <h4 className="font-semibold text-forest text-sm">Quick Wins</h4>
+                <p className="text-xs text-forest">High Impact, Low Effort</p>
               </div>
               <div className="absolute bottom-2 right-2">
-                <span className="text-xs text-green-600">🎯 Do First</span>
+                <span className="text-xs text-forest">🎯 Do First</span>
               </div>
             </div>
 
             {/* Bottom Left: Time Wasters (Low Impact, High Effort) */}
-            <div className="bg-red-50 border-red-200 border-r p-4 relative">
+            <div className="bg-rust/5 border-rust/20 border-r p-4 relative">
               <div className="absolute top-2 left-2">
-                <h4 className="font-semibold text-red-800 text-sm">Time Wasters</h4>
-                <p className="text-xs text-red-600">Low Impact, High Effort</p>
+                <h4 className="font-semibold text-rust text-sm">Time Wasters</h4>
+                <p className="text-xs text-rust">Low Impact, High Effort</p>
               </div>
               <div className="absolute bottom-2 right-2">
-                <span className="text-xs text-red-600">⚠️ Avoid</span>
+                <span className="text-xs text-rust">⚠️ Avoid</span>
               </div>
             </div>
 
             {/* Bottom Right: Major Projects (High Impact, High Effort) */}
-            <div className="bg-blue-50 border-blue-200 p-4 relative">
+            <div className="bg-terracotta/5 border-terracotta/20 p-4 relative">
               <div className="absolute top-2 left-2">
-                <h4 className="font-semibold text-blue-800 text-sm">Major Projects</h4>
-                <p className="text-xs text-blue-600">High Impact, High Effort</p>
+                <h4 className="font-semibold text-ink text-sm">Major Projects</h4>
+                <p className="text-xs text-terracotta">High Impact, High Effort</p>
               </div>
               <div className="absolute bottom-2 right-2">
-                <span className="text-xs text-blue-600">📋 Plan Well</span>
+                <span className="text-xs text-terracotta">📋 Plan Well</span>
               </div>
             </div>
 
@@ -133,27 +133,27 @@ export default function PriorityMatrix({
           {/* Axis Labels */}
           <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">Low Effort</span>
-              <div className="w-24 h-0.5 bg-gray-300"></div>
-              <span className="text-sm text-gray-600">High Effort</span>
+              <span className="text-sm text-ink-light">Low Effort</span>
+              <div className="w-24 h-0.5 bg-ink/20"></div>
+              <span className="text-sm text-ink-light">High Effort</span>
             </div>
           </div>
           <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 -rotate-90">
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">Low Impact</span>
-              <div className="w-16 h-0.5 bg-gray-300"></div>
-              <span className="text-sm text-gray-600">High Impact</span>
+              <span className="text-sm text-ink-light">Low Impact</span>
+              <div className="w-16 h-0.5 bg-ink/20"></div>
+              <span className="text-sm text-ink-light">High Impact</span>
             </div>
           </div>
         </div>
 
         {/* Current Position Summary */}
         {priorityScoring && (
-          <div className="mt-8 pt-4 border-t border-gray-200">
+          <div className="mt-8 pt-4 border-t border-ink/8">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-gray-900">Your Feature Position</h4>
-                <p className="text-sm text-gray-600">
+                <h4 className="font-semibold text-ink">Your Feature Position</h4>
+                <p className="text-sm text-ink-light">
                   Impact: {priorityScoring.impact_score}/10 • Effort: {priorityScoring.effort_score}/10
                 </p>
               </div>

@@ -26,22 +26,22 @@ interface MetricsCardProps {
 
 function MetricsCard({ title, value, subtitle, status = 'success', children }: MetricsCardProps) {
   const statusColors = {
-    success: 'border-green-200 bg-green-50',
-    warning: 'border-yellow-200 bg-yellow-50',
-    error: 'border-red-200 bg-red-50'
+    success: 'border-forest/20 bg-forest/5',
+    warning: 'border-mustard/20 bg-mustard/5',
+    error: 'border-rust/20 bg-rust/5'
   }
 
   const textColors = {
-    success: 'text-green-800',
-    warning: 'text-yellow-800',
-    error: 'text-red-800'
+    success: 'text-forest',
+    warning: 'text-mustard',
+    error: 'text-rust'
   }
 
   return (
     <div className={`border rounded-lg p-4 ${statusColors[status]}`}>
-      <h3 className="text-sm font-medium text-gray-700 mb-1">{title}</h3>
+      <h3 className="text-sm font-medium text-ink-light mb-1">{title}</h3>
       <div className={`text-2xl font-bold ${textColors[status]}`}>{value}</div>
-      {subtitle && <p className="text-sm text-gray-600 mt-1">{subtitle}</p>}
+      {subtitle && <p className="text-sm text-ink-light mt-1">{subtitle}</p>}
       {children && <div className="mt-3">{children}</div>}
     </div>
   )
@@ -56,12 +56,12 @@ function AlertBanner({ alerts }: { alerts: Array<{ level: 'warning' | 'critical'
   return (
     <div className="space-y-2 mb-6">
       {criticalAlerts.map((alert, index) => (
-        <div key={index} className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div key={index} className="bg-rust/10 border border-rust/30 text-rust px-4 py-3 rounded">
           <strong>Critical:</strong> {alert.message} (Value: {alert.value})
         </div>
       ))}
       {warningAlerts.map((alert, index) => (
-        <div key={index} className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+        <div key={index} className="bg-mustard/10 border border-mustard/30 text-mustard px-4 py-3 rounded">
           <strong>Warning:</strong> {alert.message} (Value: {alert.value})
         </div>
       ))}
@@ -74,7 +74,7 @@ function DistributionChart({ data, title }: { data: Record<string, number>; titl
 
   if (total === 0) {
     return (
-      <div className="text-center text-gray-500 py-4">
+      <div className="text-center text-slate-blue py-4">
         No data available for {title}
       </div>
     )
@@ -82,7 +82,7 @@ function DistributionChart({ data, title }: { data: Record<string, number>; titl
 
   return (
     <div>
-      <h4 className="text-sm font-medium text-gray-700 mb-3">{title}</h4>
+      <h4 className="text-sm font-medium text-ink-light mb-3">{title}</h4>
       <div className="space-y-2">
         {Object.entries(data)
           .sort(([,a], [,b]) => b - a)
@@ -90,15 +90,15 @@ function DistributionChart({ data, title }: { data: Record<string, number>; titl
             const percentage = (count / total) * 100
             return (
               <div key={key} className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 capitalize">{key.replace('_', ' ')}</span>
+                <span className="text-sm text-ink-light capitalize">{key.replace('_', ' ')}</span>
                 <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
+                  <div className="w-20 bg-ink/10 rounded-full h-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full"
+                      className="bg-terracotta h-2 rounded-full"
                       style={{ width: `${percentage}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium text-gray-700 w-12 text-right">
+                  <span className="text-sm font-medium text-ink-light w-12 text-right">
                     {count} ({percentage.toFixed(1)}%)
                   </span>
                 </div>
@@ -153,20 +153,20 @@ export default function AuthMetricsDashboard() {
   if (loading && !metricsData) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600">Loading metrics...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-terracotta"></div>
+        <span className="ml-2 text-ink-light">Loading metrics...</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <div className="bg-rust/10 border border-rust/30 text-rust px-4 py-3 rounded">
         <h3 className="font-medium">Error loading metrics</h3>
         <p>{error}</p>
         <button
           onClick={fetchMetrics}
-          className="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+          className="mt-2 bg-rust text-cream px-3 py-1 rounded text-sm hover:bg-rust/90"
         >
           Retry
         </button>
@@ -176,7 +176,7 @@ export default function AuthMetricsDashboard() {
 
   if (!metricsData) {
     return (
-      <div className="text-center text-gray-500 py-8">
+      <div className="text-center text-slate-blue py-8">
         No metrics data available
       </div>
     )
@@ -202,7 +202,7 @@ export default function AuthMetricsDashboard() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Authentication Metrics Dashboard</h1>
+        <h1 className="text-2xl font-bold text-ink">Authentication Metrics Dashboard</h1>
         <div className="flex space-x-4">
           <label className="flex items-center space-x-2">
             <input
@@ -211,12 +211,12 @@ export default function AuthMetricsDashboard() {
               onChange={(e) => setDetailed(e.target.checked)}
               className="rounded"
             />
-            <span className="text-sm text-gray-600">Detailed view</span>
+            <span className="text-sm text-ink-light">Detailed view</span>
           </label>
           <select
             value={selectedWindow}
             onChange={(e) => setSelectedWindow(e.target.value as '1h' | '24h' | '7d')}
-            className="border border-gray-300 rounded px-3 py-1 text-sm"
+            className="border border-ink/15 rounded px-3 py-1 text-sm"
           >
             <option value="1h">Last Hour</option>
             <option value="24h">Last 24 Hours</option>
@@ -225,7 +225,7 @@ export default function AuthMetricsDashboard() {
           <button
             onClick={fetchMetrics}
             disabled={loading}
-            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+            className="bg-terracotta text-cream px-3 py-1 rounded text-sm hover:bg-terracotta-hover disabled:opacity-50"
           >
             {loading ? 'Refreshing...' : 'Refresh'}
           </button>
@@ -296,7 +296,7 @@ export default function AuthMetricsDashboard() {
         )}
       </div>
 
-      <div className="mt-6 text-xs text-gray-500 border-t pt-4">
+      <div className="mt-6 text-xs text-slate-blue border-t border-ink/8 pt-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <strong>Last Updated:</strong> {new Date(metricsData.metadata.last_updated).toLocaleString()}

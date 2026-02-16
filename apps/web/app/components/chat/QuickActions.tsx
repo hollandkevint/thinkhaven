@@ -194,16 +194,16 @@ export default function QuickActions({
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-terracotta" fill="currentColor" viewBox="0 0 24 24">
             <path d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           <h3 className="text-sm font-medium text-primary">
             {hasPhaseActions ? 'Strategic Actions' : 'Quick Actions'}
           </h3>
           {coachingContext?.currentBmadSession && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 rounded-full">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-xs text-blue-700 font-medium capitalize">
+            <div className="flex items-center gap-1 px-2 py-1 bg-terracotta/10 rounded-full">
+              <div className="w-2 h-2 bg-terracotta rounded-full"></div>
+              <span className="text-xs text-terracotta font-medium capitalize">
                 {coachingContext.currentBmadSession.phase}
               </span>
             </div>
@@ -237,7 +237,7 @@ export default function QuickActions({
                     key={`${group.id}-${index}`}
                     onClick={() => handleActionClick(action)}
                     disabled={disabled}
-                    className="text-left px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-secondary hover:text-primary hover:bg-blue-50 hover:border-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-left px-3 py-2 bg-white border border-ink/8 rounded-lg text-sm text-secondary hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {action}
                   </button>
@@ -254,10 +254,10 @@ export default function QuickActions({
               key={index}
               onClick={() => handleActionClick(action)}
               disabled={disabled}
-              className="text-left px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-secondary hover:text-primary hover:bg-blue-50 hover:border-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+              className="text-left px-3 py-2 bg-white border border-ink/8 rounded-lg text-sm text-secondary hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
             >
               <div className="flex items-center gap-2">
-                <svg className="w-3 h-3 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 text-slate-blue/60 group-hover:text-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span className="flex-1">{action}</span>
@@ -269,13 +269,13 @@ export default function QuickActions({
 
       {/* Coaching Context Summary */}
       {coachingContext && (
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="mt-4 p-3 bg-terracotta/5 rounded-lg border border-terracotta/20">
           <div className="flex items-start gap-2">
-            <svg className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-terracotta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
             </svg>
             <div className="flex-1">
-              <div className="text-xs text-blue-800 space-y-1">
+              <div className="text-xs text-ink space-y-1">
                 {coachingContext.currentBmadSession && (
                   <div>
                     <span className="font-medium">Current session:</span>{' '}
@@ -307,7 +307,7 @@ export default function QuickActions({
       )}
 
       {/* Tip */}
-      <div className="mt-3 text-xs text-gray-500 italic">
+      <div className="mt-3 text-xs text-slate-blue italic">
         💡 Click any action to start a conversation with Mary, your AI strategist
       </div>
     </div>

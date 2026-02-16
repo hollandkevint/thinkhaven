@@ -181,31 +181,31 @@ export function formatBriefAsHTML(brief: FeatureBrief): string {
       color: #333;
     }
     h1 {
-      color: #1a202c;
-      border-bottom: 3px solid #4299e1;
+      color: #2C2416;
+      border-bottom: 3px solid #C4785C;
       padding-bottom: 10px;
       margin-bottom: 30px;
     }
     h2 {
-      color: #2d3748;
-      border-bottom: 1px solid #e2e8f0;
+      color: #4A3D2E;
+      border-bottom: 1px solid #F5F0E6;
       padding-bottom: 8px;
       margin-top: 30px;
       margin-bottom: 15px;
     }
     .meta {
-      color: #718096;
+      color: #6B7B8C;
       font-style: italic;
       margin-bottom: 30px;
     }
     .priority-context {
-      background: #ebf8ff;
-      border-left: 4px solid #4299e1;
+      background: #FAF7F2;
+      border-left: 4px solid #C4785C;
       padding: 15px;
       margin: 20px 0;
     }
     .priority-context strong {
-      color: #2c5282;
+      color: #B56A4E;
     }
     ol {
       padding-left: 25px;
@@ -216,15 +216,15 @@ export function formatBriefAsHTML(brief: FeatureBrief): string {
     .footer {
       margin-top: 40px;
       padding-top: 20px;
-      border-top: 1px solid #e2e8f0;
+      border-top: 1px solid #F5F0E6;
       text-align: center;
-      color: #718096;
+      color: #6B7B8C;
       font-size: 14px;
     }
-    .category-critical { color: #c53030; font-weight: bold; }
-    .category-high { color: #dd6b20; font-weight: bold; }
-    .category-medium { color: #d69e2e; font-weight: bold; }
-    .category-low { color: #718096; }
+    .category-critical { color: #8B4D3B; font-weight: bold; }
+    .category-high { color: #C4785C; font-weight: bold; }
+    .category-medium { color: #D4A84B; font-weight: bold; }
+    .category-low { color: #6B7B8C; }
     .quadrant {
       display: inline-block;
       padding: 4px 12px;
@@ -232,10 +232,10 @@ export function formatBriefAsHTML(brief: FeatureBrief): string {
       font-size: 14px;
       font-weight: 600;
     }
-    .quadrant-quick-wins { background: #c6f6d5; color: #276749; }
-    .quadrant-major-projects { background: #bee3f8; color: #2c5282; }
-    .quadrant-fill-ins { background: #fefcbf; color: #744210; }
-    .quadrant-time-wasters { background: #fed7d7; color: #9b2c2c; }
+    .quadrant-quick-wins { background: #d4e5d0; color: #4A6741; }
+    .quadrant-major-projects { background: #F5F0E6; color: #B56A4E; }
+    .quadrant-fill-ins { background: #f5ecd0; color: #744210; }
+    .quadrant-time-wasters { background: #f5e6e3; color: #8B4D3B; }
   </style>
 </head>
 <body>

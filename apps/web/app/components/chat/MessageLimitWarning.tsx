@@ -34,21 +34,21 @@ export function MessageLimitWarning({
 
   if (limitReached) {
     return (
-      <div className="mx-4 mb-4 rounded-lg border-2 border-red-300 bg-red-50 p-4 shadow-sm">
+      <div className="mx-4 mb-4 rounded-lg border-2 border-rust/30 bg-rust/10 p-4 shadow-sm">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="h-6 w-6 flex-shrink-0 text-red-600 mt-0.5" />
+          <AlertTriangle className="h-6 w-6 flex-shrink-0 text-rust mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-semibold text-red-900 mb-1">
+            <h3 className="font-semibold text-rust mb-1">
               Message Limit Reached
             </h3>
-            <p className="text-sm text-red-800 mb-3">
+            <p className="text-sm text-rust mb-3">
               You've reached the 10-message limit for this session. Save your work or start a new session to continue.
             </p>
             <div className="flex flex-wrap gap-2">
               {onExport && (
                 <button
                   onClick={onExport}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-rust text-white rounded-md hover:bg-rust/90 transition-colors text-sm font-medium"
                 >
                   <Download className="h-4 w-4" />
                   Export Session
@@ -57,7 +57,7 @@ export function MessageLimitWarning({
               {onNewSession && (
                 <button
                   onClick={onNewSession}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white text-red-900 border border-red-300 rounded-md hover:bg-red-50 transition-colors text-sm font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-cream text-rust border border-rust/30 rounded-md hover:bg-rust/10 transition-colors text-sm font-medium"
                 >
                   <RefreshCw className="h-4 w-4" />
                   New Session
@@ -79,18 +79,18 @@ export function MessageLimitWarning({
   const color = getWarningColor();
   const colorClasses = {
     yellow: {
-      border: 'border-yellow-300',
-      bg: 'bg-yellow-50',
-      text: 'text-yellow-900',
-      icon: 'text-yellow-600',
-      subtext: 'text-yellow-800',
+      border: 'border-mustard/30',
+      bg: 'bg-mustard/10',
+      text: 'text-ink',
+      icon: 'text-mustard',
+      subtext: 'text-mustard',
     },
     orange: {
-      border: 'border-orange-300',
-      bg: 'bg-orange-50',
-      text: 'text-orange-900',
-      icon: 'text-orange-600',
-      subtext: 'text-orange-800',
+      border: 'border-terracotta/30',
+      bg: 'bg-terracotta/5',
+      text: 'text-ink',
+      icon: 'text-terracotta',
+      subtext: 'text-terracotta',
     },
   };
 
@@ -133,11 +133,11 @@ export function MessageCounterBadge({
   const { currentCount, messageLimit, remaining } = limitStatus;
 
   // Color based on remaining messages
-  let colorClass = 'bg-gray-100 text-gray-700';
+  let colorClass = 'bg-parchment text-ink';
   if (remaining <= 2) {
-    colorClass = 'bg-orange-100 text-orange-700';
+    colorClass = 'bg-terracotta/10 text-terracotta';
   } else if (remaining <= 5) {
-    colorClass = 'bg-yellow-100 text-yellow-700';
+    colorClass = 'bg-mustard/10 text-mustard';
   }
 
   return (

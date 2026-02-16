@@ -62,9 +62,9 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({
 
   if (error) {
     return (
-      <div className={`mermaid-error border-2 border-red-300 bg-red-50 p-4 rounded ${className}`}>
-        <div className="text-red-600 font-medium mb-2">⚠️ Diagram Rendering Error</div>
-        <div className="text-sm text-red-500 font-mono whitespace-pre-wrap">{error}</div>
+      <div className={`mermaid-error border-2 border-rust/30 bg-rust/10 p-4 rounded ${className}`}>
+        <div className="text-rust font-medium mb-2">⚠️ Diagram Rendering Error</div>
+        <div className="text-sm text-rust font-mono whitespace-pre-wrap">{error}</div>
       </div>
     );
   }
@@ -72,7 +72,7 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({
   if (isRendering) {
     return (
       <div className={`flex items-center justify-center p-8 ${className}`}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-terracotta"></div>
       </div>
     );
   }

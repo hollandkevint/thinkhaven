@@ -27,13 +27,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#1a202c',
-    borderBottom: '3px solid #4299e1',
+    color: '#2C2416',
+    borderBottom: '3px solid #C4785C',
     paddingBottom: 10,
   },
   meta: {
     fontSize: 10,
-    color: '#718096',
+    color: '#6B7B8C',
     fontStyle: 'italic',
     marginBottom: 24,
   },
@@ -44,9 +44,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2d3748',
+    color: '#4A3D2E',
     marginBottom: 10,
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #F5F0E6',
     paddingBottom: 6,
   },
   text: {
@@ -57,8 +57,8 @@ const styles = StyleSheet.create({
   },
   // Priority Context Box
   priorityBox: {
-    backgroundColor: '#ebf8ff',
-    borderLeft: '4px solid #4299e1',
+    backgroundColor: '#FAF7F2',
+    borderLeft: '4px solid #C4785C',
     padding: 12,
     marginBottom: 20,
     marginTop: 8,
@@ -70,12 +70,12 @@ const styles = StyleSheet.create({
   priorityLabel: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#2c5282',
+    color: '#B56A4E',
     width: 120,
   },
   priorityValue: {
     fontSize: 11,
-    color: '#1a202c',
+    color: '#2C2416',
   },
   priorityBadge: {
     display: 'inline-block',
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     width: 20,
     fontWeight: 'bold',
-    color: '#4299e1',
+    color: '#C4785C',
   },
   listText: {
     fontSize: 11,
@@ -112,12 +112,12 @@ const styles = StyleSheet.create({
     left: 40,
     right: 40,
     textAlign: 'center',
-    borderTop: '1px solid #e2e8f0',
+    borderTop: '1px solid #F5F0E6',
     paddingTop: 12,
   },
   footerText: {
     fontSize: 9,
-    color: '#718096',
+    color: '#6B7B8C',
     marginBottom: 4,
   },
   // Page Number
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     bottom: 20,
     right: 40,
-    color: '#718096',
+    color: '#6B7B8C',
   },
   // Branding (optional custom logo space)
   brandingSection: {
@@ -135,11 +135,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
     paddingBottom: 12,
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #F5F0E6',
   },
   brandingText: {
     fontSize: 10,
-    color: '#4299e1',
+    color: '#C4785C',
     fontWeight: 'bold',
   },
 });
@@ -168,15 +168,15 @@ export default function FeatureBriefPDF({ brief, branding }: FeatureBriefPDFProp
   const getCategoryColor = (category: string): string => {
     switch (category.toLowerCase()) {
       case 'critical':
-        return '#c53030';
+        return '#8B4D3B';
       case 'high':
-        return '#dd6b20';
+        return '#C4785C';
       case 'medium':
-        return '#d69e2e';
+        return '#D4A84B';
       case 'low':
-        return '#718096';
+        return '#6B7B8C';
       default:
-        return '#718096';
+        return '#6B7B8C';
     }
   };
 

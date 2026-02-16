@@ -64,12 +64,12 @@ export function FeedbackForm({ userId, onSubmitted }: FeedbackFormProps) {
 
   if (submitted) {
     return (
-      <Card className="border-green-200 bg-green-50">
+      <Card className="border-forest/20 bg-forest/5">
         <CardContent className="pt-6">
           <div className="text-center">
             <div className="text-4xl mb-2">🙏</div>
-            <p className="font-medium text-green-800">Thank you for your feedback!</p>
-            <p className="text-sm text-green-600 mt-1">
+            <p className="font-medium text-forest">Thank you for your feedback!</p>
+            <p className="text-sm text-forest mt-1">
               Your input helps us build a better product
             </p>
           </div>
@@ -101,15 +101,15 @@ export function FeedbackForm({ userId, onSubmitted }: FeedbackFormProps) {
                   onClick={() => setRating(value)}
                   className={`w-12 h-12 rounded-lg border-2 transition-all ${
                     rating === value
-                      ? 'border-blue-600 bg-blue-50 text-blue-600'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-terracotta bg-terracotta/5 text-terracotta'
+                      : 'border-ink/8 hover:border-ink/8'
                   }`}
                 >
                   {value}
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-1">1 = Not valuable, 5 = Extremely valuable</p>
+            <p className="text-xs text-slate-blue mt-1">1 = Not valuable, 5 = Extremely valuable</p>
           </div>
 
           {/* Would Pay */}
@@ -123,8 +123,8 @@ export function FeedbackForm({ userId, onSubmitted }: FeedbackFormProps) {
                 onClick={() => setWouldPay(true)}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   wouldPay === true
-                    ? 'border-green-600 bg-green-50 text-green-700 font-medium'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-forest bg-forest/5 text-forest font-medium'
+                    : 'border-ink/8 hover:border-ink/8'
                 }`}
               >
                 Yes, I'd pay
@@ -134,8 +134,8 @@ export function FeedbackForm({ userId, onSubmitted }: FeedbackFormProps) {
                 onClick={() => setWouldPay(false)}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   wouldPay === false
-                    ? 'border-red-600 bg-red-50 text-red-700 font-medium'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-rust bg-rust/5 text-rust font-medium'
+                    : 'border-ink/8 hover:border-ink/8'
                 }`}
               >
                 Not yet
@@ -153,7 +153,7 @@ export function FeedbackForm({ userId, onSubmitted }: FeedbackFormProps) {
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="Your thoughts, suggestions, or concerns..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-ink/8 rounded-lg focus:ring-2 focus:ring-terracotta focus:border-transparent"
               rows={4}
             />
           </div>

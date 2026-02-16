@@ -119,7 +119,7 @@ export default function AccountPage() {
         </div>
 
         {/* Account Information */}
-        <div className="bg-white border border-divider rounded-lg p-6">
+        <div className="bg-card border border-divider rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Account Information</h2>
 
           <div className="space-y-4">
@@ -155,7 +155,7 @@ export default function AccountPage() {
         </div>
 
         {/* Password Change */}
-        <div className="bg-white border border-divider rounded-lg p-6">
+        <div className="bg-card border border-divider rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Change Password</h2>
 
           <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -197,7 +197,7 @@ export default function AccountPage() {
         </div>
 
         {/* Workspace Management */}
-        <div className="bg-white border border-divider rounded-lg p-6">
+        <div className="bg-card border border-divider rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Workspace Management</h2>
 
           <div className="space-y-4">
@@ -217,7 +217,7 @@ export default function AccountPage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="bg-white border border-error rounded-lg p-6">
+        <div className="bg-card border border-error rounded-lg p-6">
           <h2 className="text-xl font-semibold text-error mb-4">Danger Zone</h2>
 
           <div className="space-y-4">

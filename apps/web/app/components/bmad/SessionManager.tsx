@@ -155,7 +155,7 @@ export default function SessionManager({
             <span className="font-medium text-primary">Overall Progress</span>
             <span className="text-secondary">{Math.round(session.progress.overallCompletion)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-ink/10 rounded-full h-2">
             <div 
               className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${session.progress.overallCompletion}%` }}
@@ -165,35 +165,35 @@ export default function SessionManager({
 
         {/* Current Phase Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="bg-blue-50 p-3 rounded-lg">
+          <div className="bg-terracotta/5 p-3 rounded-lg">
             <div className="flex justify-between items-start mb-2">
-              <h4 className="font-medium text-blue-900">Current Phase</h4>
-              <span className="text-xs text-blue-700">{Math.round(phaseProgress)}%</span>
+              <h4 className="font-medium text-ink">Current Phase</h4>
+              <span className="text-xs text-terracotta">{Math.round(phaseProgress)}%</span>
             </div>
-            <p className="text-blue-800 text-sm mb-2">
+            <p className="text-ink text-sm mb-2">
               {session.currentPhase.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
             </p>
-            <div className="w-full bg-blue-200 rounded-full h-1.5">
+            <div className="w-full bg-terracotta/20 rounded-full h-1.5">
               <div 
-                className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                className="bg-terracotta h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${phaseProgress}%` }}
               ></div>
             </div>
           </div>
 
-          <div className="bg-green-50 p-3 rounded-lg">
-            <h4 className="font-medium text-green-900 mb-2">Phase Time</h4>
+          <div className="bg-forest/5 p-3 rounded-lg">
+            <h4 className="font-medium text-ink mb-2">Phase Time</h4>
             <div className="flex justify-between text-sm">
               <div>
-                <div className="text-green-800 font-medium">{formatTime(currentPhaseTime)}</div>
-                <div className="text-green-600 text-xs">Elapsed</div>
+                <div className="text-forest font-medium">{formatTime(currentPhaseTime)}</div>
+                <div className="text-forest text-xs">Elapsed</div>
               </div>
               {currentAllocation && (
                 <div className="text-right">
-                  <div className="text-green-800 font-medium">
+                  <div className="text-forest font-medium">
                     {currentAllocation.allocatedMinutes}m
                   </div>
-                  <div className="text-green-600 text-xs">Allocated</div>
+                  <div className="text-forest text-xs">Allocated</div>
                 </div>
               )}
             </div>
@@ -216,7 +216,7 @@ export default function SessionManager({
         )}
 
         {/* Current Step Indicator */}
-        <div className="bg-gray-50 p-3 rounded-lg mb-4">
+        <div className="bg-parchment p-3 rounded-lg mb-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
             <span className="text-sm font-medium text-primary">Current Step</span>

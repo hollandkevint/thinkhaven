@@ -67,10 +67,10 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream">
       {/* Minimal Navigation - Logo only */}
       <div className="absolute top-8 left-8">
-        <Link href="/" className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+        <Link href="/" className="text-2xl font-bold font-display text-foreground">
           Thinkhaven
         </Link>
       </div>
@@ -84,12 +84,7 @@ function LoginPageContent() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || loading}
-            className="w-full h-11 flex items-center justify-center gap-3 px-4 border rounded-lg transition-all disabled:opacity-50 hover:border-gray-400"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'white',
-              color: 'var(--foreground)'
-            }}
+            className="w-full h-11 flex items-center justify-center gap-3 px-4 border border-border rounded-lg transition-all disabled:opacity-50 hover:border-ink/20 bg-white text-foreground"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -105,10 +100,10 @@ function LoginPageContent() {
           {/* OR Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t" style={{ borderColor: 'var(--border)' }} />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white" style={{ color: 'var(--muted)' }}>OR</span>
+              <span className="px-2 bg-cream text-muted-foreground">OR</span>
             </div>
           </div>
 
@@ -118,8 +113,7 @@ function LoginPageContent() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-semibold mb-1"
-                style={{ color: 'var(--foreground)' }}
+                className="block text-sm font-semibold mb-1 text-foreground"
               >
                 Email
               </label>
@@ -130,11 +124,7 @@ function LoginPageContent() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 px-4 border rounded-lg focus:outline-none focus:ring-2 transition-all"
-                style={{
-                  borderColor: 'var(--border)',
-                  '--tw-ring-color': 'var(--primary)'
-                } as React.CSSProperties}
+                className="w-full h-11 px-4 border border-border rounded-lg focus:outline-none focus:ring-2 ring-primary transition-all"
                 placeholder="your@email.com"
               />
             </div>
@@ -143,8 +133,7 @@ function LoginPageContent() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-semibold mb-1"
-                style={{ color: 'var(--foreground)' }}
+                className="block text-sm font-semibold mb-1 text-foreground"
               >
                 Password
               </label>
@@ -155,14 +144,10 @@ function LoginPageContent() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-11 px-4 border rounded-lg focus:outline-none focus:ring-2 transition-all"
-                style={{
-                  borderColor: 'var(--border)',
-                  '--tw-ring-color': 'var(--primary)'
-                } as React.CSSProperties}
+                className="w-full h-11 px-4 border border-border rounded-lg focus:outline-none focus:ring-2 ring-primary transition-all"
                 placeholder="••••••••"
               />
-              <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+              <p className="text-xs mt-1 text-muted-foreground">
                 At least 8 characters
               </p>
             </div>
@@ -170,12 +155,7 @@ function LoginPageContent() {
             {/* Error Message */}
             {error && (
               <div
-                className="p-3 rounded-lg text-sm"
-                style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.05)',
-                  border: '1px solid var(--error)',
-                  color: 'var(--error)'
-                }}
+                className="p-3 rounded-lg text-sm bg-rust/5 border border-rust text-rust"
               >
                 {error}
               </div>
@@ -185,11 +165,7 @@ function LoginPageContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-11 rounded-lg font-semibold transition-all disabled:opacity-50"
-              style={{
-                backgroundColor: 'var(--primary)',
-                color: 'white'
-              }}
+              className="w-full h-11 rounded-lg font-semibold transition-all disabled:opacity-50 bg-primary text-cream"
             >
               {loading ? 'Signing in...' : 'Log in'}
             </button>
@@ -197,11 +173,10 @@ function LoginPageContent() {
 
           {/* Account Toggle Link */}
           <div className="text-center text-sm">
-            <span style={{ color: 'var(--muted)' }}>Don't have an account? </span>
+            <span className="text-muted-foreground">Don&apos;t have an account? </span>
             <Link
               href="/signup"
-              className="font-semibold hover:underline"
-              style={{ color: 'var(--primary)' }}
+              className="font-semibold hover:underline text-primary"
             >
               Sign up
             </Link>
@@ -215,10 +190,10 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-cream">
         <div className="text-center">
-          <div className="h-8 w-48 bg-gray-200 animate-pulse rounded mb-4 mx-auto"></div>
-          <p style={{ color: 'var(--muted)' }}>Loading login...</p>
+          <div className="h-8 w-48 bg-ink/10 animate-pulse rounded mb-4 mx-auto"></div>
+          <p className="text-muted-foreground">Loading login...</p>
         </div>
       </div>
     }>

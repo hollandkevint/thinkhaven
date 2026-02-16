@@ -643,20 +643,20 @@ export class ProjectBriefGenerator {
   <title>${brief.title}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #1a1a1a; }
-    h1 { color: #1a1a1a; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }
-    h2 { color: #374151; margin-top: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
-    .meta { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    h1 { color: #2C2416; border-bottom: 3px solid #C4785C; padding-bottom: 10px; }
+    h2 { color: #4A3D2E; margin-top: 30px; border-bottom: 1px solid #F5F0E6; padding-bottom: 8px; }
+    .meta { background: #F5F0E6; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; }
-    th { background: #f9fafb; font-weight: 600; }
-    .priority-critical { color: #dc2626; font-weight: 600; }
-    .priority-high { color: #ea580c; font-weight: 600; }
-    .priority-medium { color: #ca8a04; }
-    .priority-low { color: #16a34a; }
+    th, td { border: 1px solid #F5F0E6; padding: 10px; text-align: left; }
+    th { background: #FAF7F2; font-weight: 600; }
+    .priority-critical { color: #8B4D3B; font-weight: 600; }
+    .priority-high { color: #C4785C; font-weight: 600; }
+    .priority-medium { color: #D4A84B; }
+    .priority-low { color: #4A6741; }
     .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; }
-    .status-planning { background: #dbeafe; color: #1d4ed8; }
-    .deliverable-card { background: #f9fafb; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #3b82f6; }
-    footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 0.875rem; }
+    .status-planning { background: #F5F0E6; color: #B56A4E; }
+    .deliverable-card { background: #FAF7F2; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #C4785C; }
+    footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #F5F0E6; color: #6B7B8C; font-size: 0.875rem; }
   </style>
 </head>
 <body>

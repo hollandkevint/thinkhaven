@@ -47,12 +47,12 @@ export function WaitlistForm() {
           placeholder="your@email.com"
           required
           disabled={status === 'loading'}
-          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+          className="flex-1 px-4 py-3 border border-ink/15 rounded-lg focus:ring-2 focus:ring-terracotta focus:border-terracotta disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3 bg-terracotta text-cream font-semibold rounded-lg hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {status === 'loading' ? 'Joining...' : 'Join Waitlist'}
         </button>
@@ -60,7 +60,7 @@ export function WaitlistForm() {
       {message && (
         <p
           className={`text-sm mt-3 text-center ${
-            status === 'error' ? 'text-red-600' : 'text-green-600'
+            status === 'error' ? 'text-rust' : 'text-forest'
           }`}
         >
           {message}

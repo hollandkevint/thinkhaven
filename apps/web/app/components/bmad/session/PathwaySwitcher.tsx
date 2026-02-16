@@ -138,9 +138,9 @@ export default function PathwaySwitcher({
             </div>
             <button
               onClick={onCancel}
-              className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-full hover:bg-parchment flex items-center justify-center transition-colors"
             >
-              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-slate-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -153,16 +153,16 @@ export default function PathwaySwitcher({
               {/* Current Pathway */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-primary mb-3">Current Pathway</h3>
-                <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-gray-400">
+                <div className="bg-parchment rounded-lg p-4 border-l-4 border-ink/20">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="text-gray-600">
+                    <div className="text-ink-light">
                       {getPathwayIcon(currentPathway)}
                     </div>
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-ink">
                       {getPathwayDisplayName(currentPathway)}
                     </span>
                   </div>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-ink-light text-sm">
                     {getPathwayDescription(currentPathway)}
                   </p>
                 </div>
@@ -198,7 +198,7 @@ export default function PathwaySwitcher({
                             </div>
                             {recommendation && (
                               <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                                <span className="text-xs bg-forest/10 text-forest px-2 py-1 rounded">
                                   {confidence}% recommended
                                 </span>
                               </div>
@@ -209,7 +209,7 @@ export default function PathwaySwitcher({
                           {getPathwayDescription(pathway)}
                         </p>
                         {recommendation && (
-                          <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                          <div className="text-xs text-terracotta bg-terracotta/5 p-2 rounded">
                             <strong>Why switch:</strong> {recommendation.reasoning}
                           </div>
                         )}
@@ -221,27 +221,27 @@ export default function PathwaySwitcher({
 
               {/* Switch Impact Preview */}
               {selectedPathway && switchImpact && (
-                <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-yellow-900 mb-3">Switch Impact Analysis</h4>
+                <div className="mb-6 bg-mustard/5 border border-mustard/20 rounded-lg p-4">
+                  <h4 className="font-semibold text-ink mb-3">Switch Impact Analysis</h4>
                   <div className="grid md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <div className="text-yellow-600 mb-1">Progress Impact</div>
-                      <div className="font-medium text-yellow-900">
+                      <div className="text-mustard mb-1">Progress Impact</div>
+                      <div className="font-medium text-ink">
                         {switchImpact.progressLoss}% progress adjustment
                       </div>
                     </div>
                     <div>
-                      <div className="text-yellow-600 mb-1">Context Retention</div>
-                      <div className="font-medium text-yellow-900">
+                      <div className="text-mustard mb-1">Context Retention</div>
+                      <div className="font-medium text-ink">
                         {switchImpact.contextRetention}% context preserved
                       </div>
                     </div>
                     <div>
-                      <div className="text-yellow-600 mb-1">Risk Level</div>
+                      <div className="text-mustard mb-1">Risk Level</div>
                       <div className={`font-medium ${
-                        switchImpact.riskLevel === 'low' ? 'text-green-600' :
-                        switchImpact.riskLevel === 'medium' ? 'text-yellow-600' :
-                        'text-red-600'
+                        switchImpact.riskLevel === 'low' ? 'text-forest' :
+                        switchImpact.riskLevel === 'medium' ? 'text-mustard' :
+                        'text-rust'
                       }`}>
                         {switchImpact.riskLevel.toUpperCase()}
                       </div>
@@ -260,7 +260,7 @@ export default function PathwaySwitcher({
                         type="checkbox"
                         checked={transferContext}
                         onChange={(e) => setTransferContext(e.target.checked)}
-                        className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                        className="w-4 h-4 text-primary border-ink/8 rounded focus:ring-primary"
                       />
                       <div className="flex-1">
                         <div className="font-medium text-primary">Transfer Context</div>
@@ -277,7 +277,7 @@ export default function PathwaySwitcher({
               <div className="flex justify-between items-center">
                 <button
                   onClick={onCancel}
-                  className="px-6 py-3 border border-divider text-secondary rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 border border-divider text-secondary rounded-lg hover:bg-parchment transition-colors"
                 >
                   Cancel
                 </button>
@@ -293,8 +293,8 @@ export default function PathwaySwitcher({
           ) : (
             /* Confirmation Modal */
             <div className="text-center py-8">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-mustard/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-mustard" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
@@ -306,16 +306,16 @@ export default function PathwaySwitcher({
               </p>
 
               {switchImpact && switchImpact.riskLevel !== 'low' && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left">
+                <div className="bg-rust/5 border border-rust/20 rounded-lg p-4 mb-6 text-left">
                   <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-rust mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                     </svg>
                     <div>
-                      <h4 className="font-semibold text-red-900 mb-1">
+                      <h4 className="font-semibold text-ink mb-1">
                         {switchImpact.riskLevel === 'high' ? 'High Risk Switch' : 'Medium Risk Switch'}
                       </h4>
-                      <p className="text-red-800 text-sm">
+                      <p className="text-rust text-sm">
                         This switch may result in {switchImpact.progressLoss}% progress adjustment and {switchImpact.estimatedTimeLoss} minutes of additional work time.
                       </p>
                     </div>
@@ -326,7 +326,7 @@ export default function PathwaySwitcher({
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() => setShowConfirmation(false)}
-                  className="px-6 py-3 border border-divider text-secondary rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 border border-divider text-secondary rounded-lg hover:bg-parchment transition-colors"
                 >
                   Go Back
                 </button>

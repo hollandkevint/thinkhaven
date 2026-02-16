@@ -49,8 +49,8 @@ export function ArtifactList({
         }}
         className={`
           inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full
-          bg-blue-50 text-blue-700 text-xs font-medium
-          hover:bg-blue-100 transition-colors
+          bg-terracotta/10 text-terracotta text-xs font-medium
+          hover:bg-terracotta/15 transition-colors
           ${className}
         `}
         title={`${artifacts.length} artifact${artifacts.length === 1 ? '' : 's'}`}
@@ -66,7 +66,7 @@ export function ArtifactList({
   // List mode - show full list
   return (
     <div className={`space-y-1 ${className}`}>
-      <div className="text-xs text-gray-500 font-medium mb-2">
+      <div className="text-xs text-slate-blue font-medium mb-2">
         Artifacts ({artifacts.length})
       </div>
       {artifacts.map((artifact) => {
@@ -81,15 +81,15 @@ export function ArtifactList({
               w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm
               transition-colors
               ${isSelected
-                ? 'bg-blue-100 text-blue-700'
-                : 'hover:bg-gray-100 text-gray-700'
+                ? 'bg-terracotta/10 text-terracotta'
+                : 'hover:bg-parchment text-ink-light'
               }
             `}
           >
             <span className="text-base">{config?.icon || '📄'}</span>
             <div className="flex-1 min-w-0">
               <div className="truncate font-medium">{artifact.title}</div>
-              <div className="text-xs text-gray-500">{config?.label || artifact.type}</div>
+              <div className="text-xs text-slate-blue">{config?.label || artifact.type}</div>
             </div>
           </button>
         );

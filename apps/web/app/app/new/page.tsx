@@ -71,7 +71,7 @@ export default function NewSessionPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center">
         <ErrorState
           error={error}
           onRetry={handleRetry}
@@ -80,7 +80,7 @@ export default function NewSessionPage() {
         />
         <button
           onClick={handleBackToDashboard}
-          className="mt-4 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="mt-4 px-4 py-2 text-sm text-ink-light hover:text-ink transition-colors"
         >
           Back to Dashboard
         </button>
@@ -89,7 +89,7 @@ export default function NewSessionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-cream">
       <AnimatedLoader messages={sessionMessages} className="min-h-screen" />
     </div>
   );

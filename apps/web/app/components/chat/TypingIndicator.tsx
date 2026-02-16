@@ -39,8 +39,8 @@ export default function TypingIndicator({
   return (
     <div className={`flex items-center gap-4 ${className}`}>
       {/* Avatar */}
-      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-        <span className="text-white font-semibold text-sm">M</span>
+      <div className="w-8 h-8 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
+        <span className="text-cream font-semibold text-sm font-display">M</span>
       </div>
 
       {/* Typing indicator */}
@@ -48,9 +48,9 @@ export default function TypingIndicator({
         <div className="flex items-center gap-3">
           {/* Animated dots */}
           <div className="flex gap-1">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 bg-terracotta rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-terracotta rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+            <div className="w-2 h-2 bg-terracotta rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
           </div>
           
           {/* Status text */}
@@ -123,9 +123,9 @@ export function StreamingProgress({
     <div className={`text-xs text-secondary flex items-center gap-2 ${className}`}>
       {percentage !== undefined ? (
         <>
-          <div className="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
+          <div className="w-16 h-1 bg-ink/10 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-blue-500 transition-all duration-300 ease-out"
+              className="h-full bg-terracotta transition-all duration-300 ease-out"
               style={{ width: `${percentage}%` }}
             />
           </div>
@@ -133,8 +133,8 @@ export function StreamingProgress({
         </>
       ) : (
         <>
-          <div className="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-500 animate-pulse" style={{ width: '60%' }} />
+          <div className="w-16 h-1 bg-ink/10 rounded-full overflow-hidden">
+            <div className="h-full bg-terracotta animate-pulse" style={{ width: '60%' }} />
           </div>
           <span>Streaming...</span>
         </>

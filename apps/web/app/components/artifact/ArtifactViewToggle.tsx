@@ -23,7 +23,7 @@ export function ArtifactViewToggle({
 }: ArtifactViewToggleProps) {
   return (
     <div
-      className={`inline-flex rounded-md bg-gray-100 p-0.5 ${className}`}
+      className={`inline-flex rounded-md bg-parchment p-0.5 ${className}`}
       role="radiogroup"
       aria-label="View mode"
     >
@@ -37,8 +37,8 @@ export function ArtifactViewToggle({
           px-2.5 py-1 text-xs font-medium rounded transition-colors
           ${
             mode === 'rendered'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-cream text-ink shadow-sm'
+              : 'text-ink-light hover:text-ink'
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
@@ -55,8 +55,8 @@ export function ArtifactViewToggle({
           px-2.5 py-1 text-xs font-medium rounded transition-colors
           ${
             mode === 'raw'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-cream text-ink shadow-sm'
+              : 'text-ink-light hover:text-ink'
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}

@@ -164,7 +164,7 @@ export default function BookmarksPanel({
             placeholder="Search bookmarks..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
           />
         </div>
 
@@ -179,8 +179,8 @@ export default function BookmarksPanel({
                   onClick={() => toggleTag(tag)}
                   className={`px-2 py-1 text-xs rounded border transition-colors ${
                     selectedTags.includes(tag)
-                      ? 'bg-blue-100 text-blue-800 border-blue-200'
-                      : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                      ? 'bg-terracotta/10 text-ink border-terracotta/20'
+                      : 'bg-parchment text-ink-light border-ink/8 hover:bg-parchment'
                   }`}
                 >
                   {tag} ({count})
@@ -190,7 +190,7 @@ export default function BookmarksPanel({
             {selectedTags.length > 0 && (
               <button
                 onClick={() => setSelectedTags([])}
-                className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+                className="mt-2 text-xs text-terracotta hover:text-ink"
               >
                 Clear filters
               </button>
@@ -205,11 +205,11 @@ export default function BookmarksPanel({
           <div className="p-4">
             <div className="animate-pulse space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="border border-gray-200 rounded-lg p-3">
+                <div key={i} className="border border-ink/8 rounded-lg p-3">
                   <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-ink/10 rounded w-3/4"></div>
+                    <div className="h-3 bg-ink/10 rounded w-1/2"></div>
+                    <div className="h-3 bg-ink/10 rounded w-full"></div>
                   </div>
                 </div>
               ))}
@@ -219,7 +219,7 @@ export default function BookmarksPanel({
           <div className="p-4 text-center">
             <div className="text-secondary text-sm">
               <div className="mb-2">
-                <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-12 h-12 mx-auto text-ink/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
               </div>
@@ -237,8 +237,8 @@ export default function BookmarksPanel({
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className={`border rounded-lg p-3 hover:bg-gray-50 cursor-pointer transition-colors ${
-                  BOOKMARK_COLORS[bookmark.color as keyof typeof BOOKMARK_COLORS]?.border || 'border-gray-200'
+                className={`border rounded-lg p-3 hover:bg-parchment cursor-pointer transition-colors ${
+                  BOOKMARK_COLORS[bookmark.color as keyof typeof BOOKMARK_COLORS]?.border || 'border-ink/8'
                 }`}
                 onClick={() => onNavigateToMessage(bookmark.message_id, bookmark.conversation.id)}
               >
@@ -260,9 +260,9 @@ export default function BookmarksPanel({
                   
                   {/* Color indicator and actions */}
                   <div className="flex items-center gap-2 ml-2">
-                    <div 
+                    <div
                       className={`w-3 h-3 rounded ${
-                        BOOKMARK_COLORS[bookmark.color as keyof typeof BOOKMARK_COLORS]?.bg || 'bg-blue-100'
+                        BOOKMARK_COLORS[bookmark.color as keyof typeof BOOKMARK_COLORS]?.bg || 'bg-terracotta/10'
                       }`}
                     />
                     <button
@@ -270,7 +270,7 @@ export default function BookmarksPanel({
                         e.stopPropagation()
                         deleteBookmark(bookmark.id)
                       }}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      className="p-1 text-slate-blue/60 hover:text-rust transition-colors"
                       title="Delete bookmark"
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -288,7 +288,7 @@ export default function BookmarksPanel({
                 )}
 
                 {/* Message preview */}
-                <div className="text-sm text-secondary bg-gray-50 rounded p-2 mb-2 border-l-2 border-gray-300">
+                <div className="text-sm text-secondary bg-parchment rounded p-2 mb-2 border-l-2 border-ink/8">
                   {truncateText(bookmark.message.content, 120)}
                 </div>
 
@@ -299,9 +299,9 @@ export default function BookmarksPanel({
                       <span
                         key={tag}
                         className={`px-2 py-1 text-xs rounded ${
-                          BOOKMARK_COLORS[bookmark.color as keyof typeof BOOKMARK_COLORS]?.bg || 'bg-blue-100'
+                          BOOKMARK_COLORS[bookmark.color as keyof typeof BOOKMARK_COLORS]?.bg || 'bg-terracotta/10'
                         } ${
-                          BOOKMARK_COLORS[bookmark.color as keyof typeof BOOKMARK_COLORS]?.text || 'text-blue-800'
+                          BOOKMARK_COLORS[bookmark.color as keyof typeof BOOKMARK_COLORS]?.text || 'text-ink'
                         }`}
                       >
                         {tag}
