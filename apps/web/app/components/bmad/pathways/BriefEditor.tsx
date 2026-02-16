@@ -187,7 +187,7 @@ export default function BriefEditor({
               </label>
               <button
                 onClick={() => handleArrayItemAdd('userStories')}
-                className="text-sm text-terracotta hover:text-terracotta font-medium"
+                className="text-sm text-terracotta hover:text-terracotta-hover font-medium"
               >
                 + Add Story
               </button>
@@ -207,7 +207,7 @@ export default function BriefEditor({
                   />
                   <button
                     onClick={() => handleArrayItemRemove('userStories', idx)}
-                    className="text-rust hover:text-rust p-2 flex-shrink-0"
+                    className="text-rust hover:text-ink p-2 flex-shrink-0"
                     title="Remove story"
                   >
                     ✕
@@ -228,7 +228,7 @@ export default function BriefEditor({
               </label>
               <button
                 onClick={() => handleArrayItemAdd('acceptanceCriteria')}
-                className="text-sm text-terracotta hover:text-terracotta font-medium"
+                className="text-sm text-terracotta hover:text-terracotta-hover font-medium"
               >
                 + Add Criterion
               </button>
@@ -248,7 +248,7 @@ export default function BriefEditor({
                   />
                   <button
                     onClick={() => handleArrayItemRemove('acceptanceCriteria', idx)}
-                    className="text-rust hover:text-rust p-2 flex-shrink-0"
+                    className="text-rust hover:text-ink p-2 flex-shrink-0"
                     title="Remove criterion"
                   >
                     ✕
@@ -269,7 +269,7 @@ export default function BriefEditor({
               </label>
               <button
                 onClick={() => handleArrayItemAdd('successMetrics')}
-                className="text-sm text-terracotta hover:text-terracotta font-medium"
+                className="text-sm text-terracotta hover:text-terracotta-hover font-medium"
               >
                 + Add Metric
               </button>
@@ -287,7 +287,7 @@ export default function BriefEditor({
                   />
                   <button
                     onClick={() => handleArrayItemRemove('successMetrics', idx)}
-                    className="text-rust hover:text-rust p-2 flex-shrink-0"
+                    className="text-rust hover:text-ink p-2 flex-shrink-0"
                     title="Remove metric"
                   >
                     ✕
@@ -308,7 +308,7 @@ export default function BriefEditor({
               </label>
               <button
                 onClick={() => handleArrayItemAdd('implementationNotes')}
-                className="text-sm text-terracotta hover:text-terracotta font-medium"
+                className="text-sm text-terracotta hover:text-terracotta-hover font-medium"
               >
                 + Add Note
               </button>
@@ -326,7 +326,7 @@ export default function BriefEditor({
                   />
                   <button
                     onClick={() => handleArrayItemRemove('implementationNotes', idx)}
-                    className="text-rust hover:text-rust p-2 flex-shrink-0"
+                    className="text-rust hover:text-ink p-2 flex-shrink-0"
                     title="Remove note"
                   >
                     ✕

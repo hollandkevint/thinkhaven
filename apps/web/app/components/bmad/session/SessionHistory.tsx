@@ -39,7 +39,7 @@ export default function SessionHistory({
         <div className="mb-6">
           <button
             onClick={() => toggleSection('context')}
-            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-parchment transition-colors"
+            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-cream transition-colors"
           >
             <span className="font-medium text-primary">Shared Context</span>
             <svg
@@ -111,7 +111,7 @@ export default function SessionHistory({
           <div className="mb-6">
             <button
               onClick={() => toggleSection('history')}
-              className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-parchment transition-colors"
+              className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-cream transition-colors"
             >
               <span className="font-medium text-primary">Pathway History</span>
               <svg
@@ -172,7 +172,7 @@ export default function SessionHistory({
         <div className="mb-6">
           <button
             onClick={() => toggleSection('progress')}
-            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-parchment transition-colors"
+            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-cream transition-colors"
           >
             <span className="font-medium text-primary">Progress Tracking</span>
             <svg
@@ -264,7 +264,7 @@ export default function SessionHistory({
         <div>
           <button
             onClick={() => toggleSection('analytics')}
-            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-parchment transition-colors"
+            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-cream transition-colors"
           >
             <span className="font-medium text-primary">Analytics Summary</span>
             <svg

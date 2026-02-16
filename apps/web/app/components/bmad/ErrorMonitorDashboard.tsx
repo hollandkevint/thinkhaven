@@ -31,7 +31,7 @@ export default function ErrorMonitorDashboard({ className = '' }: ErrorMonitorDa
       case 'critical':
         return 'bg-rust/10 text-rust border-rust/20'
       case 'high':
-        return 'bg-mustard/10 text-mustard border-mustard/20'
+        return 'bg-rust/10 text-rust border-rust/20'
       case 'medium':
         return 'bg-mustard/10 text-mustard border-mustard/20'
       case 'low':
@@ -46,7 +46,7 @@ export default function ErrorMonitorDashboard({ className = '' }: ErrorMonitorDa
       case 'blocking':
         return 'bg-rust'
       case 'major':
-        return 'bg-mustard'
+        return 'bg-rust'
       case 'minor':
         return 'bg-mustard'
       case 'none':

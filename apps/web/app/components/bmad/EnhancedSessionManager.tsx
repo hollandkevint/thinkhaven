@@ -502,7 +502,7 @@ export default function EnhancedSessionManager({
         <div>
           <button
             onClick={() => setShowSessionHistory(!showSessionHistory)}
-            className="w-full bg-parchment hover:bg-parchment transition-colors p-4 rounded-lg border border-ink/8 flex items-center justify-between"
+            className="w-full bg-parchment hover:bg-cream transition-colors p-4 rounded-lg border border-ink/8 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
               <svg className="w-5 h-5 text-slate-blue" fill="currentColor" viewBox="0 0 24 24">

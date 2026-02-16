@@ -75,7 +75,7 @@ export default function OutputTypeSelector({
         className={`
           w-full flex items-center justify-between gap-3 p-4
           bg-white border border-ink/8 rounded-lg
-          hover:border-terracotta/20 hover:bg-terracotta/5
+          hover:border-terracotta hover:bg-terracotta/5
           focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-1
           transition-all disabled:opacity-50 disabled:cursor-not-allowed
           ${isOpen ? 'border-terracotta ring-2 ring-terracotta/20' : ''}
@@ -131,7 +131,7 @@ export default function OutputTypeSelector({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className={`font-medium ${selectedType === option.id ? 'text-ink' : 'text-ink'}`}>
+                      <p className={`font-medium ${selectedType === option.id ? 'text-terracotta' : 'text-ink'}`}>
                         {option.name}
                       </p>
                       <span className="text-xs text-slate-blue/60">{option.estimatedTime}</span>

@@ -40,7 +40,7 @@ export default function FeatureAnalysisQuestions({
               key={index}
               className={`group rounded-lg border border-terracotta/20 bg-white p-4 transition-all ${
                 onQuestionClick
-                  ? 'cursor-pointer hover:border-terracotta/20 hover:shadow-md hover:-translate-y-0.5'
+                  ? 'cursor-pointer hover:border-terracotta hover:shadow-md hover:-translate-y-0.5'
                   : ''
               }`}
               onClick={() => onQuestionClick?.(question, index)}

@@ -16,10 +16,14 @@ permissions:
 
 jobs:
   # Automated review on new PRs
+  # Known issue: claude-code-action@v1 intermittently crashes on PR open
+  # with exit code 1 (ajv schema validation). See:
+  # https://github.com/anthropics/claude-code-action/issues/911
   auto-review:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    continue-on-error: true
 
     steps:
       - name: Checkout code
