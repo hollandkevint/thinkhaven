@@ -332,8 +332,8 @@ export default function Home() {
                     </a>
                   </li>
                   <li>
-                    <a href="/demo" className="text-cream/60 hover:text-cream transition-colors">
-                      Live Demo
+                    <a href="/try" className="text-cream/60 hover:text-cream transition-colors">
+                      Try Free
                     </a>
                   </li>
                   <li>
@@ -354,7 +354,7 @@ export default function Home() {
               </div>
             </div>
             <div className="border-t border-cream/10 mt-12 pt-8 text-center">
-              <p className="text-cream/40 text-sm">&copy; 2025 ThinkHaven. All rights reserved.</p>
+              <p className="text-cream/40 text-sm">&copy; 2026 ThinkHaven. All rights reserved.</p>
             </div>
           </div>
         </div>

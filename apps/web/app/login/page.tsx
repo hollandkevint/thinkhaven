@@ -67,10 +67,10 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream">
       {/* Minimal Navigation - Logo only */}
       <div className="absolute top-8 left-8">
-        <Link href="/" className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+        <Link href="/" className="text-2xl font-bold font-display" style={{ color: 'var(--foreground)' }}>
           Thinkhaven
         </Link>
       </div>
@@ -84,7 +84,7 @@ function LoginPageContent() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || loading}
-            className="w-full h-11 flex items-center justify-center gap-3 px-4 border rounded-lg transition-all disabled:opacity-50 hover:border-gray-400"
+            className="w-full h-11 flex items-center justify-center gap-3 px-4 border rounded-lg transition-all disabled:opacity-50 hover:border-ink/20"
             style={{
               borderColor: 'var(--border)',
               backgroundColor: 'white',
@@ -108,7 +108,7 @@ function LoginPageContent() {
               <div className="w-full border-t" style={{ borderColor: 'var(--border)' }} />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white" style={{ color: 'var(--muted)' }}>OR</span>
+              <span className="px-2 bg-cream" style={{ color: 'var(--muted)' }}>OR</span>
             </div>
           </div>
 
@@ -172,7 +172,7 @@ function LoginPageContent() {
               <div
                 className="p-3 rounded-lg text-sm"
                 style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                  backgroundColor: 'rgba(139, 77, 59, 0.05)',
                   border: '1px solid var(--error)',
                   color: 'var(--error)'
                 }}
@@ -215,9 +215,9 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-cream">
         <div className="text-center">
-          <div className="h-8 w-48 bg-gray-200 animate-pulse rounded mb-4 mx-auto"></div>
+          <div className="h-8 w-48 bg-ink/10 animate-pulse rounded mb-4 mx-auto"></div>
           <p style={{ color: 'var(--muted)' }}>Loading login...</p>
         </div>
       </div>

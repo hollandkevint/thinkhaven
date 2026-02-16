@@ -92,10 +92,10 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream">
       {/* Minimal Navigation - Logo only */}
       <div className="absolute top-8 left-8">
-        <Link href="/" className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+        <Link href="/" className="text-2xl font-bold font-display" style={{ color: 'var(--foreground)' }}>
           Thinkhaven
         </Link>
       </div>
@@ -109,7 +109,7 @@ export default function SignUpPage() {
             type="button"
             onClick={handleGoogleSignUp}
             disabled={googleLoading || loading}
-            className="w-full h-11 flex items-center justify-center gap-3 px-4 border rounded-lg transition-all disabled:opacity-50 hover:border-gray-400"
+            className="w-full h-11 flex items-center justify-center gap-3 px-4 border rounded-lg transition-all disabled:opacity-50 hover:border-ink/20"
             style={{
               borderColor: 'var(--border)',
               backgroundColor: 'white',
@@ -133,7 +133,7 @@ export default function SignUpPage() {
               <div className="w-full border-t" style={{ borderColor: 'var(--border)' }} />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white" style={{ color: 'var(--muted)' }}>OR</span>
+              <span className="px-2 bg-cream" style={{ color: 'var(--muted)' }}>OR</span>
             </div>
           </div>
 
@@ -195,17 +195,17 @@ export default function SignUpPage() {
               {passwordStrength && (
                 <div className="mt-2">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-ink/10 rounded-full overflow-hidden">
                       <div
                         className="h-full transition-all duration-300"
                         style={{
                           width: `${(passwordStrength.score / 5) * 100}%`,
                           backgroundColor:
                             passwordStrength.level === 'weak'
-                              ? '#ef4444'
+                              ? 'var(--error, #8B4D3B)'
                               : passwordStrength.level === 'medium'
-                              ? '#f59e0b'
-                              : '#10b981',
+                              ? 'var(--warning, #D4A84B)'
+                              : 'var(--success, #4A6741)',
                         }}
                       />
                     </div>
@@ -214,10 +214,10 @@ export default function SignUpPage() {
                       style={{
                         color:
                           passwordStrength.level === 'weak'
-                            ? '#ef4444'
+                            ? 'var(--error, #8B4D3B)'
                             : passwordStrength.level === 'medium'
-                            ? '#f59e0b'
-                            : '#10b981',
+                            ? 'var(--warning, #D4A84B)'
+                            : 'var(--success, #4A6741)',
                       }}
                     >
                       {passwordStrength.level}
@@ -232,9 +232,9 @@ export default function SignUpPage() {
               <div
                 className="p-3 rounded-lg text-sm"
                 style={{
-                  backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                  border: '1px solid #10b981',
-                  color: '#10b981'
+                  backgroundColor: 'rgba(74, 103, 65, 0.05)',
+                  border: '1px solid var(--success, #4A6741)',
+                  color: 'var(--success, #4A6741)'
                 }}
               >
                 {message}
@@ -246,9 +246,9 @@ export default function SignUpPage() {
               <div
                 className="p-3 rounded-lg text-sm"
                 style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.05)',
-                  border: '1px solid #ef4444',
-                  color: '#ef4444'
+                  backgroundColor: 'rgba(139, 77, 59, 0.05)',
+                  border: '1px solid var(--error, #8B4D3B)',
+                  color: 'var(--error, #8B4D3B)'
                 }}
               >
                 {error}
