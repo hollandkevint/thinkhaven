@@ -71,8 +71,8 @@ export default function TryPage() {
         </a>
         <nav className="flex items-center gap-4">
           <FeedbackButton variant="nav" />
-          <a href="/demo" className="text-sm font-medium" style={{ color: 'var(--slate-blue)' }}>
-            Learn more
+          <a href="/assessment" className="text-sm font-medium" style={{ color: 'var(--slate-blue)' }}>
+            Take Assessment
           </a>
           <a href="/login" className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
             Sign in

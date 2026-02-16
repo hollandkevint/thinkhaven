@@ -262,9 +262,9 @@ export default function ResultsPage() {
                 size="lg"
                 variant="outline"
                 className="flex-1"
-                onClick={() => router.push('/demo')}
+                onClick={() => router.push('/try')}
               >
-                Watch Demo
+                Try It Free
               </Button>
             </div>
           </CardContent>

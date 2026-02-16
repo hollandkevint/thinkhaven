@@ -177,31 +177,7 @@ export const SELECTORS = {
     categoryScore: '[data-testid="category-score"]',
     actionPlan: '[data-testid="action-plan"], .action-plan',
     ctaStartTrial: 'a[href="/"], button:has-text("Start Free Trial")',
-    ctaWatchDemo: 'a[href="/demo"], button:has-text("Demo")',
-  },
-
-  // ===================
-  // DEMO (/demo)
-  // ===================
-  demo: {
-    // Hub
-    title: 'h1:has-text("Demo")',
-    scenarioCard: '[data-testid="demo-card"], .demo-scenario-card',
-    scenarioTitle: '[data-testid="scenario-title"], h3',
-    scenarioMeta: 'text=/messages|min read/i',
-
-    // Viewer
-    messageDisplay: '[data-testid="demo-message"], .demo-message',
-    continueButton: 'button:has-text("Continue"), [data-testid="continue"]',
-    autoAdvanceToggle: 'input[type="checkbox"], [role="switch"]',
-    playPauseButton: 'button[aria-label*="play"], button[aria-label*="pause"]',
-    progressIndicator: '[data-testid="demo-progress"], .demo-progress',
-
-    // Insights
-    insightsSidebar: '[data-testid="insights-sidebar"], .insights-panel',
-
-    // CTA
-    conversionCta: '[data-testid="conversion-cta"], .conversion-cta',
+    ctaTryFree: 'a[href="/try"], button:has-text("Try It Free")',
   },
 
   // ===================

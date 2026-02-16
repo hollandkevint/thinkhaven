@@ -33,12 +33,6 @@ export const ROUTES = {
   /** Assessment results page */
   assessmentResults: '/assessment/results',
 
-  /** Demo hub - shows available demo scenarios */
-  demo: '/demo',
-
-  /** Demo scenario viewer - requires scenario ID */
-  demoScenario: (scenario: string) => `/demo/${scenario}`,
-
   /** Resend email confirmation */
   resendConfirmation: '/resend-confirmation',
 
@@ -136,9 +130,6 @@ export const ROUTE_PATTERNS = {
   /** Matches any session ID */
   appSession: /\/app\/session\/[a-f0-9-]+/,
 
-  /** Matches any demo scenario */
-  demoScenario: /\/demo\/[a-z0-9-]+/,
-
   /** Matches any workspace (legacy) */
   workspace: /\/workspace\/[a-f0-9-]+/,
 
@@ -191,7 +182,6 @@ export const PUBLIC_ROUTES = [
   { name: 'Signup', path: ROUTES.signup },
   { name: 'Try (Guest)', path: ROUTES.try },
   { name: 'Assessment', path: ROUTES.assessment },
-  { name: 'Demo Hub', path: ROUTES.demo },
   { name: 'Resend Confirmation', path: ROUTES.resendConfirmation },
 ];
 

@@ -43,7 +43,7 @@ describe('Navigation Component', () => {
     render(<Navigation />)
     
     expect(screen.getByText('Thinkhaven')).toBeInTheDocument()
-    expect(screen.getByText('Demo')).toBeInTheDocument()
+    expect(screen.getByText('Try Free')).toBeInTheDocument()
     expect(screen.getByText('Login')).toBeInTheDocument()
     expect(screen.getByText('Sign Up')).toBeInTheDocument()
   })
@@ -58,11 +58,11 @@ describe('Navigation Component', () => {
     render(<Navigation />)
     
     expect(screen.getByText('Thinkhaven')).toBeInTheDocument()
-    expect(screen.getByText('Demo')).toBeInTheDocument()
+    expect(screen.getByText('Try Free')).toBeInTheDocument()
     expect(screen.getByText('test')).toBeInTheDocument() // Username from email
   })
 
-  it('navigates to demo when demo button is clicked', () => {
+  it('navigates to try page when try free button is clicked', () => {
     ;(useAuth as any).mockReturnValue({
       user: null,
       loading: false,
@@ -70,9 +70,9 @@ describe('Navigation Component', () => {
     })
 
     render(<Navigation />)
-    
-    fireEvent.click(screen.getByText('Demo'))
-    expect(mockPush).toHaveBeenCalledWith('/demo')
+
+    fireEvent.click(screen.getByText('Try Free'))
+    expect(mockPush).toHaveBeenCalledWith('/try')
   })
 
   it('navigates to login when login button is clicked', () => {

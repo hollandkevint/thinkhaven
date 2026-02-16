@@ -131,17 +131,17 @@ export default function BranchDialog({
 
         <div className="p-6 space-y-6">
           {/* Branch Point Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Branch Point</h4>
-            <p className="text-sm text-blue-800 mb-2">
+          <div className="bg-terracotta/5 border border-terracotta/20 rounded-lg p-4">
+            <h4 className="font-medium text-ink mb-2">Branch Point</h4>
+            <p className="text-sm text-ink mb-2">
               From: <span className="font-medium">{conversationTitle || 'Untitled Conversation'}</span>
             </p>
             <div className="bg-white border rounded p-3">
-              <p className="text-sm text-gray-700 leading-relaxed">
+              <p className="text-sm text-ink-light leading-relaxed">
                 {truncateMessage(messageContent)}
               </p>
             </div>
-            <p className="text-xs text-blue-600 mt-2">
+            <p className="text-xs text-terracotta mt-2">
               This will create a new conversation starting from this message, allowing you to explore alternative directions.
             </p>
           </div>
@@ -156,7 +156,7 @@ export default function BranchDialog({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Alternative Strategy Analysis"
-              className="w-full px-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
               maxLength={100}
             />
             <p className="text-xs text-secondary mt-1">
@@ -176,8 +176,8 @@ export default function BranchDialog({
                   onClick={() => setSelectedDirection(direction.value === selectedDirection ? '' : direction.value)}
                   className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                     selectedDirection === direction.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-terracotta bg-terracotta/5'
+                      : 'border-ink/8 hover:border-ink/20 hover:bg-parchment'
                   }`}
                 >
                   <div className="font-medium text-sm text-primary mb-1">
@@ -201,7 +201,7 @@ export default function BranchDialog({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe what you want to explore in this branch..."
               rows={3}
-              className="w-full px-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent resize-none"
               maxLength={500}
             />
             <p className="text-xs text-secondary mt-1">
@@ -216,7 +216,7 @@ export default function BranchDialog({
                 type="checkbox"
                 checked={preserveContext}
                 onChange={(e) => setPreserveContext(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta"
               />
               <div>
                 <span className="text-sm font-medium text-primary">Preserve Context</span>
@@ -228,14 +228,14 @@ export default function BranchDialog({
           </div>
 
           {/* Advanced Info */}
-          <div className="bg-gray-50 border rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+          <div className="bg-parchment border rounded-lg p-4">
+            <h4 className="font-medium text-ink mb-2 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               How Branching Works
             </h4>
-            <ul className="text-sm text-gray-700 space-y-1">
+            <ul className="text-sm text-ink-light space-y-1">
               <li>• Creates a new conversation starting from the selected message</li>
               <li>• Original conversation remains unchanged</li>
               <li>• You can switch between branches anytime</li>
@@ -246,7 +246,7 @@ export default function BranchDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-divider bg-gray-50">
+        <div className="flex items-center justify-between p-6 border-t border-divider bg-parchment">
           <div className="text-sm text-secondary">
             This will create a new conversation that you can explore independently.
           </div>
@@ -261,7 +261,7 @@ export default function BranchDialog({
             <button
               onClick={handleCreate}
               disabled={creating || !title.trim()}
-              className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-4 py-2 text-sm bg-terracotta text-white rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {creating && (
                 <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
