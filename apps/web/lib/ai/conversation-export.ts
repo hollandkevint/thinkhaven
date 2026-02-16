@@ -496,18 +496,18 @@ export class ConversationExporter {
   private async generateHTML(data: ExportData): Promise<string> {
     const styles = `
       <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 40px; }
-        .header { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #2C2416; margin: 40px; }
+        .header { border-bottom: 2px solid #F5F0E6; padding-bottom: 20px; margin-bottom: 30px; }
         .conversation { margin-bottom: 40px; page-break-inside: avoid; }
-        .conversation-header { background: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin-bottom: 20px; }
+        .conversation-header { background: #FAF7F2; padding: 15px; border-left: 4px solid #C4785C; margin-bottom: 20px; }
         .message { margin-bottom: 20px; padding: 15px; border-radius: 8px; }
-        .message.user { background: #e3f2fd; border-left: 4px solid #2196f3; }
-        .message.assistant { background: #f3e5f5; border-left: 4px solid #9c27b0; }
-        .message-meta { font-size: 0.9em; color: #666; margin-bottom: 10px; }
-        .bookmark { background: #fff3e0; border: 1px solid #ff9800; padding: 10px; margin-top: 10px; border-radius: 4px; }
-        .context { background: #e8f5e8; padding: 15px; margin: 20px 0; border-radius: 4px; }
-        h1, h2, h3 { color: #2c3e50; }
-        .meta-info { color: #666; font-size: 0.9em; }
+        .message.user { background: #FAF7F2; border-left: 4px solid #C4785C; }
+        .message.assistant { background: #F5F0E6; border-left: 4px solid #4A6741; }
+        .message-meta { font-size: 0.9em; color: #6B7B8C; margin-bottom: 10px; }
+        .bookmark { background: #f5ecd0; border: 1px solid #D4A84B; padding: 10px; margin-top: 10px; border-radius: 4px; }
+        .context { background: #d4e5d0; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        h1, h2, h3 { color: #2C2416; }
+        .meta-info { color: #6B7B8C; font-size: 0.9em; }
       </style>
     `
 

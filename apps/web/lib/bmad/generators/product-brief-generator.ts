@@ -601,23 +601,23 @@ export class ProductBriefGenerator {
   <title>${brief.title}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #1a1a1a; }
-    h1 { color: #1a1a1a; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }
-    h2 { color: #374151; margin-top: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
-    h3 { color: #4b5563; }
-    .header-meta { color: #6b7280; margin-bottom: 30px; }
-    .overview-box { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); padding: 20px; border-radius: 12px; margin: 20px 0; }
-    .tagline { font-size: 1.25rem; color: #0369a1; font-weight: 500; }
+    h1 { color: #2C2416; border-bottom: 3px solid #C4785C; padding-bottom: 10px; }
+    h2 { color: #4A3D2E; margin-top: 30px; border-bottom: 1px solid #F5F0E6; padding-bottom: 8px; }
+    h3 { color: #4A3D2E; }
+    .header-meta { color: #6B7B8C; margin-bottom: 30px; }
+    .overview-box { background: linear-gradient(135deg, #FAF7F2, #F5F0E6); padding: 20px; border-radius: 12px; margin: 20px 0; }
+    .tagline { font-size: 1.25rem; color: #B56A4E; font-weight: 500; }
     table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; }
-    th { background: #f9fafb; }
-    .risk-high { color: #dc2626; }
-    .risk-medium { color: #d97706; }
-    .risk-low { color: #16a34a; }
+    th, td { border: 1px solid #F5F0E6; padding: 10px; text-align: left; }
+    th { background: #FAF7F2; }
+    .risk-high { color: #8B4D3B; }
+    .risk-medium { color: #D4A84B; }
+    .risk-low { color: #4A6741; }
     .feature-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px; }
-    .must-have { background: #fee2e2; color: #991b1b; }
-    .should-have { background: #fef3c7; color: #92400e; }
-    .nice-to-have { background: #d1fae5; color: #065f46; }
-    footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 0.875rem; }
+    .must-have { background: #f5e6e3; color: #8B4D3B; }
+    .should-have { background: #f5ecd0; color: #92400e; }
+    .nice-to-have { background: #d4e5d0; color: #4A6741; }
+    footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #F5F0E6; color: #6B7B8C; font-size: 0.875rem; }
   </style>
 </head>
 <body>

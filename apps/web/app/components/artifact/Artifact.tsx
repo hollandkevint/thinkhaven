@@ -63,8 +63,8 @@ export function Artifact({ artifact, onPopOut, className = '' }: ArtifactProps) 
   return (
     <div
       className={`
-        border border-gray-200 rounded-lg overflow-hidden
-        bg-white shadow-sm
+        border border-ink/10 rounded-lg overflow-hidden
+        bg-cream shadow-sm
         ${className}
       `}
     >
@@ -84,7 +84,7 @@ export function Artifact({ artifact, onPopOut, className = '' }: ArtifactProps) 
 
       {/* Copy feedback */}
       {copyFeedback && (
-        <div className="px-3 py-1 bg-green-50 text-green-700 text-xs">
+        <div className="px-3 py-1 bg-forest/10 text-forest text-xs">
           Copied to clipboard
         </div>
       )}
@@ -94,7 +94,7 @@ export function Artifact({ artifact, onPopOut, className = '' }: ArtifactProps) 
         <div className="p-4">
           {isRaw ? (
             // Raw mode: show markdown source
-            <pre className="font-mono text-sm text-gray-800 whitespace-pre-wrap break-words bg-gray-50 p-3 rounded border border-gray-100 overflow-auto max-h-96">
+            <pre className="font-mono text-sm text-ink whitespace-pre-wrap break-words bg-parchment p-3 rounded border border-ink/8 overflow-auto max-h-96">
               {artifact.content}
             </pre>
           ) : (
@@ -106,7 +106,7 @@ export function Artifact({ artifact, onPopOut, className = '' }: ArtifactProps) 
 
           {/* Editable indicator */}
           {isEditable && (
-            <div className="mt-2 text-xs text-gray-400 flex items-center gap-1">
+            <div className="mt-2 text-xs text-slate-blue flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
@@ -118,7 +118,7 @@ export function Artifact({ artifact, onPopOut, className = '' }: ArtifactProps) 
 
       {/* Collapsed preview */}
       {isCollapsed && (
-        <div className="px-3 py-2 text-sm text-gray-500 truncate">
+        <div className="px-3 py-2 text-sm text-slate-blue truncate">
           {artifact.content.slice(0, 100)}
           {artifact.content.length > 100 && '...'}
         </div>

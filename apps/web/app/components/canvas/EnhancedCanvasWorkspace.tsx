@@ -214,7 +214,7 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
               setError(null);
               window.location.reload();
             }}
-            className="px-4 py-2 bg-terracotta text-white rounded hover:bg-terracotta-hover"
+            className="px-4 py-2 bg-terracotta text-cream rounded hover:bg-terracotta-hover"
           >
             Reload Page
           </button>
@@ -286,7 +286,7 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
       {/* Canvas Area */}
       <div
         className={`flex-1 overflow-hidden relative transition-all duration-300 ${
-          highlightedElement ? 'ring-4 ring-green-500 ring-opacity-50 shadow-lg' : ''
+          highlightedElement ? 'ring-4 ring-forest ring-opacity-50 shadow-lg' : ''
         }`}
         data-canvas-container
       >

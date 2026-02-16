@@ -112,8 +112,8 @@ describe('PriorityScoring Component', () => {
 
     await waitFor(() => {
       const criticalElement = screen.getByText('Critical');
-      expect(criticalElement.className).toContain('text-red-600');
-      expect(criticalElement.className).toContain('bg-red-50');
+      expect(criticalElement.className).toContain('text-rust');
+      expect(criticalElement.className).toContain('bg-rust/5');
     });
   });
 
@@ -129,8 +129,8 @@ describe('PriorityScoring Component', () => {
 
     await waitFor(() => {
       const quickWinsElement = screen.getByText('Quick Wins');
-      expect(quickWinsElement.className).toContain('text-green-700');
-      expect(quickWinsElement.className).toContain('bg-green-50');
+      expect(quickWinsElement.className).toContain('text-forest');
+      expect(quickWinsElement.className).toContain('bg-forest/5');
     });
   });
 

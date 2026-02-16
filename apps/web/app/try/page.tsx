@@ -46,10 +46,10 @@ export default function TryPage() {
   // Show loading state while checking auth or migrating
   if (loading || migrating) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: 'var(--cream)' }}>
+      <div className="flex items-center justify-center h-screen bg-cream">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'var(--terracotta)', borderTopColor: 'transparent' }}></div>
-          <p style={{ color: 'var(--slate-blue)' }}>
+          <div className="w-12 h-12 border-4 border-terracotta border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-blue">
             {migrating ? 'Saving your conversation...' : 'Loading...'}
           </p>
         </div>
@@ -63,24 +63,23 @@ export default function TryPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--cream)' }}>
+    <div className="h-screen flex flex-col bg-cream">
       {/* Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--cream)' }}>
-        <a href="/" className="text-2xl font-bold font-display" style={{ color: 'var(--ink)' }}>
+      <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-cream">
+        <a href="/" className="text-2xl font-bold font-display text-ink">
           ThinkHaven
         </a>
         <nav className="flex items-center gap-4">
           <FeedbackButton variant="nav" />
-          <a href="/assessment" className="text-sm font-medium" style={{ color: 'var(--slate-blue)' }}>
+          <a href="/assessment" className="text-sm font-medium text-slate-blue">
             Take Assessment
           </a>
-          <a href="/login" className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
+          <a href="/login" className="text-sm font-medium text-ink">
             Sign in
           </a>
           <a
             href="/signup"
-            className="px-4 py-2 text-sm font-medium rounded-lg"
-            style={{ backgroundColor: 'var(--terracotta)', color: 'var(--cream)' }}
+            className="px-4 py-2 text-sm font-medium rounded-lg bg-terracotta text-cream"
           >
             Sign up
           </a>
@@ -88,7 +87,7 @@ export default function TryPage() {
       </header>
 
       {/* Info banner */}
-      <div className="flex-shrink-0 px-6 py-3" style={{ backgroundColor: 'var(--terracotta)', color: 'var(--cream)' }}>
+      <div className="flex-shrink-0 px-6 py-3 bg-terracotta text-cream">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm">
             <strong>Try before you sign up!</strong> Get 10 free messages to experience ThinkHaven's AI-powered strategic thinking.

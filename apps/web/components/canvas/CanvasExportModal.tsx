@@ -180,19 +180,19 @@ export default function CanvasExportModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-cream rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-ink/10">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Export Canvas</h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <h2 className="text-xl font-bold text-ink">Export Canvas</h2>
+              <p className="text-sm text-ink-light mt-1">
                 {mode === 'draw' ? 'Export your drawing' : 'Export your diagram'}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-slate-blue hover:text-ink-light hover:bg-parchment rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -205,7 +205,7 @@ export default function CanvasExportModal({
         <div className="px-6 py-4 space-y-6">
           {/* Format Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               Export Format
             </label>
             <div className="flex gap-3">
@@ -213,23 +213,23 @@ export default function CanvasExportModal({
                 onClick={() => setFormat('png')}
                 className={`flex-1 px-4 py-3 rounded-lg border-2 transition-colors ${
                   format === 'png'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-terracotta bg-terracotta/5 text-terracotta'
+                    : 'border-ink/10 hover:border-ink/20'
                 }`}
               >
                 <div className="font-medium">PNG</div>
-                <div className="text-xs text-gray-600 mt-1">Raster image, best for sharing</div>
+                <div className="text-xs text-ink-light mt-1">Raster image, best for sharing</div>
               </button>
               <button
                 onClick={() => setFormat('svg')}
                 className={`flex-1 px-4 py-3 rounded-lg border-2 transition-colors ${
                   format === 'svg'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-terracotta bg-terracotta/5 text-terracotta'
+                    : 'border-ink/10 hover:border-ink/20'
                 }`}
               >
                 <div className="font-medium">SVG</div>
-                <div className="text-xs text-gray-600 mt-1">Vector image, scalable quality</div>
+                <div className="text-xs text-ink-light mt-1">Vector image, scalable quality</div>
               </button>
             </div>
           </div>
@@ -239,13 +239,13 @@ export default function CanvasExportModal({
             <>
               {/* Resolution Preset */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-ink mb-2">
                   Resolution
                 </label>
                 <select
                   value={resolutionPreset}
                   onChange={(e) => setResolutionPreset(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-ink/15 rounded-lg focus:border-terracotta focus:ring-1 focus:ring-terracotta"
                 >
                   {RESOLUTION_PRESETS.map((preset, index) => (
                     <option key={index} value={index}>
@@ -259,7 +259,7 @@ export default function CanvasExportModal({
               {isCustomResolution && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-ink mb-2">
                       Width (px)
                     </label>
                     <input
@@ -268,11 +268,11 @@ export default function CanvasExportModal({
                       onChange={(e) => setCustomWidth(Number(e.target.value))}
                       min={100}
                       max={7680}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-ink/15 rounded-lg focus:border-terracotta focus:ring-1 focus:ring-terracotta"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-ink mb-2">
                       Height (px)
                     </label>
                     <input
@@ -281,7 +281,7 @@ export default function CanvasExportModal({
                       onChange={(e) => setCustomHeight(Number(e.target.value))}
                       min={100}
                       max={7680}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-ink/15 rounded-lg focus:border-terracotta focus:ring-1 focus:ring-terracotta"
                     />
                   </div>
                 </div>
@@ -289,7 +289,7 @@ export default function CanvasExportModal({
 
               {/* Scale */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-ink mb-2">
                   Quality Scale
                 </label>
                 <div className="flex gap-2">
@@ -299,8 +299,8 @@ export default function CanvasExportModal({
                       onClick={() => setScale(option.value)}
                       className={`flex-1 px-3 py-2 rounded-lg border transition-colors ${
                         scale === option.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-terracotta bg-terracotta/5 text-terracotta'
+                          : 'border-ink/10 hover:border-ink/20'
                       }`}
                     >
                       <div className="text-sm font-medium">{option.label}</div>
@@ -313,7 +313,7 @@ export default function CanvasExportModal({
 
           {/* Background Color */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               Background
             </label>
             <div className="flex gap-3">
@@ -321,8 +321,8 @@ export default function CanvasExportModal({
                 onClick={() => setBackgroundColor('#ffffff')}
                 className={`flex-1 px-3 py-2 rounded-lg border transition-colors ${
                   backgroundColor === '#ffffff'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-terracotta bg-terracotta/5 text-terracotta'
+                    : 'border-ink/10 hover:border-ink/20'
                 }`}
               >
                 White
@@ -331,8 +331,8 @@ export default function CanvasExportModal({
                 onClick={() => setBackgroundColor('transparent')}
                 className={`flex-1 px-3 py-2 rounded-lg border transition-colors ${
                   backgroundColor === 'transparent'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-terracotta bg-terracotta/5 text-terracotta'
+                    : 'border-ink/10 hover:border-ink/20'
                 }`}
               >
                 Transparent
@@ -341,7 +341,7 @@ export default function CanvasExportModal({
                 type="color"
                 value={backgroundColor === 'transparent' ? '#ffffff' : backgroundColor}
                 onChange={(e) => setBackgroundColor(e.target.value)}
-                className="w-16 h-10 rounded-lg border border-gray-300 cursor-pointer"
+                className="w-16 h-10 rounded-lg border border-ink/15 cursor-pointer"
               />
             </div>
           </div>
@@ -353,9 +353,9 @@ export default function CanvasExportModal({
                 type="checkbox"
                 checked={includeMetadata}
                 onChange={(e) => setIncludeMetadata(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-4 h-4 text-terracotta border-ink/15 rounded focus:ring-terracotta"
               />
-              <span className="text-sm text-gray-700">
+              <span className="text-sm text-ink">
                 Include metadata (workspace name, date, session info)
               </span>
             </label>
@@ -363,9 +363,9 @@ export default function CanvasExportModal({
 
           {/* Preview */}
           {previewUrl && exportResult?.success && (
-            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <div className="text-sm font-medium text-gray-700 mb-3">Preview</div>
-              <div className="max-h-64 overflow-auto bg-white rounded border border-gray-200 flex items-center justify-center">
+            <div className="border border-ink/10 rounded-lg p-4 bg-parchment">
+              <div className="text-sm font-medium text-ink mb-3">Preview</div>
+              <div className="max-h-64 overflow-auto bg-cream rounded border border-ink/10 flex items-center justify-center">
                 <img
                   src={previewUrl}
                   alt="Export preview"
@@ -377,14 +377,14 @@ export default function CanvasExportModal({
 
           {/* Error */}
           {exportResult && !exportResult.success && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="p-4 bg-rust/10 border border-rust/30 rounded-lg">
               <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-rust flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                 </svg>
                 <div>
-                  <div className="font-medium text-red-800">Export Failed</div>
-                  <div className="text-sm text-red-700 mt-1">{exportResult.error}</div>
+                  <div className="font-medium text-rust">Export Failed</div>
+                  <div className="text-sm text-rust mt-1">{exportResult.error}</div>
                 </div>
               </div>
             </div>
@@ -392,11 +392,11 @@ export default function CanvasExportModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+        <div className="px-6 py-4 border-t border-ink/10 bg-parchment rounded-b-xl">
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-4 py-2 text-ink hover:bg-parchment rounded-lg transition-colors"
             >
               Cancel
             </button>
@@ -407,7 +407,7 @@ export default function CanvasExportModal({
                   {format === 'png' && (
                     <button
                       onClick={handleCopyToClipboard}
-                      className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-2"
+                      className="px-4 py-2 text-terracotta hover:bg-terracotta/5 rounded-lg transition-colors flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -417,7 +417,7 @@ export default function CanvasExportModal({
                   )}
                   <button
                     onClick={handleDownload}
-                    className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-forest text-white hover:bg-forest/90 rounded-lg transition-colors flex items-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -431,7 +431,7 @@ export default function CanvasExportModal({
                 <button
                   onClick={handleExport}
                   disabled={isExporting}
-                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-terracotta text-cream hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center gap-2"
                 >
                   {isExporting ? (
                     <>

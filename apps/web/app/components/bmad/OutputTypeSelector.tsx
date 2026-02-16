@@ -75,7 +75,7 @@ export default function OutputTypeSelector({
         className={`
           w-full flex items-center justify-between gap-3 p-4
           bg-white border border-ink/8 rounded-lg
-          hover:border-terracotta/20 hover:bg-terracotta/5/50
+          hover:border-terracotta/20 hover:bg-terracotta/5
           focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-1
           transition-all disabled:opacity-50 disabled:cursor-not-allowed
           ${isOpen ? 'border-terracotta ring-2 ring-terracotta/20' : ''}

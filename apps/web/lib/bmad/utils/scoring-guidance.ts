@@ -108,9 +108,9 @@ export function getScoreLabel(score: number): string {
 }
 
 export function getScoreColor(score: number): string {
-  if (score <= 2) return "text-red-600";
-  if (score <= 4) return "text-orange-600";
-  if (score <= 6) return "text-yellow-600";
-  if (score <= 8) return "text-blue-600";
-  return "text-green-600";
+  if (score <= 2) return "text-rust";
+  if (score <= 4) return "text-mustard";
+  if (score <= 6) return "text-mustard";
+  if (score <= 8) return "text-slate-blue";
+  return "text-forest";
 }

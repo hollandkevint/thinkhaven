@@ -240,7 +240,7 @@ export default function MessageInput({
           <div className="h-6 w-px bg-divider mx-1"></div>
           <button
             onClick={() => setShowToolbar(false)}
-            className="p-2 text-secondary hover:text-primary hover:bg-gray-50 rounded transition-colors"
+            className="p-2 text-secondary hover:text-primary hover:bg-parchment rounded transition-colors"
             title="Hide toolbar"
             type="button"
           >
@@ -264,9 +264,9 @@ export default function MessageInput({
           disabled={disabled}
           rows={1}
           className="w-full px-4 py-3 pr-20 resize-none bg-transparent border-none outline-none text-secondary placeholder:text-slate-blue/60 min-h-[50px] max-h-[200px]"
-          style={{ 
+          style={{
             scrollbarWidth: 'thin',
-            scrollbarColor: '#CBD5E1 transparent'
+            scrollbarColor: 'var(--slate-blue) transparent'
           }}
         />
 

@@ -250,8 +250,8 @@ export default function GuestChatInterface() {
               <h1 className="text-xl font-bold" style={{ color: 'var(--ink)' }}>Mary</h1>
               <p className="text-sm" style={{ color: 'var(--slate-blue)' }}>AI Business Strategist</p>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ backgroundColor: 'rgba(212, 168, 75, 0.15)' }}>
-              <span className="text-xs font-medium" style={{ color: 'var(--mustard)' }}>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-mustard/15">
+              <span className="text-xs font-medium text-mustard">
                 Guest Mode
               </span>
             </div>
@@ -260,14 +260,13 @@ export default function GuestChatInterface() {
           <div className="flex items-center gap-3">
             {/* Message Counter */}
             <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-              style={{
-                backgroundColor: remainingMessages <= 2
-                  ? 'rgba(139, 77, 59, 0.1)'
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
+                remainingMessages <= 2
+                  ? 'bg-rust/10'
                   : remainingMessages <= 4
-                    ? 'rgba(212, 168, 75, 0.15)'
-                    : 'rgba(74, 103, 65, 0.1)'
-              }}
+                    ? 'bg-mustard/15'
+                    : 'bg-forest/10'
+              }`}
             >
               <span
                 className="text-sm font-medium"
@@ -286,13 +285,7 @@ export default function GuestChatInterface() {
             {/* Sign Up Button */}
             <button
               onClick={handleSignupClick}
-              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200"
-              style={{
-                backgroundColor: 'var(--terracotta)',
-                color: 'var(--cream)'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--terracotta-hover)'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--terracotta)'}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-terracotta hover:bg-terracotta-hover text-cream transition-colors"
             >
               Sign up
             </button>

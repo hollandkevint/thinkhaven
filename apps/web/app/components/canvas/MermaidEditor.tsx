@@ -147,7 +147,7 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
           {onSave && (
             <button
               onClick={handleSave}
-              className="px-3 py-1.5 text-sm bg-terracotta text-white rounded hover:bg-terracotta-hover"
+              className="px-3 py-1.5 text-sm bg-terracotta text-cream rounded hover:bg-terracotta-hover"
             >
               💾 Save
             </button>

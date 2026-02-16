@@ -11,8 +11,8 @@ export function OfflineNotice() {
   return (
     <div className={`fixed top-0 left-0 right-0 z-50 px-4 py-3 text-center text-sm transition-all duration-300 ${
       isOnline
-        ? 'bg-green-500 text-white'
-        : 'bg-orange-500 text-white'
+        ? 'bg-forest text-cream'
+        : 'bg-terracotta text-cream'
     }`}>
       <div className="flex items-center justify-center gap-2">
         {isOnline ? (

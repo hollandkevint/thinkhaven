@@ -314,7 +314,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
           <button
             onClick={saveCanvasState}
-            className="px-3 py-1.5 bg-terracotta text-white rounded hover:bg-terracotta-hover text-sm"
+            className="px-3 py-1.5 bg-terracotta text-cream rounded hover:bg-terracotta-hover text-sm"
             title="Save (Ctrl+S)"
           >
             💾 Save

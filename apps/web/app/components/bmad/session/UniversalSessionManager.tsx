@@ -297,7 +297,7 @@ export default function UniversalSessionManager({
                       </span>
                       <button
                         onClick={() => setShowPathwaySwitcher(true)}
-                        className="px-3 py-1 bg-terracotta text-white rounded text-sm hover:bg-terracotta transition-colors"
+                        className="px-3 py-1 bg-terracotta text-cream rounded text-sm hover:bg-terracotta transition-colors"
                       >
                         Consider
                       </button>

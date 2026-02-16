@@ -101,9 +101,9 @@ describe('PriorityMatrix Component', () => {
       el.className.includes('px-3')
     );
 
-    expect(quadrantBadge?.className).toContain('bg-green-50');
-    expect(quadrantBadge?.className).toContain('border-green-200');
-    expect(quadrantBadge?.className).toContain('text-green-800');
+    expect(quadrantBadge?.className).toContain('bg-forest/5');
+    expect(quadrantBadge?.className).toContain('border-forest/20');
+    expect(quadrantBadge?.className).toContain('text-forest');
   });
 
   it('should apply correct styling for Time Wasters quadrant', () => {
@@ -113,9 +113,9 @@ describe('PriorityMatrix Component', () => {
       el.className.includes('px-3')
     );
 
-    expect(quadrantBadge?.className).toContain('bg-red-50');
-    expect(quadrantBadge?.className).toContain('border-red-200');
-    expect(quadrantBadge?.className).toContain('text-red-800');
+    expect(quadrantBadge?.className).toContain('bg-rust/5');
+    expect(quadrantBadge?.className).toContain('border-rust/20');
+    expect(quadrantBadge?.className).toContain('text-rust');
   });
 
   it('should apply correct styling for Major Projects quadrant', () => {
@@ -125,9 +125,9 @@ describe('PriorityMatrix Component', () => {
       el.className.includes('px-3')
     );
 
-    expect(quadrantBadge?.className).toContain('bg-blue-50');
-    expect(quadrantBadge?.className).toContain('border-blue-200');
-    expect(quadrantBadge?.className).toContain('text-blue-800');
+    expect(quadrantBadge?.className).toContain('bg-terracotta/5');
+    expect(quadrantBadge?.className).toContain('border-terracotta/20');
+    expect(quadrantBadge?.className).toContain('text-ink');
   });
 
   it('should apply correct styling for Fill-ins quadrant', () => {
@@ -137,9 +137,9 @@ describe('PriorityMatrix Component', () => {
       el.className.includes('px-3')
     );
 
-    expect(quadrantBadge?.className).toContain('bg-yellow-50');
-    expect(quadrantBadge?.className).toContain('border-yellow-200');
-    expect(quadrantBadge?.className).toContain('text-yellow-800');
+    expect(quadrantBadge?.className).toContain('bg-mustard/5');
+    expect(quadrantBadge?.className).toContain('border-mustard/20');
+    expect(quadrantBadge?.className).toContain('text-mustard');
   });
 
   it('should handle feature positioning in different quadrants', () => {

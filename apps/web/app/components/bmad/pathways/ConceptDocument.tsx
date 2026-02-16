@@ -27,7 +27,7 @@ export default function ConceptDocument({
         {showExportButton && (
           <button
             onClick={onExport}
-            className="mt-4 px-4 py-2 bg-terracotta text-white rounded-md hover:bg-terracotta-hover transition-colors"
+            className="mt-4 px-4 py-2 bg-terracotta text-cream rounded-md hover:bg-terracotta-hover transition-colors"
           >
             Export Document
           </button>

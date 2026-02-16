@@ -219,7 +219,7 @@ export default function MarketExploration({
           data-testid="submit-response"
           onClick={handleSubmit}
           disabled={isLoading || !targetMarket.trim() || !marketSize}
-          className="px-6 py-2 bg-terracotta text-white rounded-lg hover:bg-terracotta-hover disabled:bg-ink/20 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2 bg-terracotta text-cream rounded-lg hover:bg-terracotta-hover disabled:bg-ink/20 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? (
             <div className="flex items-center space-x-2">

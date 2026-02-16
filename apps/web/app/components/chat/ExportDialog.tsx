@@ -185,7 +185,7 @@ export default function ExportDialog({
 
   return (
     <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${className}`}>
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-cream rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-divider">
           <h2 className="text-xl font-semibold text-primary">Export Conversations</h2>
@@ -264,7 +264,7 @@ export default function ExportDialog({
                   </span>
                   <p className="text-xs text-secondary">Bookmarked messages with tags and descriptions</p>
                   {!supportsFeature('bookmarks') && (
-                    <p className="text-xs text-amber-600">Not supported by {currentFormatInfo?.name}</p>
+                    <p className="text-xs text-mustard">Not supported by {currentFormatInfo?.name}</p>
                   )}
                 </div>
               </label>
@@ -283,7 +283,7 @@ export default function ExportDialog({
                   </span>
                   <p className="text-xs text-secondary">Links between related messages</p>
                   {!supportsFeature('references') && (
-                    <p className="text-xs text-amber-600">Not supported by {currentFormatInfo?.name}</p>
+                    <p className="text-xs text-mustard">Not supported by {currentFormatInfo?.name}</p>
                   )}
                 </div>
               </label>
@@ -302,7 +302,7 @@ export default function ExportDialog({
                   </span>
                   <p className="text-xs text-secondary">Key insights, summaries, and conversation context</p>
                   {!supportsFeature('context') && (
-                    <p className="text-xs text-amber-600">Not supported by {currentFormatInfo?.name}</p>
+                    <p className="text-xs text-mustard">Not supported by {currentFormatInfo?.name}</p>
                   )}
                 </div>
               </label>
@@ -431,14 +431,14 @@ export default function ExportDialog({
             <button
               onClick={onClose}
               disabled={exporting}
-              className="px-4 py-2 text-sm text-secondary hover:text-primary border border-divider rounded hover:bg-white transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm text-secondary hover:text-primary border border-divider rounded hover:bg-cream transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleExport}
               disabled={exporting || previewLoading || !preview}
-              className="px-4 py-2 text-sm bg-terracotta text-white rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-4 py-2 text-sm bg-terracotta text-cream rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {exporting && (
                 <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>

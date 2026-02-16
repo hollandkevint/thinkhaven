@@ -339,14 +339,14 @@ export class BrainstormSummaryGenerator {
   <title>${summary.title}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
-    h1 { color: #1a1a1a; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
-    h2 { color: #374151; margin-top: 30px; }
+    h1 { color: #2C2416; border-bottom: 2px solid #C4785C; padding-bottom: 10px; }
+    h2 { color: #4A3D2E; margin-top: 30px; }
     ul { padding-left: 20px; }
     li { margin: 8px 0; }
-    .metadata { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    .action-high { color: #dc2626; font-weight: 600; }
-    .action-medium { color: #d97706; }
-    .action-low { color: #6b7280; }
+    .metadata { background: #F5F0E6; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .action-high { color: #8B4D3B; font-weight: 600; }
+    .action-medium { color: #D4A84B; }
+    .action-low { color: #6B7B8C; }
   </style>
 </head>
 <body>
@@ -372,7 +372,7 @@ export class BrainstormSummaryGenerator {
     ${summary.nextSteps.map(s => `<li>${s}</li>`).join('\n')}
   </ol>
 
-  <footer style="margin-top: 40px; color: #6b7280; font-size: 0.875rem;">
+  <footer style="margin-top: 40px; color: #6B7B8C; font-size: 0.875rem;">
     Generated on ${summary.metadata.generatedAt.toLocaleString()}
   </footer>
 </body>

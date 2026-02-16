@@ -127,9 +127,9 @@ export default function StateBridge({ workspaceId, className = '' }: StateBridge
               return (
                 <div key={bridge.id} className="flex items-center gap-2 p-1 bg-primary/5 rounded text-xs">
                   <span className={`px-1 py-0.5 rounded text-xs ${
-                    bridge.bridgeType === 'suggestion' ? 'bg-blue-100 text-blue-800' :
-                    bridge.bridgeType === 'generated' ? 'bg-green-100 text-green-800' :
-                    'bg-gray-100 text-gray-800'
+                    bridge.bridgeType === 'suggestion' ? 'bg-slate-blue/10 text-slate-blue' :
+                    bridge.bridgeType === 'generated' ? 'bg-forest/10 text-forest' :
+                    'bg-ink/10 text-ink'
                   }`}>
                     {bridge.bridgeType}
                   </span>

@@ -317,7 +317,7 @@ export default function FeatureInput({
           <div className="space-y-3">
             {analysisQuestions.map((question, index) => (
               <div key={index} className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-terracotta text-white rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
+                <div className="w-6 h-6 bg-terracotta text-cream rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
                   {index + 1}
                 </div>
                 <p className="text-ink text-sm leading-relaxed">{question}</p>
@@ -329,7 +329,7 @@ export default function FeatureInput({
             <div className="flex justify-end mt-6 pt-4 border-t border-terracotta/20">
               <button
                 onClick={onNext}
-                className="px-6 py-2 bg-terracotta text-white rounded-lg hover:bg-terracotta-hover transition-colors"
+                className="px-6 py-2 bg-terracotta text-cream rounded-lg hover:bg-terracotta-hover transition-colors"
               >
                 Continue to Priority Scoring →
               </button>

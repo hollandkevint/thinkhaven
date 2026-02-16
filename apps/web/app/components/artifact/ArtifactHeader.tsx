@@ -111,21 +111,21 @@ export function ArtifactHeader({
     <div
       className={`
         flex items-center justify-between px-3 py-2
-        bg-gray-50 border-b border-gray-200 rounded-t-lg
+        bg-parchment border-b border-ink/10 rounded-t-lg
         ${className}
       `}
     >
       {/* Left side: Icon, Type badge, Title */}
       <div className="flex items-center gap-2 min-w-0">
-        <span className="text-gray-500 flex-shrink-0">
+        <span className="text-slate-blue flex-shrink-0">
           {getIcon(config.icon)}
         </span>
 
-        <span className="text-xs font-medium text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded flex-shrink-0">
+        <span className="text-xs font-medium text-slate-blue bg-ink/10 px-1.5 py-0.5 rounded flex-shrink-0">
           {config.label}
         </span>
 
-        <h3 className="text-sm font-medium text-gray-900 truncate">
+        <h3 className="text-sm font-medium text-ink truncate">
           {title}
         </h3>
       </div>
@@ -144,7 +144,7 @@ export function ArtifactHeader({
         <button
           type="button"
           onClick={onCopy}
-          className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-colors"
+          className="p-1.5 text-slate-blue hover:text-ink hover:bg-parchment rounded transition-colors"
           title="Copy content"
         >
           {icons.Copy}
@@ -155,7 +155,7 @@ export function ArtifactHeader({
           <button
             type="button"
             onClick={onPopOut}
-            className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-colors"
+            className="p-1.5 text-slate-blue hover:text-ink hover:bg-parchment rounded transition-colors"
             title="Pop out to panel"
           >
             {icons.ExternalLink}
@@ -167,7 +167,7 @@ export function ArtifactHeader({
           <button
             type="button"
             onClick={onExport}
-            className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-colors"
+            className="p-1.5 text-slate-blue hover:text-ink hover:bg-parchment rounded transition-colors"
             title="Export"
           >
             {icons.Download}
@@ -178,7 +178,7 @@ export function ArtifactHeader({
         <button
           type="button"
           onClick={onToggleExpand}
-          className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-colors"
+          className="p-1.5 text-slate-blue hover:text-ink hover:bg-parchment rounded transition-colors"
           title={isCollapsed ? 'Expand' : 'Collapse'}
         >
           {isCollapsed ? icons.ChevronDown : icons.ChevronUp}

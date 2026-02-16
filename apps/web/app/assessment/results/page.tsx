@@ -196,7 +196,7 @@ export default function ResultsPage() {
         </div>
 
         {/* Personalized Recommendations */}
-        <Card className="mb-8 bg-terracotta text-white">
+        <Card className="mb-8 bg-terracotta text-cream">
           <CardHeader>
             <CardTitle>💡 Your Personalized Action Plan</CardTitle>
             <CardDescription className="text-white/80">

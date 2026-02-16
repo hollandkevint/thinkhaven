@@ -65,10 +65,10 @@ export default function BriefPreview({ brief, className = '' }: BriefPreviewProp
               {brief.userStories.map((story, idx) => (
                 <div
                   key={idx}
-                  className="pl-4 border-l-3 border-l-terracotta py-2 bg-terracotta/5/50 rounded-r"
+                  className="pl-4 border-l-3 border-l-terracotta py-2 bg-terracotta/5 rounded-r"
                 >
                   <div className="flex items-start">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-terracotta text-white text-xs font-bold mr-3 flex-shrink-0">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-terracotta text-cream text-xs font-bold mr-3 flex-shrink-0">
                       {idx + 1}
                     </span>
                     <p className="text-ink-light leading-relaxed">{story}</p>

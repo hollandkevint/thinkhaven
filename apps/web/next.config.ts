@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      { source: '/demo', destination: '/try', permanent: true },
+      { source: '/demo/:path*', destination: '/try', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

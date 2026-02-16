@@ -254,7 +254,7 @@ export default function FeatureBriefGenerator({
               <div className="flex justify-end pt-4 border-t border-ink/8">
                 <button
                   onClick={onComplete}
-                  className="px-6 py-3 bg-terracotta text-white rounded-lg text-sm font-semibold hover:bg-terracotta-hover transition-all shadow-sm"
+                  className="px-6 py-3 bg-terracotta text-cream rounded-lg text-sm font-semibold hover:bg-terracotta-hover transition-all shadow-sm"
                 >
                   Complete Feature Refinement →
                 </button>

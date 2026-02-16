@@ -344,7 +344,7 @@ export default function MessageActionMenu({
                     <button
                       onClick={handleAddTag}
                       disabled={!tagInput.trim()}
-                      className="px-2 py-1 bg-terracotta text-white text-xs rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 py-1 bg-terracotta text-cream text-xs rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Add
                     </button>
@@ -384,7 +384,7 @@ export default function MessageActionMenu({
                 <button
                   onClick={handleBookmarkSubmit}
                   disabled={!bookmarkData.title.trim()}
-                  className="flex-1 px-3 py-2 text-sm bg-terracotta text-white rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-3 py-2 text-sm bg-terracotta text-cream rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Save Bookmark
                 </button>

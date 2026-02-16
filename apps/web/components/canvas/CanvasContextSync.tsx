@@ -182,7 +182,7 @@ export default function CanvasContextSync({
         <div className="flex items-center gap-2">
           <div
             className={`w-2 h-2 rounded-full ${
-              syncEnabled ? 'bg-green-500' : 'bg-gray-400'
+              syncEnabled ? 'bg-forest' : 'bg-slate-blue'
             }`}
             title={syncEnabled ? 'Sync enabled' : 'Sync disabled'}
           />
@@ -197,8 +197,8 @@ export default function CanvasContextSync({
             onClick={toggleAutoPopulate}
             className={`text-xs px-2 py-1 rounded transition-colors ${
               autoPopulateEnabled
-                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-terracotta/10 text-terracotta hover:bg-terracotta/20'
+                : 'bg-parchment text-ink-light hover:bg-cream'
             }`}
             title="Auto-apply high-confidence suggestions"
           >
@@ -210,8 +210,8 @@ export default function CanvasContextSync({
             onClick={toggleSync}
             className={`text-xs px-2 py-1 rounded transition-colors ${
               syncEnabled
-                ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-forest/10 text-forest hover:bg-forest/20'
+                : 'bg-parchment text-ink-light hover:bg-cream'
             }`}
             title="Toggle canvas synchronization"
           >
@@ -231,17 +231,17 @@ export default function CanvasContextSync({
 
       {/* Active Suggestion Indicator - Enhanced */}
       {activeSuggestion && (
-        <div className="mt-2 p-3 bg-green-50 border-l-4 border-green-500 rounded shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="mt-2 p-3 bg-forest/5 border-l-4 border-forest rounded shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 text-sm font-medium text-green-800">
+              <div className="flex items-center gap-2 text-sm font-medium text-forest">
                 <span className="flex-shrink-0">✅</span>
                 <span className="truncate">Added to Canvas</span>
               </div>
-              <div className="mt-1 text-xs text-green-700 leading-relaxed">
+              <div className="mt-1 text-xs text-forest leading-relaxed">
                 "{activeSuggestion.title}" was added to your canvas workspace
               </div>
-              <div className="mt-1 text-xs text-green-600">
+              <div className="mt-1 text-xs text-forest">
                 Type: {activeSuggestion.type.replace('-', ' ')} •
                 Confidence: {Math.round(activeSuggestion.confidence * 100)}%
               </div>
@@ -261,7 +261,7 @@ export default function CanvasContextSync({
                   }));
                 }
               }}
-              className="flex-shrink-0 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors shadow-sm hover:shadow"
+              className="flex-shrink-0 px-3 py-1.5 bg-forest hover:bg-forest/90 text-white text-xs font-medium rounded-md transition-colors shadow-sm hover:shadow"
               title="Scroll to and highlight the canvas element"
             >
               View on Canvas →
@@ -309,7 +309,7 @@ export function CanvasSyncIndicator({ syncEnabled }: { syncEnabled: boolean }) {
     <div className="flex items-center gap-1.5 text-xs text-secondary">
       <div
         className={`w-1.5 h-1.5 rounded-full ${
-          syncEnabled ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+          syncEnabled ? 'bg-forest animate-pulse' : 'bg-slate-blue'
         }`}
       />
       <span>{syncEnabled ? 'Canvas synced' : 'Canvas sync off'}</span>

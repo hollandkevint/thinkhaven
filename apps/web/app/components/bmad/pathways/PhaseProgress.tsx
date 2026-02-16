@@ -90,7 +90,7 @@ export default function PhaseProgress({
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-2
                 ${isActive
-                  ? 'bg-terracotta text-white'
+                  ? 'bg-terracotta text-cream'
                   : isCompleted
                     ? 'bg-forest text-white'
                     : 'bg-ink/20 text-ink-light'

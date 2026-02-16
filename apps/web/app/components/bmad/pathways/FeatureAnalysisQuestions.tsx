@@ -46,7 +46,7 @@ export default function FeatureAnalysisQuestions({
               onClick={() => onQuestionClick?.(question, index)}
             >
               <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-terracotta text-white rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
+                <div className="w-6 h-6 bg-terracotta text-cream rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
                   {index + 1}
                 </div>
                 <div className="flex-1">

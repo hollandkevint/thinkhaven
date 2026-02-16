@@ -163,12 +163,7 @@ export default function ExportPanel({
       {/* Export Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
-        style={{
-          border: '1px solid var(--border)',
-          color: 'var(--foreground)',
-          backgroundColor: isOpen ? 'rgba(0, 121, 255, 0.1)' : 'transparent',
-        }}
+        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border border-border text-foreground ${isOpen ? 'bg-terracotta/10' : ''}`}
         title="Export chat conversation"
       >
         <svg
@@ -190,35 +185,31 @@ export default function ExportPanel({
       {/* Export Panel Dropdown */}
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-80 rounded-lg shadow-lg border z-50"
-          style={{
-            backgroundColor: 'var(--surface)',
-            borderColor: 'var(--border)',
-          }}
+          className="absolute right-0 mt-2 w-80 rounded-lg shadow-lg border border-border bg-muted z-50"
         >
           <div className="p-4">
             {/* Header */}
             <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--foreground)' }}>
+              <h3 className="text-lg font-semibold mb-1 text-foreground">
                 Export Chat
               </h3>
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>
+              <p className="text-xs text-muted-foreground">
                 Save your conversation in multiple formats
               </p>
             </div>
 
             {/* Stats */}
-            <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 121, 255, 0.05)' }}>
+            <div className="mb-4 p-3 rounded-lg bg-terracotta/5">
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <span style={{ color: 'var(--muted)' }}>Messages:</span>
-                  <span className="font-semibold ml-1" style={{ color: 'var(--foreground)' }}>
+                  <span className="text-muted-foreground">Messages:</span>
+                  <span className="font-semibold ml-1 text-foreground">
                     {stats.totalMessages}
                   </span>
                 </div>
                 <div>
-                  <span style={{ color: 'var(--muted)' }}>Read time:</span>
-                  <span className="font-semibold ml-1" style={{ color: 'var(--foreground)' }}>
+                  <span className="text-muted-foreground">Read time:</span>
+                  <span className="font-semibold ml-1 text-foreground">
                     {stats.estimatedReadTime} min
                   </span>
                 </div>
@@ -228,15 +219,11 @@ export default function ExportPanel({
             {/* Status Message */}
             {exportStatus.type && (
               <div
-                className="mb-4 p-3 rounded-lg text-sm"
-                style={{
-                  backgroundColor:
-                    exportStatus.type === 'success'
-                      ? 'rgba(16, 185, 129, 0.1)'
-                      : 'rgba(239, 68, 68, 0.1)',
-                  color:
-                    exportStatus.type === 'success' ? '#10b981' : '#ef4444',
-                }}
+                className={`mb-4 p-3 rounded-lg text-sm ${
+                  exportStatus.type === 'success'
+                    ? 'bg-forest/10 text-forest'
+                    : 'bg-rust/10 text-rust'
+                }`}
               >
                 {exportStatus.message}
               </div>
@@ -244,18 +231,14 @@ export default function ExportPanel({
 
             {/* Export Options */}
             <div className="space-y-2 mb-4">
-              <p className="text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
+              <p className="text-xs font-semibold mb-2 text-muted-foreground">
                 DOWNLOAD AS:
               </p>
 
               <button
                 onClick={() => handleExport('markdown')}
                 disabled={isExporting || messages.length === 0}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--background)',
-                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-border bg-background"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -266,10 +249,10 @@ export default function ExportPanel({
                   />
                 </svg>
                 <div>
-                  <div className="font-medium text-sm" style={{ color: 'var(--foreground)' }}>
+                  <div className="font-medium text-sm text-foreground">
                     Markdown (.md)
                   </div>
-                  <div className="text-xs" style={{ color: 'var(--muted)' }}>
+                  <div className="text-xs text-muted-foreground">
                     Formatted text with structure
                   </div>
                 </div>
@@ -278,11 +261,7 @@ export default function ExportPanel({
               <button
                 onClick={() => handleExport('text')}
                 disabled={isExporting || messages.length === 0}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--background)',
-                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-border bg-background"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -293,10 +272,10 @@ export default function ExportPanel({
                   />
                 </svg>
                 <div>
-                  <div className="font-medium text-sm" style={{ color: 'var(--foreground)' }}>
+                  <div className="font-medium text-sm text-foreground">
                     Plain Text (.txt)
                   </div>
-                  <div className="text-xs" style={{ color: 'var(--muted)' }}>
+                  <div className="text-xs text-muted-foreground">
                     Simple readable format
                   </div>
                 </div>
@@ -305,11 +284,7 @@ export default function ExportPanel({
               <button
                 onClick={() => handleExport('json')}
                 disabled={isExporting || messages.length === 0}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--background)',
-                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-border bg-background"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -320,10 +295,10 @@ export default function ExportPanel({
                   />
                 </svg>
                 <div>
-                  <div className="font-medium text-sm" style={{ color: 'var(--foreground)' }}>
+                  <div className="font-medium text-sm text-foreground">
                     JSON (.json)
                   </div>
-                  <div className="text-xs" style={{ color: 'var(--muted)' }}>
+                  <div className="text-xs text-muted-foreground">
                     Structured data format
                   </div>
                 </div>
@@ -331,19 +306,15 @@ export default function ExportPanel({
             </div>
 
             {/* Quick Actions */}
-            <div className="space-y-2 mb-4 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
-              <p className="text-xs font-semibold mb-2" style={{ color: 'var(--muted)' }}>
+            <div className="space-y-2 mb-4 pt-4 border-t border-border">
+              <p className="text-xs font-semibold mb-2 text-muted-foreground">
                 QUICK ACTIONS:
               </p>
 
               <button
                 onClick={handleCopyToClipboard}
                 disabled={isExporting || messages.length === 0}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: 'rgba(0, 121, 255, 0.1)',
-                  color: 'var(--primary)',
-                }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-terracotta/10 text-primary"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -358,14 +329,10 @@ export default function ExportPanel({
             </div>
 
             {/* Navigation Actions */}
-            <div className="space-y-2 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <div className="space-y-2 pt-4 border-t border-border">
               <button
                 onClick={handleNewSession}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                style={{
-                  backgroundColor: 'var(--primary)',
-                  color: 'white',
-                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-primary text-cream"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -380,11 +347,7 @@ export default function ExportPanel({
 
               <button
                 onClick={handleBackToDashboard}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                style={{
-                  border: '1px solid var(--border)',
-                  color: 'var(--foreground)',
-                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border border-border text-foreground"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -404,9 +367,8 @@ export default function ExportPanel({
       {/* Backdrop to close panel */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-40 bg-transparent"
           onClick={() => setIsOpen(false)}
-          style={{ backgroundColor: 'transparent' }}
         />
       )}
     </div>

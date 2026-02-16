@@ -66,7 +66,7 @@ export default function ErrorMonitorDashboard({ className = '' }: ErrorMonitorDa
   }
 
   return (
-    <div className={`bg-white border border-ink/8 rounded-lg shadow-sm ${className}`}>
+    <div className={`bg-cream border border-ink/8 rounded-lg shadow-sm ${className}`}>
       {/* Collapsed Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -209,7 +209,7 @@ export default function ErrorMonitorDashboard({ className = '' }: ErrorMonitorDa
                   setMetrics(BmadErrorMonitor.getMetrics())
                   setRecentErrors(BmadErrorMonitor.getRecentErrors(10))
                 }}
-                className="px-3 py-1 text-xs bg-terracotta text-white rounded hover:bg-terracotta-hover transition-colors"
+                className="px-3 py-1 text-xs bg-terracotta text-cream rounded hover:bg-terracotta-hover transition-colors"
               >
                 Refresh
               </button>

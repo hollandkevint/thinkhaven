@@ -25,7 +25,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                 onClick={() => {
                   navigator.clipboard.writeText(String(children).replace(/\n$/, ''))
                 }}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white text-gray-600 hover:text-gray-800 rounded p-1.5 text-xs border shadow-sm"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white text-slate-blue hover:text-ink rounded p-1.5 text-xs border shadow-sm"
                 title="Copy code"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

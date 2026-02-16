@@ -805,46 +805,41 @@ export default function WorkspacePage() {
                           <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-terracotta text-cream">
                             M
                           </div>
-                          <div className="px-5 py-4 rounded-xl" style={{ backgroundColor: 'var(--surface)' }}>
+                          <div className="px-5 py-4 rounded-xl bg-muted">
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
                               className="prose prose-sm max-w-none"
                               components={{
                                 code({ inline, className, children, ...props }: any) {
                                   return inline ? (
-                                    <code className="px-1.5 py-0.5 rounded text-sm"
-                                          style={{
-                                            backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                            fontFamily: 'var(--font-mono)'
-                                          }}>
+                                    <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
                                       {children}
                                     </code>
                                   ) : (
-                                    <pre className="p-4 rounded-lg overflow-x-auto"
-                                         style={{ backgroundColor: '#f9f9f9' }}>
-                                      <code style={{ fontFamily: 'var(--font-mono)' }}>
+                                    <pre className="p-4 rounded-lg overflow-x-auto bg-parchment">
+                                      <code className="font-mono">
                                         {children}
                                       </code>
                                     </pre>
                                   );
                                 },
                                 h1: ({ children }) => (
-                                  <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>
+                                  <h1 className="text-2xl font-bold mb-4 text-ink">
                                     {children}
                                   </h1>
                                 ),
                                 h2: ({ children }) => (
-                                  <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--foreground)' }}>
+                                  <h2 className="text-xl font-bold mb-3 text-ink">
                                     {children}
                                   </h2>
                                 ),
                                 h3: ({ children }) => (
-                                  <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+                                  <h3 className="text-lg font-semibold mb-2 text-ink">
                                     {children}
                                   </h3>
                                 ),
                                 p: ({ children }) => (
-                                  <p className="mb-4 leading-relaxed" style={{ color: 'var(--foreground)' }}>
+                                  <p className="mb-4 leading-relaxed text-ink">
                                     {children}
                                   </p>
                                 ),
@@ -859,7 +854,7 @@ export default function WorkspacePage() {
                                   </ol>
                                 ),
                                 li: ({ children }) => (
-                                  <li style={{ color: 'var(--foreground)' }}>
+                                  <li className="text-ink">
                                     {children}
                                   </li>
                                 ),
@@ -873,7 +868,7 @@ export default function WorkspacePage() {
                     ) : (
                       <div className="flex justify-center">
                         <div className="px-5 py-4 rounded-xl bg-parchment max-w-[70%]">
-                          <p className="text-sm" style={{ color: 'var(--muted)' }}>
+                          <p className="text-sm text-slate-blue">
                             <strong>System:</strong> {message.content}
                           </p>
                         </div>
@@ -898,7 +893,7 @@ export default function WorkspacePage() {
                       <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-terracotta text-cream">
                         M
                       </div>
-                      <div className="px-5 py-4 rounded-xl" style={{ backgroundColor: 'var(--surface)' }}>
+                      <div className="px-5 py-4 rounded-xl bg-muted">
                         <span className="loading-shimmer h-4 w-32 inline-block rounded"></span>
                       </div>
                     </div>

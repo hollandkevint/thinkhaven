@@ -66,7 +66,7 @@ export class PaneErrorBoundary extends Component<Props, State> {
                 <summary className="cursor-pointer text-secondary hover:text-primary mb-2">
                   Technical Details
                 </summary>
-                <div className="bg-gray-50 p-3 rounded border text-gray-700 overflow-auto max-h-32">
+                <div className="bg-parchment p-3 rounded border text-ink-light overflow-auto max-h-32">
                   <div className="font-semibold mb-1">Error:</div>
                   <div className="mb-2">{this.state.error.message}</div>
                   <div className="font-semibold mb-1">Stack:</div>

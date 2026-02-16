@@ -181,7 +181,7 @@ export default function ElicitationPanel({
       'strategy': 'bg-terracotta/10 text-terracotta border-terracotta/20',
       'validation': 'bg-forest/10 text-forest border-forest/20',
       'optimization': 'bg-mustard/10 text-mustard border-mustard/20',
-      'innovation': 'bg-pink-100 text-pink-800 border-pink-200',
+      'innovation': 'bg-dusty-rose/10 text-ink border-dusty-rose/20',
       'execution': 'bg-terracotta/10 text-terracotta border-terracotta/20',
       'default': 'bg-parchment text-ink border-ink/8'
     }
@@ -512,7 +512,7 @@ export default function ElicitationPanel({
                     {retryCount >= 1 && (
                       <button
                         onClick={handleOfflineMode}
-                        className="px-4 py-2 bg-terracotta text-white text-sm rounded-lg hover:bg-terracotta-hover transition-colors"
+                        className="px-4 py-2 bg-terracotta text-cream text-sm rounded-lg hover:bg-terracotta-hover transition-colors"
                       >
                         Continue Offline
                       </button>

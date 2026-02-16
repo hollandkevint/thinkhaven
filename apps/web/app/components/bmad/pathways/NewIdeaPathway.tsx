@@ -146,7 +146,7 @@ export default function NewIdeaPathway({
                     uniqueValueProps: ['Comprehensive solution', 'Market-validated approach']
                   })}
                   disabled={isLoading}
-                  className="px-6 py-2 bg-terracotta text-white rounded-md hover:bg-terracotta-hover disabled:opacity-50"
+                  className="px-6 py-2 bg-terracotta text-cream rounded-md hover:bg-terracotta-hover disabled:opacity-50"
                 >
                   {isLoading ? 'Processing...' : 'Continue to Positioning'}
                 </button>

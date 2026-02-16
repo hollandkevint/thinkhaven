@@ -225,10 +225,10 @@ export default function StreamingMessage({
           {/* Bookmark indicator */}
           {bookmarks.length > 0 && (
             <div className="flex items-center gap-1">
-              <svg className="w-3 h-3 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 text-mustard" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
               </svg>
-              <span className="text-xs text-yellow-600 font-medium">
+              <span className="text-xs text-mustard font-medium">
                 {bookmarks.length}
               </span>
             </div>

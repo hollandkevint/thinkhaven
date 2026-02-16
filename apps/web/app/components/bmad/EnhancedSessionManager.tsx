@@ -331,7 +331,7 @@ export default function EnhancedSessionManager({
         {/* Enhanced Current Phase Info */}
         <div className="bg-cream border border-terracotta/20 p-5 rounded-lg">
           <div className="flex items-start gap-4 mb-4">
-            <div className={`w-12 h-12 bg-gradient-to-br from-terracotta to-terracotta rounded-full flex items-center justify-center flex-shrink-0 shadow-lg`}>
+            <div className={`w-12 h-12 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0 shadow-lg`}>
               <div className="w-4 h-4 bg-white rounded-full animate-pulse"></div>
             </div>
             <div className="flex-1">
@@ -351,7 +351,7 @@ export default function EnhancedSessionManager({
               <div className="mb-4">
                 <div className="w-full bg-white/60 rounded-full h-3 shadow-inner">
                   <div 
-                    className={`bg-gradient-to-r from-terracotta to-terracotta h-3 rounded-full transition-all duration-500 shadow-sm`}
+                    className={`bg-terracotta h-3 rounded-full transition-all duration-500 shadow-sm`}
                     style={{ width: `${phaseProgress}%` }}
                   ></div>
                 </div>
@@ -398,7 +398,7 @@ export default function EnhancedSessionManager({
                 }`}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${
                     phase.isActive 
-                      ? 'bg-terracotta text-white animate-pulse' 
+                      ? 'bg-terracotta text-cream animate-pulse' 
                       : phase.progress === 100 
                         ? `bg-forest text-white` 
                         : phase.progress > 0
@@ -426,7 +426,7 @@ export default function EnhancedSessionManager({
                     <p className="text-xs text-secondary mb-2">{phase.description}</p>
                     <div className="w-full bg-ink/10 rounded-full h-2">
                       <div 
-                        className={`bg-gradient-to-r from-terracotta to-terracotta h-2 rounded-full transition-all duration-500`}
+                        className={`bg-terracotta h-2 rounded-full transition-all duration-500`}
                         style={{ width: `${phase.progress}%` }}
                       ></div>
                     </div>
@@ -473,18 +473,18 @@ export default function EnhancedSessionManager({
               </div>
               <h4 className="font-semibold text-ink">Session Summary</h4>
             </div>
-            <div className="space-y-3 text-sm text-terracotta">
-              <div className="flex justify-between items-center py-2 border-b border-terracotta/20/50">
+            <div className="space-y-3 text-sm text-ink-light">
+              <div className="flex justify-between items-center py-2 border-b border-terracotta/20">
                 <span>Pathway:</span>
                 <span className="font-semibold">{getPathwayName(session.pathway)}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-terracotta/20/50">
+              <div className="flex justify-between items-center py-2 border-b border-terracotta/20">
                 <span>Phases completed:</span>
                 <span className="font-semibold">
                   {Object.values(session.progress.phaseCompletion).filter(p => p === 100).length} of {session.timeAllocations.length}
                 </span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-terracotta/20/50">
+              <div className="flex justify-between items-center py-2 border-b border-terracotta/20">
                 <span>Time efficiency:</span>
                 <span className="font-semibold">
                   {timeElapsed > 0 ? Math.round((session.progress.overallCompletion / (timeElapsed / 60)) * 10) / 10 : 0}%/min

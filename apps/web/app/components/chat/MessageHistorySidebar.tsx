@@ -592,14 +592,11 @@ export default function MessageHistorySidebar({
                       </span>
                     </div>
                     
-                    <div 
-                      className="text-sm text-secondary leading-relaxed"
-                      dangerouslySetInnerHTML={{
-                        __html: message.content.length > 200 
-                          ? `${message.content.substring(0, 200)}...`
-                          : message.content
-                      }}
-                    />
+                    <p className="text-sm text-secondary leading-relaxed">
+                      {message.content.length > 200
+                        ? `${message.content.substring(0, 200)}...`
+                        : message.content}
+                    </p>
                   </div>
                 ))
               )}
