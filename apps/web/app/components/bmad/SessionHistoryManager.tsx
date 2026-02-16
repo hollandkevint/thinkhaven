@@ -175,11 +175,11 @@ export default function SessionHistoryManager({
     return (
       <div className={`bg-white rounded-lg border border-divider p-6 ${className}`}>
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded mb-4 w-1/3"></div>
+          <div className="h-6 bg-ink/10 rounded mb-4 w-1/3"></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gray-200 rounded w-full"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-4 bg-ink/10 rounded w-full"></div>
+            <div className="h-4 bg-ink/10 rounded w-3/4"></div>
+            <div className="h-4 bg-ink/10 rounded w-1/2"></div>
           </div>
         </div>
       </div>
@@ -192,7 +192,7 @@ export default function SessionHistoryManager({
       <div className="p-6 border-b border-divider">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-terracotta rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
               </svg>
@@ -205,7 +205,7 @@ export default function SessionHistoryManager({
           
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className="px-4 py-2 text-sm border border-divider rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 text-sm border border-divider rounded-lg hover:bg-parchment transition-colors"
           >
             {showHistory ? 'Hide History' : 'Show History'}
           </button>
@@ -217,24 +217,24 @@ export default function SessionHistoryManager({
         {getResumableSessions().length > 0 && (
           <div>
             <h4 className="font-semibold text-primary mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-forest" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"/>
               </svg>
               Resume Active Sessions
             </h4>
             <div className="grid gap-3">
               {getResumableSessions().map((session, index) => (
-                <div key={session.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <div key={session.id} className="border border-ink/8 rounded-lg p-4 hover:bg-parchment transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div className={`w-3 h-3 rounded-full ${
-                          session.metadata.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'
+                          session.metadata.status === 'active' ? 'bg-forest' : 'bg-mustard'
                         }`}></div>
                         <h5 className="font-medium text-primary">
                           {getPathwayName(session.pathway)}
                         </h5>
-                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                        <span className="text-xs px-2 py-1 bg-parchment text-ink-light rounded-full">
                           {Math.round(session.progress.overallCompletion)}% complete
                         </span>
                       </div>
@@ -247,9 +247,9 @@ export default function SessionHistoryManager({
                       
                       {/* Progress bar */}
                       <div className="mt-3">
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                        <div className="w-full bg-ink/10 rounded-full h-2">
+                          <div
+                            className="bg-terracotta h-2 rounded-full transition-all duration-300"
                             style={{ width: `${session.progress.overallCompletion}%` }}
                           ></div>
                         </div>
@@ -259,13 +259,13 @@ export default function SessionHistoryManager({
                     <div className="flex items-center gap-2 ml-4">
                       <button
                         onClick={() => setSelectedSession(selectedSession === session.id ? null : session.id)}
-                        className="px-3 py-1 text-xs border border-gray-300 text-gray-600 rounded hover:bg-gray-100 transition-colors"
+                        className="px-3 py-1 text-xs border border-ink/15 text-ink-light rounded hover:bg-parchment transition-colors"
                       >
                         Details
                       </button>
                       <button
                         onClick={() => handleResumeSession(session.id)}
-                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white text-sm rounded-lg hover:shadow-md transition-all"
+                        className="px-4 py-2 bg-terracotta text-cream text-sm rounded-lg hover:bg-terracotta-hover hover:shadow-md transition-all"
                       >
                         Resume
                       </button>
@@ -274,7 +274,7 @@ export default function SessionHistoryManager({
                   
                   {/* Session Details */}
                   {selectedSession === session.id && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="mt-4 pt-4 border-t border-ink/8">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="font-medium text-secondary">Current Step:</span>
@@ -285,7 +285,7 @@ export default function SessionHistoryManager({
                           <ul className="text-primary space-y-1">
                             {session.progress.nextSteps.slice(0, 2).map((step, idx) => (
                               <li key={idx} className="flex items-center gap-2">
-                                <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                                <div className="w-1 h-1 bg-terracotta rounded-full"></div>
                                 <span className="truncate">{step}</span>
                               </li>
                             ))}
@@ -304,7 +304,7 @@ export default function SessionHistoryManager({
         {showHistory && (
           <div>
             <h4 className="font-semibold text-primary mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-terracotta" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
               Activity Timeline
@@ -312,7 +312,7 @@ export default function SessionHistoryManager({
             
             {sessionHistory.length === 0 ? (
               <div className="text-center py-8 text-secondary">
-                <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-12 h-12 mx-auto mb-4 text-ink/15" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
                 </svg>
                 <p>No session history available</p>
@@ -321,8 +321,8 @@ export default function SessionHistoryManager({
             ) : (
               <div className="space-y-3 max-h-80 overflow-y-auto">
                 {sessionHistory.slice(-20).reverse().map((entry, index) => (
-                  <div key={entry.id} className="flex items-start gap-4 p-3 bg-gray-50 rounded-lg">
-                    <div className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm border border-gray-200">
+                  <div key={entry.id} className="flex items-start gap-4 p-3 bg-parchment rounded-lg">
+                    <div className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm border border-ink/8">
                       {getActionIcon(entry.action)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -330,7 +330,7 @@ export default function SessionHistoryManager({
                         <span className="font-medium text-primary text-sm">
                           {getActionDescription(entry.action)}
                         </span>
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+                        <span className="text-xs px-2 py-1 bg-terracotta/10 text-terracotta rounded-full">
                           {entry.progress.toFixed(0)}%
                         </span>
                       </div>
@@ -338,10 +338,10 @@ export default function SessionHistoryManager({
                         Session: {entry.sessionId.slice(-8)} • Phase: {entry.phase.replace(/_/g, ' ')}
                       </p>
                       {entry.details && (
-                        <p className="text-xs text-gray-600 italic">{entry.details}</p>
+                        <p className="text-xs text-ink-light italic">{entry.details}</p>
                       )}
                     </div>
-                    <div className="text-xs text-gray-400 whitespace-nowrap">
+                    <div className="text-xs text-slate-blue/60 whitespace-nowrap">
                       {formatTimeAgo(entry.timestamp)}
                     </div>
                   </div>
@@ -353,8 +353,8 @@ export default function SessionHistoryManager({
 
         {/* Current Session Quick Stats */}
         {currentSession && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-lg">
-            <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+          <div className="bg-parchment border border-ink/8 p-4 rounded-lg">
+            <h4 className="font-semibold text-ink mb-3 flex items-center gap-2">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
@@ -362,26 +362,26 @@ export default function SessionHistoryManager({
             </h4>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               <div className="text-center">
-                <div className="font-bold text-lg text-blue-900">{Math.round(currentSession.progress.overallCompletion)}%</div>
-                <div className="text-blue-700 text-xs">Progress</div>
+                <div className="font-bold text-lg text-ink">{Math.round(currentSession.progress.overallCompletion)}%</div>
+                <div className="text-ink-light text-xs">Progress</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-lg text-blue-900">
+                <div className="font-bold text-lg text-ink">
                   {Object.values(currentSession.progress.phaseCompletion).filter(p => p === 100).length}
                 </div>
-                <div className="text-blue-700 text-xs">Phases Done</div>
+                <div className="text-ink-light text-xs">Phases Done</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-lg text-blue-900">
+                <div className="font-bold text-lg text-ink">
                   {getSessionHistory(currentSession.id).length}
                 </div>
-                <div className="text-blue-700 text-xs">Activities</div>
+                <div className="text-ink-light text-xs">Activities</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-lg text-blue-900">
+                <div className="font-bold text-lg text-ink">
                   {formatTimeAgo(new Date(currentSession.startTime))}
                 </div>
-                <div className="text-blue-700 text-xs">Started</div>
+                <div className="text-ink-light text-xs">Started</div>
               </div>
             </div>
           </div>

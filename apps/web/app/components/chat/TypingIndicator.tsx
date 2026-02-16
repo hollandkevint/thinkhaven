@@ -49,8 +49,8 @@ export default function TypingIndicator({
           {/* Animated dots */}
           <div className="flex gap-1">
             <div className="w-2 h-2 bg-terracotta rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 bg-terracotta rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+            <div className="w-2 h-2 bg-terracotta rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
           </div>
           
           {/* Status text */}
@@ -134,7 +134,7 @@ export function StreamingProgress({
       ) : (
         <>
           <div className="w-16 h-1 bg-ink/10 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-500 animate-pulse" style={{ width: '60%' }} />
+            <div className="h-full bg-terracotta animate-pulse" style={{ width: '60%' }} />
           </div>
           <span>Streaming...</span>
         </>
