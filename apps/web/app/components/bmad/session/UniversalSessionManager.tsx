@@ -157,15 +157,15 @@ export default function UniversalSessionManager({
       <div className={`universal-session-manager ${className}`}>
         <div className="bg-white rounded-lg border border-divider p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-blue-100 rounded-full animate-pulse"></div>
+            <div className="w-8 h-8 bg-terracotta/10 rounded-full animate-pulse"></div>
             <div className="space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
-              <div className="h-3 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <div className="h-4 bg-ink/10 rounded w-48 animate-pulse"></div>
+              <div className="h-3 bg-ink/10 rounded w-32 animate-pulse"></div>
             </div>
           </div>
           <div className="space-y-3">
-            <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-            <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+            <div className="h-3 bg-ink/10 rounded animate-pulse"></div>
+            <div className="h-3 bg-ink/10 rounded w-3/4 animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -207,21 +207,21 @@ export default function UniversalSessionManager({
 
         {/* State Information */}
         <div className="grid md:grid-cols-3 gap-4 mb-4">
-          <div className="bg-blue-50 rounded-lg p-3">
-            <div className="text-sm text-blue-600 mb-1">Current Pathway</div>
-            <div className="font-semibold text-blue-900">
+          <div className="bg-terracotta/5 rounded-lg p-3">
+            <div className="text-sm text-terracotta mb-1">Current Pathway</div>
+            <div className="font-semibold text-ink">
               {universalState.currentPathway.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
             </div>
           </div>
-          <div className="bg-green-50 rounded-lg p-3">
-            <div className="text-sm text-green-600 mb-1">Global Progress</div>
-            <div className="font-semibold text-green-900">
+          <div className="bg-forest/5 rounded-lg p-3">
+            <div className="text-sm text-forest mb-1">Global Progress</div>
+            <div className="font-semibold text-ink">
               {Math.round(universalState.globalProgress.overallCompletion)}% Complete
             </div>
           </div>
-          <div className="bg-purple-50 rounded-lg p-3">
-            <div className="text-sm text-purple-600 mb-1">Pathway Switches</div>
-            <div className="font-semibold text-purple-900">
+          <div className="bg-terracotta/5 rounded-lg p-3">
+            <div className="text-sm text-terracotta mb-1">Pathway Switches</div>
+            <div className="font-semibold text-ink">
               {universalState.analytics.pathwaySwitches} Switches
             </div>
           </div>
@@ -236,10 +236,10 @@ export default function UniversalSessionManager({
                 <React.Fragment key={index}>
                   {transition.fromPathway && (
                     <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                      <span className="px-2 py-1 bg-gray-100 rounded text-gray-700">
+                      <span className="px-2 py-1 bg-parchment rounded text-ink-light">
                         {transition.fromPathway.replace('-', ' ')}
                       </span>
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-slate-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
@@ -259,7 +259,7 @@ export default function UniversalSessionManager({
         {lastBackupTime && (
           <div className="border-t border-divider pt-4 mt-4">
             <div className="flex items-center gap-2 text-sm text-secondary">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-forest" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
               Last backup: {lastBackupTime.toLocaleTimeString()}
@@ -270,9 +270,9 @@ export default function UniversalSessionManager({
 
       {/* Pathway Switch Recommendations */}
       {switchRecommendations.length > 0 && !showPathwaySwitcher && (
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-4 mb-6">
+        <div className="bg-cream rounded-lg border border-terracotta/20 p-4 mb-6">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
@@ -292,12 +292,12 @@ export default function UniversalSessionManager({
                       <div className="text-sm text-secondary">{rec.reasoning}</div>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
-                      <span className="text-sm font-medium text-blue-600">
+                      <span className="text-sm font-medium text-terracotta">
                         {Math.round(rec.confidence * 100)}%
                       </span>
                       <button
                         onClick={() => setShowPathwaySwitcher(true)}
-                        className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
+                        className="px-3 py-1 bg-terracotta text-white rounded text-sm hover:bg-terracotta transition-colors"
                       >
                         Consider
                       </button>

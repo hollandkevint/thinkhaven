@@ -32,14 +32,14 @@ export default function LoadingIndicator({
   const sizeClasses = getSizeClasses()
 
   const renderSpinner = () => (
-    <div className={`border-2 border-gray-200 border-t-primary rounded-full animate-spin ${sizeClasses.spinner}`}></div>
+    <div className={`border-2 border-ink/10 border-t-primary rounded-full animate-spin ${sizeClasses.spinner}`}></div>
   )
 
   const renderSkeleton = () => (
     <div className="animate-pulse space-y-3">
-      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+      <div className="h-4 bg-ink/10 rounded w-3/4"></div>
+      <div className="h-4 bg-ink/10 rounded w-1/2"></div>
+      <div className="h-4 bg-ink/10 rounded w-2/3"></div>
     </div>
   )
 
@@ -53,7 +53,7 @@ export default function LoadingIndicator({
           </span>
         )}
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
+      <div className="w-full bg-ink/10 rounded-full h-2">
         <div 
           className="bg-primary h-2 rounded-full transition-all duration-300" 
           style={{ width: `${progress || 0}%` }}

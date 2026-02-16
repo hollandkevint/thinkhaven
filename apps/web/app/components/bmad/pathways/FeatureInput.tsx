@@ -197,11 +197,11 @@ export default function FeatureInput({
             <div className="flex justify-between items-center mt-1">
               <div className="text-xs text-secondary">
                 {featureDescription.length < 50 ? (
-                  <span className="text-orange-600">
+                  <span className="text-mustard">
                     {50 - featureDescription.length} more characters needed
                   </span>
                 ) : (
-                  <span className="text-green-600">✓ Minimum length met</span>
+                  <span className="text-forest">✓ Minimum length met</span>
                 )}
               </div>
               <div className="text-xs text-secondary">
@@ -280,7 +280,7 @@ export default function FeatureInput({
           <div className="flex justify-between items-center pt-4 border-t border-divider">
             <div className="text-sm text-secondary">
               {hasGeneratedQuestions ? (
-                <span className="text-green-600">✓ Analysis questions generated</span>
+                <span className="text-forest">✓ Analysis questions generated</span>
               ) : (
                 'Ready to generate validation questions'
               )}
@@ -310,26 +310,26 @@ export default function FeatureInput({
 
       {/* Generated Questions Display */}
       {analysisQuestions.length > 0 && (
-        <div className="mt-6 bg-blue-50 rounded-lg border border-blue-200 p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">
+        <div className="mt-6 bg-terracotta/5 rounded-lg border border-terracotta/20 p-6">
+          <h3 className="text-lg font-semibold text-ink mb-4">
             Feature Validation Questions
           </h3>
           <div className="space-y-3">
             {analysisQuestions.map((question, index) => (
               <div key={index} className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
+                <div className="w-6 h-6 bg-terracotta text-white rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
                   {index + 1}
                 </div>
-                <p className="text-blue-800 text-sm leading-relaxed">{question}</p>
+                <p className="text-ink text-sm leading-relaxed">{question}</p>
               </div>
             ))}
           </div>
 
           {onNext && (
-            <div className="flex justify-end mt-6 pt-4 border-t border-blue-200">
+            <div className="flex justify-end mt-6 pt-4 border-t border-terracotta/20">
               <button
                 onClick={onNext}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-6 py-2 bg-terracotta text-white rounded-lg hover:bg-terracotta-hover transition-colors"
               >
                 Continue to Priority Scoring →
               </button>

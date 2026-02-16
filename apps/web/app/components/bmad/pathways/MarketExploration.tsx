@@ -78,11 +78,11 @@ export default function MarketExploration({
   return (
     <div className="space-y-6">
       {/* Phase Description */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-blue-900 mb-2">
+      <div className="bg-terracotta/5 border border-terracotta/20 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-ink mb-2">
           Market Opportunity Analysis
         </h3>
-        <p className="text-blue-700 text-sm">
+        <p className="text-terracotta text-sm">
           Identify and analyze market opportunities for your concept.
           We'll help you understand your target market, size the opportunity, and map the competitive landscape.
         </p>
@@ -92,33 +92,33 @@ export default function MarketExploration({
       <div className="space-y-6">
         {/* Target Market */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-ink-light mb-2">
             Who is your ideal customer? *
           </label>
           <textarea
             data-testid="user-input"
             value={targetMarket}
             onChange={(e) => setTargetMarket(e.target.value)}
-            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-4 border border-ink/8 rounded-lg focus:ring-terracotta focus:border-terracotta"
             placeholder="Describe your target customer in detail: demographics, behaviors, pain points, budget..."
             rows={3}
             disabled={isLoading}
           />
-          <div className="mt-2 text-sm text-gray-500">
+          <div className="mt-2 text-sm text-slate-blue">
             Include demographics, psychographics, and specific pain points
           </div>
         </div>
 
         {/* Market Size */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-ink-light mb-2">
             How large is your potential market? *
           </label>
           <div className="space-y-3">
             <select
               value={marketSize}
               onChange={(e) => setMarketSize(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-3 border border-ink/8 rounded-lg focus:ring-terracotta focus:border-terracotta"
               disabled={isLoading}
             >
               <option value="">Select market size...</option>
@@ -132,13 +132,13 @@ export default function MarketExploration({
 
         {/* Competition */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-ink-light mb-2">
             Who are your main competitors or alternatives?
           </label>
           <textarea
             value={competition}
             onChange={(e) => setCompetition(e.target.value)}
-            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-4 border border-ink/8 rounded-lg focus:ring-terracotta focus:border-terracotta"
             placeholder="Include both direct competitors and alternative solutions people currently use..."
             rows={3}
             disabled={isLoading}
@@ -146,28 +146,28 @@ export default function MarketExploration({
         </div>
 
         {/* Market Research Framework */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-3">🎯 Market Analysis Framework</h4>
+        <div className="bg-parchment rounded-lg p-4">
+          <h4 className="font-medium text-ink mb-3">🎯 Market Analysis Framework</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="space-y-2">
-              <div className="font-medium text-blue-600">Customer Segmentation</div>
-              <ul className="space-y-1 text-gray-600">
+              <div className="font-medium text-terracotta">Customer Segmentation</div>
+              <ul className="space-y-1 text-ink-light">
                 <li>• Demographics & psychographics</li>
                 <li>• Pain points & needs</li>
                 <li>• Buying behavior</li>
               </ul>
             </div>
             <div className="space-y-2">
-              <div className="font-medium text-green-600">Market Sizing</div>
-              <ul className="space-y-1 text-gray-600">
+              <div className="font-medium text-forest">Market Sizing</div>
+              <ul className="space-y-1 text-ink-light">
                 <li>• Total addressable market</li>
                 <li>• Serviceable market</li>
                 <li>• Growth trends</li>
               </ul>
             </div>
             <div className="space-y-2">
-              <div className="font-medium text-purple-600">Competition</div>
-              <ul className="space-y-1 text-gray-600">
+              <div className="font-medium text-terracotta">Competition</div>
+              <ul className="space-y-1 text-ink-light">
                 <li>• Direct competitors</li>
                 <li>• Alternative solutions</li>
                 <li>• Market gaps</li>
@@ -178,12 +178,12 @@ export default function MarketExploration({
 
         {/* AI Insights Preview */}
         {targetMarket && marketSize && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-terracotta/5 border border-terracotta/20 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-blue-900">🤖 AI Market Analysis Preview</h4>
+              <h4 className="font-medium text-ink">🤖 AI Market Analysis Preview</h4>
               <button
                 onClick={() => setShowInsights(!showInsights)}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-terracotta hover:text-ink"
               >
                 {showInsights ? 'Hide' : 'Show'} Insights
               </button>
@@ -191,15 +191,15 @@ export default function MarketExploration({
 
             {showInsights && (
               <div className="space-y-3 text-sm">
-                <div className="bg-white p-3 rounded border-l-4 border-blue-400">
-                  <div className="font-medium text-gray-900">Market Opportunity Score: 8/10</div>
-                  <div className="text-gray-600 mt-1">
+                <div className="bg-white p-3 rounded border-l-4 border-terracotta">
+                  <div className="font-medium text-ink">Market Opportunity Score: 8/10</div>
+                  <div className="text-ink-light mt-1">
                     Strong market potential with {marketSize.toLowerCase()} reach and clear customer need
                   </div>
                 </div>
-                <div data-testid="market-insights" className="bg-white p-3 rounded border-l-4 border-green-400">
-                  <div className="font-medium text-gray-900">Key Insight</div>
-                  <div className="text-gray-600 mt-1">
+                <div data-testid="market-insights" className="bg-white p-3 rounded border-l-4 border-forest">
+                  <div className="font-medium text-ink">Key Insight</div>
+                  <div className="text-ink-light mt-1">
                     Target market shows high engagement potential with growing demand trends
                   </div>
                 </div>
@@ -211,7 +211,7 @@ export default function MarketExploration({
 
       {/* Action Buttons */}
       <div className="flex justify-between items-center pt-4 border-t">
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-slate-blue">
           Phase 2 of 4 • ~10 minutes
         </div>
 
@@ -219,7 +219,7 @@ export default function MarketExploration({
           data-testid="submit-response"
           onClick={handleSubmit}
           disabled={isLoading || !targetMarket.trim() || !marketSize}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-2 bg-terracotta text-white rounded-lg hover:bg-terracotta-hover disabled:bg-ink/20 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? (
             <div className="flex items-center space-x-2">
@@ -234,10 +234,10 @@ export default function MarketExploration({
 
       {/* Progress Indicator */}
       <div className="text-center" data-testid="phase-progress">
-        <div className="text-sm text-gray-500 mb-2">Market Opportunity Analysis</div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="text-sm text-slate-blue mb-2">Market Opportunity Analysis</div>
+        <div className="w-full bg-ink/10 rounded-full h-2">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            className="bg-terracotta h-2 rounded-full transition-all duration-300"
             style={{ width: `${targetMarket && marketSize ? 75 : 25}%` }}
           ></div>
         </div>

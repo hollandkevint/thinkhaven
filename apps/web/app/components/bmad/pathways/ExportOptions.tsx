@@ -127,26 +127,26 @@ export default function ExportOptions({
 
   return (
     <div className={`export-options ${className}`}>
-      <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-200 p-6">
+      <div className="bg-cream rounded-lg border border-ink/8 p-6">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-lg font-semibold text-ink mb-2">
             Export & Share Options
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-ink-light">
             Download your feature brief in multiple formats or share with your team
           </p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-700">{error}</p>
+          <div className="mb-4 bg-rust/5 border border-rust/20 rounded-lg p-3">
+            <p className="text-sm text-rust">{error}</p>
           </div>
         )}
 
         {/* Download Options */}
         <div className="space-y-3 mb-6">
-          <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+          <h4 className="text-sm font-semibold text-ink-light uppercase tracking-wider">
             Download
           </h4>
 
@@ -155,15 +155,15 @@ export default function ExportOptions({
             <button
               onClick={() => handleExport('markdown')}
               disabled={isExporting}
-              className="flex flex-col items-center p-4 bg-white border-2 border-blue-200 rounded-lg hover:border-blue-400 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex flex-col items-center p-4 bg-white border-2 border-terracotta/20 rounded-lg hover:border-terracotta hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-3xl mb-2">📄</span>
-              <span className="text-sm font-semibold text-gray-900">Markdown</span>
-              <span className="text-xs text-gray-500 text-center mt-1">
+              <span className="text-sm font-semibold text-ink">Markdown</span>
+              <span className="text-xs text-slate-blue text-center mt-1">
                 For documentation & wikis
               </span>
               {isExporting && exportingFormat === 'markdown' && (
-                <span className="text-xs text-blue-600 mt-2">Exporting...</span>
+                <span className="text-xs text-terracotta mt-2">Exporting...</span>
               )}
             </button>
 
@@ -171,15 +171,15 @@ export default function ExportOptions({
             <button
               onClick={() => handleExport('text')}
               disabled={isExporting}
-              className="flex flex-col items-center p-4 bg-white border-2 border-green-200 rounded-lg hover:border-green-400 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex flex-col items-center p-4 bg-white border-2 border-forest/20 rounded-lg hover:border-forest hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-3xl mb-2">📝</span>
-              <span className="text-sm font-semibold text-gray-900">Plain Text</span>
-              <span className="text-xs text-gray-500 text-center mt-1">
+              <span className="text-sm font-semibold text-ink">Plain Text</span>
+              <span className="text-xs text-slate-blue text-center mt-1">
                 For emails & basic docs
               </span>
               {isExporting && exportingFormat === 'text' && (
-                <span className="text-xs text-green-600 mt-2">Exporting...</span>
+                <span className="text-xs text-forest mt-2">Exporting...</span>
               )}
             </button>
 
@@ -187,15 +187,15 @@ export default function ExportOptions({
             <button
               onClick={() => handleExport('pdf')}
               disabled={isExporting}
-              className="flex flex-col items-center p-4 bg-white border-2 border-purple-200 rounded-lg hover:border-purple-400 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex flex-col items-center p-4 bg-white border-2 border-terracotta/20 rounded-lg hover:border-terracotta hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-3xl mb-2">📑</span>
-              <span className="text-sm font-semibold text-gray-900">PDF</span>
-              <span className="text-xs text-gray-500 text-center mt-1">
+              <span className="text-sm font-semibold text-ink">PDF</span>
+              <span className="text-xs text-slate-blue text-center mt-1">
                 Professional format with branding
               </span>
               {isExporting && exportingFormat === 'pdf' && (
-                <span className="text-xs text-purple-600 mt-2">Exporting...</span>
+                <span className="text-xs text-terracotta mt-2">Exporting...</span>
               )}
             </button>
           </div>
@@ -203,7 +203,7 @@ export default function ExportOptions({
 
         {/* Share Options */}
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+          <h4 className="text-sm font-semibold text-ink-light uppercase tracking-wider">
             Share
           </h4>
 
@@ -213,12 +213,12 @@ export default function ExportOptions({
               onClick={handleCopyToClipboard}
               className={`flex items-center gap-2 px-4 py-2 bg-white border-2 rounded-lg transition-all ${
                 copySuccess
-                  ? 'border-green-400 bg-green-50'
-                  : 'border-blue-300 hover:border-blue-400 hover:bg-blue-50'
+                  ? 'border-forest bg-forest/5'
+                  : 'border-terracotta/20 hover:border-terracotta hover:bg-terracotta/5'
               }`}
             >
               <span className="text-lg">{copySuccess ? '✓' : '📋'}</span>
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-ink-light">
                 {copySuccess ? 'Copied as Markdown!' : 'Copy as Markdown'}
               </span>
             </button>
@@ -226,10 +226,10 @@ export default function ExportOptions({
             {/* Email Share */}
             <button
               onClick={handleEmailShare}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-ink/8 rounded-lg hover:bg-parchment transition-colors"
             >
               <span className="text-lg">📧</span>
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-ink-light">
                 Share via Email
               </span>
             </button>
@@ -237,12 +237,12 @@ export default function ExportOptions({
         </div>
 
         {/* Format Guide */}
-        <div className="mt-6 pt-4 border-t border-gray-200">
+        <div className="mt-6 pt-4 border-t border-ink/8">
           <details className="text-sm">
-            <summary className="font-medium text-gray-700 cursor-pointer hover:text-gray-900">
+            <summary className="font-medium text-ink-light cursor-pointer hover:text-ink">
               Format Guide
             </summary>
-            <div className="mt-3 space-y-2 text-gray-600">
+            <div className="mt-3 space-y-2 text-ink-light">
               <div>
                 <span className="font-semibold">Markdown:</span> Best for GitHub, Notion, Confluence, and other documentation platforms. Preserves formatting and links.
               </div>
@@ -257,8 +257,8 @@ export default function ExportOptions({
         </div>
 
         {/* Integration Note */}
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-xs text-blue-800">
+        <div className="mt-4 p-3 bg-terracotta/5 border border-terracotta/20 rounded-lg">
+          <p className="text-xs text-ink">
             <span className="font-semibold">💡 Tip:</span> Use Markdown format to import directly into Jira, Linear, or Asana. Copy the content and paste into your issue tracker.
           </p>
         </div>

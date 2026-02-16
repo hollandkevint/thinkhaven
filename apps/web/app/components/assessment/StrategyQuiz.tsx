@@ -256,7 +256,7 @@ export function StrategyQuiz() {
                 required
                 className="w-full"
               />
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-slate-blue mt-2">
                 We'll send you detailed recommendations and insights based on your assessment.
               </p>
             </div>
@@ -282,13 +282,13 @@ export function StrategyQuiz() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Progress bar */}
       <div className="space-y-2">
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-ink-light">
           <span>Question {currentQuestion + 1} of {QUIZ_QUESTIONS.length}</span>
           <span>{Math.round(progress)}% Complete</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-ink/10 rounded-full h-2">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            className="bg-terracotta h-2 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -312,16 +312,16 @@ export function StrategyQuiz() {
               <button
                 key={option.value}
                 onClick={() => handleAnswer(question.id, option.value)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all hover:border-blue-500 hover:bg-blue-50 ${
+                className={`w-full text-left p-4 rounded-lg border-2 transition-all hover:border-terracotta hover:bg-terracotta/5 ${
                   answers[question.id] === option.value
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200'
+                    ? 'border-terracotta bg-terracotta/5'
+                    : 'border-ink/8'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{option.label}</span>
                   {answers[question.id] === option.value && (
-                    <span className="text-blue-600">✓</span>
+                    <span className="text-terracotta">✓</span>
                   )}
                 </div>
               </button>
@@ -331,7 +331,7 @@ export function StrategyQuiz() {
       </Card>
 
       {/* Navigation hint */}
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-slate-blue">
         Click an option to continue
       </p>
     </div>

@@ -177,13 +177,13 @@ export default function ElicitationPanel({
 
   const getCategoryColor = (category: string): string => {
     const colors: Record<string, string> = {
-      'analysis': 'bg-blue-100 text-blue-800 border-blue-200',
-      'strategy': 'bg-purple-100 text-purple-800 border-purple-200',
-      'validation': 'bg-green-100 text-green-800 border-green-200',
-      'optimization': 'bg-orange-100 text-orange-800 border-orange-200',
+      'analysis': 'bg-terracotta/10 text-ink border-terracotta/20',
+      'strategy': 'bg-terracotta/10 text-terracotta border-terracotta/20',
+      'validation': 'bg-forest/10 text-forest border-forest/20',
+      'optimization': 'bg-mustard/10 text-mustard border-mustard/20',
       'innovation': 'bg-pink-100 text-pink-800 border-pink-200',
-      'execution': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-      'default': 'bg-gray-100 text-gray-800 border-gray-200'
+      'execution': 'bg-terracotta/10 text-terracotta border-terracotta/20',
+      'default': 'bg-parchment text-ink border-ink/8'
     }
     
     return colors[category.toLowerCase()] || colors.default
@@ -314,19 +314,19 @@ export default function ElicitationPanel({
             <p className="text-secondary leading-relaxed mb-4">{prompt}</p>
             
             {/* Phase-Specific Strategic Context */}
-            <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+            <div className="bg-terracotta/5 rounded-lg p-4 border-l-4 border-terracotta">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-sm">{getPhaseContextualExplanation(phaseId).icon}</span>
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                  <h4 className="text-sm font-semibold text-ink mb-1">
                     {getPhaseContextualExplanation(phaseId).title}
                   </h4>
-                  <p className="text-blue-800 text-sm mb-3">
+                  <p className="text-ink text-sm mb-3">
                     {getPhaseContextualExplanation(phaseId).description}
                   </p>
-                  <div className="text-xs text-blue-700 bg-blue-100 rounded px-2 py-1 inline-block">
+                  <div className="text-xs text-terracotta bg-terracotta/10 rounded px-2 py-1 inline-block">
                     💡 Each option below represents a different strategic approach within this phase
                   </div>
                 </div>
@@ -335,7 +335,7 @@ export default function ElicitationPanel({
           </div>
           <div className="ml-4 text-right">
             <div className="text-sm text-secondary">Current Phase</div>
-            <div className="text-xs font-mono text-primary bg-gray-100 px-2 py-1 rounded">
+            <div className="text-xs font-mono text-primary bg-parchment px-2 py-1 rounded">
               {phaseId.replace(/_/g, '-').toUpperCase()}
             </div>
           </div>
@@ -372,7 +372,7 @@ export default function ElicitationPanel({
                     flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm
                     ${selectedOption === option.number 
                       ? 'bg-primary text-white' 
-                      : 'bg-gray-100 text-gray-600'
+                      : 'bg-parchment text-ink-light'
                     }
                   `}>
                     {option.number}
@@ -393,7 +393,7 @@ export default function ElicitationPanel({
                       {/* Time Estimate */}
                       <div className="flex-shrink-0 text-right">
                         <div className="text-xs text-secondary mb-1">Duration</div>
-                        <div className="text-sm font-medium text-primary bg-gray-50 px-2 py-1 rounded">
+                        <div className="text-sm font-medium text-primary bg-parchment px-2 py-1 rounded">
                           {formatEstimatedTime(option.estimatedTime)}
                         </div>
                       </div>
@@ -489,21 +489,21 @@ export default function ElicitationPanel({
         {/* Error Display and Recovery Options */}
         {error && (
           <div className="mt-6 pt-6 border-t border-divider">
-            <div className="bg-red-50 rounded-lg p-4 border-l-4 border-red-400 mb-4">
+            <div className="bg-rust/5 rounded-lg p-4 border-l-4 border-rust mb-4">
               <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 bg-rust rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-semibold text-xs">!</span>
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-red-900 mb-2">Connection Issue</h4>
-                  <p className="text-red-800 text-sm mb-3">{error}</p>
+                  <h4 className="font-semibold text-ink mb-2">Connection Issue</h4>
+                  <p className="text-rust text-sm mb-3">{error}</p>
                   
                   <div className="flex flex-wrap gap-2">
                     {retryCount < 2 && (
                       <button
                         onClick={handleRetry}
                         disabled={isSubmitting}
-                        className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-4 py-2 bg-rust text-white text-sm rounded-lg hover:bg-rust/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         {isSubmitting ? 'Retrying...' : 'Try Again'}
                       </button>
@@ -512,7 +512,7 @@ export default function ElicitationPanel({
                     {retryCount >= 1 && (
                       <button
                         onClick={handleOfflineMode}
-                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                        className="px-4 py-2 bg-terracotta text-white text-sm rounded-lg hover:bg-terracotta-hover transition-colors"
                       >
                         Continue Offline
                       </button>
@@ -520,7 +520,7 @@ export default function ElicitationPanel({
                     
                     <button
                       onClick={() => window.location.reload()}
-                      className="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
+                      className="px-4 py-2 bg-slate-blue text-white text-sm rounded-lg hover:bg-slate-blue/80 transition-colors"
                     >
                       Refresh Page
                     </button>
@@ -534,18 +534,18 @@ export default function ElicitationPanel({
         {/* Offline Mode Indicator */}
         {isOfflineMode && (
           <div className="mt-6 pt-6 border-t border-divider">
-            <div className="bg-yellow-50 rounded-lg p-4 border-l-4 border-yellow-400 mb-4">
+            <div className="bg-mustard/5 rounded-lg p-4 border-l-4 border-mustard mb-4">
               <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 bg-mustard rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-semibold text-xs">⚡</span>
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-yellow-900 mb-2">Offline Mode Active</h4>
-                  <p className="text-yellow-800 text-sm mb-3">
+                  <h4 className="font-semibold text-ink mb-2">Offline Mode Active</h4>
+                  <p className="text-mustard text-sm mb-3">
                     Your responses are being saved locally and will be synchronized when connection is restored. 
                     You can continue working with basic recommendations.
                   </p>
-                  <div className="text-xs text-yellow-700 bg-yellow-100 rounded px-2 py-1 inline-block">
+                  <div className="text-xs text-mustard bg-mustard/10 rounded px-2 py-1 inline-block">
                     💾 Data saved locally • Will sync when online
                   </div>
                 </div>
@@ -558,14 +558,14 @@ export default function ElicitationPanel({
         <div className="mt-6 pt-6 border-t border-divider">
           {/* Next Steps Preview */}
           {(selectedOption !== null || (showCustomInput && customInput.trim())) && (
-            <div className="bg-green-50 rounded-lg p-4 mb-4 border-l-4 border-green-400">
+            <div className="bg-forest/5 rounded-lg p-4 mb-4 border-l-4 border-forest">
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-5 h-5 bg-forest rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-semibold text-xs">✓</span>
                 </div>
                 <div>
-                  <h5 className="text-sm font-semibold text-green-900 mb-1">Next: Strategic Analysis</h5>
-                  <p className="text-green-800 text-sm">
+                  <h5 className="text-sm font-semibold text-ink mb-1">Next: Strategic Analysis</h5>
+                  <p className="text-forest text-sm">
                     {selectedOption !== null 
                       ? `Your choice will guide the next phase of strategic analysis. We&apos;ll build on your selected approach with tailored frameworks and actionable insights.`
                       : `Your custom response will be analyzed to provide personalized strategic guidance and next steps.`
@@ -580,7 +580,7 @@ export default function ElicitationPanel({
             {/* Progress indicator */}
             <div className="text-sm text-secondary">
               {canSubmit ? (
-                <span className="text-green-600">✓ Ready to proceed</span>
+                <span className="text-forest">✓ Ready to proceed</span>
               ) : (
                 <span>Select an option to continue</span>
               )}
@@ -593,9 +593,9 @@ export default function ElicitationPanel({
                 px-8 py-3 rounded-lg font-medium transition-all flex items-center gap-2
                 ${canSubmit && !isSubmitting && !(showCustomInput && customInput.length > 500)
                   ? isOfflineMode 
-                    ? 'bg-yellow-600 text-white hover:bg-yellow-700 shadow-sm hover:shadow-md'
+                    ? 'bg-mustard text-white hover:bg-mustard/80 shadow-sm hover:shadow-md'
                     : 'bg-primary text-white hover:bg-primary-hover shadow-sm hover:shadow-md'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-parchment text-slate-blue/60 cursor-not-allowed'
                 }
               `}
             >

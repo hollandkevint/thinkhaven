@@ -65,7 +65,7 @@ export default function TryPage() {
   return (
     <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--cream)' }}>
       {/* Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'white' }}>
+      <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--cream)' }}>
         <a href="/" className="text-2xl font-bold font-display" style={{ color: 'var(--ink)' }}>
           ThinkHaven
         </a>

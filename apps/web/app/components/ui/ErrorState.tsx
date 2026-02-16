@@ -25,13 +25,13 @@ export function ErrorState({
 }: ErrorStateProps) {
   const getErrorIcon = () => {
     if (error.toLowerCase().includes('network') || error.toLowerCase().includes('connection')) {
-      return <Wifi className="w-6 h-6 text-orange-500" />
+      return <Wifi className="w-6 h-6 text-mustard" />
     } else if (error.toLowerCase().includes('database') || error.toLowerCase().includes('pgrst')) {
-      return <Database className="w-6 h-6 text-red-500" />
+      return <Database className="w-6 h-6 text-rust" />
     } else if (error.toLowerCase().includes('authentication') || error.toLowerCase().includes('auth')) {
-      return <Shield className="w-6 h-6 text-yellow-500" />
+      return <Shield className="w-6 h-6 text-mustard" />
     }
-    return <AlertTriangle className="w-6 h-6 text-red-500" />
+    return <AlertTriangle className="w-6 h-6 text-rust" />
   }
 
   const getErrorTitle = () => {
@@ -70,10 +70,10 @@ export function ErrorState({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-sm text-ink-light mb-2">
               {getErrorDescription()}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-blue">
               {error}
             </p>
           </div>
@@ -116,8 +116,8 @@ export function ErrorState({
           </div>
 
           {retryCount >= 2 && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
-              <p className="text-yellow-800">
+            <div className="mt-4 p-3 bg-mustard/10 border border-mustard/20 rounded text-sm">
+              <p className="text-ink">
                 Multiple attempts failed. If this continues, please contact support or try again later.
               </p>
             </div>
