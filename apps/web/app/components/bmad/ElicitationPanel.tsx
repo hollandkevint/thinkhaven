@@ -182,7 +182,7 @@ export default function ElicitationPanel({
       'validation': 'bg-forest/10 text-forest border-forest/20',
       'optimization': 'bg-mustard/10 text-mustard border-mustard/20',
       'innovation': 'bg-dusty-rose/10 text-ink border-dusty-rose/20',
-      'execution': 'bg-terracotta/10 text-terracotta border-terracotta/20',
+      'execution': 'bg-slate-blue/10 text-slate-blue border-slate-blue/20',
       'default': 'bg-parchment text-ink border-ink/8'
     }
     
