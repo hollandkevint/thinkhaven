@@ -12,7 +12,7 @@ interface MarkdownRendererProps {
 export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   return (
     <ReactMarkdown
-      className={`prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-p:text-secondary prose-p:leading-relaxed prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-gray-50 prose-pre:border prose-pre:border-divider prose-blockquote:border-l-primary prose-blockquote:pl-4 prose-blockquote:italic prose-ul:text-secondary prose-ol:text-secondary prose-li:mb-1 ${className}`}
+      className={`prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-p:text-secondary-foreground prose-p:leading-relaxed prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-gray-50 prose-pre:border prose-pre:border-divider prose-blockquote:border-l-primary prose-blockquote:pl-4 prose-blockquote:italic prose-ul:text-secondary-foreground prose-ol:text-secondary-foreground prose-li:mb-1 ${className}`}
       components={{
         code: ({ node, inline, className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || '')
@@ -84,7 +84,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </h4>
         ),
         p: ({ children, ...props }) => (
-          <p className="text-secondary leading-relaxed mb-4 last:mb-0" {...props}>
+          <p className="text-secondary-foreground leading-relaxed mb-4 last:mb-0" {...props}>
             {children}
           </p>
         ),
@@ -99,7 +99,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </ol>
         ),
         li: ({ children, ordered, ...props }) => (
-          <li className="text-secondary flex items-start gap-3 relative" {...props}>
+          <li className="text-secondary-foreground flex items-start gap-3 relative" {...props}>
             {ordered ? (
               <span className="flex-shrink-0 w-6 h-6 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-semibold mt-0.5">
                 {/* Counter will be handled by CSS */}
@@ -128,7 +128,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </strong>
         ),
         em: ({ children, ...props }) => (
-          <em className="italic text-secondary" {...props}>
+          <em className="italic text-secondary-foreground" {...props}>
             {children}
           </em>
         ),
@@ -174,7 +174,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </th>
         ),
         td: ({ children, ...props }) => (
-          <td className="px-4 py-3 text-sm text-secondary" {...props}>
+          <td className="px-4 py-3 text-sm text-secondary-foreground" {...props}>
             {children}
           </td>
         ),
