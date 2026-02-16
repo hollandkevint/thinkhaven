@@ -65,14 +65,14 @@ export default function TryPage() {
   return (
     <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--cream)' }}>
       {/* Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'white' }}>
+      <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--cream)' }}>
         <a href="/" className="text-2xl font-bold font-display" style={{ color: 'var(--ink)' }}>
           ThinkHaven
         </a>
         <nav className="flex items-center gap-4">
           <FeedbackButton variant="nav" />
-          <a href="/demo" className="text-sm font-medium" style={{ color: 'var(--slate-blue)' }}>
-            Learn more
+          <a href="/assessment" className="text-sm font-medium" style={{ color: 'var(--slate-blue)' }}>
+            Take Assessment
           </a>
           <a href="/login" className="text-sm font-medium" style={{ color: 'var(--ink)' }}>
             Sign in

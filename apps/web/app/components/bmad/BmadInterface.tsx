@@ -276,8 +276,8 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                 step.isActive 
                   ? 'bg-primary text-white' 
                   : currentStep === 'session-completed' && index < 2
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-200 text-gray-600'
+                    ? 'bg-forest text-white'
+                    : 'bg-ink/10 text-ink-light'
               }`}>
                 {currentStep === 'session-completed' && index < 2 ? (
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -510,7 +510,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             {/* Header */}
             <div className="p-6 border-b border-divider">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-terracotta rounded-xl flex items-center justify-center">
                   <span className="text-white font-bold text-lg">B</span>
                 </div>
                 <div>
@@ -536,39 +536,39 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
               <div>
                 <h3 className="text-lg font-semibold text-primary mb-4">Choose Your Strategic Journey</h3>
                 <div className="grid gap-4">
-                  <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="w-8 h-8 text-blue-500 flex-shrink-0">
+                  <div className="flex items-start gap-3 p-4 bg-terracotta/5 rounded-lg border border-terracotta/20">
+                    <div className="w-8 h-8 text-terracotta flex-shrink-0">
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-900 mb-1">New Idea Development</h4>
-                      <p className="text-blue-800 text-sm">Transform early-stage concepts into validated business opportunities through structured brainstorming and market analysis.</p>
+                      <h4 className="font-semibold text-ink mb-1">New Idea Development</h4>
+                      <p className="text-ink text-sm">Transform early-stage concepts into validated business opportunities through structured brainstorming and market analysis.</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="w-8 h-8 text-green-500 flex-shrink-0">
+                  <div className="flex items-start gap-3 p-4 bg-forest/5 rounded-lg border border-forest/20">
+                    <div className="w-8 h-8 text-forest flex-shrink-0">
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-green-900 mb-1">Business Model Analysis</h4>
-                      <p className="text-green-800 text-sm">Deep dive into revenue models and business strategy using systematic market research and competitive analysis.</p>
+                      <h4 className="font-semibold text-ink mb-1">Business Model Analysis</h4>
+                      <p className="text-forest text-sm">Deep dive into revenue models and business strategy using systematic market research and competitive analysis.</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="w-8 h-8 text-purple-500 flex-shrink-0">
+                  <div className="flex items-start gap-3 p-4 bg-terracotta/5 rounded-lg border border-terracotta/20">
+                    <div className="w-8 h-8 text-terracotta flex-shrink-0">
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-purple-900 mb-1">Strategic Optimization</h4>
-                      <p className="text-purple-800 text-sm">Refine existing strategies and features using data-driven analysis and competitive positioning frameworks.</p>
+                      <h4 className="font-semibold text-ink mb-1">Strategic Optimization</h4>
+                      <p className="text-terracotta text-sm">Refine existing strategies and features using data-driven analysis and competitive positioning frameworks.</p>
                     </div>
                   </div>
                 </div>
@@ -579,17 +579,17 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                 <h3 className="text-lg font-semibold text-primary mb-3">How It Works</h3>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">1</div>
+                    <div className="w-10 h-10 bg-terracotta/10 text-terracotta rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">1</div>
                     <h4 className="font-medium text-primary mb-1">Select Pathway</h4>
                     <p className="text-secondary text-sm">Choose the strategic approach that best fits your current challenge</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">2</div>
+                    <div className="w-10 h-10 bg-forest/10 text-forest rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">2</div>
                     <h4 className="font-medium text-primary mb-1">Guided Session</h4>
                     <p className="text-secondary text-sm">Work through structured phases with strategic frameworks and tools</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">3</div>
+                    <div className="w-10 h-10 bg-terracotta/10 text-terracotta rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">3</div>
                     <h4 className="font-medium text-primary mb-1">Actionable Results</h4>
                     <p className="text-secondary text-sm">Get specific next steps and a strategic framework to guide your decisions</p>
                   </div>
@@ -598,7 +598,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-divider bg-gray-50">
+            <div className="p-6 border-t border-divider bg-parchment">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-secondary">
                   Ready to begin your strategic thinking journey?
@@ -628,7 +628,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-terracotta rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">B</span>
             </div>
             <div>
@@ -646,19 +646,19 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
         <ErrorBoundary
           component="ContinuationGuidance"
           fallback={() => (
-            <div className="mb-6 bg-red-50 rounded-lg border border-red-200 p-4">
+            <div className="mb-6 bg-rust/5 rounded-lg border border-rust/20 p-4">
               <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 bg-rust/50 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-semibold text-xs">!</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-red-900 mb-2">Session Guidance Unavailable</h3>
-                  <p className="text-red-800 text-sm mb-3">
+                  <h3 className="font-semibold text-ink mb-2">Session Guidance Unavailable</h3>
+                  <p className="text-rust text-sm mb-3">
                     Unable to display session continuation guidance, but your session is still available.
                   </p>
                   <button
                     onClick={() => setShowContinuationGuidance(false)}
-                    className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                    className="px-4 py-2 bg-rust text-white text-sm rounded-lg hover:bg-rust/80 transition-colors"
                   >
                     Continue Anyway
                   </button>
@@ -667,9 +667,9 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             </div>
           )}
         >
-        <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-4">
+        <div className="mb-6 bg-cream rounded-lg border border-terracotta/20 p-4">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
               <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
@@ -700,8 +700,8 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                   </div>
                 </div>
               </div>
-              <div className="bg-blue-100 rounded-lg p-3 mb-4">
-                <p className="text-blue-800 text-sm">
+              <div className="bg-terracotta/10 rounded-lg p-3 mb-4">
+                <p className="text-ink text-sm">
                   <strong>💡 Your session is ready to continue.</strong> We&apos;ve saved your progress and you can pick up right where you left off. 
                   The next strategic phase is waiting for your input below.
                 </p>
@@ -734,20 +734,20 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
         <ErrorBoundary
           component="MainContent"
           fallback={() => (
-            <div className="bg-red-50 rounded-lg border border-red-200 p-6">
+            <div className="bg-rust/5 rounded-lg border border-rust/20 p-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-rust/50 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-semibold">!</span>
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold text-red-900 mb-2">Session Unavailable</h2>
-                  <p className="text-red-800 mb-4">
+                  <h2 className="text-xl font-bold text-ink mb-2">Session Unavailable</h2>
+                  <p className="text-rust mb-4">
                     There was an error loading the strategic thinking interface. This might be a temporary issue.
                   </p>
                   
                   <div className="space-y-3 mb-4">
-                    <h3 className="font-semibold text-red-900">What you can do:</h3>
-                    <ul className="text-red-800 text-sm space-y-1 ml-4">
+                    <h3 className="font-semibold text-ink">What you can do:</h3>
+                    <ul className="text-rust text-sm space-y-1 ml-4">
                       <li>• Refresh the page to try again</li>
                       <li>• Check your internet connection</li>
                       <li>• Try again in a few minutes</li>
@@ -757,13 +757,13 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                   <div className="flex gap-3">
                     <button
                       onClick={() => window.location.reload()}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="px-4 py-2 bg-rust text-white rounded-lg hover:bg-rust/80 transition-colors"
                     >
                       Refresh Page
                     </button>
                     <button
                       onClick={() => setCurrentStep('pathway-selection')}
-                      className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
+                      className="px-4 py-2 border border-rust/40 text-rust rounded-lg hover:bg-rust/10 transition-colors"
                     >
                       Reset Session
                     </button>

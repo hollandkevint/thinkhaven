@@ -66,10 +66,10 @@ export default function Navigation({ className = '' }: NavigationProps) {
       <div className="hidden md:flex items-center gap-4">
         <Button
           variant="ghost"
-          onClick={() => router.push('/demo')}
+          onClick={() => router.push('/try')}
           className="text-ink-light hover:text-ink"
         >
-          Demo
+          Try Free
         </Button>
 
         {/* Credit Balance - only show for logged-in users */}
@@ -131,8 +131,8 @@ export default function Navigation({ className = '' }: NavigationProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => router.push('/demo')}>
-              Demo
+            <DropdownMenuItem onClick={() => router.push('/try')}>
+              Try Free
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             

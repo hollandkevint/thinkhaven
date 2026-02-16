@@ -74,27 +74,27 @@ export default function OutputTypeSelector({
         disabled={isGenerating}
         className={`
           w-full flex items-center justify-between gap-3 p-4
-          bg-white border border-gray-200 rounded-lg
-          hover:border-blue-300 hover:bg-blue-50/50
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+          bg-white border border-ink/8 rounded-lg
+          hover:border-terracotta/20 hover:bg-terracotta/5/50
+          focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-1
           transition-all disabled:opacity-50 disabled:cursor-not-allowed
-          ${isOpen ? 'border-blue-400 ring-2 ring-blue-100' : ''}
+          ${isOpen ? 'border-terracotta ring-2 ring-terracotta/20' : ''}
         `}
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+          <div className="p-2 bg-terracotta/10 rounded-lg text-terracotta">
             <Download className="w-5 h-5" />
           </div>
           <div className="text-left">
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-ink">
               {selectedOption ? selectedOption.name : 'Generate Output'}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-blue">
               {selectedOption ? selectedOption.estimatedTime : 'Choose a format to export'}
             </p>
           </div>
         </div>
-        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-5 h-5 text-slate-blue/60 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown menu */}
@@ -107,9 +107,9 @@ export default function OutputTypeSelector({
           />
 
           {/* Options */}
-          <div className="absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+          <div className="absolute z-20 w-full mt-2 bg-white border border-ink/8 rounded-xl shadow-lg overflow-hidden">
             <div className="p-2">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide px-3 py-2">
+              <p className="text-xs font-medium text-slate-blue uppercase tracking-wide px-3 py-2">
                 Choose Output Format
               </p>
 
@@ -119,24 +119,24 @@ export default function OutputTypeSelector({
                   onClick={() => handleSelect(option.id)}
                   className={`
                     w-full flex items-start gap-3 p-3 rounded-lg text-left
-                    hover:bg-gray-50 transition-colors
-                    ${selectedType === option.id ? 'bg-blue-50' : ''}
+                    hover:bg-parchment transition-colors
+                    ${selectedType === option.id ? 'bg-terracotta/5' : ''}
                   `}
                 >
                   <div className={`
                     p-2 rounded-lg flex-shrink-0
-                    ${selectedType === option.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}
+                    ${selectedType === option.id ? 'bg-terracotta/10 text-terracotta' : 'bg-parchment text-ink-light'}
                   `}>
                     {option.icon}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className={`font-medium ${selectedType === option.id ? 'text-blue-900' : 'text-gray-900'}`}>
+                      <p className={`font-medium ${selectedType === option.id ? 'text-ink' : 'text-ink'}`}>
                         {option.name}
                       </p>
-                      <span className="text-xs text-gray-400">{option.estimatedTime}</span>
+                      <span className="text-xs text-slate-blue/60">{option.estimatedTime}</span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
+                    <p className="text-sm text-slate-blue mt-0.5 line-clamp-2">
                       {option.description}
                     </p>
                   </div>
@@ -182,10 +182,10 @@ export function OutputTypeSelectorCompact({
         disabled={isGenerating}
         className={`
           flex items-center gap-2 px-3 py-2
-          bg-gradient-to-r from-blue-600 to-indigo-600
+          bg-terracotta
           text-white text-sm font-medium rounded-lg
-          hover:from-blue-700 hover:to-indigo-700
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+          hover:bg-terracotta-hover
+          focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-2
           transition-all disabled:opacity-50 disabled:cursor-not-allowed
           shadow-sm hover:shadow
         `}
@@ -198,7 +198,7 @@ export function OutputTypeSelectorCompact({
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 z-20 w-72 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+          <div className="absolute right-0 z-20 w-72 mt-2 bg-white border border-ink/8 rounded-xl shadow-lg overflow-hidden">
             <div className="p-2">
               {outputTypes.map((option) => (
                 <button
@@ -207,14 +207,14 @@ export function OutputTypeSelectorCompact({
                     onSelect(option.id)
                     setIsOpen(false)
                   }}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg text-left hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg text-left hover:bg-parchment transition-colors"
                 >
-                  <div className="p-1.5 bg-gray-100 rounded text-gray-600">
+                  <div className="p-1.5 bg-parchment rounded text-ink-light">
                     {option.icon}
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900 text-sm">{option.name}</p>
-                    <p className="text-xs text-gray-500">{option.estimatedTime}</p>
+                    <p className="font-medium text-ink text-sm">{option.name}</p>
+                    <p className="text-xs text-slate-blue">{option.estimatedTime}</p>
                   </div>
                 </button>
               ))}

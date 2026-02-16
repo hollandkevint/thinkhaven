@@ -43,11 +43,11 @@ function getConfidenceBadge(confidence: number): {
   label: string
 } {
   if (confidence >= 0.8) {
-    return { color: 'bg-green-100 text-green-700 border-green-200', label: 'High' }
+    return { color: 'bg-forest/10 text-forest border-forest/20', label: 'High' }
   } else if (confidence >= 0.6) {
-    return { color: 'bg-yellow-100 text-yellow-700 border-yellow-200', label: 'Medium' }
+    return { color: 'bg-mustard/10 text-mustard border-mustard/20', label: 'Medium' }
   } else {
-    return { color: 'bg-gray-100 text-gray-600 border-gray-200', label: 'Low' }
+    return { color: 'bg-parchment text-ink-light border-ink/8', label: 'Low' }
   }
 }
 
@@ -92,8 +92,8 @@ export default function VisualSuggestionIndicator({
               key={suggestion.id}
               className={`border rounded-lg transition-all ${
                 highConf
-                  ? 'border-blue-200 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:border-blue-300'
+                  ? 'border-terracotta/20 bg-terracotta/5'
+                  : 'border-ink/8 bg-white hover:border-terracotta/30'
               }`}
             >
               {/* Suggestion Header */}
@@ -108,7 +108,7 @@ export default function VisualSuggestionIndicator({
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium text-sm text-gray-900 truncate">
+                        <h4 className="font-medium text-sm text-ink truncate">
                           {suggestion.title}
                         </h4>
                         <span
@@ -117,13 +117,13 @@ export default function VisualSuggestionIndicator({
                           {badge.label}
                         </span>
                         {highConf && (
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-terracotta/10 text-terracotta px-2 py-0.5 rounded-full">
                             ✨ Recommended
                           </span>
                         )}
                       </div>
                       {!compact && (
-                        <p className="text-xs text-gray-600 line-clamp-2">
+                        <p className="text-xs text-ink-light line-clamp-2">
                           {suggestion.description}
                         </p>
                       )}
@@ -137,7 +137,7 @@ export default function VisualSuggestionIndicator({
                         onClick={() =>
                           setExpandedId(isExpanded ? null : suggestion.id)
                         }
-                        className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                        className="p-1.5 text-slate-blue hover:text-ink hover:bg-parchment rounded transition-colors"
                         title="Preview diagram"
                       >
                         <svg
@@ -159,14 +159,14 @@ export default function VisualSuggestionIndicator({
                     )}
                     <button
                       onClick={() => onApply(suggestion.id)}
-                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+                      className="px-3 py-1.5 text-xs font-medium text-cream bg-terracotta hover:bg-terracotta-hover rounded transition-colors"
                       title="Add to canvas"
                     >
                       Add to Canvas
                     </button>
                     <button
                       onClick={() => onDismiss(suggestion.id)}
-                      className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                      className="p-1.5 text-slate-blue/60 hover:text-slate-blue hover:bg-parchment rounded transition-colors"
                       title="Dismiss"
                     >
                       <svg
@@ -189,12 +189,12 @@ export default function VisualSuggestionIndicator({
 
               {/* Preview (Expanded) */}
               {isExpanded && suggestion.diagramCode && (
-                <div className="border-t border-gray-200 p-3 bg-gray-50">
-                  <div className="text-xs text-gray-600 mb-2 font-medium">
+                <div className="border-t border-ink/8 p-3 bg-parchment">
+                  <div className="text-xs text-ink-light mb-2 font-medium">
                     Preview Code:
                   </div>
-                  <pre className="text-xs bg-white border border-gray-200 rounded p-2 overflow-x-auto max-h-48">
-                    <code className="text-gray-800">{suggestion.diagramCode}</code>
+                  <pre className="text-xs bg-white border border-ink/8 rounded p-2 overflow-x-auto max-h-48">
+                    <code className="text-ink">{suggestion.diagramCode}</code>
                   </pre>
                 </div>
               )}
@@ -205,7 +205,7 @@ export default function VisualSuggestionIndicator({
 
       {/* Help Text */}
       {suggestions.some(s => isHighConfidence(s)) && (
-        <div className="text-xs text-gray-500 italic mt-2">
+        <div className="text-xs text-slate-blue italic mt-2">
           💡 High-confidence suggestions are based on detected patterns in the conversation
         </div>
       )}

@@ -210,13 +210,13 @@ export default function ExportDialog({
                   onClick={() => handleFormatChange(key as ExportFormat)}
                   className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                     selectedFormat === key
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-terracotta bg-terracotta/5'
+                      : 'border-ink/8 hover:border-ink/20 hover:bg-parchment'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-primary">{format.name}</span>
-                    <span className="text-xs text-secondary bg-gray-100 px-2 py-1 rounded">
+                    <span className="text-xs text-secondary bg-parchment px-2 py-1 rounded">
                       {format.extension}
                     </span>
                   </div>
@@ -224,7 +224,7 @@ export default function ExportDialog({
                     {format.description}
                   </p>
                   {format.note && (
-                    <p className="text-xs text-blue-600 italic">
+                    <p className="text-xs text-terracotta italic">
                       {format.note}
                     </p>
                   )}
@@ -242,7 +242,7 @@ export default function ExportDialog({
                   type="checkbox"
                   checked={options.includeMetadata}
                   onChange={(e) => handleOptionChange('includeMetadata', e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta"
                 />
                 <div>
                   <span className="text-sm font-medium text-primary">Metadata</span>
@@ -256,7 +256,7 @@ export default function ExportDialog({
                   checked={options.includeBookmarks}
                   onChange={(e) => handleOptionChange('includeBookmarks', e.target.checked)}
                   disabled={!supportsFeature('bookmarks')}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50"
+                  className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta disabled:opacity-50"
                 />
                 <div>
                   <span className={`text-sm font-medium ${supportsFeature('bookmarks') ? 'text-primary' : 'text-secondary'}`}>
@@ -275,7 +275,7 @@ export default function ExportDialog({
                   checked={options.includeReferences}
                   onChange={(e) => handleOptionChange('includeReferences', e.target.checked)}
                   disabled={!supportsFeature('references')}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50"
+                  className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta disabled:opacity-50"
                 />
                 <div>
                   <span className={`text-sm font-medium ${supportsFeature('references') ? 'text-primary' : 'text-secondary'}`}>
@@ -294,7 +294,7 @@ export default function ExportDialog({
                   checked={options.includeContext}
                   onChange={(e) => handleOptionChange('includeContext', e.target.checked)}
                   disabled={!supportsFeature('context')}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50"
+                  className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta disabled:opacity-50"
                 />
                 <div>
                   <span className={`text-sm font-medium ${supportsFeature('context') ? 'text-primary' : 'text-secondary'}`}>
@@ -320,7 +320,7 @@ export default function ExportDialog({
                     type="checkbox"
                     checked={dateRangeEnabled}
                     onChange={(e) => setDateRangeEnabled(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta"
                   />
                   <span className="text-sm font-medium text-primary">Date Range</span>
                 </label>
@@ -333,7 +333,7 @@ export default function ExportDialog({
                         type="date"
                         value={options.dateRange?.start ? formatDate(options.dateRange.start) : ''}
                         onChange={(e) => handleDateRangeChange('start', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-ink/8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
                       />
                     </div>
                     <div>
@@ -342,7 +342,7 @@ export default function ExportDialog({
                         type="date"
                         value={options.dateRange?.end ? formatDate(options.dateRange.end) : ''}
                         onChange={(e) => handleDateRangeChange('end', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-ink/8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -356,7 +356,7 @@ export default function ExportDialog({
                     type="checkbox"
                     checked={maxMessagesEnabled}
                     onChange={(e) => setMaxMessagesEnabled(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta"
                   />
                   <span className="text-sm font-medium text-primary">Limit Messages</span>
                 </label>
@@ -370,7 +370,7 @@ export default function ExportDialog({
                       max="10000"
                       value={options.maxMessages || 1000}
                       onChange={(e) => handleOptionChange('maxMessages', parseInt(e.target.value))}
-                      className="w-32 px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-32 px-3 py-2 border border-ink/8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
                     />
                     <p className="text-xs text-secondary mt-1">
                       Keep most recent messages if limit is reached
@@ -383,34 +383,34 @@ export default function ExportDialog({
 
           {/* Export Preview */}
           {preview && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-medium text-blue-900 mb-2">Export Preview</h4>
+            <div className="bg-terracotta/5 border border-terracotta/20 rounded-lg p-4">
+              <h4 className="font-medium text-ink mb-2">Export Preview</h4>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-blue-700">Conversations:</span>
-                  <span className="ml-2 font-medium text-blue-900">{preview.conversationCount}</span>
+                  <span className="text-terracotta">Conversations:</span>
+                  <span className="ml-2 font-medium text-ink">{preview.conversationCount}</span>
                 </div>
                 <div>
-                  <span className="text-blue-700">Messages:</span>
-                  <span className="ml-2 font-medium text-blue-900">{preview.messageCount.toLocaleString()}</span>
+                  <span className="text-terracotta">Messages:</span>
+                  <span className="ml-2 font-medium text-ink">{preview.messageCount.toLocaleString()}</span>
                 </div>
                 <div>
-                  <span className="text-blue-700">Estimated Size:</span>
-                  <span className="ml-2 font-medium text-blue-900">{preview.estimatedSize}</span>
+                  <span className="text-terracotta">Estimated Size:</span>
+                  <span className="ml-2 font-medium text-ink">{preview.estimatedSize}</span>
                 </div>
                 {preview.dateRange && (
                   <div className="col-span-2">
-                    <span className="text-blue-700">Date Range:</span>
-                    <span className="ml-2 font-medium text-blue-900">
+                    <span className="text-terracotta">Date Range:</span>
+                    <span className="ml-2 font-medium text-ink">
                       {new Date(preview.dateRange.start).toLocaleDateString()} - {new Date(preview.dateRange.end).toLocaleDateString()}
                     </span>
                   </div>
                 )}
               </div>
               {previewLoading && (
-                <div className="mt-2 text-xs text-blue-600">
+                <div className="mt-2 text-xs text-terracotta">
                   <div className="inline-flex items-center gap-2">
-                    <div className="animate-spin w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                    <div className="animate-spin w-3 h-3 border-2 border-terracotta border-t-transparent rounded-full"></div>
                     Updating preview...
                   </div>
                 </div>
@@ -420,7 +420,7 @@ export default function ExportDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-divider bg-gray-50">
+        <div className="flex items-center justify-between p-6 border-t border-divider bg-parchment">
           <div className="text-sm text-secondary">
             {conversationIds?.length 
               ? `Exporting ${conversationIds.length} selected conversation${conversationIds.length !== 1 ? 's' : ''}`
@@ -438,7 +438,7 @@ export default function ExportDialog({
             <button
               onClick={handleExport}
               disabled={exporting || previewLoading || !preview}
-              className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-4 py-2 text-sm bg-terracotta text-white rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {exporting && (
                 <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>

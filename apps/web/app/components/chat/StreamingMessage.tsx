@@ -189,12 +189,12 @@ export default function StreamingMessage({
       {/* Avatar */}
       <div className="flex-shrink-0">
         {isAssistant ? (
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-semibold text-sm">M</span>
+          <div className="w-8 h-8 bg-terracotta rounded-full flex items-center justify-center">
+            <span className="text-cream font-semibold text-sm font-display">M</span>
           </div>
         ) : (
-          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <div className="w-8 h-8 bg-ink/10 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-ink-light" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
           </div>
@@ -215,8 +215,8 @@ export default function StreamingMessage({
           )}
           {coachingContext?.currentBmadSession && (
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-xs text-blue-600 font-medium">
+              <div className="w-2 h-2 bg-terracotta rounded-full"></div>
+              <span className="text-xs text-terracotta font-medium">
                 {coachingContext.currentBmadSession.pathway} • {coachingContext.currentBmadSession.phase}
               </span>
             </div>
@@ -258,7 +258,7 @@ export default function StreamingMessage({
             ? 'bg-primary text-white rounded-br-md' 
             : 'bg-white border border-divider rounded-bl-md'
           }
-          ${isStreaming ? 'shadow-sm ring-2 ring-blue-200' : 'shadow-sm'}
+          ${isStreaming ? 'shadow-sm ring-2 ring-terracotta/20' : 'shadow-sm'}
         `}>
           {isUser ? (
             <p className="text-white leading-relaxed">{content}</p>
@@ -292,7 +292,7 @@ export default function StreamingMessage({
             </button>
             
             {isExpanded && (
-              <div className="mt-2 p-3 bg-gray-50 rounded-lg border text-xs space-y-2">
+              <div className="mt-2 p-3 bg-parchment rounded-lg border border-ink/8 text-xs space-y-2">
                 {tokenUsage && (
                   <div className="grid grid-cols-2 gap-2">
                     <div>

@@ -122,17 +122,17 @@ export default function NewIdeaPathway({
       case 'concept_refinement':
         return (
           <div className="space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-blue-900 mb-4">
+            <div className="bg-terracotta/5 border border-terracotta/20 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-ink mb-4">
                 Business Concept Refinement
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-ink-light mb-2">
                     What unique value does your solution provide?
                   </label>
                   <textarea
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border border-ink/8 rounded-md focus:ring-terracotta focus:border-terracotta"
                     rows={4}
                     placeholder="Describe your unique value proposition..."
                     onChange={(e) => {
@@ -146,7 +146,7 @@ export default function NewIdeaPathway({
                     uniqueValueProps: ['Comprehensive solution', 'Market-validated approach']
                   })}
                   disabled={isLoading}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="px-6 py-2 bg-terracotta text-white rounded-md hover:bg-terracotta-hover disabled:opacity-50"
                 >
                   {isLoading ? 'Processing...' : 'Continue to Positioning'}
                 </button>
@@ -158,17 +158,17 @@ export default function NewIdeaPathway({
       case 'positioning':
         return (
           <div className="space-y-6">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-green-900 mb-4">
+            <div className="bg-forest/5 border border-forest/20 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-ink mb-4">
                 Strategic Positioning
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-ink-light mb-2">
                     Next steps for your business concept:
                   </label>
                   <textarea
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    className="w-full p-3 border border-ink/8 rounded-md focus:ring-forest focus:border-forest"
                     rows={4}
                     placeholder="What are your next concrete steps?"
                     onChange={(e) => {
@@ -198,7 +198,7 @@ export default function NewIdeaPathway({
                     }
                   })}
                   disabled={isLoading}
-                  className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                  className="px-6 py-2 bg-forest text-white rounded-md hover:bg-forest/80 disabled:opacity-50"
                 >
                   {isLoading ? 'Completing Session...' : 'Complete Pathway'}
                 </button>
@@ -216,10 +216,10 @@ export default function NewIdeaPathway({
     return (
       <div className="space-y-6">
         <div className="text-center py-6">
-          <h2 className="text-2xl font-bold text-green-600 mb-2">
+          <h2 className="text-2xl font-bold text-forest mb-2">
             🎉 Pathway Complete!
           </h2>
-          <p className="text-gray-600">
+          <p className="text-ink-light">
             Your business concept has been developed and documented.
           </p>
         </div>
@@ -245,10 +245,10 @@ export default function NewIdeaPathway({
     <div className="max-w-4xl mx-auto space-y-6" data-testid="new-idea-pathway">
       {/* Header */}
       <div className="text-center py-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="pathway-title">
+        <h1 className="text-3xl font-bold text-ink mb-2" data-testid="pathway-title">
           New Idea Creative Expansion
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-ink-light">
           Transform your raw business idea into a structured opportunity
         </p>
       </div>
@@ -264,10 +264,10 @@ export default function NewIdeaPathway({
       {/* Current Phase */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900" data-testid="current-phase">
+          <h2 className="text-xl font-semibold text-ink" data-testid="current-phase">
             {NEW_IDEA_PHASES[currentPhase]?.name || 'Loading...'}
           </h2>
-          <div className="text-sm text-gray-500" data-testid="phase-timer">
+          <div className="text-sm text-slate-blue" data-testid="phase-timer">
             {pathway && `${Math.ceil(pathway.getRemainingPhaseTime() / (60 * 1000))} min remaining`}
           </div>
         </div>
@@ -277,7 +277,7 @@ export default function NewIdeaPathway({
 
       {/* Session Timer */}
       {pathway && (
-        <div className="text-center text-sm text-gray-500" data-testid="total-session-timer">
+        <div className="text-center text-sm text-slate-blue" data-testid="total-session-timer">
           Total session time remaining: {Math.ceil(pathway.getRemainingTime() / (60 * 1000))} minutes
         </div>
       )}

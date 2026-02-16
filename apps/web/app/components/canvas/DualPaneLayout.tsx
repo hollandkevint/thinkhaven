@@ -170,13 +170,13 @@ export const DualPaneLayout: React.FC<DualPaneLayoutProps> = ({
       <div className="flex flex-col h-full w-full">
         {/* Mobile tab switcher */}
         {showMobileToggle && (
-          <div className="flex border-b border-gray-200 bg-white">
+          <div className="flex border-b border-ink/8 bg-white">
             <button
               onClick={() => setMobileActivePane('left')}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
                 mobileActivePane === 'left'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-terracotta border-b-2 border-terracotta'
+                  : 'text-ink-light hover:text-ink'
               }`}
             >
               💬 Conversation
@@ -185,8 +185,8 @@ export const DualPaneLayout: React.FC<DualPaneLayoutProps> = ({
               onClick={() => setMobileActivePane('right')}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
                 mobileActivePane === 'right'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-terracotta border-b-2 border-terracotta'
+                  : 'text-ink-light hover:text-ink'
               }`}
             >
               🎨 Canvas
@@ -220,7 +220,7 @@ export const DualPaneLayout: React.FC<DualPaneLayoutProps> = ({
     >
       {/* Left Pane */}
       <div
-        className="overflow-auto border-r border-gray-200"
+        className="overflow-auto border-r border-ink/8"
         style={{ width: `${splitPercentage}%` }}
       >
         {leftPane}
@@ -229,7 +229,7 @@ export const DualPaneLayout: React.FC<DualPaneLayoutProps> = ({
       {/* Resizable Divider */}
       <div
         ref={dividerRef}
-        className="relative w-1 bg-gray-200 hover:bg-blue-500 transition-colors cursor-col-resize flex items-center justify-center group"
+        className="relative w-1 bg-ink/10 hover:bg-terracotta transition-colors cursor-col-resize flex items-center justify-center group"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         role="separator"
@@ -248,16 +248,16 @@ export const DualPaneLayout: React.FC<DualPaneLayoutProps> = ({
       >
         {/* Divider handle */}
         <div className="absolute inset-y-0 -left-1 -right-1 flex items-center justify-center">
-          <div className="w-1 h-12 bg-gray-400 group-hover:bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="w-1 h-12 bg-slate-blue/60 group-hover:bg-terracotta rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
 
         {/* Reset button (appears on hover) */}
         <button
           onClick={handleResetSplit}
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-                     bg-white border border-gray-300 rounded px-2 py-1 text-xs
+                     bg-white border border-ink/8 rounded px-2 py-1 text-xs
                      opacity-0 group-hover:opacity-100 transition-opacity shadow-sm
-                     hover:bg-gray-50 z-10"
+                     hover:bg-parchment z-10"
           title="Reset to 50/50 split (Ctrl+Shift+R)"
         >
           ⟷

@@ -30,26 +30,26 @@ export default async function MonitoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-cream">
+      <header className="bg-parchment shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">Authentication Monitoring</h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <h1 className="text-xl font-semibold text-ink">Authentication Monitoring</h1>
+              <p className="text-sm text-ink-light mt-1">
                 Real-time authentication metrics and security monitoring
               </p>
             </div>
             <nav className="flex space-x-4">
               <a
                 href="/app"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                className="text-slate-blue hover:text-ink px-3 py-2 rounded-md text-sm font-medium"
               >
                 Dashboard
               </a>
               <a
                 href="/monitoring"
-                className="bg-blue-100 text-blue-800 px-3 py-2 rounded-md text-sm font-medium"
+                className="bg-terracotta/10 text-terracotta px-3 py-2 rounded-md text-sm font-medium"
               >
                 Monitoring
               </a>
@@ -62,9 +62,9 @@ export default async function MonitoringPage() {
         <AuthMetricsDashboard />
       </main>
 
-      <footer className="bg-white border-t mt-12">
+      <footer className="bg-parchment border-t mt-12">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="text-center text-sm text-gray-500">
+          <div className="text-center text-sm text-slate-blue">
             <p>
               Authentication monitoring powered by ThinkHaven •
               Data retention: 7 days •

@@ -16,7 +16,7 @@ const TldrawCanvas = dynamic(() => import('./TldrawCanvas'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-full">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terracotta"></div>
     </div>
   ),
 });
@@ -200,21 +200,21 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
   // Show error state if something went wrong
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full bg-gray-50 p-4">
+      <div className="flex flex-col items-center justify-center h-full w-full bg-parchment p-4">
         <div className="max-w-md text-center">
-          <div className="text-red-600 mb-4">
+          <div className="text-rust mb-4">
             <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Canvas Error</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h3 className="text-lg font-semibold text-ink mb-2">Canvas Error</h3>
+          <p className="text-ink-light mb-4">{error}</p>
           <button
             onClick={() => {
               setError(null);
               window.location.reload();
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-4 py-2 bg-terracotta text-white rounded hover:bg-terracotta-hover"
           >
             Reload Page
           </button>
@@ -224,17 +224,17 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
   }
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-50">
+    <div className="flex flex-col h-full w-full bg-parchment">
       {/* Toolbar */}
       {!readOnly && (
-        <div className="flex items-center gap-2 p-3 bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center gap-2 p-3 bg-white border-b border-ink/8 shadow-sm">
           <div className="flex items-center gap-1 mr-4">
             <button
               onClick={() => setMode('draw')}
               className={`px-3 py-1.5 rounded transition-colors ${
                 mode === 'draw'
-                  ? 'bg-blue-100 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'bg-terracotta/10 text-terracotta font-medium'
+                  : 'text-ink-light hover:bg-parchment'
               }`}
               title="Freeform Drawing (Ctrl+Shift+M)"
             >
@@ -244,8 +244,8 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
               onClick={() => setMode('diagram')}
               className={`px-3 py-1.5 rounded transition-colors ${
                 mode === 'diagram'
-                  ? 'bg-blue-100 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'bg-terracotta/10 text-terracotta font-medium'
+                  : 'text-ink-light hover:bg-parchment'
               }`}
               title="Mermaid Diagrams (Ctrl+Shift+M)"
             >
@@ -253,12 +253,12 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
             </button>
           </div>
 
-          <div className="h-6 w-px bg-gray-300" />
+          <div className="h-6 w-px bg-ink/20" />
 
           {/* Export Button */}
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded transition-colors flex items-center gap-1.5"
+            className="px-3 py-1.5 text-ink-light hover:bg-parchment rounded transition-colors flex items-center gap-1.5"
             title="Export canvas as PNG or SVG"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +267,7 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
             Export
           </button>
 
-          <div className="ml-auto flex items-center gap-2 text-xs text-gray-500">
+          <div className="ml-auto flex items-center gap-2 text-xs text-slate-blue">
             {lastSaved && (
               <span>
                 Last saved: {lastSaved.toLocaleTimeString()}
@@ -275,7 +275,7 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
             )}
             {sessionId && (
               <>
-                <span className="text-gray-400">•</span>
+                <span className="text-slate-blue/60">•</span>
                 <span>Session: {sessionId.slice(0, 8)}</span>
               </>
             )}
@@ -291,7 +291,7 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
         data-canvas-container
       >
         {highlightedElement && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-full shadow-lg animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-forest text-white text-sm font-medium rounded-full shadow-lg animate-in fade-in slide-in-from-top-4 duration-300">
             ✨ New content added here
           </div>
         )}
@@ -313,9 +313,9 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
 
       {/* Help Text */}
       {!readOnly && (
-        <div className="p-2 bg-white border-t border-gray-200 text-xs text-gray-500 flex items-center gap-4">
-          <span>💡 Press <kbd className="px-1 py-0.5 bg-gray-100 rounded text-gray-700">Ctrl+Shift+M</kbd> to toggle between drawing and diagrams</span>
-          <span className="text-gray-400">•</span>
+        <div className="p-2 bg-white border-t border-ink/8 text-xs text-slate-blue flex items-center gap-4">
+          <span>💡 Press <kbd className="px-1 py-0.5 bg-parchment rounded text-ink-light">Ctrl+Shift+M</kbd> to toggle between drawing and diagrams</span>
+          <span className="text-slate-blue/60">•</span>
           <span>Auto-save every 30 seconds</span>
         </div>
       )}

@@ -36,8 +36,8 @@ export default function ResultsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4" />
-          <p className="text-gray-600">Loading your results...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-terracotta border-t-transparent mx-auto mb-4" />
+          <p className="text-ink-light">Loading your results...</p>
         </div>
       </div>
     );
@@ -62,10 +62,10 @@ export default function ResultsPage() {
   }
 
   const getScoreLevel = (score: number) => {
-    if (score >= 4.5) return { level: 'Expert', color: 'bg-green-600', description: 'Outstanding' };
-    if (score >= 3.5) return { level: 'Advanced', color: 'bg-blue-600', description: 'Strong' };
-    if (score >= 2.5) return { level: 'Intermediate', color: 'bg-yellow-600', description: 'Developing' };
-    return { level: 'Beginner', color: 'bg-orange-600', description: 'Opportunity to grow' };
+    if (score >= 4.5) return { level: 'Expert', color: 'bg-forest', description: 'Outstanding' };
+    if (score >= 3.5) return { level: 'Advanced', color: 'bg-terracotta', description: 'Strong' };
+    if (score >= 2.5) return { level: 'Intermediate', color: 'bg-mustard', description: 'Developing' };
+    return { level: 'Beginner', color: 'bg-rust', description: 'Opportunity to grow' };
   };
 
   const evidenceLevel = getScoreLevel(results.scores.evidence);
@@ -97,44 +97,44 @@ export default function ResultsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+    <div className="min-h-screen bg-cream py-12 px-4">
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
           <Badge variant="secondary" className="mb-4">
             Assessment Complete ✓
           </Badge>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-ink mb-4">
             Your Strategic Thinking Scorecard
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-ink-light">
             Results sent to: <strong>{results.email}</strong>
           </p>
         </div>
 
         {/* Overall Score */}
-        <Card className="mb-8 border-2 border-blue-600">
+        <Card className="mb-8 border-2 border-terracotta">
           <CardHeader>
             <CardTitle className="text-2xl">Overall Strategic Maturity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-6xl font-bold text-blue-600">
+                <div className="text-6xl font-bold text-terracotta">
                   {results.scores.overall.toFixed(1)}
                 </div>
-                <div className="text-sm text-gray-600">out of 5.0</div>
+                <div className="text-sm text-ink-light">out of 5.0</div>
               </div>
               <div className="text-right">
                 <div className={`inline-block px-4 py-2 rounded-lg text-white ${overallLevel.color}`}>
                   {overallLevel.level}
                 </div>
-                <div className="text-sm text-gray-600 mt-2">{overallLevel.description}</div>
+                <div className="text-sm text-ink-light mt-2">{overallLevel.description}</div>
               </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-ink/10 rounded-full h-3">
               <div
-                className="bg-blue-600 h-3 rounded-full"
+                className="bg-terracotta h-3 rounded-full"
                 style={{ width: `${(results.scores.overall / 5) * 100}%` }}
               />
             </div>
@@ -151,9 +151,9 @@ export default function ResultsPage() {
             <CardContent>
               <div className="text-4xl font-bold mb-2">{results.scores.evidence.toFixed(1)}</div>
               <Badge className={evidenceLevel.color}>{evidenceLevel.level}</Badge>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+              <div className="w-full bg-ink/10 rounded-full h-2 mt-4">
                 <div
-                  className="bg-blue-600 h-2 rounded-full"
+                  className="bg-terracotta h-2 rounded-full"
                   style={{ width: `${(results.scores.evidence / 5) * 100}%` }}
                 />
               </div>
@@ -168,9 +168,9 @@ export default function ResultsPage() {
             <CardContent>
               <div className="text-4xl font-bold mb-2">{results.scores.framework.toFixed(1)}</div>
               <Badge className={frameworkLevel.color}>{frameworkLevel.level}</Badge>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+              <div className="w-full bg-ink/10 rounded-full h-2 mt-4">
                 <div
-                  className="bg-blue-600 h-2 rounded-full"
+                  className="bg-terracotta h-2 rounded-full"
                   style={{ width: `${(results.scores.framework / 5) * 100}%` }}
                 />
               </div>
@@ -185,9 +185,9 @@ export default function ResultsPage() {
             <CardContent>
               <div className="text-4xl font-bold mb-2">{results.scores.execution.toFixed(1)}</div>
               <Badge className={executionLevel.color}>{executionLevel.level}</Badge>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+              <div className="w-full bg-ink/10 rounded-full h-2 mt-4">
                 <div
-                  className="bg-blue-600 h-2 rounded-full"
+                  className="bg-terracotta h-2 rounded-full"
                   style={{ width: `${(results.scores.execution / 5) * 100}%` }}
                 />
               </div>
@@ -196,10 +196,10 @@ export default function ResultsPage() {
         </div>
 
         {/* Personalized Recommendations */}
-        <Card className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <Card className="mb-8 bg-terracotta text-white">
           <CardHeader>
             <CardTitle>💡 Your Personalized Action Plan</CardTitle>
-            <CardDescription className="text-blue-100">
+            <CardDescription className="text-white/80">
               Based on your assessment, here's where to focus first
             </CardDescription>
           </CardHeader>
@@ -210,7 +210,7 @@ export default function ResultsPage() {
                 {weakestArea === 'framework' && '🎯 Framework Mastery'}
                 {weakestArea === 'execution' && '🚀 Execution Excellence'}
               </h3>
-              <p className="text-blue-100 mb-4">
+              <p className="text-white/80 mb-4">
                 This is your biggest opportunity for improvement. Strengthening this area will have the highest impact.
               </p>
               <ul className="space-y-2">
@@ -226,7 +226,7 @@ export default function ResultsPage() {
         </Card>
 
         {/* CTA Section */}
-        <Card className="border-2 border-blue-600">
+        <Card className="border-2 border-terracotta">
           <CardHeader>
             <CardTitle>🎯 Ready to Level Up Your Strategic Thinking?</CardTitle>
             <CardDescription>
@@ -237,15 +237,15 @@ export default function ResultsPage() {
             <div className="grid md:grid-cols-3 gap-4 text-sm">
               <div>
                 <div className="font-semibold mb-1">✓ 2 Free Sessions</div>
-                <div className="text-gray-600">Try before you commit</div>
+                <div className="text-ink-light">Try before you commit</div>
               </div>
               <div>
                 <div className="font-semibold mb-1">✓ Systematic Frameworks</div>
-                <div className="text-gray-600">Evidence-based methods</div>
+                <div className="text-ink-light">Evidence-based methods</div>
               </div>
               <div>
                 <div className="font-semibold mb-1">✓ Actionable Outputs</div>
-                <div className="text-gray-600">Professional documents</div>
+                <div className="text-ink-light">Professional documents</div>
               </div>
             </div>
           </CardContent>
@@ -262,16 +262,16 @@ export default function ResultsPage() {
                 size="lg"
                 variant="outline"
                 className="flex-1"
-                onClick={() => router.push('/demo')}
+                onClick={() => router.push('/try')}
               >
-                Watch Demo
+                Try It Free
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Results Summary */}
-        <div className="mt-8 text-center text-sm text-gray-500">
+        <div className="mt-8 text-center text-sm text-slate-blue">
           <p>📧 Check your email for detailed recommendations</p>
           <p className="mt-2">Questions? Contact kevin@thinkhaven.co</p>
         </div>

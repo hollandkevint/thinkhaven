@@ -29,32 +29,32 @@ export default function PriorityScoring({
 
   const getPriorityCategoryColor = (category: string) => {
     switch (category) {
-      case 'Critical': return 'text-red-600 bg-red-50 border-red-200'
-      case 'High': return 'text-orange-600 bg-orange-50 border-orange-200'
-      case 'Medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
-      case 'Low': return 'text-gray-600 bg-gray-50 border-gray-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      case 'Critical': return 'text-rust bg-rust/5 border-rust/20'
+      case 'High': return 'text-mustard bg-mustard/5 border-mustard/20'
+      case 'Medium': return 'text-mustard bg-mustard/5 border-mustard/20'
+      case 'Low': return 'text-ink-light bg-parchment border-ink/8'
+      default: return 'text-ink-light bg-parchment border-ink/8'
     }
   }
 
   const getQuadrantColor = (quadrant: string) => {
     switch (quadrant) {
-      case 'Quick Wins': return 'text-green-700 bg-green-50 border-green-200'
-      case 'Major Projects': return 'text-blue-700 bg-blue-50 border-blue-200'
-      case 'Fill-ins': return 'text-yellow-700 bg-yellow-50 border-yellow-200'
-      case 'Time Wasters': return 'text-red-700 bg-red-50 border-red-200'
-      default: return 'text-gray-700 bg-gray-50 border-gray-200'
+      case 'Quick Wins': return 'text-forest bg-forest/5 border-forest/20'
+      case 'Major Projects': return 'text-terracotta bg-terracotta/5 border-terracotta/20'
+      case 'Fill-ins': return 'text-mustard bg-mustard/5 border-mustard/20'
+      case 'Time Wasters': return 'text-rust bg-rust/5 border-rust/20'
+      default: return 'text-ink-light bg-parchment border-ink/8'
     }
   }
 
   return (
     <div className={`priority-scoring-container ${className}`}>
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-ink/8 p-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-ink mb-2">
             Priority Scoring
           </h2>
-          <p className="text-gray-600">
+          <p className="text-ink-light">
             Rate your feature on effort and impact to determine its priority level.
           </p>
         </div>
@@ -88,19 +88,19 @@ export default function PriorityScoring({
             <PriorityMatrix priorityScoring={priorityScore} />
 
             {/* Priority Summary */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4">
+            <div className="bg-cream rounded-lg border border-terracotta/20 p-6">
+              <h3 className="text-lg font-semibold text-ink mb-4">
                 Priority Assessment Results
               </h3>
 
               <div className="grid md:grid-cols-3 gap-4 mb-4">
                 {/* Priority Score */}
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">
+                  <div className="text-3xl font-bold text-terracotta mb-1">
                     {priorityScore.calculated_priority}
                   </div>
-                  <div className="text-sm text-blue-800">Priority Score</div>
-                  <div className="text-xs text-blue-600">(Impact ÷ Effort)</div>
+                  <div className="text-sm text-ink">Priority Score</div>
+                  <div className="text-xs text-terracotta">(Impact ÷ Effort)</div>
                 </div>
 
                 {/* Priority Category */}
@@ -108,7 +108,7 @@ export default function PriorityScoring({
                   <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getPriorityCategoryColor(priorityScore.priority_category)}`}>
                     {priorityScore.priority_category}
                   </div>
-                  <div className="text-sm text-blue-800 mt-1">Priority Level</div>
+                  <div className="text-sm text-ink mt-1">Priority Level</div>
                 </div>
 
                 {/* Quadrant */}
@@ -116,14 +116,14 @@ export default function PriorityScoring({
                   <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getQuadrantColor(priorityScore.quadrant)}`}>
                     {priorityScore.quadrant}
                   </div>
-                  <div className="text-sm text-blue-800 mt-1">Quadrant</div>
+                  <div className="text-sm text-ink mt-1">Quadrant</div>
                 </div>
               </div>
 
               {/* Recommendations */}
-              <div className="pt-4 border-t border-blue-200">
-                <h4 className="font-semibold text-blue-900 mb-2">Recommendation</h4>
-                <p className="text-blue-800 text-sm">
+              <div className="pt-4 border-t border-terracotta/20">
+                <h4 className="font-semibold text-ink mb-2">Recommendation</h4>
+                <p className="text-ink text-sm">
                   {priorityScore.quadrant === 'Quick Wins' &&
                     "🎯 High priority! This feature offers maximum value for minimal investment. Consider implementing immediately."}
                   {priorityScore.quadrant === 'Major Projects' &&
@@ -139,13 +139,13 @@ export default function PriorityScoring({
         )}
 
         {/* Progress Indicator */}
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="mt-6 pt-4 border-t border-ink/8">
+          <div className="flex items-center justify-between text-sm text-ink-light">
             <span>Step 2 of 4 - Priority Scoring</span>
             <span>Time remaining: ~4 minutes</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: '50%' }}></div>
+          <div className="w-full bg-ink/10 rounded-full h-2 mt-2">
+            <div className="bg-terracotta h-2 rounded-full transition-all duration-300" style={{ width: '50%' }}></div>
           </div>
         </div>
       </div>

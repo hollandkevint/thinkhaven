@@ -244,10 +244,10 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   }, [canvasState.selectedElementIds, readOnly, deleteSelected, saveCanvasState, handleZoomIn, handleZoomOut, handleResetZoom]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-50">
+    <div className="flex flex-col h-full w-full bg-parchment">
       {/* Toolbar */}
       {!readOnly && (
-        <div className="flex items-center gap-2 p-3 bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center gap-2 p-3 bg-white border-b border-ink/8 shadow-sm">
           <div className="flex items-center gap-1 mr-4">
             <ToolButton
               icon="↖"
@@ -281,40 +281,40 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             />
           </div>
 
-          <div className="h-6 w-px bg-gray-300" />
+          <div className="h-6 w-px bg-ink/20" />
 
           <div className="flex items-center gap-1">
             <button
               onClick={handleZoomOut}
-              className="p-2 hover:bg-gray-100 rounded"
+              className="p-2 hover:bg-parchment rounded"
               title="Zoom Out (Ctrl+-)"
             >
               🔍-
             </button>
-            <span className="text-sm text-gray-600 min-w-[60px] text-center">
+            <span className="text-sm text-ink-light min-w-[60px] text-center">
               {Math.round(canvasState.viewport.zoom * 100)}%
             </span>
             <button
               onClick={handleZoomIn}
-              className="p-2 hover:bg-gray-100 rounded"
+              className="p-2 hover:bg-parchment rounded"
               title="Zoom In (Ctrl++)"
             >
               🔍+
             </button>
             <button
               onClick={handleResetZoom}
-              className="p-2 hover:bg-gray-100 rounded text-sm"
+              className="p-2 hover:bg-parchment rounded text-sm"
               title="Reset Zoom (Ctrl+0)"
             >
               ↺
             </button>
           </div>
 
-          <div className="h-6 w-px bg-gray-300 ml-auto" />
+          <div className="h-6 w-px bg-ink/20 ml-auto" />
 
           <button
             onClick={saveCanvasState}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+            className="px-3 py-1.5 bg-terracotta text-white rounded hover:bg-terracotta-hover text-sm"
             title="Save (Ctrl+S)"
           >
             💾 Save
@@ -332,18 +332,18 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             transformOrigin: 'center center'
           }}
         >
-          <div className="text-center text-gray-400 p-8">
+          <div className="text-center text-slate-blue/60 p-8">
             <div className="text-6xl mb-4">🎨</div>
             <p className="text-lg font-medium">Canvas Workspace</p>
             <p className="text-sm mt-2">Canvas library integration coming next</p>
-            <p className="text-xs mt-4 text-gray-500">
+            <p className="text-xs mt-4 text-slate-blue">
               {canvasState.elements.length} element{canvasState.elements.length !== 1 ? 's' : ''}
             </p>
           </div>
         </div>
 
         {/* Status bar */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 text-xs text-gray-600 flex justify-between">
+        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-ink/8 px-4 py-2 text-xs text-ink-light flex justify-between">
           <span>
             {canvasState.selectedElementIds.length > 0
               ? `${canvasState.selectedElementIds.length} selected`
@@ -367,8 +367,8 @@ const ToolButton: React.FC<{
     onClick={onClick}
     className={`p-2 rounded transition-colors ${
       active
-        ? 'bg-blue-100 text-blue-700'
-        : 'hover:bg-gray-100 text-gray-700'
+        ? 'bg-terracotta/10 text-terracotta'
+        : 'hover:bg-parchment text-ink-light'
     }`}
     title={label}
   >

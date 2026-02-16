@@ -110,19 +110,19 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
   }, [code]);
 
   return (
-    <div className="flex flex-col h-full border border-gray-200 rounded-lg overflow-hidden bg-white">
+    <div className="flex flex-col h-full border border-ink/8 rounded-lg overflow-hidden bg-white">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 p-3 bg-gray-50 border-b border-gray-200">
+      <div className="flex items-center gap-2 p-3 bg-parchment border-b border-ink/8">
         <div className="flex items-center gap-1 mr-auto">
-          <span className="text-sm text-gray-600 mr-2">Template:</span>
+          <span className="text-sm text-ink-light mr-2">Template:</span>
           {Object.keys(MERMAID_TEMPLATES).map((template) => (
             <button
               key={template}
               onClick={() => handleTemplateSelect(template as keyof typeof MERMAID_TEMPLATES)}
               className={`px-3 py-1.5 text-sm rounded transition-colors ${
                 activeTemplate === template
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ? 'bg-terracotta/10 text-terracotta'
+                  : 'bg-white text-ink-light hover:bg-parchment'
               }`}
             >
               {template}
@@ -133,13 +133,13 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowPreview(!showPreview)}
-            className="px-3 py-1.5 text-sm bg-white rounded hover:bg-gray-100"
+            className="px-3 py-1.5 text-sm bg-white rounded hover:bg-parchment"
           >
             {showPreview ? '👁️ Hide Preview' : '👁️ Show Preview'}
           </button>
           <button
             onClick={handleCopy}
-            className="px-3 py-1.5 text-sm bg-white rounded hover:bg-gray-100"
+            className="px-3 py-1.5 text-sm bg-white rounded hover:bg-parchment"
             title="Copy to clipboard"
           >
             📋 Copy
@@ -147,7 +147,7 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
           {onSave && (
             <button
               onClick={handleSave}
-              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-3 py-1.5 text-sm bg-terracotta text-white rounded hover:bg-terracotta-hover"
             >
               💾 Save
             </button>
@@ -158,15 +158,15 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
       {/* Editor and Preview */}
       <div className="flex-1 flex overflow-hidden" style={{ height }}>
         {/* Code Editor */}
-        <div className={`${showPreview ? 'w-1/2' : 'w-full'} flex flex-col border-r border-gray-200`}>
-          <div className="flex items-center justify-between p-2 bg-gray-50 border-b border-gray-200">
-            <span className="text-xs font-medium text-gray-600">Mermaid Code</span>
-            <span className="text-xs text-gray-500">{code.split('\n').length} lines</span>
+        <div className={`${showPreview ? 'w-1/2' : 'w-full'} flex flex-col border-r border-ink/8`}>
+          <div className="flex items-center justify-between p-2 bg-parchment border-b border-ink/8">
+            <span className="text-xs font-medium text-ink-light">Mermaid Code</span>
+            <span className="text-xs text-slate-blue">{code.split('\n').length} lines</span>
           </div>
           <textarea
             value={code}
             onChange={handleCodeChange}
-            className="flex-1 p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+            className="flex-1 p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-inset"
             placeholder="Enter Mermaid diagram code..."
             spellCheck={false}
           />
@@ -175,8 +175,8 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
         {/* Live Preview */}
         {showPreview && (
           <div className="w-1/2 flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between p-2 bg-gray-50 border-b border-gray-200">
-              <span className="text-xs font-medium text-gray-600">Preview</span>
+            <div className="flex items-center justify-between p-2 bg-parchment border-b border-ink/8">
+              <span className="text-xs font-medium text-ink-light">Preview</span>
             </div>
             <div className="flex-1 overflow-auto p-4 bg-white">
               <MermaidRenderer code={code} />
@@ -186,7 +186,7 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
       </div>
 
       {/* Help Text */}
-      <div className="p-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
+      <div className="p-2 bg-parchment border-t border-ink/8 text-xs text-slate-blue">
         💡 Tip: Select a template to get started, or write custom Mermaid syntax. Changes preview in real-time.
       </div>
     </div>

@@ -140,7 +140,7 @@ export default function MessageActionMenu({
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-secondary hover:text-primary hover:bg-gray-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+        className="p-2 text-secondary hover:text-primary hover:bg-parchment rounded-lg transition-colors opacity-0 group-hover:opacity-100"
         title="Message actions"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,9 +167,9 @@ export default function MessageActionMenu({
                     setShowBookmarkForm(true)
                   }
                 }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                className="w-full px-4 py-2 text-left text-sm hover:bg-parchment flex items-center gap-3"
               >
-                <div className={`w-4 h-4 rounded ${isBookmarked ? 'text-yellow-500' : 'text-gray-400'}`}>
+                <div className={`w-4 h-4 rounded ${isBookmarked ? 'text-mustard' : 'text-slate-blue/60'}`}>
                   {isBookmarked ? (
                     <svg fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
@@ -199,9 +199,9 @@ export default function MessageActionMenu({
                   console.log('Create reference')
                   setIsOpen(false)
                 }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                className="w-full px-4 py-2 text-left text-sm hover:bg-parchment flex items-center gap-3"
               >
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-slate-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
                 <div>
@@ -216,9 +216,9 @@ export default function MessageActionMenu({
                   onViewReferences()
                   setIsOpen(false)
                 }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                className="w-full px-4 py-2 text-left text-sm hover:bg-parchment flex items-center gap-3"
               >
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-slate-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <div>
@@ -234,9 +234,9 @@ export default function MessageActionMenu({
                     onCreateBranch(messageId)
                     setIsOpen(false)
                   }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-parchment flex items-center gap-3"
                 >
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-slate-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
@@ -254,9 +254,9 @@ export default function MessageActionMenu({
                   navigator.clipboard.writeText(messageId)
                   setIsOpen(false)
                 }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-3"
+                className="w-full px-4 py-2 text-left text-sm hover:bg-parchment flex items-center gap-3"
               >
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-slate-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
                 <div className="font-medium">Copy Message ID</div>
@@ -287,7 +287,7 @@ export default function MessageActionMenu({
                     type="text"
                     value={bookmarkData.title}
                     onChange={(e) => setBookmarkData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-3 py-2 border border-divider rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-divider rounded text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
                     placeholder="Enter bookmark title"
                     maxLength={100}
                   />
@@ -301,7 +301,7 @@ export default function MessageActionMenu({
                   <textarea
                     value={bookmarkData.description}
                     onChange={(e) => setBookmarkData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 border border-divider rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-divider rounded text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent resize-none"
                     placeholder="Optional description"
                     rows={2}
                     maxLength={500}
@@ -317,12 +317,12 @@ export default function MessageActionMenu({
                     {bookmarkData.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-terracotta/10 text-ink text-xs rounded"
                       >
                         {tag}
                         <button
                           onClick={() => handleRemoveTag(tag)}
-                          className="hover:text-blue-900"
+                          className="hover:text-ink"
                         >
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -337,14 +337,14 @@ export default function MessageActionMenu({
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="flex-1 px-2 py-1 border border-divider rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="flex-1 px-2 py-1 border border-divider rounded text-xs focus:outline-none focus:ring-1 focus:ring-terracotta"
                       placeholder="Add tag"
                       maxLength={20}
                     />
                     <button
                       onClick={handleAddTag}
                       disabled={!tagInput.trim()}
-                      className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 py-1 bg-terracotta text-white text-xs rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Add
                     </button>
@@ -363,8 +363,8 @@ export default function MessageActionMenu({
                         onClick={() => setBookmarkData(prev => ({ ...prev, color }))}
                         className={`w-6 h-6 rounded border-2 transition-colors ${
                           bookmarkData.color === color 
-                            ? 'border-gray-400 ring-2 ring-blue-500' 
-                            : 'border-gray-200'
+                            ? 'border-ink/20 ring-2 ring-terracotta'
+                            : 'border-ink/8'
                         } ${classes.bg}`}
                         title={color}
                       />
@@ -377,14 +377,14 @@ export default function MessageActionMenu({
               <div className="flex gap-2 mt-4 pt-3 border-t border-divider">
                 <button
                   onClick={() => setShowBookmarkForm(false)}
-                  className="flex-1 px-3 py-2 text-sm text-secondary hover:text-primary border border-divider rounded hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-3 py-2 text-sm text-secondary hover:text-primary border border-divider rounded hover:bg-parchment transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleBookmarkSubmit}
                   disabled={!bookmarkData.title.trim()}
-                  className="flex-1 px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-3 py-2 text-sm bg-terracotta text-white rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Save Bookmark
                 </button>

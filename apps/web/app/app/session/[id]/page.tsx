@@ -655,8 +655,7 @@ export default function WorkspacePage() {
                 </svg>
                 Mary Chat
                 {workspace.chat_context.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full"
-                        style={{ backgroundColor: 'rgba(0, 121, 255, 0.1)', color: 'var(--primary)' }}>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-terracotta/10 text-terracotta">
                     {workspace.chat_context.length}
                   </span>
                 )}
@@ -671,7 +670,7 @@ export default function WorkspacePage() {
               }`}
             >
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                <div className="w-4 h-4 bg-terracotta rounded flex items-center justify-center">
                   <span className="text-white font-bold text-xs">B</span>
                 </div>
                 BMad Method
@@ -687,18 +686,18 @@ export default function WorkspacePage() {
               <div className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-4xl mx-auto space-y-6">
                 {workspace.chat_context.length === 0 && (
-                  <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 mb-4">
+                  <div className="bg-parchment p-6 rounded-lg border border-ink/8 mb-4">
                     <div className="flex items-start gap-3 mb-4">
-                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-semibold">M</span>
+                      <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-cream font-semibold font-display">M</span>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-blue-900 text-lg mb-2">Welcome to your Strategic Session!</p>
-                        <p className="text-blue-700 mb-4">
+                        <p className="font-semibold text-ink text-lg mb-2 font-display">Welcome to your Strategic Session!</p>
+                        <p className="text-ink-light mb-4">
                           I&apos;m Mary, your AI strategic advisor. I&apos;m here to help you think through ideas, validate concepts,
                           and develop actionable plans using the proven bMAD Method.
                         </p>
-                        <p className="font-medium text-blue-900 mb-3">Try asking me about:</p>
+                        <p className="font-medium text-ink mb-3">Try asking me about:</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <button
                             onClick={() => {
@@ -709,7 +708,7 @@ export default function WorkspacePage() {
                                 input?.select()
                               }, 100)
                             }}
-                            className="text-left px-4 py-3 bg-white hover:bg-blue-100 border border-blue-200 rounded-lg text-sm text-blue-800 hover:text-blue-900 transition-colors"
+                            className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
                           >
                             💡 Validate a new product idea
                           </button>
@@ -722,7 +721,7 @@ export default function WorkspacePage() {
                                 input?.select()
                               }, 100)
                             }}
-                            className="text-left px-4 py-3 bg-white hover:bg-blue-100 border border-blue-200 rounded-lg text-sm text-blue-800 hover:text-blue-900 transition-colors"
+                            className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
                           >
                             📊 Analyze competitive landscape
                           </button>
@@ -735,7 +734,7 @@ export default function WorkspacePage() {
                                 input?.select()
                               }, 100)
                             }}
-                            className="text-left px-4 py-3 bg-white hover:bg-blue-100 border border-blue-200 rounded-lg text-sm text-blue-800 hover:text-blue-900 transition-colors"
+                            className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
                           >
                             🎯 Refine business model
                           </button>
@@ -748,16 +747,16 @@ export default function WorkspacePage() {
                                 input?.select()
                               }, 100)
                             }}
-                            className="text-left px-4 py-3 bg-white hover:bg-blue-100 border border-blue-200 rounded-lg text-sm text-blue-800 hover:text-blue-900 transition-colors"
+                            className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
                           >
                             ⚡ Prioritize features
                           </button>
                         </div>
                       </div>
                     </div>
-                    <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        💬 <strong>Tip:</strong> Click a suggestion above to populate the input field, then press <kbd className="px-2 py-1 bg-white border border-blue-300 rounded text-xs font-mono">Send</kbd> or <kbd className="px-2 py-1 bg-white border border-blue-300 rounded text-xs font-mono">Enter</kbd> to chat with Mary!
+                    <div className="mt-4 p-3 bg-terracotta/10 rounded-lg">
+                      <p className="text-sm text-ink">
+                        💬 <strong>Tip:</strong> Click a suggestion above to populate the input field, then press <kbd className="px-2 py-1 bg-white border border-ink/15 rounded text-xs font-mono">Send</kbd> or <kbd className="px-2 py-1 bg-white border border-ink/15 rounded text-xs font-mono">Enter</kbd> to chat with Mary!
                       </p>
                     </div>
                   </div>
@@ -786,7 +785,7 @@ export default function WorkspacePage() {
                     {message.role === 'user' ? (
                       <div className="flex justify-end">
                         <div className="flex items-start gap-3 max-w-[70%]">
-                          <div className="px-5 py-4 rounded-xl" style={{ backgroundColor: 'rgba(0, 121, 255, 0.1)' }}>
+                          <div className="px-5 py-4 rounded-xl bg-terracotta/10">
                             <p style={{ color: 'var(--foreground)' }}>{message.content}</p>
                           </div>
                           <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
@@ -803,8 +802,7 @@ export default function WorkspacePage() {
                     ) : message.role === 'assistant' ? (
                       <div className="flex justify-start">
                         <div className="flex items-start gap-3 max-w-[70%]">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                               style={{ backgroundColor: '#6b6b6b', color: 'white' }}>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-terracotta text-cream">
                             M
                           </div>
                           <div className="px-5 py-4 rounded-xl" style={{ backgroundColor: 'var(--surface)' }}>
@@ -874,7 +872,7 @@ export default function WorkspacePage() {
                       </div>
                     ) : (
                       <div className="flex justify-center">
-                        <div className="px-5 py-4 rounded-xl bg-gray-100 max-w-[70%]">
+                        <div className="px-5 py-4 rounded-xl bg-parchment max-w-[70%]">
                           <p className="text-sm" style={{ color: 'var(--muted)' }}>
                             <strong>System:</strong> {message.content}
                           </p>
@@ -884,8 +882,7 @@ export default function WorkspacePage() {
                     {message.metadata?.strategic_tags && (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {message.metadata.strategic_tags.map((tag, i) => (
-                          <span key={i} className="text-xs px-2 py-1 rounded"
-                                style={{ backgroundColor: 'rgba(0, 121, 255, 0.1)', color: 'var(--primary)' }}>
+                          <span key={i} className="text-xs px-2 py-1 rounded bg-ink/5 text-ink">
                             {tag}
                           </span>
                         ))}
@@ -898,8 +895,7 @@ export default function WorkspacePage() {
                 {sendingMessage && (
                   <div className="flex justify-start mb-6 opacity-50">
                     <div className="flex items-start gap-3 max-w-[70%]">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                           style={{ backgroundColor: '#6b6b6b', color: 'white' }}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-terracotta text-cream">
                         M
                       </div>
                       <div className="px-5 py-4 rounded-xl" style={{ backgroundColor: 'var(--surface)' }}>
@@ -1019,7 +1015,7 @@ export default function WorkspacePage() {
                 <span className="font-medium ml-1" style={{ color: 'var(--foreground)' }}>{workspace.canvas_elements.length}</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#10b981' }}></div>
+                <div className="w-2 h-2 rounded-full bg-forest"></div>
                 <span style={{ color: 'var(--muted)' }}>Auto-saved</span>
               </div>
             </div>

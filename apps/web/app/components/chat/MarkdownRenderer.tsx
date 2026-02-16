@@ -111,12 +111,12 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </li>
         ),
         blockquote: ({ children, ...props }) => (
-          <blockquote className="border-l-4 border-blue-500 bg-blue-50 pl-4 py-3 my-4 rounded-r-lg" {...props}>
+          <blockquote className="border-l-4 border-terracotta bg-terracotta/5 pl-4 py-3 my-4 rounded-r-lg" {...props}>
             <div className="flex items-start gap-2">
-              <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-terracotta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
               </svg>
-              <div className="flex-1 text-blue-900 italic">
+              <div className="flex-1 text-ink italic">
                 {children}
               </div>
             </div>
@@ -133,9 +133,9 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </em>
         ),
         a: ({ children, href, ...props }) => (
-          <a 
+          <a
             href={href}
-            className="text-blue-600 hover:text-blue-800 underline decoration-blue-200 hover:decoration-blue-400 transition-colors"
+            className="text-terracotta hover:text-terracotta-hover underline decoration-terracotta/30 hover:decoration-terracotta/60 transition-colors"
             target="_blank"
             rel="noopener noreferrer"
             {...props}
@@ -148,23 +148,23 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
         ),
         table: ({ children, ...props }) => (
           <div className="overflow-x-auto my-4">
-            <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg" {...props}>
+            <table className="min-w-full divide-y divide-ink/10 border border-ink/10 rounded-lg" {...props}>
               {children}
             </table>
           </div>
         ),
         thead: ({ children, ...props }) => (
-          <thead className="bg-gray-50" {...props}>
+          <thead className="bg-parchment" {...props}>
             {children}
           </thead>
         ),
         tbody: ({ children, ...props }) => (
-          <tbody className="bg-white divide-y divide-gray-200" {...props}>
+          <tbody className="bg-white divide-y divide-ink/10" {...props}>
             {children}
           </tbody>
         ),
         tr: ({ children, ...props }) => (
-          <tr className="hover:bg-gray-50" {...props}>
+          <tr className="hover:bg-parchment" {...props}>
             {children}
           </tr>
         ),

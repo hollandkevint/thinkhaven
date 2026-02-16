@@ -86,7 +86,7 @@ export async function updateSession(request: NextRequest) {
 
   // Define route security policies
   const publicRoutes = ['/', '/login', '/signup', '/resend-confirmation', '/.well-known', '/auth/callback']
-  const testOnlyRoutes = ['/test-dual-pane', '/test-bmad-buttons', '/demo'] // Restrict these in production
+  const testOnlyRoutes = ['/test-dual-pane', '/test-bmad-buttons'] // Restrict these in production
   const staticAssets = ['.css', '.js', '.map', '.ico', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']
 
   const isPublicRoute = publicRoutes.some(route =>

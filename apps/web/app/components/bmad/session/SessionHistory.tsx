@@ -39,7 +39,7 @@ export default function SessionHistory({
         <div className="mb-6">
           <button
             onClick={() => toggleSection('context')}
-            className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-parchment transition-colors"
           >
             <span className="font-medium text-primary">Shared Context</span>
             <svg
@@ -55,7 +55,7 @@ export default function SessionHistory({
           </button>
 
           {expandedSection === 'context' && (
-            <div className="mt-3 p-4 bg-gray-50 rounded-lg space-y-4">
+            <div className="mt-3 p-4 bg-parchment rounded-lg space-y-4">
               {/* User Inputs */}
               {universalState.sharedContext.userInputs.length > 0 && (
                 <div>
@@ -81,7 +81,7 @@ export default function SessionHistory({
                   <h4 className="font-medium text-secondary mb-2">Key Insights</h4>
                   <div className="space-y-2">
                     {universalState.sharedContext.keyInsights.map((insight, index) => (
-                      <div key={index} className="p-3 bg-blue-50 rounded border-l-4 border-blue-400 text-sm">
+                      <div key={index} className="p-3 bg-terracotta/5 rounded border-l-4 border-terracotta text-sm">
                         {insight}
                       </div>
                     ))}
@@ -95,7 +95,7 @@ export default function SessionHistory({
                   <h4 className="font-medium text-secondary mb-2">Recommendations</h4>
                   <div className="space-y-2">
                     {universalState.sharedContext.recommendations.map((rec, index) => (
-                      <div key={index} className="p-3 bg-green-50 rounded border-l-4 border-green-400 text-sm">
+                      <div key={index} className="p-3 bg-forest/5 rounded border-l-4 border-forest text-sm">
                         {rec}
                       </div>
                     ))}
@@ -111,7 +111,7 @@ export default function SessionHistory({
           <div className="mb-6">
             <button
               onClick={() => toggleSection('history')}
-              className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-parchment transition-colors"
             >
               <span className="font-medium text-primary">Pathway History</span>
               <svg
@@ -127,21 +127,21 @@ export default function SessionHistory({
             </button>
 
             {expandedSection === 'history' && (
-              <div className="mt-3 p-4 bg-gray-50 rounded-lg">
+              <div className="mt-3 p-4 bg-parchment rounded-lg">
                 <div className="space-y-4">
                   {universalState.pathwayHistory.map((transition, index) => (
                     <div key={index} className="flex items-start gap-4 p-3 bg-white rounded border">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-blue-600 text-sm font-medium">{index + 1}</span>
+                      <div className="w-8 h-8 bg-terracotta/10 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-terracotta text-sm font-medium">{index + 1}</span>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           {transition.fromPathway && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                            <span className="px-2 py-1 bg-parchment text-ink-light rounded text-sm">
                               {transition.fromPathway.replace('-', ' ')}
                             </span>
                           )}
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 text-slate-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                           <span className="px-2 py-1 bg-primary/10 text-primary rounded text-sm">
@@ -151,11 +151,11 @@ export default function SessionHistory({
                         <div className="text-sm text-secondary mb-1">
                           Reason: <span className="capitalize">{transition.reason.replace('_', ' ')}</span>
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-slate-blue">
                           {formatTimestamp(transition.timestamp)}
                         </div>
                         {transition.contextTransferred && (
-                          <div className="mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded inline-block">
+                          <div className="mt-2 text-xs bg-forest/10 text-forest px-2 py-1 rounded inline-block">
                             Context transferred
                           </div>
                         )}
@@ -172,7 +172,7 @@ export default function SessionHistory({
         <div className="mb-6">
           <button
             onClick={() => toggleSection('progress')}
-            className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-parchment transition-colors"
           >
             <span className="font-medium text-primary">Progress Tracking</span>
             <svg
@@ -188,7 +188,7 @@ export default function SessionHistory({
           </button>
 
           {expandedSection === 'progress' && (
-            <div className="mt-3 p-4 bg-gray-50 rounded-lg space-y-4">
+            <div className="mt-3 p-4 bg-parchment rounded-lg space-y-4">
               {/* Overall Progress */}
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -197,7 +197,7 @@ export default function SessionHistory({
                     {Math.round(universalState.globalProgress.overallCompletion)}%
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-ink/10 rounded-full h-2">
                   <div
                     className="bg-primary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${universalState.globalProgress.overallCompletion}%` }}
@@ -220,9 +220,9 @@ export default function SessionHistory({
                             {Math.round(completion)}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-ink/10 rounded-full h-2">
                           <div
-                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                            className="bg-terracotta h-2 rounded-full transition-all duration-300"
                             style={{ width: `${completion}%` }}
                           ></div>
                         </div>
@@ -238,14 +238,14 @@ export default function SessionHistory({
                   <h4 className="font-medium text-secondary mb-3">Time Spent</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="bg-white rounded p-3">
-                      <div className="text-gray-600 mb-1">Total Session</div>
+                      <div className="text-ink-light mb-1">Total Session</div>
                       <div className="font-semibold">
                         {Math.round(universalState.globalProgress.totalSessionTime / 60000)} min
                       </div>
                     </div>
                     {Object.entries(universalState.globalProgress.timeSpent).map(([pathway, time]) => (
                       <div key={pathway} className="bg-white rounded p-3">
-                        <div className="text-gray-600 mb-1 capitalize">
+                        <div className="text-ink-light mb-1 capitalize">
                           {pathway.replace('-', ' ')}
                         </div>
                         <div className="font-semibold">
@@ -264,7 +264,7 @@ export default function SessionHistory({
         <div>
           <button
             onClick={() => toggleSection('analytics')}
-            className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            className="w-full flex items-center justify-between p-3 bg-parchment rounded-lg hover:bg-parchment transition-colors"
           >
             <span className="font-medium text-primary">Analytics Summary</span>
             <svg
@@ -280,39 +280,39 @@ export default function SessionHistory({
           </button>
 
           {expandedSection === 'analytics' && (
-            <div className="mt-3 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-3 p-4 bg-parchment rounded-lg">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div className="bg-white rounded p-3 text-center">
                   <div className="text-2xl font-bold text-primary mb-1">
                     {universalState.analytics.pathwaySwitches}
                   </div>
-                  <div className="text-gray-600">Pathway Switches</div>
+                  <div className="text-ink-light">Pathway Switches</div>
                 </div>
                 <div className="bg-white rounded p-3 text-center">
-                  <div className="text-2xl font-bold text-green-600 mb-1">
+                  <div className="text-2xl font-bold text-forest mb-1">
                     {Math.round(universalState.analytics.completionRate * 100)}%
                   </div>
-                  <div className="text-gray-600">Completion Rate</div>
+                  <div className="text-ink-light">Completion Rate</div>
                 </div>
                 <div className="bg-white rounded p-3 text-center">
-                  <div className="text-2xl font-bold text-blue-600 mb-1">
+                  <div className="text-2xl font-bold text-terracotta mb-1">
                     {universalState.sharedContext.keyInsights.length}
                   </div>
-                  <div className="text-gray-600">Key Insights</div>
+                  <div className="text-ink-light">Key Insights</div>
                 </div>
                 <div className="bg-white rounded p-3 text-center">
-                  <div className="text-2xl font-bold text-purple-600 mb-1">
+                  <div className="text-2xl font-bold text-terracotta mb-1">
                     {universalState.sharedContext.generatedDocuments.length}
                   </div>
-                  <div className="text-gray-600">Documents</div>
+                  <div className="text-ink-light">Documents</div>
                 </div>
               </div>
 
               {/* Behavior Patterns */}
               {universalState.analytics.userBehaviorPatterns && (
-                <div className="mt-4 p-3 bg-blue-50 rounded">
-                  <h4 className="font-medium text-blue-900 mb-2">Session Pattern</h4>
-                  <div className="text-sm text-blue-800">
+                <div className="mt-4 p-3 bg-terracotta/5 rounded">
+                  <h4 className="font-medium text-ink mb-2">Session Pattern</h4>
+                  <div className="text-sm text-ink">
                     Your session shows a{' '}
                     <strong>{universalState.analytics.userBehaviorPatterns.sessionPattern || 'focused'}</strong>{' '}
                     approach to strategic thinking.

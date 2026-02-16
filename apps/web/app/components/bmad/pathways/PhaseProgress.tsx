@@ -40,16 +40,16 @@ export default function PhaseProgress({
       {/* Overall Progress */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Session Progress</h3>
-          <p className="text-sm text-gray-600">
+          <h3 className="text-lg font-semibold text-ink">Session Progress</h3>
+          <p className="text-sm text-ink-light">
             Phase {currentPhaseIndex + 1} of {NEW_IDEA_PHASES.length}
           </p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-blue-600" data-testid="overall-progress">
+          <div className="text-2xl font-bold text-terracotta" data-testid="overall-progress">
             {totalProgress}%
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-slate-blue">
             {remainingTime} min remaining
           </div>
         </div>
@@ -57,9 +57,9 @@ export default function PhaseProgress({
 
       {/* Progress Bar */}
       <div className="mb-6">
-        <div className="w-full bg-gray-200 rounded-full h-3">
+        <div className="w-full bg-ink/10 rounded-full h-3">
           <div
-            className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out"
+            className="bg-terracotta h-3 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${totalProgress}%` }}
           ></div>
         </div>
@@ -79,10 +79,10 @@ export default function PhaseProgress({
               className={`
                 relative p-4 rounded-lg border-2 transition-all duration-300
                 ${isActive
-                  ? 'border-blue-500 bg-blue-50 active'
+                  ? 'border-terracotta bg-terracotta/5 active'
                   : isCompleted
-                    ? 'border-green-500 bg-green-50 completed'
-                    : 'border-gray-200 bg-gray-50 pending'
+                    ? 'border-forest bg-forest/5 completed'
+                    : 'border-ink/8 bg-parchment pending'
                 }
               `}
             >
@@ -90,10 +90,10 @@ export default function PhaseProgress({
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-2
                 ${isActive
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-terracotta text-white'
                   : isCompleted
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-300 text-gray-600'
+                    ? 'bg-forest text-white'
+                    : 'bg-ink/20 text-ink-light'
                 }
               `}>
                 {getPhaseIcon(status, phase.id)}
@@ -103,11 +103,11 @@ export default function PhaseProgress({
               <div>
                 <div className={`
                   text-sm font-medium mb-1
-                  ${isActive ? 'text-blue-900' : isCompleted ? 'text-green-900' : 'text-gray-600'}
+                  ${isActive ? 'text-ink' : isCompleted ? 'text-ink' : 'text-ink-light'}
                 `}>
                   {phase.name}
                 </div>
-                <div className="text-xs text-gray-500 mb-2">
+                <div className="text-xs text-slate-blue mb-2">
                   {phase.timeAllocation} min
                 </div>
 
@@ -115,10 +115,10 @@ export default function PhaseProgress({
                 <div className={`
                   text-xs px-2 py-1 rounded-full inline-block
                   ${isActive
-                    ? 'bg-blue-100 text-blue-800'
+                    ? 'bg-terracotta/10 text-ink'
                     : isCompleted
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-600'
+                      ? 'bg-forest/10 text-forest'
+                      : 'bg-parchment text-ink-light'
                   }
                 `}>
                   {isActive ? 'In Progress' : isCompleted ? 'Complete' : 'Pending'}
@@ -128,7 +128,7 @@ export default function PhaseProgress({
               {/* Current Phase Indicator */}
               {isActive && (
                 <div className="absolute -top-2 -right-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="w-4 h-4 bg-terracotta rounded-full animate-pulse"></div>
                 </div>
               )}
             </div>
@@ -138,17 +138,17 @@ export default function PhaseProgress({
 
       {/* Current Phase Details */}
       {currentPhaseIndex < NEW_IDEA_PHASES.length && (
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="mt-6 p-4 bg-terracotta/5 rounded-lg border border-terracotta/20">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium text-blue-900">
+              <h4 className="font-medium text-ink">
                 Current Phase: {NEW_IDEA_PHASES[currentPhaseIndex].name}
               </h4>
-              <p className="text-sm text-blue-700 mt-1">
+              <p className="text-sm text-terracotta mt-1">
                 {NEW_IDEA_PHASES[currentPhaseIndex].description}
               </p>
             </div>
-            <div className="text-right text-sm text-blue-600" data-testid="current-phase-time">
+            <div className="text-right text-sm text-terracotta" data-testid="current-phase-time">
               {NEW_IDEA_PHASES[currentPhaseIndex].timeAllocation}:00
             </div>
           </div>
@@ -157,10 +157,10 @@ export default function PhaseProgress({
 
       {/* Time Warnings */}
       {remainingTime <= 5 && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mt-4 p-3 bg-rust/5 border border-rust/20 rounded-lg">
           <div className="flex items-center space-x-2">
-            <span className="text-red-500">⚠️</span>
-            <span className="text-sm font-medium text-red-800">
+            <span className="text-rust">⚠️</span>
+            <span className="text-sm font-medium text-rust">
               Less than 5 minutes remaining! Consider moving to final phases.
             </span>
           </div>

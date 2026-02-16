@@ -98,10 +98,10 @@ export default function FeatureRefinementPathway({
             <PriorityScoring
               onScoreChange={handlePriorityScoringComplete}
             />
-            <div className="flex justify-end pt-4 border-t border-gray-200">
+            <div className="flex justify-end pt-4 border-t border-ink/8">
               <button
                 onClick={() => setCurrentPhase(3)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm"
+                className="px-6 py-3 bg-terracotta text-white rounded-lg text-sm font-semibold hover:bg-terracotta-hover transition-all shadow-sm"
               >
                 Continue to Brief Generation →
               </button>
@@ -126,17 +126,17 @@ export default function FeatureRefinementPathway({
   if (sessionComplete) {
     return (
       <div className={`feature-refinement-pathway ${className}`}>
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 p-8 text-center">
+        <div className="bg-forest/5 rounded-lg border border-forest/20 p-8 text-center">
           <div className="mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-600 text-white mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-forest text-white mb-4">
               <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-green-900 mb-2">
+            <h2 className="text-2xl font-bold text-ink mb-2">
               Feature Refinement Complete!
             </h2>
-            <p className="text-green-700">
+            <p className="text-forest">
               Your feature brief is ready for development team handoff
             </p>
           </div>
@@ -144,7 +144,7 @@ export default function FeatureRefinementPathway({
           <div className="space-y-3">
             <button
               onClick={() => window.location.href = '/app'}
-              className="w-full px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+              className="w-full px-6 py-3 bg-forest text-white rounded-lg font-semibold hover:bg-forest/80 transition-colors"
             >
               Return to Dashboard
             </button>
@@ -168,7 +168,7 @@ export default function FeatureRefinementPathway({
                   }
                 })
               }}
-              className="w-full px-6 py-3 bg-white border border-green-300 text-green-700 rounded-lg font-semibold hover:bg-green-50 transition-colors"
+              className="w-full px-6 py-3 bg-white border border-forest/40 text-forest rounded-lg font-semibold hover:bg-forest/5 transition-colors"
             >
               Refine Another Feature
             </button>
@@ -182,10 +182,10 @@ export default function FeatureRefinementPathway({
     <div className={`feature-refinement-pathway ${className}`}>
       {/* Pathway Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-ink mb-2">
           Feature Refinement Pathway
         </h1>
-        <p className="text-gray-600">
+        <p className="text-ink-light">
           Analyze, prioritize, and document your feature for development
         </p>
       </div>
@@ -201,7 +201,7 @@ export default function FeatureRefinementPathway({
       <div className="phase-content">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terracotta"></div>
           </div>
         ) : (
           renderCurrentPhase()
@@ -209,8 +209,8 @@ export default function FeatureRefinementPathway({
       </div>
 
       {/* Session Metadata */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <div className="flex items-center justify-between text-sm text-gray-500">
+      <div className="mt-8 pt-6 border-t border-ink/8">
+        <div className="flex items-center justify-between text-sm text-slate-blue">
           <div>
             Session ID: <span className="font-mono">{sessionId.slice(0, 8)}</span>
           </div>
