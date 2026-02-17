@@ -18,6 +18,7 @@ npm run lint             # ESLint
 npm test                 # Unit tests (Vitest, watch mode)
 npm run test:run         # Unit tests (once)
 npm run test:e2e         # E2E tests (Playwright, 7 smoke tests)
+npm run test:prod        # Smoke tests against production (15 tests)
 ```
 
 Migrations: `apps/web/supabase/migrations/` (001 → 011, sequential, never skip)
@@ -42,7 +43,8 @@ See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_
 
 - Unit tests: `**/*.test.{ts,tsx}`, setup in `tests/setup.ts`
 - E2E: `tests/e2e/smoke/health.spec.ts` - 7 public route smoke tests, all passing in CI
-- Config: `vitest.config.ts`, `playwright.config.ts`
+- Prod: `tests/e2e/smoke/beta-checklist.spec.ts` - 9 production verification tests (`npm run test:prod`)
+- Config: `vitest.config.ts`, `playwright.config.ts`, `playwright.prod.config.ts` (production)
 - 45/71 unit test files fail (pre-existing, not regressions). mary-persona: 67/67 pass.
 
 ## Configuration
@@ -65,6 +67,8 @@ See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_
 10. **Supabase server client** - `createClient()` returns null when env vars missing; callers must null-check
 11. **Next.js env files** - Only reads `.env`, `.env.local`, `.env.production` (NOT `.env.test`)
 12. **SSG safety** - `lib/supabase/client.ts` exports a no-op Proxy for SSG; use for client components
+13. **Monorepo git paths** - Always use absolute paths or run git commands from repo root, not `apps/web/`
+14. **Claude Code Review CI** - `anthropics/claude-code-action@v1` has known SDK crash (issue #911). `continue-on-error: true` is set. Job may show failed but workflow passes.
 
 ## Production Deployment
 
