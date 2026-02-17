@@ -248,7 +248,8 @@ export async function POST(request: NextRequest) {
     });
 
     // ADMIN BYPASS CHECK: Kevin gets unlimited messages (check BEFORE any message limit logic)
-    const isAdmin = user.email?.toLowerCase() === 'kholland7@gmail.com';
+    const ADMIN_EMAILS = ['kholland7@gmail.com', 'hollandkevint@gmail.com'];
+    const isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '');
 
     // Get or create BMad session for message limit tracking
     let sessionId: string | null = null;

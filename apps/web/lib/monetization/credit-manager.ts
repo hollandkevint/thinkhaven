@@ -12,6 +12,8 @@
 
 import { createClient } from '@/lib/supabase/server';
 
+const ADMIN_EMAILS = ['kholland7@gmail.com', 'hollandkevint@gmail.com'];
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -89,7 +91,7 @@ export async function hasCredits(userId: string, required: number = 1): Promise<
   const { data: { user } } = await supabase.auth.getUser();
   
   // Admin bypass for Kevin
-  if (user?.email?.toLowerCase() === 'kholland7@gmail.com') {
+  if (ADMIN_EMAILS.includes(user?.email?.toLowerCase() ?? '')) {
     console.log('[ADMIN] Bypassing credit check for Kevin');
     return true;
   }
@@ -129,7 +131,7 @@ export async function deductCredit(
   const { data: { user } } = await supabase.auth.getUser();
 
   // Admin bypass for Kevin
-  if (user?.email?.toLowerCase() === 'kholland7@gmail.com') {
+  if (ADMIN_EMAILS.includes(user?.email?.toLowerCase() ?? '')) {
     console.log('[ADMIN] Bypassing credit deduction for Kevin');
     return {
       success: true,
