@@ -19,13 +19,16 @@ test.describe('Authenticated Session - test-admin', () => {
     expect(page.url()).not.toContain('waitlist');
     console.log('PASS: Dashboard loaded:', page.url());
 
-    // Step 3: Click "+ New Session"
-    const newSessionBtn = page.locator('a[href*="/app/new"], button:has-text("New Session")').first();
-    await expect(newSessionBtn).toBeVisible({ timeout: 5000 });
-    await newSessionBtn.click();
-    await page.waitForURL('**/app/new**', { timeout: 10000 });
+    // Step 3: Screenshot dashboard and click "New Session"
+    await page.waitForLoadState('networkidle');
+    await page.screenshot({ path: '/tmp/thinkhaven-00-dashboard.png', fullPage: true });
 
-    // Step 4: Wait for workspace prep and redirect to session
+    const newSessionBtn = page.getByRole('button', { name: /new session/i }).first();
+    await expect(newSessionBtn).toBeVisible({ timeout: 10000 });
+    await newSessionBtn.click();
+    console.log('PASS: Clicked New Session button');
+
+    // Step 4: Wait for session creation (may go through /app/new then redirect)
     console.log('Waiting for session creation...');
     await page.waitForURL('**/app/session/**', { timeout: 30000 });
     console.log('PASS: Session created:', page.url());

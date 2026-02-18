@@ -28,7 +28,7 @@ import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
 interface BmadSession {
   id: string;
   user_id: string;
-  session_type: string;
+  pathway: string;
   current_step: string;
   session_data: Record<string, unknown>;
   created_at: string;
@@ -391,7 +391,7 @@ export default function AppDashboardPage() {
                     </p>
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="capitalize">{session.session_type.replace(/-/g, ' ')}</span>
+                      <span className="capitalize">{(session.pathway || 'session').replace(/-/g, ' ')}</span>
                       <span>{formatTimestamp(session.updated_at)}</span>
                     </div>
                   </Card>
