@@ -29,23 +29,33 @@ export default function NewSessionPage() {
 
     try {
       setError(null);
-      // Create a new session in the database
+
+      // workspace_id = user_id in current architecture (one workspace per user)
+      const workspaceId = user.id;
+
+      // Create a new session with correct schema columns
       const { data: session, error: createError } = await supabase
         .from('bmad_sessions')
-        .insert([
-          {
-            user_id: user.id,
-            session_type: 'new-idea',
-            current_step: 'concept',
-            session_data: {},
-          },
-        ])
+        .insert({
+          user_id: user.id,
+          workspace_id: workspaceId,
+          pathway: 'new-idea',
+          current_phase: 'discovery',
+          current_template: 'general',
+          current_step: 'chat',
+          templates: [],
+          next_steps: [],
+          status: 'active',
+          overall_completion: 0,
+          message_count: 0,
+          message_limit: 10,
+        })
         .select()
         .single();
 
       if (createError) throw createError;
 
-      // Redirect to the new workspace
+      // Redirect to the session workspace
       router.push(`/app/session/${session.id}`);
     } catch (err) {
       console.error('Error creating session:', err);
