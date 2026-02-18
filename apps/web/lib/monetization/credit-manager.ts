@@ -82,15 +82,19 @@ export async function getCreditBalance(userId: string): Promise<CreditBalance | 
  * Note: In LAUNCH_MODE, credit checks are bypassed to allow unlimited sessions
  * during the initial testing period (target: 100 sessions with message limits).
  */
-export async function hasCredits(userId: string, required: number = 1): Promise<boolean> {
+export async function hasCredits(userId: string, required: number = 1, userEmail?: string): Promise<boolean> {
   // Bypass credit checks in launch mode (for initial testing period)
   // Use server-only env var (no NEXT_PUBLIC prefix) to prevent client manipulation
   const isLaunchMode = process.env.LAUNCH_MODE === 'true';
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  // Admin bypass for Kevin
-  if (isAdminEmail(user?.email)) {
+
+  // Admin bypass — use provided email to avoid extra getUser() round-trip
+  const email = userEmail ?? (await (async () => {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.email;
+  })());
+
+  if (isAdminEmail(email)) {
     console.log('[ADMIN] Bypassing credit check');
     return true;
   }
@@ -121,16 +125,21 @@ export async function hasCredits(userId: string, required: number = 1): Promise<
  */
 export async function deductCredit(
   userId: string,
-  sessionId?: string
+  sessionId?: string,
+  userEmail?: string
 ): Promise<DeductCreditResult> {
   // Bypass credit deduction in launch mode (for initial testing period)
   // Use server-only env var (no NEXT_PUBLIC prefix) to prevent client manipulation
   const isLaunchMode = process.env.LAUNCH_MODE === 'true';
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  // Admin bypass for Kevin
-  if (isAdminEmail(user?.email)) {
+  // Admin bypass — use provided email to avoid extra getUser() round-trip
+  const email = userEmail ?? (await (async () => {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.email;
+  })());
+
+  if (isAdminEmail(email)) {
     console.log('[ADMIN] Bypassing credit deduction');
     return {
       success: true,
@@ -149,6 +158,7 @@ export async function deductCredit(
   }
 
   try {
+    const supabase = await createClient();
     const { data, error } = await supabase.rpc('deduct_credit_transaction', {
       p_user_id: userId,
       p_session_id: sessionId || null,

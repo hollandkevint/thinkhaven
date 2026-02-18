@@ -10,6 +10,7 @@ import {
   incrementMessageCount,
   checkMessageLimit,
   getLimitReachedMessage,
+  type MessageLimitStatus,
 } from '@/lib/bmad/message-limit-manager';
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
 import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
@@ -210,7 +211,6 @@ export async function POST(request: NextRequest) {
 
     console.log('[Chat Stream] User authenticated:', {
       userId: user.id,
-      userEmail: user.email
     });
 
     // Verify workspace access - using user_workspace table
@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
 
     // Get or create BMad session for message limit tracking
     let sessionId: string | null = null;
-    let limitStatus: any = null;
+    let limitStatus: MessageLimitStatus | null = null;
 
     try {
       const { data: bmadSession } = await supabase

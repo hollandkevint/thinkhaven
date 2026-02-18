@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
@@ -20,12 +20,16 @@ export default function NewSessionPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
+  const creatingRef = useRef(false);
 
   const createSession = useCallback(async () => {
     if (!user) {
       router.push('/login');
       return;
     }
+
+    if (creatingRef.current) return;
+    creatingRef.current = true;
 
     try {
       setError(null);
@@ -58,6 +62,7 @@ export default function NewSessionPage() {
       // Redirect to the session workspace
       router.push(`/app/session/${session.id}`);
     } catch (err) {
+      creatingRef.current = false;
       console.error('Error creating session:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to create session';
       setError(errorMessage);

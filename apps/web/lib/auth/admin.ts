@@ -1,5 +1,10 @@
-export const ADMIN_EMAILS = ['kholland7@gmail.com', 'hollandkevint@gmail.com', 'test-admin@thinkhaven.co'] as const;
+const ADMIN_EMAILS: ReadonlySet<string> = new Set([
+  'kholland7@gmail.com',
+  'hollandkevint@gmail.com',
+  'test-admin@thinkhaven.co',
+]);
 
 export function isAdminEmail(email: string | undefined | null): boolean {
-  return ADMIN_EMAILS.includes(email?.toLowerCase() as typeof ADMIN_EMAILS[number]);
+  if (!email) return false;
+  return ADMIN_EMAILS.has(email.toLowerCase());
 }
