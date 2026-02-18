@@ -59,7 +59,7 @@ export default function ResendConfirmationPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="kholland7@gmail.com"
+              placeholder="you@example.com"
               className="mt-1 block w-full px-3 py-2 border border-divider rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
             />
           </div>

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { claudeClient, type ConversationMessage } from '@/lib/ai/claude-client';
 import { StreamEncoder, createStreamHeaders } from '@/lib/ai/streaming';
 import { createClient } from '@/lib/supabase/server';
+import { isAdminEmail } from '@/lib/auth/admin';
 import { CoachingContext, SubPersonaSessionState } from '@/lib/ai/mary-persona';
 import { WorkspaceContextBuilder, ConversationContextManager, BmadSessionData } from '@/lib/ai/workspace-context';
 import { ContextBuilder } from '@/lib/ai/context-builder';
@@ -247,9 +248,8 @@ export async function POST(request: NextRequest) {
       hasState: !!workspace.workspace_state
     });
 
-    // ADMIN BYPASS CHECK: Kevin gets unlimited messages (check BEFORE any message limit logic)
-    const ADMIN_EMAILS = ['kholland7@gmail.com', 'hollandkevint@gmail.com'];
-    const isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '');
+    // ADMIN BYPASS CHECK: unlimited messages (check BEFORE any message limit logic)
+    const isAdmin = isAdminEmail(user.email);
 
     // Get or create BMad session for message limit tracking
     let sessionId: string | null = null;
@@ -350,7 +350,7 @@ export async function POST(request: NextRequest) {
       });
     } else if (isAdmin) {
       // Admin: Skip increment, set limitStatus to look unlimited so UI doesn't warn
-      console.log('[Chat Stream] Admin bypass: Skipping message limit tracking for', user.email);
+      console.log('[Chat Stream] Admin bypass: Skipping message limit tracking');
       limitStatus = {
         currentCount: 0,
         messageLimit: -1,
