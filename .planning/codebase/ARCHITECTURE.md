@@ -1,193 +1,196 @@
 # Architecture
 
-**Analysis Date:** 2026-02-14
+**Analysis Date:** 2026-02-20
 
 ## Pattern Overview
 
-**Overall:** Layered architecture with Next.js App Router, modular domain services, and React Context state management
+**Overall:** Next.js App Router monorepo with server-client separation and an agentic AI loop
 
 **Key Characteristics:**
-- Server-side rendering with client-side interactivity (Next.js 15.5 App Router)
-- Domain-driven design with specialized subsystems (BMad engine, AI integration, workspace management)
-- Database-first architecture with Supabase PostgreSQL + Row Level Security
-- API routes for streaming AI responses and session management
-- Monorepo structure with workspace packages (planned for shared UI/canvas components)
+- Server Components for auth-gated layout, Client Components for all interactive UI
+- API routes handle all AI calls; client never calls Anthropic directly
+- Single-user workspace model: one `user_workspace` row per user, not per session
+- SSE streaming for AI responses with typed event protocol (`metadata`, `content`, `speaker_change`, `complete`, `error`)
+- Dual-pane UI (chat left, canvas/board right) driven by client-side state, persisted to Supabase on finalize
 
 ## Layers
 
-**Presentation Layer (App Router):**
-- Purpose: UI routing, page components, client-side interactivity
-- Location: `app/`
-- Contains: Pages (`page.tsx`), layouts, route handlers, React components
-- Depends on: `lib/` domain services, `lib/auth/AuthContext.tsx`, `lib/workspace/WorkspaceContext.tsx`
-- Used by: End users via browser
+**Route Layer (Next.js App Router):**
+- Purpose: Page rendering, layout, redirects
+- Location: `apps/web/app/`
+- Contains: `page.tsx`, `layout.tsx`, `route.ts` files
+- Depends on: Auth layer, lib layer, component layer
+- Used by: Browser, Vercel edge
+
+**Auth Layer:**
+- Purpose: Session management, beta-gate enforcement
+- Location: `apps/web/lib/auth/`, `apps/web/app/app/layout.tsx`
+- Contains: `AuthContext.tsx` (client React context), `beta-access.ts` (server JWT check), `admin.ts`, `jwt-verify.ts`
+- Depends on: `lib/supabase/server.ts`, `lib/supabase/client.ts`
+- Used by: Root layout (AuthProvider), all protected routes, API routes
 
 **API Layer:**
-- Purpose: Server-side request handling, streaming responses, authentication
-- Location: `app/api/`
-- Contains: Route handlers (`route.ts`)
-- Depends on: `lib/` services, Supabase server client, Anthropic SDK
-- Used by: Frontend components via `fetch()`
+- Purpose: Server-side AI calls, auth verification, credit/limit enforcement
+- Location: `apps/web/app/api/`
+- Contains: Route handlers (`route.ts`) for chat, bmad, checkout, credits, feedback, monitoring
+- Depends on: `lib/ai/`, `lib/supabase/server.ts`, `lib/monetization/`
+- Used by: Client components via `fetch()`
 
-**Domain Services Layer:**
-- Purpose: Business logic, AI orchestration, session management, data access
-- Location: `lib/`
-- Contains: BMad engine (`lib/bmad/`), AI integration (`lib/ai/`), auth (`lib/auth/`), database clients (`lib/supabase/`)
-- Depends on: External services (Supabase, Anthropic), shared types
-- Used by: API routes, client components (via context providers)
+**AI Layer:**
+- Purpose: Claude client, streaming, persona management, tool execution
+- Location: `apps/web/lib/ai/`
+- Contains: `claude-client.ts`, `streaming.ts`, `mary-persona.ts`, `board-types.ts`, `board-members.ts`, `tool-executor.ts`, `tools/`
+- Depends on: `@anthropic-ai/sdk`
+- Used by: `app/api/chat/stream/route.ts`, `app/api/chat/guest/route.ts`
+
+**BMad Layer:**
+- Purpose: Structured strategic session logic, pathways, templates, message limits
+- Location: `apps/web/lib/bmad/`
+- Contains: `session-primitives.ts`, `session-orchestrator.ts`, `pathway-router.ts`, `template-engine.ts`, `message-limit-manager.ts`, pathway/engine/generator subdirs
+- Depends on: `lib/supabase/server.ts`, `lib/monetization/`
+- Used by: API routes, `app/components/bmad/`
+
+**Component Layer:**
+- Purpose: All React UI
+- Location: `apps/web/app/components/` (feature components), `apps/web/components/` (shared primitives)
+- Contains: Feature directories (`bmad/`, `board/`, `canvas/`, `artifact/`, `chat/`, `workspace/`, `ui/`, `feedback/`, `monetization/`, `monitoring/`)
+- Depends on: `lib/auth/`, `lib/supabase/client.ts`, `lib/stores/`, `lib/artifact/`
+- Used by: Pages in `app/`
 
 **Data Layer:**
-- Purpose: Persistent storage, user authentication, session state
-- Location: Supabase PostgreSQL (remote), schema defined in `supabase/`
-- Contains: Tables, migrations, Row Level Security policies
-- Depends on: Supabase infrastructure
-- Used by: Domain services via `lib/supabase/client.ts` and `lib/supabase/server.ts`
-
-**Shared Packages (Future):**
-- Purpose: Reusable UI components and canvas engine
-- Location: `packages/ui/`, `packages/canvas-engine/`, `packages/shared/`, `packages/bmad-engine/`
-- Contains: Package exports (currently minimal)
-- Depends on: React, TypeScript
-- Used by: Main app (planned expansion)
+- Purpose: Supabase client wrappers, type definitions
+- Location: `apps/web/lib/supabase/`
+- Contains: `server.ts` (SSR client, returns null when env missing), `client.ts` (browser Proxy, no-ops during SSG)
+- Depends on: `@supabase/ssr`
+- Used by: All layers
 
 ## Data Flow
 
-**User Authentication Flow:**
+**User Message → AI Response:**
 
-1. User submits credentials at `app/login/page.tsx` or `app/signup/page.tsx`
-2. Client calls `supabase.auth.signInWithPassword()` or `signInWithOAuth()` via `lib/supabase/client.ts`
-3. Supabase returns session token
-4. `AuthProvider` in `app/layout.tsx` detects session change via `onAuthStateChange()`
-5. User object stored in React Context, accessible via `useAuth()` hook
-6. Protected routes check `user` state and redirect if null
+1. User types in `apps/web/app/app/session/[id]/page.tsx` and submits
+2. Page calls `fetch('/api/chat/stream', { method: 'POST', body: { message, workspaceId, conversationHistory } })`
+3. `apps/web/app/api/chat/stream/route.ts` verifies auth via `lib/supabase/server.ts`
+4. Route atomically increments message count via `lib/bmad/message-limit-manager.ts`
+5. Route builds coaching context via `lib/ai/workspace-context.ts` and `lib/ai/context-builder.ts`
+6. Route calls either `claudeClient.sendMessage()` (standard streaming) or `executeAgenticLoop()` (tool-enabled)
+7. Agentic loop: Claude calls → `lib/ai/tool-executor.ts` executes tools (switch_speaker, discovery, document) → continues until `end_turn` or 5 rounds max
+8. Route encodes response via `lib/ai/streaming.ts` `StreamEncoder` as SSE events
+9. Page reads SSE stream, handles `speaker_change`/`content`/`complete` events, updates local state
+10. On `complete`, page calls Supabase to persist `workspace_state.chat_context`
 
-**AI Chat Flow:**
+**Auth Flow:**
 
-1. User sends message from `app/workspace/[id]/page.tsx`
-2. Frontend POSTs to `app/api/chat/stream/route.ts` with `{ message, workspaceId, conversationHistory, useTools }`
-3. API route authenticates via `lib/supabase/server.ts`
-4. Verifies workspace access from `workspaces` table
-5. Calls `lib/ai/claude-client.ts` with message and history
-6. Claude API returns streaming response
-7. `lib/ai/streaming.ts` encodes chunks as Server-Sent Events
-8. Frontend receives stream, updates UI in real-time
-9. API route persists conversation to database via `lib/ai/conversation-persistence.ts`
-
-**BMad Session Flow:**
-
-1. User selects pathway at `app/components/bmad/PathwaySelector.tsx`
-2. Component POSTs to `app/api/bmad/route.ts` with pathway type
-3. API route calls `lib/bmad/session-orchestrator.ts` to create session
-4. Orchestrator loads template via `lib/bmad/template-engine.ts`
-5. Initializes phase state via `lib/bmad/pathway-router.ts`
-6. Stores session in `bmad_sessions` table via `lib/bmad/database.ts`
-7. Returns session state to frontend
-8. `BmadInterface.tsx` renders current phase with elicitation options
-9. User responses trigger phase advancement via orchestrator
-10. Document generation triggered by `lib/bmad/generators/` on session completion
+1. User hits `/app/*` route
+2. `apps/web/app/app/layout.tsx` (Server Component) calls `checkBetaAccess()` from `lib/auth/beta-access.ts`
+3. `checkBetaAccess` verifies JWT, checks `beta_approved` claim, falls back to `beta_access` DB table
+4. Non-approved → redirect to `/waitlist`; unauthenticated → redirect to `/login`
+5. Client wraps in `AuthProvider` (`lib/auth/AuthContext.tsx`) for reactive auth state
 
 **State Management:**
-- Client state: React Context (`AuthContext`, `WorkspaceContext`)
-- Server state: PostgreSQL via Supabase
-- Session state: Zustand stores (mentioned in dependencies, not yet implemented)
-- Optimistic updates: Not implemented (database is source of truth)
+
+- Chat history: React `useState` in page component, synced to Supabase `user_workspace.workspace_state` on each message finalize
+- Board state: React `useState` in page, derived from stream `complete` event `additionalData.boardState`
+- Dual-pane canvas/workspace: Zustand store in `lib/stores/dualPaneStore.ts`
+- Artifact system: React context in `lib/artifact/artifact-store.tsx`, persisted via `lib/artifact/artifact-persistence.ts`
+- Auth: React context in `lib/auth/AuthContext.tsx`
+- Workspace metadata: React context in `lib/workspace/WorkspaceContext.tsx`
 
 ## Key Abstractions
 
-**BmadSession:**
-- Purpose: Represents a structured strategic session with phases and outputs
-- Examples: `lib/bmad/types.ts` (interface), `lib/bmad/session-orchestrator.ts` (lifecycle management)
-- Pattern: State machine with phase transitions, template-driven execution
+**ClaudeClient (`lib/ai/claude-client.ts`):**
+- Purpose: Single-responsibility wrapper around `@anthropic-ai/sdk`
+- Methods: `sendMessage()` (streaming), `sendMessageWithTools()` (non-streaming with tools), `continueWithToolResults()` (tool loop continuation)
+- Pattern: Lazy-initialized singleton exported as `claudeClient`
 
-**SessionOrchestrator:**
-- Purpose: Manages BMad session lifecycle from creation to document generation
-- Examples: `lib/bmad/session-orchestrator.ts`
-- Pattern: Service object with CRUD operations, delegates to template engine and database
+**MaryPersona (`lib/ai/mary-persona.ts`):**
+- Purpose: System prompt generator for the AI facilitator (Mary) with sub-persona mode shifting
+- Pattern: Delegates to `generateBoardSystemPrompt()` when board state present; otherwise generates single-persona prompt with weighted coaching modes
+- Examples: `maryPersona.generateSystemPrompt(coachingContext)`
 
-**PathwayRouter:**
-- Purpose: Routes users to appropriate strategic pathway based on intent
-- Examples: `lib/bmad/pathway-router.ts`
-- Pattern: Strategy pattern with pathway configurations (NEW_IDEA, BUSINESS_MODEL, STRATEGIC_OPTIMIZATION)
+**StreamEncoder/Decoder (`lib/ai/streaming.ts`):**
+- Purpose: Typed SSE protocol for AI responses
+- Event types: `metadata`, `content`, `speaker_change`, `complete`, `error`, `typing`
+- Pattern: `StreamEncoder` on server in API route; client manually parses `data:` lines
 
-**ClaudeClient:**
-- Purpose: Abstracts Anthropic API for streaming chat and tool calling
-- Examples: `lib/ai/claude-client.ts`
-- Pattern: Adapter pattern wrapping `@anthropic-ai/sdk`
+**ToolExecutor (`lib/ai/tool-executor.ts`):**
+- Purpose: Executes Claude tool calls (discovery, document, session, switch_speaker)
+- Pattern: `executeAll(toolCalls)` → returns results; `formatResultsForClaude()` formats for continuation
+- Tools defined in `lib/ai/tools/` (discovery-tools, document-tools, session-tools, index)
 
-**Supabase Client Factory:**
-- Purpose: Creates appropriate Supabase client for server/client contexts
-- Examples: `lib/supabase/server.ts` (server components), `lib/supabase/client.ts` (browser)
-- Pattern: Factory pattern with environment-specific configurations
+**SessionPrimitives (`lib/bmad/session-primitives.ts`):**
+- Purpose: Atomic functions for session lifecycle (create, advance phase, complete, add insight)
+- Pattern: Use these instead of direct Supabase calls for all session operations
+
+**ArtifactProvider (`lib/artifact/`):**
+- Purpose: Structured outputs (documents, frameworks) generated during sessions
+- Pattern: React context wrapping session page; `ArtifactPanel` rendered as overlay
+
+**Board of Directors (`lib/ai/board-types.ts`, `lib/ai/board-members.ts`):**
+- Purpose: Multi-speaker AI session with 6 personas (Mary, Victoria, Casey, Elaine, Omar, Taylor)
+- Pattern: `switch_speaker` tool triggers handoff; `speaker_change` SSE event updates UI; handoffs encoded as `__handoff__FromName__ToName__reason` system messages
 
 ## Entry Points
 
-**Root Landing Page:**
-- Location: `app/page.tsx`
-- Triggers: User navigates to root URL
-- Responsibilities: Redirect authenticated users to `/dashboard`, show landing page for guests
+**Landing Page:**
+- Location: `apps/web/app/page.tsx`
+- Triggers: Browser navigation to `/`
+- Responsibilities: Marketing page with waitlist form
 
-**App Layout:**
-- Location: `app/layout.tsx`
-- Triggers: Wraps all pages
-- Responsibilities: Initialize `AuthProvider`, apply global styles, set metadata
+**App Dashboard:**
+- Location: `apps/web/app/app/page.tsx`
+- Triggers: Authenticated navigation to `/app`
+- Responsibilities: Session list, new session CTA
 
-**Dashboard:**
-- Location: `app/dashboard/page.tsx`
-- Triggers: User navigates after login
-- Responsibilities: List workspaces, create new workspaces, navigate to workspace detail
-
-**Workspace Detail:**
-- Location: `app/workspace/[id]/page.tsx`
-- Triggers: User clicks workspace from dashboard
-- Responsibilities: Load workspace, render chat interface and BMad interface, manage tab switching
+**Session Workspace:**
+- Location: `apps/web/app/app/session/[id]/page.tsx`
+- Triggers: Navigation to `/app/session/:id`
+- Responsibilities: Full dual-pane workspace, chat/BMad tabs, streaming AI responses
 
 **Chat Stream API:**
-- Location: `app/api/chat/stream/route.ts`
-- Triggers: Frontend POSTs chat message
-- Responsibilities: Authenticate, call Claude API, stream response, persist conversation
+- Location: `apps/web/app/api/chat/stream/route.ts`
+- Triggers: `POST /api/chat/stream`
+- Responsibilities: Auth, rate limiting, context building, agentic loop, SSE response
 
-**BMad API:**
-- Location: `app/api/bmad/route.ts`
-- Triggers: Frontend requests session creation or phase actions
-- Responsibilities: Orchestrate BMad sessions, return phase state and elicitation prompts
+**Auth Callback:**
+- Location: `apps/web/app/auth/callback/route.ts`
+- Triggers: OAuth redirect from Supabase/Google
+- Responsibilities: Exchange auth code for session, redirect to `/app`
+
+**Root Layout:**
+- Location: `apps/web/app/layout.tsx`
+- Triggers: Every page render
+- Responsibilities: Wraps all pages in `AuthProvider` and `WorkspaceProvider`
+
+**App Layout (beta gate):**
+- Location: `apps/web/app/app/layout.tsx`
+- Triggers: Every `/app/*` request
+- Responsibilities: Server-side beta access check; redirects non-approved users
 
 ## Error Handling
 
-**Strategy:** Layered error handling with domain-specific error types, graceful degradation, and user-facing messages
+**Strategy:** Fail-open for non-critical (session creation), fail-closed for billing/limits
 
 **Patterns:**
-- Custom error classes: `BmadMethodError` (code, context), `SessionStateError` in `lib/bmad/types.ts`
-- API error responses: JSON with `{ error: string, details?: string }` and HTTP status codes (400, 401, 404, 500)
-- Try-catch blocks: Wrap async operations in API routes and domain services
-- Client error boundaries: Not implemented (Next.js default error handling)
-- Streaming error encoding: `StreamEncoder.encodeError()` in `lib/ai/streaming.ts` sends error events to client
-- Database errors: Caught in `lib/bmad/database.ts`, wrapped in `BmadMethodError`
-- Auth errors: `AuthProvider` silently fails to `null` user state, protected routes redirect to login
+- API routes return structured JSON errors: `{ error, details, hint }` with appropriate HTTP status
+- Streaming errors encoded as `{ type: 'error', error, errorDetails: { retryable, suggestion } }` SSE events
+- Client pages catch stream errors, display inline error messages with retry, never crash silently
+- `PaneErrorBoundary` (`app/components/dual-pane/PaneErrorBoundary.tsx`) catches rendering errors per pane
+- `ErrorState` component (`app/components/ui/ErrorState.tsx`) provides retry/sign-out UI for data fetch failures
+- Supabase `createClient()` returns `null` when env vars missing; callers must null-check before use
 
 ## Cross-Cutting Concerns
 
-**Logging:** Console.log statements in API routes and error handlers (no structured logging framework)
+**Logging:** `console.log/error` with structured objects and `[Component]` prefixes throughout; `lib/monitoring/auth-logger.ts` for auth events persisted to DB
 
-**Validation:** Zod schemas in dependencies, validation rules in `lib/bmad/types.ts` (ValidationRule interface), API routes validate required fields
+**Validation:** Request validation inline in API route handlers; env validation via `lib/security/env-validator.ts`
 
-**Authentication:**
-- Supabase Auth with email/password and OAuth (Google)
-- Session management via cookies (handled by `@supabase/ssr`)
-- `AuthProvider` context exposes `user`, `loading`, `signOut()`
-- API routes authenticate via `createClient()` from `lib/supabase/server.ts`
-- Row Level Security policies enforce data access in database
+**Authentication:** Server: `lib/supabase/server.ts` + `lib/auth/beta-access.ts` in Server Components/layouts; Client: `lib/auth/AuthContext.tsx` React context; API: `supabase.auth.getUser()` in each route handler
 
-**Authorization:**
-- Workspace access verified by `user_id` column in `workspaces` table
-- RLS policies in `supabase/schema.sql` (users can only access own workspaces)
-- No role-based access control (single user per workspace)
+**Rate Limiting:** `lib/security/rate-limiter.ts` for API abuse; `lib/bmad/message-limit-manager.ts` for per-session AI message quotas (default 10, admin bypass)
 
-**Caching:** Not implemented (database queries run on every request)
-
-**Rate Limiting:** Not implemented
-
-**Monitoring:** Not implemented (Vercel analytics available via deployment)
+**Credits:** `lib/monetization/credit-manager.ts` with `deductCredit()` atomic function; always use `deduct_credit_transaction()` DB function, never manual UPDATE
 
 ---
 
-*Architecture analysis: 2026-02-14*
+*Architecture analysis: 2026-02-20*

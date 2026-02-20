@@ -1,440 +1,352 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-02-14
+**Analysis Date:** 2026-02-20
 
 ## Test Framework
 
-**Runner:**
-- Vitest 1.x
+**Unit/Integration Runner:**
+- Vitest `^3.2.4`
 - Config: `apps/web/vitest.config.ts`
+- Environment: jsdom (browser-like DOM simulation)
+- Globals enabled (`globals: true`) — no need to import `describe`/`it`/`expect` in test files
+
+**E2E Runner:**
+- Playwright `^1.55.0`
+- Config: `apps/web/playwright.config.ts` (local dev) and `apps/web/playwright.prod.config.ts` (production)
 
 **Assertion Library:**
-- Vitest built-in assertions (Jest-compatible)
-- `@testing-library/jest-dom` for DOM assertions
+- Vitest built-in assertions (`expect`)
+- `@testing-library/jest-dom ^6.8.0` — DOM matchers (`.toBeInTheDocument()`, `.toHaveClass()`, `.toHaveAttribute()`, etc.)
+
+**Component Testing:**
+- `@testing-library/react ^16.3.0`
+- `render`, `screen`, `fireEvent`, `waitFor`, `act` from `@testing-library/react`
 
 **Run Commands:**
 ```bash
-npm test              # Run all tests in watch mode
-npm run test:run      # Run all tests once
-npm run test:e2e      # Run Playwright E2E tests
-npm run test:e2e:ui   # Run Playwright with UI
-```
-
-**Coverage:**
-```bash
-vitest --coverage     # Generate coverage report
+# From apps/web/
+npm test                  # Unit tests (Vitest, watch mode)
+npm run test:run          # Unit tests (single run, CI-safe)
+npm run test:e2e          # All E2E tests (requires local dev server)
+npm run test:smoke        # E2E smoke tests only (tests/e2e/smoke/)
+npm run test:prod         # Smoke tests against https://thinkhaven.co (no local server)
 ```
 
 ## Test File Organization
 
-**Location:**
-- Co-located: `lib/canvas/__tests__/visual-suggestion-parser.test.ts`
-- Separate directory: `apps/web/__tests__/` for integration tests
-- E2E tests: `apps/web/tests/e2e/` for Playwright specs
-- Multiple test directories exist: `__tests__/` and `tests/` used interchangeably
+**Two separate test roots exist:**
+
+1. `apps/web/tests/` — primary test location (58 files)
+   - `tests/setup.ts` — global Vitest setup file
+   - `tests/config/global-setup.ts` — Playwright global setup
+   - `tests/helpers/routes.ts` — shared route constants for E2E tests
+   - `tests/utils/` — test utilities and metadata helpers
+   - `tests/e2e/smoke/` — Playwright smoke specs
+
+2. `apps/web/__tests__/` — secondary location (12+ files, older analysis tests)
+   - `__tests__/bmad/analysis/` — analysis engine tests
+   - `__tests__/lib/` — lib unit tests
+   - `__tests__/integration/` — integration tests
+
+**Subdirectory structure in `tests/`:**
+```
+tests/
+├── setup.ts                          # Vitest global setup
+├── config/
+│   ├── global-setup.ts               # Playwright server readiness check
+│   └── test-env.ts
+├── helpers/
+│   └── routes.ts                     # Route constants (ROUTES, PUBLIC_ROUTES, etc.)
+├── utils/
+│   ├── results-aggregator.ts
+│   └── test-metadata.ts
+├── e2e/
+│   └── smoke/
+│       ├── health.spec.ts            # 7 public route smoke tests (CI passing)
+│       ├── auth-session.spec.ts      # Full login+session flow (requires TEST_ADMIN_*)
+│       └── beta-checklist.spec.ts    # Production verification tests
+├── bmad/                             # BMad-specific feature tests
+├── components/                       # Component render tests
+│   ├── auth/
+│   ├── bmad/
+│   ├── chat/
+│   └── ui/
+├── integration/                      # Integration tests (mock Supabase)
+├── lib/                              # lib module unit tests
+│   ├── auth/
+│   └── bmad/
+├── canvas/                           # Canvas-specific tests
+├── coaching-effectiveness.test.ts
+└── error-scenarios/
+```
 
 **Naming:**
-- Unit/integration tests: `*.test.ts` or `*.test.tsx`
-- E2E tests: `*.spec.ts`
-
-**Structure:**
-```
-apps/web/
-├── __tests__/              # Integration tests
-│   ├── bmad/
-│   │   ├── analysis/
-│   │   ├── generators/
-│   │   └── pathways/
-│   ├── demo/
-│   ├── integration/
-│   └── lib/
-├── tests/                  # Component & E2E tests
-│   ├── api/
-│   ├── bmad/
-│   ├── components/
-│   ├── e2e/
-│   ├── integration/
-│   └── performance/
-└── lib/                    # Co-located tests
-    └── canvas/
-        └── __tests__/
-```
+- Unit/integration test files: `*.test.ts` or `*.test.tsx`
+- E2E Playwright files: `*.spec.ts`
+- Vitest picks up `*.test.{ts,tsx}`; Playwright picks up `*.spec.ts` (separated by config `testMatch`)
 
 ## Test Structure
 
 **Suite Organization:**
 ```typescript
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-describe('Analysis Engine Integration', () => {
-  let mockBusinessData: any;
-  let mockCompetitorData: any[];
-
-  beforeEach(() => {
-    mockBusinessData = {
-      sessionType: 'Business Model Analysis',
-      customerSegments: [{...}],
-      revenueStreams: [{...}]
-    };
-
-    mockCompetitorData = [{...}];
-  });
-
-  describe('runCompleteMonetizationAnalysis', () => {
-    it('should execute full analysis pipeline successfully', async () => {
-      const result = await runCompleteMonetizationAnalysis(
-        mockBusinessData,
-        mockCompetitorData
-      );
-
-      expect(result).toHaveProperty('pricing');
-      expect(result).toHaveProperty('competitive');
-      expect(result.summary.enginesExecuted).toBe(4);
-    });
-
-    it('should handle missing competitor data gracefully', async () => {
-      const result = await runCompleteMonetizationAnalysis(mockBusinessData);
-
-      expect(result.pricing).toBeDefined();
-      expect(result.competitive).toBeUndefined();
-      expect(result.summary.enginesExecuted).toBe(3);
-    });
-  });
-});
-```
-
-**Patterns:**
-- `describe` blocks for grouping related tests
-- `it` for individual test cases
-- `beforeEach` for test setup
-- Nested `describe` blocks for sub-features
-
-## Mocking
-
-**Framework:** Vitest built-in mocking (`vi`)
-
-**Patterns:**
-
-**Mock modules:**
-```typescript
-import { vi } from 'vitest';
-
-vi.mock('@/app/components/bmad/useBmadSession')
-const mockUseBmadSession = useBmadSession as jest.MockedFunction<typeof useBmadSession>
-```
-
-**Mock components:**
-```typescript
-jest.mock('@/app/components/bmad/PathwaySelector', () => {
-  return function MockPathwaySelector({ onPathwaySelected }: any) {
-    return (
-      <div data-testid="pathway-selector">
-        <button onClick={() => onPathwaySelected('new-idea', 'test input')}>
-          Select Pathway
-        </button>
-      </div>
-    )
-  }
+describe('ModuleName', () => {
+  describe('functionName', () => {
+    it('should [behavior] when [condition]', () => {
+      // arrange
+      // act
+      // assert
+    })
+  })
 })
 ```
 
-**Mock Next.js:**
+**Patterns:**
+- Nested `describe` blocks for grouping related behavior (feature → scenario → case)
+- `beforeEach(() => { vi.clearAllMocks() })` — standard reset before each test
+- `afterEach(() => { vi.restoreAllMocks() })` — restore spied functions after each test
+- `it` used (not `test`) in most files — both are valid in Vitest
+
+**Component test structure:**
 ```typescript
-// In tests/setup.ts
+describe('ComponentName', () => {
+  const defaultProps = { /* ... */ }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Element.prototype.scrollIntoView = vi.fn() // DOM method stubbing
+  })
+
+  describe('Basic Rendering', () => {
+    it('should render X correctly', () => {
+      render(<Component {...defaultProps} />)
+      expect(screen.getByText('...')).toBeInTheDocument()
+    })
+  })
+
+  describe('Behavior Group', () => {
+    it('should handle Y', async () => {
+      render(<Component {...defaultProps} onEvent={vi.fn()} />)
+      fireEvent.click(screen.getByTestId('btn'))
+      await waitFor(() => expect(mockFn).toHaveBeenCalled())
+    })
+  })
+})
+```
+
+## Mocking
+
+**Framework:** Vitest (`vi`)
+
+**Module mocking — Supabase (most common pattern):**
+```typescript
+const mockSupabaseClient = {
+  from: vi.fn(),
+  auth: { getUser: vi.fn() }
+}
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn(() => Promise.resolve(mockSupabaseClient))
+}))
+
+// In test: configure return values per test
+mockSupabaseClient.from.mockReturnValue({
+  select: vi.fn().mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      single: vi.fn().mockResolvedValue({ data: { id: 'test-id' }, error: null })
+    })
+  })
+})
+```
+
+**Module mocking — Next.js (in `tests/setup.ts`, applied globally):**
+```typescript
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-  }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams(),
 }))
 
 vi.mock('next/headers', () => ({
-  cookies: () => ({
-    get: vi.fn(),
-    set: vi.fn(),
-  }),
+  cookies: () => ({ get: vi.fn(), set: vi.fn() }),
 }))
 ```
 
-**Mock global objects:**
+**Component dependency mocking:**
 ```typescript
-// In tests/setup.ts
-Object.defineProperty(global, 'crypto', {
-  value: {
-    randomUUID: () => Math.random().toString(36).substring(2, 15)
-  },
-  writable: true
-})
+vi.mock('@/app/components/chat/MarkdownRenderer', () => ({
+  default: ({ content }: { content: string }) => (
+    <div data-testid="markdown-content">{content}</div>
+  )
+}))
 ```
 
-**What to Mock:**
-- External dependencies (Supabase, Anthropic SDK)
-- Next.js router and navigation
-- Child components in component tests
-- Browser APIs (`window`, `crypto`)
+**Spy pattern for console:**
+```typescript
+const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+// ... test ...
+consoleSpy.mockRestore()
+```
 
-**What NOT to Mock:**
-- Business logic under test
-- Utility functions
-- Type definitions
+**What to mock:**
+- `@/lib/supabase/server` — always mock; real DB not available in unit tests
+- `@/lib/supabase/client` — mock when testing components that call it
+- `next/navigation` — mocked globally in `tests/setup.ts`
+- `next/headers` — mocked globally in `tests/setup.ts`
+- Child components — mock with `data-testid` stubs when testing parent behavior in isolation
+- `@anthropic-ai/sdk` — mock in integration tests that don't need real AI responses
+
+**What NOT to mock:**
+- Pure utility functions (e.g., `getPhaseOrder`, `calculateProgress`) — test them directly
+- `lib/bmad/session-primitives.ts` pure functions — tested without mocking the functions themselves
+- Component logic that is the actual subject of the test
 
 ## Fixtures and Factories
 
-**Test Data:**
+**Test Data — inline objects (no shared factory files):**
 ```typescript
-beforeEach(() => {
-  mockBusinessData = {
-    sessionType: 'Business Model Analysis',
-    customerSegments: [{
-      id: 'segment-1',
-      name: 'Small Business',
-      painPoints: ['High costs', 'Complex processes'],
-      jobsToBeDone: ['Reduce overhead', 'Improve efficiency'],
-      size: 10000
-    }],
-    revenueStreams: [{
-      id: 'revenue-1',
-      name: 'SaaS Subscription',
-      description: 'Monthly software subscription',
-      pricing: {
-        amount: 99,
-        currency: 'USD',
-        frequency: 'monthly'
-      },
-      targetSegments: ['segment-1']
-    }]
-  };
-});
-```
-
-**Factory patterns:**
-```typescript
-const defaultSessionHookReturn = {
-  currentSession: null,
-  isLoading: false,
-  error: null,
-  createSession: jest.fn(),
-  advanceSession: jest.fn(),
-  getSession: jest.fn(),
-  pauseSession: jest.fn(),
-  resumeSession: jest.fn(),
-  exitSession: jest.fn(),
+const mockCoachingContext: CoachingContext = {
+  userProfile: {
+    experienceLevel: 'intermediate',
+    industry: 'technology',
+    role: 'product_manager'
+  },
+  currentBmadSession: {
+    sessionId: 'session-123',
+    pathway: 'strategic_analysis',
+    phase: 'diagnosis'
+  },
+  previousInsights: [
+    { insight: 'Market opportunity identified', confidence: 0.8 }
+  ]
 }
 
-mockUseBmadSession.mockReturnValue(defaultSessionHookReturn)
+const defaultProps = {
+  id: 'msg-123',
+  role: 'assistant' as const,
+  content: 'This is a test message',
+  timestamp: new Date('2024-01-01T12:00:00Z'),
+  onBookmark: vi.fn(),
+  onCreateBranch: vi.fn()
+}
 ```
 
-**Location:**
-- Defined inline in test files (no separate fixtures directory detected)
-- Reused via `beforeEach` blocks
+**Location:** Fixtures defined at the top of each test file — no shared fixtures directory.
+
+**Supabase mock IDs:** Use readable IDs like `'test-user-123'`, `'session-123'`, `'workspace-123'` rather than UUIDs.
 
 ## Coverage
 
-**Requirements:** Not enforced (no coverage thresholds in vitest.config.ts)
+**Requirements:** No coverage thresholds enforced (no `coverage` config in `vitest.config.ts`)
+
+**Known test state:**
+- 45 of 71 unit test files fail — pre-existing failures, not regressions
+- `tests/lib/bmad/` (mary-persona group): 67/67 tests pass
+- `__tests__/` directory has additional passing tests for analysis engines
 
 **View Coverage:**
 ```bash
-vitest --coverage
+# No coverage script configured — run manually
+npx vitest run --coverage
 ```
-
-**Configuration:**
-- Environment: `jsdom` for React component tests
-- Globals: `true` (enables global test functions)
-- CSS: `false` (CSS not processed in tests)
 
 ## Test Types
 
-**Unit Tests:**
-- Scope: Individual functions, classes, components
-- Location: `__tests__/` directories, co-located tests
-- Approach: Mock dependencies, test in isolation
-- Example: `lib/canvas/__tests__/visual-suggestion-parser.test.ts`
+**Unit Tests (`*.test.ts`):**
+- Pure functions tested directly (phase order, credit calculations, progress calculations)
+- Classes tested with mocked dependencies
+- Located in `tests/lib/`, `tests/components/`, `__tests__/lib/`
 
-**Integration Tests:**
-- Scope: Multiple modules working together
-- Location: `__tests__/integration/`, `tests/integration/`
-- Approach: Minimal mocking, test real interactions
-- Example: `__tests__/bmad/analysis/analysis-integration.test.ts`
+**Integration Tests (`*.test.ts` in `tests/integration/`):**
+- Test service interactions with mocked Supabase
+- Verify error handling scenarios (PGRST205, auth failures, schema mismatches)
+- Test database query patterns by configuring mock return values
+- No real network calls or database connections
 
-**Component Tests:**
-- Scope: React components with user interactions
-- Location: `tests/components/`
-- Framework: Vitest + React Testing Library
-- Example: `tests/components/bmad/BmadInterface.test.tsx`
-
-**E2E Tests:**
-- Framework: Playwright
-- Config: `apps/web/playwright.config.ts`
-- Location: `tests/e2e/`
-- Test directory: `./tests/e2e`
-- File pattern: `**/*.spec.ts`
-- Example: `tests/e2e/smoke/health.spec.ts`
-
-**Playwright Configuration:**
-```typescript
-export default defineConfig({
-  testDir: './tests/e2e',
-  fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'off',
-  },
-  testMatch: '**/*.spec.ts',
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'Mobile Chrome', use: { ...devices['Pixel 5'] } },
-  ],
-})
-```
+**E2E Tests (`*.spec.ts` in `tests/e2e/smoke/`):**
+- `health.spec.ts` — 7 public route smoke tests, loops over `PUBLIC_ROUTES` array
+- `beta-checklist.spec.ts` — 9 production verification tests (forms, redirects, mobile viewports)
+- `auth-session.spec.ts` — full authenticated flow (skipped when `TEST_ADMIN_EMAIL`/`TEST_ADMIN_PASSWORD` not set)
 
 ## Common Patterns
 
 **Async Testing:**
 ```typescript
-it('should execute full analysis pipeline successfully', async () => {
-  const result = await runCompleteMonetizationAnalysis(
-    mockBusinessData,
-    mockCompetitorData
-  );
+it('should resolve async operation', async () => {
+  const result = await someAsyncFunction('input')
+  expect(result).toBe('expected')
+})
 
-  expect(result).toHaveProperty('pricing');
-  expect(result.summary.enginesExecuted).toBe(4);
-});
-```
-
-**Testing React Components:**
-```typescript
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-
-it('catches errors in PathwaySelector with error boundary', async () => {
-  (window as any).__THROW_PATHWAY_ERROR__ = true
-
-  render(<BmadInterface workspaceId="test-workspace" />)
-
-  expect(screen.getByText('Something Went Wrong')).toBeInTheDocument()
-  expect(screen.getByText('Try Again')).toBeInTheDocument()
+// React state update
+await waitFor(() => {
+  expect(onComplete).toHaveBeenCalled()
 })
 ```
 
 **Error Testing:**
 ```typescript
-it('should validate input requirements', async () => {
-  const invalidBusinessData = {
-    customerSegments: [],
-    revenueStreams: []
-  };
+it('should handle missing field gracefully', () => {
+  const error = { message: errorObj.message || 'Unknown error occurred' }
+  expect(error.message).toBe('Unknown error occurred')
+})
 
-  await expect(runCompleteMonetizationAnalysis(invalidBusinessData))
-    .rejects.toThrow('Business data must include at least one customer segment and revenue stream');
-});
+// Testing console.error is called
+const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+// ... action ...
+expect(consoleSpy).toHaveBeenCalledWith('Label:', expectedObject)
+consoleSpy.mockRestore()
 ```
 
-**Performance Testing:**
+**Testing type safety (export existence checks):**
 ```typescript
-it('should complete analysis within reasonable time limits', async () => {
-  const startTime = Date.now();
-
-  await runCompleteMonetizationAnalysis(
-    mockBusinessData,
-    mockCompetitorData
-  );
-
-  const executionTime = Date.now() - startTime;
-  expect(executionTime).toBeLessThan(30000); // Should complete within 30 seconds
-});
+it('should export required functions', async () => {
+  const { createSessionRecord, loadSessionState } =
+    await import('@/lib/bmad/session-primitives')
+  expect(typeof createSessionRecord).toBe('function')
+  expect(typeof loadSessionState).toBe('function')
+})
 ```
 
-**Testing with Arrays:**
+**E2E Route Constants:**
+Use `ROUTES` and `PUBLIC_ROUTES` from `tests/helpers/routes.ts` instead of hardcoded strings:
 ```typescript
-it('should prioritize by revenue potential', () => {
-  const result = runQuickRevenueOptimization(mockBusinessData);
+import { PUBLIC_ROUTES, ROUTES, ROUTE_PATTERNS } from '../../helpers/routes'
 
-  if (result.implementationPriority.length > 1) {
-    // Should be sorted by potential revenue (descending)
-    for (let i = 1; i < result.implementationPriority.length; i++) {
-      expect(result.implementationPriority[i-1].potentialRevenue || 0)
-        .toBeGreaterThanOrEqual(result.implementationPriority[i].potentialRevenue || 0);
-    }
-  }
-});
+await page.goto(ROUTES.login)
+await page.waitForURL(ROUTE_PATTERNS.appSession, { timeout: 30000 })
 ```
 
-**Conditional Logic Testing:**
+**Playwright selector priority:**
+- `page.getByRole('button', { name: /text/i })` — preferred (accessible)
+- `page.locator('button', { hasText: 'Text' })` — for partial text matches
+- `page.locator('[data-testid="..."]')` — for test-specific hooks
+- CSS class selectors (`.flex.justify-start`) — used sparingly, fragile
+
+**E2E test skip pattern:**
 ```typescript
-it('should integrate data between engines', async () => {
-  const result = await runCompleteMonetizationAnalysis(
-    mockBusinessData,
-    mockCompetitorData
-  );
-
-  // Competitive data should influence revenue optimization
-  expect(result.revenue.optimizationOpportunities.some(opp =>
-    opp.opportunityId?.includes('comp-') || opp.title?.includes('Competitive')
-  )).toBe(true);
-});
+test.skip(!EMAIL || !PASSWORD, 'TEST_ADMIN_EMAIL and TEST_ADMIN_PASSWORD env vars required')
 ```
 
-## Test Environment
+## Global Test Setup
 
-**Setup File:** `apps/web/tests/setup.ts`
+**Vitest setup (`tests/setup.ts`):**
+- Imports `@testing-library/jest-dom` for DOM matchers
+- Sets `global.React = React`
+- Stubs `window.crypto.randomUUID`
+- Mocks `next/navigation` and `next/headers` globally
 
-**Global Setup:**
-- React made globally available
-- Mock `window.crypto`
-- Mock Next.js navigation
-- Mock Next.js headers
-- `@testing-library/jest-dom` imported
+**Playwright global setup (`tests/config/global-setup.ts`):**
+- Loads `.env.test` then `.env.local` (later overrides earlier)
+- Validates `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set
+- Polls `/login` up to 30 seconds waiting for dev server readiness
+- Fails fast (`process.exit(1)`) on missing env or server unavailable
 
-**Environment Variables:**
-```typescript
-// From vitest.config.ts
-env: {
-  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://test.supabase.co',
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key',
-  NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'test-client-id',
-  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-}
-```
-
-## Test Organization Principles
-
-**Test Coverage:**
-- 460+ test files across the project
-- Heavy focus on business logic (bmad analysis engines)
-- Component tests for critical UI paths
-- Integration tests for multi-module workflows
-- E2E tests for critical user flows
-
-**Test Categories:**
-- Business logic: Analysis engines, pathways, generators
-- UI components: React components with error boundaries
-- API integration: Supabase queries, authentication
-- Performance: Load tests for large datasets
-- Error scenarios: Graceful degradation, error boundaries
-
-**Test File Patterns:**
-```
-__tests__/bmad/analysis/analysis-integration.test.ts  # Integration
-tests/components/bmad/BmadInterface.test.tsx          # Component
-tests/e2e/smoke/health.spec.ts                        # E2E
-lib/canvas/__tests__/visual-suggestion-parser.test.ts # Co-located unit
-```
-
-## Known Gaps
-
-**From TODO comments:**
-- `revenue-optimization-engine.test.ts` - Tests for revenue optimization (TODO)
-- `growth-strategy-engine.test.ts` - Tests for growth strategy planning (TODO)
-- PNG metadata writing in `canvas-export.ts` (TODO: Implement PNG tEXt chunk writing)
-- Additional test scenarios needed per `__tests__/bmad/analysis/README.md`
+**Production E2E (`playwright.prod.config.ts`):**
+- No `globalSetup`, no `webServer` block
+- `baseURL: 'https://thinkhaven.co'`
+- Run with `npm run test:prod`
 
 ---
 
-*Testing analysis: 2026-02-14*
+*Testing analysis: 2026-02-20*

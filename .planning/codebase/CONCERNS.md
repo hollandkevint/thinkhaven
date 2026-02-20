@@ -1,275 +1,207 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-02-14
+**Analysis Date:** 2026-02-20
 
 ## Tech Debt
 
-**Deprecated Next.js Version with Security Vulnerability:**
-- Issue: Next.js 15.5.7 marked as deprecated with security vulnerability in package-lock.json
-- Files: `apps/web/package.json`, `package-lock.json`
-- Impact: Security risk in production, potential exploit vectors
-- Fix approach: Upgrade to Next.js 15.6+ immediately. Test auth flows and middleware behavior post-upgrade since Edge Runtime compatibility was a previous blocker
+**Null-unchecked Supabase Client in API Routes:**
+- Issue: `createClient()` in `lib/supabase/server.ts` returns `null` when env vars are missing (build-time safety), but most API routes call it and immediately chain `.auth.getUser()` without null-checking. This crashes with a runtime TypeError if env vars are absent.
+- Files: `app/api/chat/stream/route.ts:198-199`, `app/api/bmad/route.ts:36-37`, `app/api/checkout/idea-validation/route.ts:14`, `app/api/credits/balance/route.ts:15`, `app/api/feedback/trial/route.ts:22`
+- Impact: All API routes will crash at startup if `NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` are missing. CI failures in edge cases.
+- Fix approach: Add `if (!supabase) return 401/500 Response` after each `createClient()` call, or make `createClient()` throw instead of returning null.
 
-**Severely Outdated Dependencies:**
-- Issue: @anthropic-ai/sdk at 0.27.3 (latest: 0.74.0), @supabase/supabase-js at 2.57.4 (latest: 2.95.3) — 38 versions behind
-- Files: `apps/web/package.json`
-- Impact: Missing API features, potential breaking changes accumulating, security patches not applied
-- Fix approach: Incremental upgrade strategy — test Anthropic SDK first (may affect streaming), then Supabase (auth changes likely). Budget 2-3 hours for compatibility fixes
+**Hardcoded Magic Numbers for Message Limit:**
+- Issue: The 10-message-per-session limit is hardcoded in two places that create sessions inline rather than using `DEFAULT_MESSAGE_LIMIT` from `lib/bmad/message-limit-manager.ts`.
+- Files: `app/api/chat/stream/route.ts:288`, `app/app/new/page.tsx:55`
+- Impact: Changing the limit requires updating three places instead of one. Drift risk.
+- Fix approach: Import and use `DEFAULT_MESSAGE_LIMIT` from `lib/bmad/message-limit-manager.ts` at both call sites.
 
-**Massive Analysis Engine Files:**
-- Issue: 1000-1500 line TypeScript files with complex business logic
-- Files: `apps/web/lib/bmad/analysis/growth-strategy-engine.ts` (1535 lines), `apps/web/app/api/bmad/route.ts` (1491 lines), `apps/web/lib/ai/mary-persona.ts` (1477 lines), `apps/web/lib/bmad/analysis/revenue-optimization-engine.ts` (1398 lines)
-- Impact: Hard to test, difficult to reason about, merge conflicts likely, tight coupling
-- Fix approach: Extract domain models first (types/interfaces), then split by responsibility — feature analysis vs pricing vs growth vs revenue. Use barrel exports to maintain API compatibility
+**Single JSONB Column for All Chat History:**
+- Issue: `user_workspace.workspace_state` is a single JSONB column storing all data (chat_context, canvas_elements, etc). As sessions grow, this column grows unboundedly. No pagination or pruning at the DB level.
+- Files: `supabase/migrations/003_user_workspace_table.sql`, `app/app/session/[id]/page.tsx:77-90`, `app/api/chat/stream/route.ts:224`
+- Impact: Large sessions will bloat the JSONB column, increasing read latency on every workspace load. PostgreSQL JSONB columns over ~1MB degrade significantly.
+- Fix approach: Introduce a `messages` table with foreign key to `user_workspace`. The existing `conversations` table (migration 002) exists but is unused by the main session flow.
 
-**Excessive Console Logging in Production:**
-- Issue: 159 console.log/error/warn calls across 57 files, likely active in production
-- Files: Throughout `apps/web/` — API routes, components, lib utilities
-- Impact: Performance overhead, potential info leakage in browser console, noise in monitoring
-- Fix approach: Implement structured logger with environment-aware levels. Replace all console calls with logger.debug/info/error. Add ESLint rule to prevent future console usage
+**Legacy `conversations` Table Created But Unused:**
+- Issue: Migration `002_conversations_messages_schema.sql` creates a `conversations` table with full schema (messages, search indexes, etc). The main session flow stores chat in `workspace_state` JSONB instead. The only consumer is `lib/supabase/conversation-queries.ts`, called only from `MessageHistorySidebar`.
+- Files: `supabase/migrations/002_conversations_messages_schema.sql`, `lib/supabase/conversation-queries.ts`
+- Impact: Dead schema adds confusion about where data lives. New developers will find two storage systems.
+- Fix approach: Either migrate the main session flow to use `conversations`, or drop the table and `conversation-queries.ts` if the sidebar feature is not prioritized.
 
-**Liberal 'any' Type Usage:**
-- Issue: 30+ instances of `any` type, especially in ChatInterface, canvas components, and BMAD pathways
-- Files: `apps/web/app/components/chat/ChatInterface.tsx` (multiple), `apps/web/app/components/canvas/EnhancedCanvasWorkspace.tsx`, `apps/web/app/components/bmad/pathways/*.tsx`
-- Impact: Type safety lost at critical boundaries, runtime errors not caught at compile time
-- Fix approach: Define proper TypeScript interfaces for message metadata, canvas state, export options. Enable `strict: true` and `noImplicitAny: true` after fixing existing violations
+**`assessment_submissions` Table Referenced But Absent from Migrations:**
+- Issue: `app/api/assessment/submit/route.ts:19` writes to `assessment_submissions`, but no migration creates this table. The route silently swallows the DB error and returns success, so data is lost.
+- Files: `app/api/assessment/submit/route.ts:18-35`, `app/components/assessment/StrategyQuiz.tsx:184-198`
+- Impact: All assessment submissions fail silently. Data falls back to `localStorage` only, which is per-browser and unrecoverable.
+- Fix approach: Write a migration creating `assessment_submissions`. Remove the silent-fail pattern; return a proper error.
 
-**Deep Import Paths (../../../../):**
-- Issue: 16 occurrences of ../../../ imports indicating poor module organization
-- Files: `apps/web/__tests__/bmad/pathways/new-idea-pathway.test.ts`, `apps/web/app/demo/[scenario]/page.tsx`, test files
-- Impact: Brittle imports that break on refactoring, unclear dependency hierarchy
-- Fix approach: Configure path aliases in tsconfig.json (`@lib/*`, `@components/*`, `@bmad/*`). Update imports systematically
+**`board_state` Column Referenced But Missing from Migrations:**
+- Issue: `app/api/chat/stream/route.ts:372` selects `board_state` from `bmad_sessions`, and `app/app/session/[id]/page.tsx` reads it, but no migration adds this column.
+- Files: `app/api/chat/stream/route.ts:372`, `app/app/session/[id]/page.tsx:336-347`
+- Impact: Board state is never persisted between page loads. Board of Directors speaker state resets on every refresh.
+- Fix approach: Add migration `020_add_board_state.sql` with `ALTER TABLE bmad_sessions ADD COLUMN board_state JSONB`.
 
-**115 Files in /lib Without Clear Boundaries:**
-- Issue: Flat `apps/web/lib/` directory with 115 files mixing concerns (auth, AI, BMAD, canvas, monetization)
-- Files: `apps/web/lib/*`
-- Impact: Hard to navigate, circular dependency risk, unclear ownership
-- Fix approach: Group by domain — `lib/auth/`, `lib/ai/`, `lib/bmad/`, `lib/canvas/`. Keep only truly shared utilities in lib root
+**In-Memory Rate Limiter Resets on Every Deploy:**
+- Issue: `lib/security/rate-limiter.ts` uses a `private static requests = new Map<string, RateLimitEntry>()`. Vercel serverless functions have no shared memory between instances, and each cold start resets the map.
+- Files: `lib/security/rate-limiter.ts:17`
+- Impact: Rate limiting provides no real protection in production on Vercel. Each function invocation starts with an empty map.
+- Fix approach: Replace with Redis-backed or Supabase-backed rate limiting. Upstash Redis is the standard Vercel-compatible option.
+
+**Duplicate Component Directory Structure:**
+- Issue: Two component roots exist: `components/` (shadcn UI primitives + canvas) and `app/components/` (feature components). Some files import from `@/components/...` and others from `@/app/components/...`. Mixed relative paths (`../../../lib/auth/AuthContext`) also exist alongside `@/` aliases.
+- Files: `app/components/ui/navigation.tsx:5-13`, `app/components/canvas/EnhancedCanvasWorkspace.tsx:12`, `app/app/session/[id]/page.tsx:15`
+- Impact: Confusion about where to place new components. Inconsistent import patterns make refactoring harder.
+- Fix approach: Establish canonical rule: `components/` for shadcn primitives only, `app/components/` for all feature code. Replace relative path imports with `@/` aliases.
+
+**Pervasive `as any` Type Casting in Session Page:**
+- Issue: `app/app/session/[id]/page.tsx` uses `as any` at least 8 times for speaker-related casts. This bypasses type safety for the Board of Directors feature which has proper types defined in `lib/ai/board-types.ts`.
+- Files: `app/app/session/[id]/page.tsx:284-396`
+- Impact: Type errors in board member logic won't be caught at compile time. The `BoardMemberId` union type in `lib/ai/board-types.ts` is effectively bypassed.
+- Fix approach: Fix the event data types at the streaming/parsing layer so the downstream components receive typed values.
+
+**Mock State in Account Page:**
+- Issue: `app/app/account/page.tsx:11-12` sets `workspaceState = null` with comment "Mock empty state" and `saveWorkspace` is a no-op. The account page shows workspace statistics (message count, canvas elements) that always render as 0.
+- Files: `app/app/account/page.tsx:11-12, 149-150`
+- Impact: Users see incorrect workspace stats. The account page is incomplete.
+- Fix approach: Fetch real workspace state from `user_workspace` using the pattern from `app/app/session/[id]/page.tsx`.
 
 ## Known Bugs
 
-**Email Verification Flow Broken:**
-- Symptoms: Email verification fails, documented in troubleshooting guide
-- Files: `docs/troubleshooting/authentication-issues.md` references issue, auth flow in `apps/web/app/auth/callback/route.ts`
-- Trigger: User clicks email confirmation link after signup
-- Workaround: Manual approval in Supabase dashboard bypasses email verification requirement
+**`assessment_submissions` Silent Data Loss:**
+- Symptoms: Submitting the strategy quiz appears successful but data is never stored in the database.
+- Files: `app/api/assessment/submit/route.ts:28-34`
+- Trigger: Any user completes the assessment quiz.
+- Workaround: None. Data only exists in the submitting browser's `localStorage`.
 
-**Session Drops Unexpectedly:**
-- Symptoms: User logged out without explicit action, documented in PROJECT.md as "sessions drop"
-- Files: Session management in `apps/web/lib/supabase/middleware.ts`, `apps/web/lib/auth/AuthContext.tsx`
-- Trigger: Browser refresh, tab switching, or time-based expiry without proper refresh
-- Workaround: User must re-authenticate
+**Board State Not Persisted:**
+- Symptoms: Board of Directors active speaker resets to Mary on page refresh.
+- Files: `app/app/session/[id]/page.tsx:65-67`, `app/api/chat/stream/route.ts:392-398`
+- Trigger: Any Board session page refresh.
+- Workaround: None currently.
 
-**OAuth Broken (Google/GitHub):**
-- Symptoms: OAuth authentication failures, mentioned in PROJECT.md as "OAuth broken"
-- Files: OAuth callback `apps/web/app/auth/callback/route.ts`, Google config in auth components
-- Trigger: Attempting Google or GitHub sign-in
-- Workaround: Email/password authentication still works
-
-**JWT Claims Cached ~1 Hour:**
-- Symptoms: Approved users must re-login to see beta_approved claim update
-- Files: Documented in `.planning/STATE.md` line 74
-- Trigger: Admin approves user in Supabase, but JWT not refreshed client-side
-- Workaround: User manually logs out and back in
+**useEffect Missing `diagramId` Stability in MermaidRenderer:**
+- Symptoms: `MermaidRenderer` generates `diagramId` with `Math.random()` on each render but includes it in the `useEffect` dependency array. Any re-render produces a new ID, potentially causing infinite re-render loops or missed renders.
+- Files: `app/components/canvas/MermaidRenderer.tsx:37, 61`
+- Trigger: Any parent re-render while Mermaid diagram is visible.
+- Workaround: Use a stable ref or `useMemo` for `diagramId`.
 
 ## Security Considerations
 
-**Environment Variables in Client Code:**
-- Risk: Multiple NEXT_PUBLIC_ variables exposed to browser, `.env.local` files tracked in git
-- Files: `.env.local`, `apps/web/.env.local` present (should be .gitignored), usage in `apps/web/lib/supabase/client.ts`, `apps/web/lib/ai/claude-client.ts`
-- Current mitigation: .env.example template exists, but actual .env.local files discovered
-- Recommendations: Verify .gitignore includes .env.local, audit NEXT_PUBLIC_ variables for sensitive data, rotate any leaked keys
+**Auth Bypass in `/api/bmad` via Referer Header:**
+- Risk: `app/api/bmad/route.ts:66-74` bypasses authentication for any request with a `Referer` header containing `/test-bmad-buttons`. The `Referer` header is fully client-controlled. Any unauthenticated caller can spoof this header to access all BMAD endpoints without auth.
+- Files: `app/api/bmad/route.ts:64-78, 190-200`
+- Current mitigation: None. The test bypass page (`/test-bmad-buttons`) does not appear to exist in the current app routes, but the server-side bypass remains active.
+- Recommendations: Remove the `isTestRequest` bypass entirely. Use proper test credentials or mock the auth layer in tests.
 
-**ANTHROPIC_API_KEY in Client Components:**
-- Risk: API key potentially exposed if used in client-side code
-- Files: `apps/web/lib/ai/claude-client.ts` should only run server-side
-- Current mitigation: API routes use server-side Anthropic client
-- Recommendations: Add runtime check to throw error if claude-client imported in browser context. Use Next.js API routes exclusively for AI calls
+**`getSession()` Used in Auth-Sensitive Code:**
+- Risk: Supabase's `getSession()` only validates locally against the stored token without hitting the auth server. A compromised or manually crafted token can pass this check. `getUser()` validates server-side.
+- Files: `lib/auth/AuthContext.tsx:24`, `lib/auth/beta-access.ts:19`
+- Current mitigation: `beta-access.ts` pairs `getSession()` with `verifyJwt()` which partially mitigates the risk, but `AuthContext.tsx` uses raw `getSession()` for initial state which gates all client-side auth checks.
+- Recommendations: Replace `getSession()` in `AuthContext.tsx` with `getUser()` for the server-validated initial session check.
 
-**No Rate Limiting in Non-Production:**
-- Risk: Development/staging environments vulnerable to abuse, rate limiter only active when NODE_ENV=production
-- Files: `apps/web/app/api/bmad/route.ts` line 40-41 (`if (isProduction)` check)
-- Current mitigation: None in dev/staging
-- Recommendations: Enable rate limiting in all environments, use separate limits (dev: higher, prod: strict). Consider IP-based limiting for unauthenticated requests
+**Admin Emails Hardcoded in Source Code:**
+- Risk: Personal email addresses committed to source control. Anyone with repo access can see admin identities.
+- Files: `lib/auth/admin.ts:1-5`
+- Current mitigation: Repository appears private. Admin check is correct in logic.
+- Recommendations: Move admin emails to an environment variable (`ADMIN_EMAILS=a@b.com,c@d.com`) and parse at runtime. Remove from source.
 
-**Guest Sessions in localStorage Only:**
-- Risk: Trivially bypassable access control for guest mode
-- Files: Documented in `.planning/PROJECT.md` line 44, implementation in GuestSessionStore
-- Current mitigation: Acknowledged as intentional for demo mode
-- Recommendations: Document that guest mode is demo-only and not for sensitive data. Add server-side validation if guest sessions start handling real user data
+**Guest API Has No Rate Limiting or Message Cap:**
+- Risk: `/api/chat/guest` is fully unauthenticated with no rate limiting, no per-IP tracking, and no server-side message count enforcement. Anyone can invoke Claude at the app's cost with no throttle.
+- Files: `app/api/chat/guest/route.ts:16-188`
+- Current mitigation: Client-side 5-message limit in `GuestChatInterface.tsx`, but this is bypassed by direct API calls.
+- Recommendations: Add IP-based rate limiting and a server-side message count enforced via short-lived tokens or Redis.
 
-**Error Stack Traces in Production:**
-- Risk: ErrorBoundary components show full stack traces when NODE_ENV=development, potentially leaking info
-- Files: `apps/web/app/components/ui/ErrorBoundary.tsx` line 124, `apps/web/app/components/dual-pane/PaneErrorBoundary.tsx` line 64
-- Current mitigation: Gated by NODE_ENV check
-- Recommendations: Ensure NODE_ENV=production in deployed environments. Add integration test to verify stack traces hidden in production builds
+**MermaidRenderer SVG Injection:**
+- Risk: `dangerouslySetInnerHTML={{ __html: svg }}` renders SVG output from mermaid. While `securityLevel: 'strict'` is set, external SVG content injected via user-supplied diagram code could contain click handlers or script-adjacent content that `strict` mode may not fully sanitize.
+- Files: `app/components/canvas/MermaidRenderer.tsx:22, 84`
+- Current mitigation: Mermaid `securityLevel: 'strict'` is set.
+- Recommendations: Add DOMPurify sanitization pass on the rendered SVG before injecting via `dangerouslySetInnerHTML` as a defense-in-depth measure.
 
 ## Performance Bottlenecks
 
-**1400+ Line Mary Persona File Loaded on Every Chat:**
-- Problem: mary-persona.ts (1477 lines) contains all sub-persona logic, loaded synchronously
-- Files: `apps/web/lib/ai/mary-persona.ts`
-- Cause: Monolithic file with pathway weights, emotional state detection, viability assessment all in one module
-- Improvement path: Code-split by feature — lazy load sub-persona modes, separate pathway configs into JSON, defer viability assessment until needed
+**Full Workspace State Written on Every Message:**
+- Problem: Every sent message triggers `supabase.update({ workspace_state: { ...all_messages } })`. As the conversation grows, each save writes the full JSONB blob including all prior messages.
+- Files: `app/app/session/[id]/page.tsx:429-440`
+- Cause: JSONB update replaces the entire column. A 100-message session writes ~100x more data than the incremental change.
+- Improvement path: Append messages to a separate `messages` table row-by-row. Use the existing `conversations` schema or create a new append-only table.
 
-**Large API Route Handler (1491 lines):**
-- Problem: Single route.ts handling all BMAD operations without pagination or streaming optimization
-- Files: `apps/web/app/api/bmad/route.ts`
-- Cause: Combined pathway routing, feature analysis, priority scoring, brief generation in one endpoint
-- Improvement path: Split into separate API routes — /api/bmad/pathway, /api/bmad/analysis, /api/bmad/priority. Implement request streaming for large responses
+**Simulated Streaming Adds Unnecessary Latency:**
+- Problem: When Claude returns a non-streaming response (the `else` fallback branch), the route simulates streaming by splitting on spaces and adding per-word delays (20-100ms per word). A 500-word response takes 10-50 seconds to "stream."
+- Files: `app/api/chat/stream/route.ts:578-587`, `app/api/chat/guest/route.ts:125-132`
+- Cause: Claude client fallback path doesn't use real streaming.
+- Improvement path: Remove artificial delays. If streaming isn't available, send the full response immediately without word-by-word simulation.
 
-**Node_modules Size (14MB):**
-- Problem: Relatively small but includes heavy dependencies like @react-pdf/renderer, tldraw
-- Files: `apps/web/node_modules/`
-- Cause: PDF generation and canvas libraries included in main bundle
-- Improvement path: Dynamic import for PDF generation (only on export), lazy load tldraw (only when canvas opened). Could reduce initial bundle by 30-40%
+**Agentic Loop Tool Execution Is Sequential:**
+- Problem: In `executeAgenticLoop`, all tool results are gathered then the next Claude call is made. Each round waits for all tools before continuing. If multiple independent tools are called in one round, they execute sequentially via `toolExecutor.executeAll`.
+- Files: `app/api/chat/stream/route.ts:95`
+- Cause: `executeAll` implementation may be sequential.
+- Improvement path: Verify `ToolExecutor.executeAll` runs tool calls in parallel with `Promise.all`.
 
-**No Memoization in Analysis Engines:**
-- Problem: Growth strategy, revenue optimization, pricing analysis re-calculate on every render
-- Files: `apps/web/lib/bmad/analysis/*.ts` engines
-- Cause: Pure calculation functions called directly without caching
-- Improvement path: Add React.useMemo for expensive calculations, implement LRU cache for analysis results with session ID as key
+**Large Single-File Modules:**
+- Problem: Several files exceed 1,000 lines, making them hard to navigate and increasing bundle/parse time.
+- Files: `lib/bmad/analysis/growth-strategy-engine.ts` (1,535 lines), `lib/ai/mary-persona.ts` (1,486 lines), `app/api/bmad/route.ts` (1,491 lines), `lib/bmad/analysis/revenue-optimization-engine.ts` (1,398 lines)
+- Cause: Analysis engines and the BMAD route handler were not split as they grew.
+- Improvement path: Split `app/api/bmad/route.ts` into per-action handler files. Extract analysis sub-engines from the monolithic files.
 
 ## Fragile Areas
 
-**Auth Middleware Disabled:**
-- Files: `apps/web/lib/supabase/middleware.ts` exists but documented as "minimal token-refresh middleware" only
-- Why fragile: All route protection moved to API routes due to Edge Runtime incompatibility. Easy to forget protection on new routes
-- Test coverage: Auth flow not covered by E2E tests per PROJECT.md ("E2E tests: only 7 smoke tests exist, no auth flow coverage")
-- Safe modification: Always add `const { data: { user } } = await supabase.auth.getUser()` at start of protected API routes. Verify getUser() not getSession() per STATE.md decision
+**`app/app/session/[id]/page.tsx` (1,038 lines):**
+- Files: `app/app/session/[id]/page.tsx`
+- Why fragile: Single component handles workspace loading, message streaming, board state, canvas state, tab switching, retry logic, and export. State is entangled across 15+ `useState` hooks. A change to streaming behavior can break canvas state, and vice versa.
+- Safe modification: Add changes to isolated sections only. Always re-test: board speaker handoff, canvas open/close, message retry, and workspace save after any edit.
+- Test coverage: No unit tests for this component. E2E smoke tests cover the route existence only.
 
-**Custom Access Token Hook Dependency:**
-- Files: Beta access depends on Supabase Custom Access Token Hook injecting `beta_approved` claim
-- Why fragile: Hook configuration lives in Supabase dashboard, not code. No visibility into hook failures. JWT claims cached ~1 hour
-- Test coverage: Manual verification only (no automated tests for JWT claims)
-- Safe modification: When changing beta access logic, update hook in dashboard AND document in REQUIREMENTS.md. Test with fresh login (not cached session)
+**Message Limit Enforcement (Race-Prone):**
+- Files: `app/api/chat/stream/route.ts:307-320`, `lib/bmad/message-limit-manager.ts`
+- Why fragile: Message count is incremented before the response is sent. If the API errors mid-stream after increment, the user loses a message count without getting a response. The limit check also queries the DB twice (increment + check).
+- Safe modification: Never move the increment to after the response. Consider adding a `message_attempted_at` column to handle rollback on catastrophic failure.
+- Test coverage: Unit tests in `tests/lib/bmad/` but they mock Supabase, so actual DB atomicity is untested.
 
-**BMAD Session State Synchronization:**
-- Files: `apps/web/lib/bmad/session/universal-state-manager.ts`, `apps/web/app/components/bmad/useBmadSession.ts`
-- Why fragile: Complex state sync between localStorage, Supabase, and React state. Race conditions possible on rapid navigation
-- Test coverage: Only 218 test files total, unclear coverage of state edge cases
-- Safe modification: Always use UniversalSessionManager methods, never direct localStorage. Add explicit wait for state sync before navigation
+**Workspace Authorization in Stream Route:**
+- Files: `app/api/chat/stream/route.ts:222-226`
+- Why fragile: The workspace lookup queries by `user_id = auth.user.id` (correct), but the `workspaceId` parameter from the request body is passed to `bmad_sessions` queries without cross-checking that the session's `workspace_id` matches `user.id`. RLS policies on `bmad_sessions` should prevent IDOR, but this should be verified.
+- Safe modification: Confirm RLS policy on `bmad_sessions` includes `user_id = auth.uid()` before relying on it.
 
-**Canvas Engine Integration:**
-- Files: `apps/web/app/components/canvas/EnhancedCanvasWorkspace.tsx`, `packages/canvas-engine/`
-- Why fragile: tldraw library integration with custom event listeners (`canvas:highlight` as any). Memory leak potential from unsubscribed listeners
-- Test coverage: No canvas tests in test suite
-- Safe modification: Always cleanup event listeners in useEffect returns. Test memory usage in DevTools when opening/closing canvas multiple times
-
-**Dual-Pane State Bridge:**
-- Files: `apps/web/app/components/dual-pane/StateBridge.tsx`
-- Why fragile: Cross-pane communication via custom events, development-only debug panels that could leak to production
-- Test coverage: No dual-pane E2E tests
-- Safe modification: Verify NODE_ENV checks before adding debug features. Use TypeScript strict mode to catch event type mismatches
-
-## Scaling Limits
-
-**Manual Beta Approval (100 users):**
-- Current capacity: Manual approval via Supabase Table Editor
-- Limit: Beyond 100-200 users, manual approval becomes bottleneck
-- Scaling path: Implement approval queue UI with bulk actions, add auto-approval rules based on criteria (company domain, referral code), migrate to admin dashboard
-
-**Single Database for All Sessions:**
-- Current capacity: All BMAD sessions, chat messages, workspaces in one Supabase project
-- Limit: Supabase free tier limits on database size and connections
-- Scaling path: Archive completed sessions older than 90 days, implement read replicas for analytics queries, consider session partitioning by date
-
-**No CDN for Static Assets:**
-- Current capacity: Vercel serves all assets
-- Limit: Geographic latency for non-US users, bandwidth costs at scale
-- Scaling path: Enable Vercel Edge Network (included), add CDN for large exports (PDF, canvas images), optimize image delivery with next/image
-
-**In-Memory Rate Limiter:**
-- Current capacity: RateLimiter class stores limits in process memory
-- Limit: Resets on deployment, doesn't work across multiple Vercel serverless instances
-- Scaling path: Migrate to Redis-based rate limiting (Upstash), implement distributed rate limiting with Vercel KV, add rate limit headers for transparency
-
-## Dependencies at Risk
-
-**@anthropic-ai/sdk (0.27.3 vs 0.74.0):**
-- Risk: 47 versions behind, major API changes likely
-- Impact: Streaming chat breaks, token counting changes, new error types
-- Migration plan: Test streaming in isolated environment, review changelog for breaking changes in messages API, budget 4-6 hours for compatibility fixes
-
-**@supabase/supabase-js (2.57.4 vs 2.95.3):**
-- Risk: 38 versions behind, auth API changes common in Supabase
-- Impact: getUser() behavior changes, RLS policy syntax updates, JWT handling modifications
-- Migration plan: Review Supabase migration guide, test auth flows in staging, update RLS policies if needed, expect 6-8 hours for full regression testing
-
-**Next.js (15.5.7 - deprecated with security vuln):**
-- Risk: Actively deprecated, security vulnerability documented in package-lock.json
-- Impact: Production security risk, App Router changes in 15.6+, middleware behavior shifts
-- Migration plan: Upgrade to 15.6 or latest 15.x immediately. Full E2E test pass required. Review middleware for Edge Runtime changes. Critical — do this before beta launch
-
-**tldraw (4.0.2):**
-- Risk: Canvas engine dependency, frequent breaking changes in major versions
-- Impact: Canvas workspace breaks, drawing API changes, export format shifts
-- Migration plan: Pin to 4.0.x range, monitor changelog before any upgrade, test canvas save/load extensively, consider migrating away if canvas de-prioritized
-
-**React 19.1.0:**
-- Risk: New major version, ecosystem catching up
-- Impact: Third-party library incompatibilities, suspense behavior changes, potential hydration errors
-- Migration plan: Already on React 19, but monitor for patch releases. Some libraries (e.g., @testing-library) may lag behind. Consider React 18 downgrade if blocking issues arise
+**`lib/auth/beta-access.ts` JWT Claim Dependency:**
+- Files: `lib/auth/beta-access.ts`
+- Why fragile: Beta gate depends on a custom JWT claim (`beta_approved`) injected by a Supabase hook (migrations 015-017). If the hook fails or a user token was issued before approval, the fallback hits the `beta_access` table directly via `getSession()` (not `getUser()`). This creates a two-path auth system where failures in one path silently fall through.
+- Safe modification: Do not change the JWT hook migrations without testing both the hook path and the DB fallback path.
 
 ## Missing Critical Features
 
-**No Error Tracking Service:**
-- Problem: No Sentry, LogRocket, or error monitoring integrated
-- Blocks: Debugging production issues, identifying error patterns, measuring reliability
-- Priority: High — cannot operate beta without visibility into failures
+**Stripe Payments Not Wired to Session Access:**
+- Problem: `app/api/checkout/idea-validation/route.ts` creates a Stripe checkout session, but there is no webhook handler that grants access or credits upon payment completion. Credit deduction via `deduct_credit_transaction()` exists in `lib/monetization/credit-manager.ts` but is not called from the streaming flow.
+- Blocks: Monetization. Users cannot purchase additional sessions.
 
-**No Analytics Beyond Planned Basic Tracking:**
-- Problem: FEED-01 (basic analytics) not yet implemented per REQUIREMENTS.md
-- Blocks: Measuring engagement, identifying drop-off points, validating hypotheses
-- Priority: High — feedback collection is core beta goal
-
-**No Admin Dashboard for Beta Management:**
-- Problem: Manual Supabase Table Editor for user approval
-- Blocks: Efficient user management at scale, approval analytics, bulk operations
-- Priority: Medium — stated as out-of-scope for <100 users, but needed if beta grows
-
-**Missing Email Notification System:**
-- Problem: EMAIL-03 (approval notifications) deferred to v2 per REQUIREMENTS.md
-- Blocks: User doesn't know they're approved, manual communication required
-- Priority: Medium — could use Supabase email templates as interim solution
-
-**No Session Recovery UI:**
-- Problem: Users lose work on browser refresh if session sync fails
-- Blocks: Reliable user experience, trust in platform
-- Priority: High — mentioned as active requirement ("Session recovery — don't lose work on refresh")
+**No Server-Side Message Count for Guest Users:**
+- Problem: Guest message limits (5 messages) are enforced only client-side in `GuestChatInterface.tsx`. The server (`app/api/chat/guest/route.ts`) has no enforcement.
+- Blocks: Cost control for the guest experience. Any developer tools bypass will consume API credits without limit.
 
 ## Test Coverage Gaps
 
-**Auth Flow Not Covered by E2E:**
-- What's not tested: Login, logout, session persistence, OAuth flows
-- Files: `apps/web/tests/` has 218 test files but PROJECT.md states "only 7 smoke tests exist, no auth flow coverage"
-- Risk: Auth regressions go undetected, beta blocker bugs ship to production
-- Priority: Critical — auth is beta launch prerequisite per REQUIREMENTS.md
+**Session Page (`app/app/session/[id]/page.tsx`):**
+- What's not tested: Streaming message parsing, board speaker handoff, canvas state persistence, message retry logic, workspace save on send.
+- Files: `app/app/session/[id]/page.tsx`
+- Risk: Any regression in the core session UX goes undetected until manual QA.
+- Priority: High
 
-**BMAD Pathway State Transitions:**
-- What's not tested: Phase advancement, pathway switching, session completion, error recovery
-- Files: Test files exist (`__tests__/bmad/pathways/*.test.ts`) but no E2E validation
-- Risk: Users stuck in pathways, data loss on transitions, session corruption
-- Priority: High — core product functionality
+**API Route Auth Bypass (`app/api/bmad/route.ts`):**
+- What's not tested: The `isTestRequest` bypass is tested indirectly but the security implication (spoofed Referer) is not tested.
+- Files: `app/api/bmad/route.ts:64-78`
+- Risk: Security regression if the bypass is forgotten.
+- Priority: High
 
-**Canvas Save/Load Reliability:**
-- What's not tested: Canvas state persistence, cross-browser compatibility, concurrent editing
-- Files: No canvas tests found in E2E suite
-- Risk: User work lost on canvas, export failures, rendering inconsistencies
-- Priority: Medium — canvas de-prioritized per PROJECT.md out-of-scope
+**45/71 Unit Test Files Failing:**
+- What's not tested: The 45 failing test files represent broad coverage gaps in auth, workspace context, bmad analysis, and conversation flows.
+- Files: See `tests/` directory. Failures noted in project memory as pre-existing.
+- Risk: New regressions are masked by pre-existing failures. No clean signal from CI.
+- Priority: High - establish a baseline before adding new tests.
 
-**Rate Limiting Bypass Scenarios:**
-- What's not tested: Rate limit headers, retry behavior, concurrent request handling
-- Files: RateLimiter in `apps/web/lib/security/rate-limiter.ts` but no tests
-- Risk: API abuse, DoS vulnerability, unfair resource allocation
-- Priority: Medium — only active in production per code inspection
-
-**Email Verification Flow:**
-- What's not tested: Email sent, link clicked, account activated
-- Files: Known broken per bugs section, no tests validating fix
-- Risk: Cannot validate email verification works when fixed
-- Priority: High — if email verification becomes beta requirement
+**Assessment Submission Flow:**
+- What's not tested: No test verifies that the assessment API route actually inserts into the database or handles the missing table error.
+- Files: `app/api/assessment/submit/route.ts`, `app/components/assessment/StrategyQuiz.tsx`
+- Risk: Silent data loss continues undetected.
+- Priority: Medium
 
 ---
 
-*Concerns audit: 2026-02-14*
+*Concerns audit: 2026-02-20*

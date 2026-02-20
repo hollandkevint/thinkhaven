@@ -1,170 +1,167 @@
 # External Integrations
 
-**Analysis Date:** 2026-02-14
+**Analysis Date:** 2026-02-20
 
 ## APIs & External Services
 
-**AI/ML:**
-- Anthropic Claude - AI coaching conversations
-  - SDK/Client: `@anthropic-ai/sdk` ^0.27.3
-  - Auth: `ANTHROPIC_API_KEY`
-  - Implementation: `apps/web/lib/ai/claude-client.ts`, `lib/ai/claude-client.ts`
-  - Model: Claude 3+ with tool use support
-  - Features: Streaming responses, tool calling, conversation continuity
-
-- OpenAI (Optional) - Context bridging and semantic search
-  - Auth: `OPENAI_API_KEY`
-  - Feature flag: `NEXT_PUBLIC_ENABLE_CONTEXT_BRIDGING`
-  - Purpose: Semantic search across knowledge base
+**AI/LLM:**
+- Anthropic Claude API - Core AI for all chat sessions, coaching, Board of Directors feature
+  - SDK: `@anthropic-ai/sdk` ^0.27.3
+  - Client: `lib/ai/claude-client.ts` (singleton `claudeClient`)
+  - Model: `claude-sonnet-4-20250514` (Claude Sonnet 4)
+  - Usage: streaming responses, tool-call agentic loop (max 5 rounds, `MAX_TOOL_ROUNDS` in `app/api/chat/stream/route.ts`)
+  - Auth env var: `ANTHROPIC_API_KEY`
 
 **Payments:**
-- Stripe - Monetization and subscriptions
-  - SDK/Client: `stripe` ^19.1.0 (server), `@stripe/stripe-js` ^8.0.0 (client)
-  - Auth: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
-  - Implementation: `apps/web/lib/monetization/stripe-service.ts`
-  - Products:
-    - Idea Validation: `STRIPE_PRICE_ID_IDEA_VALIDATION`
-    - Starter: `STRIPE_PRICE_ID_STARTER`
-    - Professional: `STRIPE_PRICE_ID_PROFESSIONAL`
-    - Business: `STRIPE_PRICE_ID_BUSINESS`
-  - Checkout API route: `apps/web/app/api/checkout/idea-validation/route.ts`
-  - Webhook support: Signature verification with `STRIPE_WEBHOOK_SECRET`
+- Stripe - Checkout sessions, webhook events, refunds, customer management
+  - SDK: `stripe` ^19.1.0 (server), `@stripe/stripe-js` ^8.0.0 (client)
+  - Service: `lib/monetization/stripe-service.ts`
+  - API version: `2024-12-18.acacia`
+  - Auth env vars: `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
+  - Price ID env vars: `STRIPE_PRICE_ID_IDEA_VALIDATION`, `STRIPE_PRICE_ID_STARTER`, `STRIPE_PRICE_ID_PROFESSIONAL`, `STRIPE_PRICE_ID_BUSINESS`
+  - Products: $99 Idea Validation (primary), credit packs at $19/$39/$79 (legacy)
 
 **Email:**
-- Resend - Transactional email delivery
-  - SDK/Client: `resend` ^6.1.2
-  - Templates: `@react-email/components` ^0.5.6
-  - Implementation: Email templates as React components
+- Resend - Package declared in `package.json` (^6.1.2) but Resend SDK not actively imported in application code
+- Transactional emails are handled via Supabase Auth's built-in email (signup confirmation, magic link)
+- `@react-email/components` ^0.5.6 present for template authoring
+
+**CI/CD AI Review:**
+- Anthropic Claude Code Action - Automated PR code review
+  - Integration: `anthropics/claude-code-action@v1` in `.github/workflows/claude-code-review.yml`
+  - Auth: `ANTHROPIC_API_KEY` GitHub secret
+  - Known issue: intermittent crash on PR open (issue #911), `continue-on-error: true` set
 
 ## Data Storage
 
 **Databases:**
-- Supabase PostgreSQL
-  - Connection: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - Client: `@supabase/ssr` ^0.7.0, `@supabase/supabase-js` ^2.56.0
-  - Implementation:
-    - Server: `lib/supabase/server.ts`, `apps/web/lib/supabase/server.ts`
-    - Client: `lib/supabase/client.ts`, `apps/web/lib/supabase/client.ts`
-    - Middleware: `lib/supabase/middleware.ts`, `apps/web/middleware.ts`
-  - Schema: Comprehensive BMAD Method tables
-    - `bmad_sessions` - User coaching sessions
-    - `bmad_phase_allocations` - Time tracking per phase
-    - `bmad_session_progress` - Completion tracking
-    - `bmad_user_responses` - User input history
-    - `bmad_elicitation_history` - Choice tracking
-    - `bmad_persona_evolution` - Persona transitions
-    - `bmad_action_items` - Generated action items
-    - `bmad_pathway_analytics` - Intent analysis tracking
-    - `bmad_knowledge_references` - Knowledge base links
-    - `bmad_phase_outputs` - Phase deliverables
-    - `bmad_template_outputs` - Template-generated content
-    - `bmad_generated_documents` - Final documents
-  - Database access layer: `apps/web/lib/bmad/database.ts`, `lib/bmad/database.ts`
-  - Features: Row-level security (RLS), realtime subscriptions, server-side rendering support
+- Supabase PostgreSQL 17.4 - Primary datastore for all user data, sessions, conversations
+  - Connection via SSR-safe client wrappers
+  - Server client: `lib/supabase/server.ts` - `createClient()` returns `null` when env missing; all callers must null-check
+  - Browser client: `lib/supabase/client.ts` - exports null-safe `Proxy` during SSG
+  - Auth env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - Service role: `SUPABASE_SERVICE_ROLE_KEY` (test helpers only)
+  - JWT secret: `SUPABASE_JWT_SECRET` (used in `lib/auth/jwt-verify.ts` via `jose`)
+  - Migrations: `apps/web/supabase/migrations/` (001-019, sequential, never skip)
+  - RLS: enabled, policies enforced
+  - Key DB function: `deduct_credit_transaction()` - always use for credit ops, never raw UPDATE
+
+**Schema highlights (from migrations):**
+- `001` - bmad method schema
+- `002` - conversations and messages
+- `003` - user_workspace table
+- `005` - session credit system
+- `007` - canvas columns
+- `008` - message limits
+- `009` - session artifacts
+- `013-016` - beta access and triggers
+- `017` - custom access token hook
+- `019` - credit trigger fix
 
 **File Storage:**
-- Local filesystem only (no cloud object storage detected)
-- Generated documents stored in database as content strings
-- PDF generation via `@react-pdf/renderer` ^4.3.1
+- No dedicated file storage service detected; PDF exports are generated on-demand and served via response streams
 
 **Caching:**
-- None detected (no Redis/Memcached integration)
+- No external caching layer (Redis, Memcached) detected
+- Next.js default caching applies to server components and fetch calls
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- Supabase Auth
-  - Implementation: OAuth callback at `apps/web/app/auth/callback/route.ts`
-  - Providers: Google OAuth configured (`NEXT_PUBLIC_GOOGLE_CLIENT_ID` referenced in tests)
-  - Session management: Cookie-based via `@supabase/ssr`
-  - Middleware: Auth state maintained across requests in `apps/web/middleware.ts`
-  - Guest mode: Supported via `apps/web/lib/guest/session-store.ts`
+- Supabase Auth - primary identity provider
+  - Email/password auth with signup confirmation
+  - Google OAuth via Supabase OAuth flow
+  - Callback route: `app/auth/callback/route.ts`
+  - Resend confirmation page: `app/resend-confirmation/page.tsx`
+
+**Google OAuth:**
+  - Configured through Supabase (not direct Google SDK)
+  - Client ID env var: `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+  - Callback handled at `/auth/callback` with PKCE code exchange
+
+**JWT Verification:**
+  - `jose` library used in `lib/auth/jwt-verify.ts` for server-side JWT validation
+  - Custom claims include `beta_approved` field (set via Supabase custom access token hook, migration 017)
+
+**Beta Access:**
+  - `lib/auth/beta-access.ts` - gates access during launch period
+  - `lib/auth/admin.ts` - hardcoded admin email allowlist
+
+**Middleware:**
+  - `middleware.ts` is **disabled** (`middleware.ts.disabled`) - Edge Runtime incompatibility
+  - Auth enforcement is done in API routes only
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- Custom error monitoring
-  - Implementation: `apps/web/lib/bmad/error-monitor.ts`
-  - Custom error types: `BmadMethodError` with error codes
-  - No external service (Sentry/Bugsnag) detected
+- No third-party error tracking (Sentry, Datadog) detected
+- Custom auth monitoring: `lib/monitoring/auth-logger.ts`, `lib/monitoring/auth-metrics.ts`, `lib/monitoring/alert-service.ts`
+- Auth metrics API: `app/api/monitoring/auth-metrics/route.ts`
+- Auth alerts API: `app/api/monitoring/alerts/route.ts`
 
 **Logs:**
-- Console-based logging
-- Debug logging in Claude client: `apps/web/lib/ai/claude-client.ts`
-- Monitoring API routes:
-  - `apps/web/app/api/monitoring/auth-metrics/route.ts`
-  - `apps/web/app/api/monitoring/alerts/route.ts`
+- `console.log`/`console.error` throughout; structured log objects with correlation IDs in auth flows
+- No log aggregation service detected
 
-**Analytics:**
-- Custom pathway analytics tracked in `bmad_pathway_analytics` table
-- Intent analysis and recommendation tracking
+**Environment Validation:**
+- `lib/security/env-validator.ts` - validates required env vars on startup; exits process in production if critical vars missing
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Vercel
-  - Config: `vercel.json`
-  - Build command: `npm run build`
-  - Output directory: `apps/web/.next`
-  - Environment: Production build via `npm run build:prod`
+- Vercel - production deployment at https://thinkhaven.co
+- Config: root `vercel.json` (`buildCommand: "npm run build"`, `outputDirectory: "apps/web/.next"`)
+- Auto-deploys on push to `main`
 
 **CI Pipeline:**
-- None detected (no GitHub Actions, CircleCI, or other CI config files)
-- Playwright test commands available:
-  - `npm run test:e2e` - E2E tests
-  - `npm run test:smoke` - Smoke tests
-  - `npm run test:core` - Core functionality tests
-
-## Environment Configuration
-
-**Required env vars:**
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
-- `ANTHROPIC_API_KEY` - Claude API key
-- `STRIPE_SECRET_KEY` - Stripe secret key (production)
-- `STRIPE_WEBHOOK_SECRET` - Stripe webhook signature verification
-
-**Optional env vars:**
-- `OPENAI_API_KEY` - For context bridging feature
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` - Google OAuth
-- `STRIPE_PRICE_ID_*` - Stripe product price IDs
-- Feature flags (all `NEXT_PUBLIC_ENABLE_*` prefixed)
-- Configuration limits (max elements, timeouts, thresholds)
-
-**Secrets location:**
-- `.env.local` for local development (gitignored)
-- Vercel environment variables for production
-- `.env.example` documents structure (no secrets)
+- GitHub Actions - `.github/workflows/e2e-tests.yml`
+  - Triggers: push to `main`/`develop`, PRs to `main`
+  - Node 20, Chromium only
+  - Runs `playwright test --project=chromium` (7 smoke tests)
+- GitHub Actions - `.github/workflows/claude-code-review.yml`
+  - Automated review on PR open (`auto-review` job, `continue-on-error: true`)
+  - Interactive `@claude` mention support in PR comments
 
 ## Webhooks & Callbacks
 
 **Incoming:**
-- Stripe webhooks
-  - Purpose: Payment event processing
-  - Verification: Signature validation via `STRIPE_WEBHOOK_SECRET`
-  - Implementation: `apps/web/lib/monetization/stripe-service.ts` (webhook verification logic)
-
-- OAuth callbacks
-  - Google OAuth: `apps/web/app/auth/callback/route.ts`
-  - Supabase Auth flow completion
+- `/auth/callback` (GET) - OAuth code exchange after Google login (Supabase PKCE flow)
+- Stripe webhook endpoint not found as a separate route in `app/api/`; webhook verification logic exists in `lib/monetization/stripe-service.ts:constructWebhookEvent()` but no dedicated `app/api/webhook/stripe/route.ts` was detected. This may be a gap or handled elsewhere.
 
 **Outgoing:**
-- None detected (no webhook dispatch to external services)
+- Stripe Checkout redirects to `APP_URL/pricing/success` and `APP_URL/validate/success` after payment
+- Supabase Auth emails (signup confirmation, password reset) - sent by Supabase's email infrastructure
 
-## Internal APIs
+## Environment Configuration
 
-**REST Endpoints:**
-- `apps/web/app/api/chat/stream/route.ts` - Streaming chat with Claude
-- `apps/web/app/api/chat/guest/route.ts` - Guest mode chat
-- `apps/web/app/api/chat/export/route.ts` - Conversation export
-- `apps/web/app/api/bmad/route.ts` - BMAD session operations
-- `apps/web/app/api/assessment/submit/route.ts` - Assessment submission
-- `apps/web/app/api/checkout/idea-validation/route.ts` - Stripe checkout creation
-- `apps/web/app/api/feedback/trial/route.ts` - Trial feedback collection
-- `apps/web/app/api/credits/balance/route.ts` - Credit balance checking
-- `apps/web/app/api/monitoring/auth-metrics/route.ts` - Auth metrics
-- `apps/web/app/api/monitoring/alerts/route.ts` - Alert management
+**Required env vars (production):**
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_JWT_SECRET
+ANTHROPIC_API_KEY
+STRIPE_SECRET_KEY
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_PRICE_ID_IDEA_VALIDATION
+STRIPE_PRICE_ID_STARTER
+STRIPE_PRICE_ID_PROFESSIONAL
+STRIPE_PRICE_ID_BUSINESS
+NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_GOOGLE_CLIENT_ID
+```
+
+**Optional / beta controls:**
+```
+LAUNCH_MODE=true    # Bypasses credit system; server-only, not exposed to client
+```
+
+**Secrets location:**
+- Local development: `apps/web/.env.local` (gitignored)
+- Production: Vercel dashboard (Settings -> Environment Variables)
+- CI: GitHub repository secrets
 
 ---
 
-*Integration audit: 2026-02-14*
+*Integration audit: 2026-02-20*
