@@ -61,21 +61,19 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Allow test access from test pages
+    // Allow test access only in non-production environments
     const referer = request.headers.get('referer') || '';
-    const isTestRequest = referer.includes('/test-bmad-buttons');
-    
+    const isTestRequest = process.env.NODE_ENV !== 'production' && referer.includes('/test-bmad-buttons');
+
     if ((authError || !user) && !isTestRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
-    // Enable test mode for database operations when in test
-    if (isTestRequest) {
+
+    if (isTestRequest && process.env.NODE_ENV !== 'production') {
       (global as { BMAD_TEST_MODE?: boolean }).BMAD_TEST_MODE = true;
     }
-    
-    // Use test user ID for test requests
-    const userId = user?.id || 'test-user-id';
+
+    const userId = user?.id || (isTestRequest ? 'test-user-id' : '');
 
     const body = await request.json();
     const { action, ...params } = body;
@@ -88,10 +86,10 @@ export async function POST(request: NextRequest) {
         return await handleCreateSession(userId, params);
         
       case 'advance_session':
-        return await handleAdvanceSession(params);
-        
+        return await handleAdvanceSession(userId, params);
+
       case 'get_session':
-        return await handleGetSession(params);
+        return await handleGetSession(userId, params);
         
       case 'search_knowledge':
         return await handleSearchKnowledge(params);
@@ -100,13 +98,13 @@ export async function POST(request: NextRequest) {
         return await handleGetUserSessions(userId, params);
 
       case 'analyze_feature_input':
-        return await handleAnalyzeFeatureInput(params);
+        return await handleAnalyzeFeatureInput(userId, params);
 
       case 'save_feature_input':
         return await handleSaveFeatureInput(userId, params);
 
       case 'calculate_priority':
-        return await handleCalculatePriority(params);
+        return await handleCalculatePriority(userId, params);
 
       case 'save_priority_scoring':
         return await handleSavePriorityScoring(userId, params);
@@ -121,23 +119,23 @@ export async function POST(request: NextRequest) {
         return await handleRegenerateFeatureBrief(userId, params);
 
       case 'export_feature_brief':
-        return await handleExportFeatureBrief(params);
+        return await handleExportFeatureBrief(userId, params);
 
       // Universal Session State Management endpoints
       case 'switch_pathway':
         return await handleSwitchPathway(userId, params);
 
       case 'backup_session_state':
-        return await handleBackupSessionState(params);
+        return await handleBackupSessionState(userId, params);
 
       case 'restore_session':
-        return await handleRestoreSession(params);
+        return await handleRestoreSession(userId, params);
 
       case 'session_analytics':
-        return await handleSessionAnalytics(params);
+        return await handleSessionAnalytics(userId, params);
 
       case 'sync_session_state':
-        return await handleSyncSessionState(params);
+        return await handleSyncSessionState(userId, params);
 
       // Business Model Pathway endpoints
       case 'analyze_revenue_streams':
@@ -176,7 +174,7 @@ export async function POST(request: NextRequest) {
     console.error('BMad API Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
-      { error: 'Internal server error', details: errorMessage },
+      { error: 'Internal server error', details: process.env.NODE_ENV !== 'production' ? errorMessage : undefined },
       { status: 500 }
     );
   }
@@ -187,21 +185,19 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    // Allow test access from test pages
+    // Allow test access only in non-production environments
     const referer = request.headers.get('referer') || '';
-    const isTestRequest = referer.includes('/test-bmad-buttons');
-    
+    const isTestRequest = process.env.NODE_ENV !== 'production' && referer.includes('/test-bmad-buttons');
+
     if ((authError || !user) && !isTestRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
-    // Enable test mode for database operations when in test
-    if (isTestRequest) {
+
+    if (isTestRequest && process.env.NODE_ENV !== 'production') {
       (global as { BMAD_TEST_MODE?: boolean }).BMAD_TEST_MODE = true;
     }
-    
-    // Use test user ID for test requests
-    const userId = user?.id || 'test-user-id';
+
+    const userId = user?.id || (isTestRequest ? 'test-user-id' : '');
 
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
@@ -226,7 +222,7 @@ export async function GET(request: NextRequest) {
     console.error('BMad API Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
-      { error: 'Internal server error', details: errorMessage },
+      { error: 'Internal server error', details: process.env.NODE_ENV !== 'production' ? errorMessage : undefined },
       { status: 500 }
     );
   }
@@ -329,18 +325,25 @@ async function handleCreateSession(
  * Advance session with user input
  */
 async function handleAdvanceSession(
-  params: { 
-    sessionId: string; 
+  userId: string,
+  params: {
+    sessionId: string;
     userInput: string;
   }
 ) {
   const { sessionId, userInput } = params;
-  
+
   if (!sessionId || !userInput) {
     return NextResponse.json(
-      { error: 'sessionId and userInput are required' }, 
+      { error: 'sessionId and userInput are required' },
       { status: 400 }
     );
+  }
+
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
   const advancement = await sessionOrchestrator.advanceSession(sessionId, userInput);
@@ -354,16 +357,17 @@ async function handleAdvanceSession(
 /**
  * Get session by ID
  */
-async function handleGetSession(params: { sessionId: string }) {
+async function handleGetSession(userId: string, params: { sessionId: string }) {
   const { sessionId } = params;
-  
+
   if (!sessionId) {
     return NextResponse.json({ error: 'sessionId is required' }, { status: 400 });
   }
 
   const session = await sessionOrchestrator.getSession(sessionId);
-  
-  if (!session) {
+
+  // SECURITY: Verify session ownership
+  if (!session || session.userId !== userId) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
@@ -442,7 +446,7 @@ async function handleGetPathways() {
 /**
  * Analyze feature input and generate validation questions
  */
-async function handleAnalyzeFeatureInput(params: { featureData: FeatureInputData }) {
+async function handleAnalyzeFeatureInput(_userId: string, params: { featureData: FeatureInputData }) {
   const { featureData } = params;
 
   if (!featureData) {
@@ -577,7 +581,7 @@ async function handleSaveFeatureInput(
 /**
  * Calculate priority score for a feature
  */
-async function handleCalculatePriority(params: {
+async function handleCalculatePriority(_userId: string, params: {
   effort_score: number;
   impact_score: number;
   session_id?: string;
@@ -911,7 +915,7 @@ async function handleRegenerateFeatureBrief(
 /**
  * Export feature brief in specified format
  */
-async function handleExportFeatureBrief(params: {
+async function handleExportFeatureBrief(userId: string, params: {
   sessionId: string;
   format: 'markdown' | 'text' | 'pdf';
 }) {
@@ -922,6 +926,12 @@ async function handleExportFeatureBrief(params: {
       { error: 'sessionId is required' },
       { status: 400 }
     );
+  }
+
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
   try {
@@ -1038,7 +1048,13 @@ async function handleSwitchPathway(userId: string, params: { sessionId: string, 
   }
 }
 
-async function handleBackupSessionState(params: { sessionId: string, backupType?: 'manual_save' | 'auto_backup' }) {
+async function handleBackupSessionState(userId: string, params: { sessionId: string, backupType?: 'manual_save' | 'auto_backup' }) {
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(params.sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   try {
     const { universalSessionStateManager } = await import('@/lib/bmad/session/universal-state-manager');
 
@@ -1060,7 +1076,13 @@ async function handleBackupSessionState(params: { sessionId: string, backupType?
   }
 }
 
-async function handleRestoreSession(params: { sessionId: string, backupId: string }) {
+async function handleRestoreSession(userId: string, params: { sessionId: string, backupId: string }) {
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(params.sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   try {
     const { universalSessionStateManager } = await import('@/lib/bmad/session/universal-state-manager');
 
@@ -1082,7 +1104,13 @@ async function handleRestoreSession(params: { sessionId: string, backupId: strin
   }
 }
 
-async function handleSessionAnalytics(params: { sessionId: string }) {
+async function handleSessionAnalytics(userId: string, params: { sessionId: string }) {
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(params.sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   try {
     const { sessionAnalyticsEngine } = await import('@/lib/bmad/analytics/session-analytics');
 
@@ -1101,7 +1129,13 @@ async function handleSessionAnalytics(params: { sessionId: string }) {
   }
 }
 
-async function handleSyncSessionState(params: { sessionId: string, partialUpdate: any }) {
+async function handleSyncSessionState(userId: string, params: { sessionId: string, partialUpdate: any }) {
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(params.sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   try {
     const { universalSessionStateManager } = await import('@/lib/bmad/session/universal-state-manager');
 

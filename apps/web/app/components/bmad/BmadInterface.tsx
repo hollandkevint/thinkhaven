@@ -1,13 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { PathwayType, UserResponse, NumberedOption } from '@/lib/bmad/types'
+import { PathwayType } from '@/lib/bmad/types'
 import { useBmadSession } from './useBmadSession'
 import PathwaySelector from './PathwaySelector'
-import SessionManager from './SessionManager'
 import EnhancedSessionManager from './EnhancedSessionManager'
 import SessionHistoryManager from './SessionHistoryManager'
-import ElicitationPanel from './ElicitationPanel'
 import { SkeletonLoader } from './LoadingIndicator'
 import ErrorBoundary from './ErrorBoundary'
 import NewIdeaPathway from './pathways/NewIdeaPathway'
@@ -31,12 +29,6 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
     lastActivity: string
     progress: number
   } | null>(null)
-  const [mockElicitationData, setMockElicitationData] = useState<{
-    options: NumberedOption[]
-    phaseTitle: string
-    prompt: string
-  } | null>(null)
-
   const {
     currentSession,
     isLoading,
@@ -119,8 +111,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             
             await getSession(activeSession.id)
             setCurrentStep('session-active')
-            generateMockElicitationData()
-          } else if (allSessions.length === 0) {
+                } else if (allSessions.length === 0) {
             // First-time user - show onboarding
             setShowOnboarding(true)
           }
@@ -152,7 +143,6 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
     try {
       await createSession(workspaceId, pathway, userInput, recommendation)
       setCurrentStep('session-active')
-      generateMockElicitationData()
       
       // Clear preserved input since it has been consumed
       if (onInputConsumed) {
@@ -173,91 +163,6 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
     if (onInputConsumed) {
       onInputConsumed()
     }
-  }
-
-  const handleElicitationSubmit = async (response: UserResponse) => {
-    if (!currentSession) return
-
-    try {
-      const userInput = response.text || `Selected option ${response.elicitationChoice}`
-      await advanceSession(currentSession.id, userInput)
-      
-      // Generate new mock data for next phase
-      generateMockElicitationData()
-      
-      // Check if session is completed
-      if (currentSession.progress.overallCompletion >= 100) {
-        setCurrentStep('session-completed')
-      }
-    } catch (error) {
-      console.error('Error advancing session:', error)
-    }
-  }
-
-  // Generate mock elicitation data since backend may not be fully ready
-  const generateMockElicitationData = () => {
-    const mockOptions: NumberedOption[] = [
-      {
-        number: 1,
-        text: "Focus on market research and competitive analysis to understand the landscape",
-        category: "analysis",
-        estimatedTime: 15
-      },
-      {
-        number: 2, 
-        text: "Develop a minimum viable product (MVP) to test core assumptions",
-        category: "validation",
-        estimatedTime: 30
-      },
-      {
-        number: 3,
-        text: "Create detailed user personas and journey maps",
-        category: "strategy",
-        estimatedTime: 20
-      },
-      {
-        number: 4,
-        text: "Build financial models and revenue projections",
-        category: "analysis",
-        estimatedTime: 25
-      },
-      {
-        number: 5,
-        text: "Design a strategic partnership framework",
-        category: "strategy", 
-        estimatedTime: 18
-      },
-      {
-        number: 6,
-        text: "Establish key performance indicators (KPIs) and success metrics",
-        category: "optimization",
-        estimatedTime: 12
-      },
-      {
-        number: 7,
-        text: "Conduct stakeholder interviews and feedback sessions",
-        category: "validation",
-        estimatedTime: 35
-      },
-      {
-        number: 8,
-        text: "Develop a comprehensive go-to-market strategy",
-        category: "execution",
-        estimatedTime: 28
-      },
-      {
-        number: 9,
-        text: "Create a risk assessment and mitigation plan",
-        category: "analysis",
-        estimatedTime: 22
-      }
-    ]
-
-    setMockElicitationData({
-      options: mockOptions,
-      phaseTitle: "Strategic Direction Setting",
-      prompt: "Based on your pathway selection, what would be the most valuable next step to move your initiative forward? Choose the approach that best aligns with your current priorities and available resources."
-    })
   }
 
   const renderBreadcrumbs = () => {
@@ -320,8 +225,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                   try {
                     await getSession(sessionId)
                     setCurrentStep('session-active')
-                    generateMockElicitationData()
-                  } catch (error) {
+                                } catch (error) {
                     console.error('Error resuming session:', error)
                   }
                 }}
@@ -392,20 +296,6 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
               />
             </ErrorBoundary>
 
-            {mockElicitationData && (
-              <ErrorBoundary component="ElicitationPanel">
-                <ElicitationPanel
-                  sessionId={currentSession.id}
-                  phaseId={currentSession.currentPhase}
-                  phaseTitle={mockElicitationData.phaseTitle}
-                  prompt={mockElicitationData.prompt}
-                  options={mockElicitationData.options}
-                  onSubmit={handleElicitationSubmit}
-                  className="w-full"
-                />
-              </ErrorBoundary>
-            )}
-
             {/* Session History during active session */}
             <ErrorBoundary component="SessionHistoryManager">
               <SessionHistoryManager
@@ -415,8 +305,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                   if (sessionId !== currentSession.id) {
                     try {
                       await getSession(sessionId)
-                      generateMockElicitationData()
-                    } catch (error) {
+                                    } catch (error) {
                       console.error('Error switching session:', error)
                     }
                   }

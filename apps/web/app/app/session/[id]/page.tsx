@@ -5,7 +5,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { LayoutTemplate } from 'lucide-react'
+import { LayoutTemplate, ArrowLeft, MessageCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import BmadInterface from '@/app/components/bmad/BmadInterface'
@@ -593,26 +594,25 @@ export default function WorkspacePage() {
       {/* Main Content Pane - 60% */}
       <PaneErrorBoundary paneName="chat">
         <div className="chat-pane">
-        <header className="h-14 mb-4 flex justify-between items-center px-4" style={{ borderBottom: '1px solid var(--border)' }}>
+        <header className="h-14 mb-4 flex justify-between items-center px-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Link href="/app" style={{ color: 'var(--primary)' }} className="hover:opacity-80 transition-opacity">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
+            <Link href="/app" className="text-primary hover:opacity-80 transition-opacity">
+              <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>{workspace.name}</h1>
+            <h1 className="text-xl font-bold font-display text-foreground">{workspace.name}</h1>
           </div>
-          <div className="flex items-center gap-3 text-xs">
-            <button
+          <div className="flex items-center gap-2 text-xs">
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setIsCanvasOpen(!isCanvasOpen)}
-              className="flex items-center gap-1 px-3 py-1 rounded transition-colors hover:bg-black/5"
-              style={{ border: '1px solid var(--border)', color: 'var(--foreground)' }}
+              className="h-7 text-xs"
             >
-              <LayoutTemplate className="w-3 h-3" />
+              <LayoutTemplate className="w-3 h-3 mr-1" />
               {boardState
                 ? (isCanvasOpen ? 'Hide Board' : 'Show Board')
                 : (isCanvasOpen ? 'Hide Canvas' : 'Show Canvas')}
-            </button>
+            </Button>
             <ArtifactList mode="badge" />
             <ExportPanel
               messages={workspace.chat_context}
@@ -620,39 +620,34 @@ export default function WorkspacePage() {
               workspaceId={workspace.id}
             />
             <FeedbackButton variant="header" />
-            <span style={{ color: 'var(--muted)' }}>{user.email}</span>
-            <Link
-              href="/app/account"
-              className="px-3 py-1 rounded transition-colors"
-              style={{ border: '1px solid var(--border)', color: 'var(--foreground)' }}
-            >
-              Account
-            </Link>
-            <button
+            <span className="text-muted-foreground">{user.email}</span>
+            <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+              <Link href="/app/account">Account</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-destructive hover:text-destructive"
               onClick={signOut}
-              className="px-3 py-1 rounded transition-colors"
-              style={{ border: '1px solid var(--border)', color: 'var(--foreground)' }}
             >
               Sign Out
-            </button>
+            </Button>
           </div>
         </header>
         
         {/* Tab Navigation */}
-        <div className="mb-4 px-4" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className="mb-4 px-4 border-b border-border">
           <div className="flex gap-4">
             <button
               onClick={() => handleTabSwitch('chat')}
-              className="pb-3 px-1 text-sm font-medium border-b-2 transition-colors"
-              style={{
-                borderColor: activeTab === 'chat' ? 'var(--primary)' : 'transparent',
-                color: activeTab === 'chat' ? 'var(--primary)' : 'var(--muted)'
-              }}
+              className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'chat'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-primary hover:border-primary/50'
+              }`}
             >
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+                <MessageCircle className="w-4 h-4" />
                 Mary Chat
                 {workspace.chat_context.length > 0 && (
                   <span className="text-xs px-2 py-0.5 rounded-full bg-terracotta/10 text-terracotta">
@@ -666,7 +661,7 @@ export default function WorkspacePage() {
               className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'bmad'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-secondary hover:text-primary hover:border-primary/50'
+                  : 'border-transparent text-muted-foreground hover:text-primary hover:border-primary/50'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -786,10 +781,9 @@ export default function WorkspacePage() {
                       <div className="flex justify-end">
                         <div className="flex items-start gap-3 max-w-[70%]">
                           <div className="px-5 py-4 rounded-xl bg-terracotta/10">
-                            <p style={{ color: 'var(--foreground)' }}>{message.content}</p>
+                            <p className="text-foreground">{message.content}</p>
                           </div>
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                               style={{ backgroundColor: 'var(--primary)', color: 'white' }}>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-primary-foreground">
                             {user?.email?.[0]?.toUpperCase() || 'U'}
                           </div>
                         </div>
@@ -995,23 +989,23 @@ export default function WorkspacePage() {
           <BoardOverview boardState={boardState} />
         ) : (
           <div className="canvas-pane">
-          <header className="h-14 mb-4 flex justify-between items-center" style={{ borderBottom: '1px solid var(--border)' }}>
+          <header className="h-14 mb-4 flex justify-between items-center border-b border-border">
             <div>
-              <h2 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>Visual Canvas</h2>
-              <p className="text-sm" style={{ color: 'var(--muted)' }}>Sketches & diagrams</p>
+              <h2 className="text-xl font-bold font-display text-foreground">Visual Canvas</h2>
+              <p className="text-sm text-muted-foreground">Sketches & diagrams</p>
             </div>
             <div className="text-right text-xs">
               <div className="mb-1">
-                <span style={{ color: 'var(--muted)' }}>Messages:</span>
-                <span className="font-medium ml-1" style={{ color: 'var(--foreground)' }}>{workspace.chat_context.length}</span>
+                <span className="text-muted-foreground">Messages:</span>
+                <span className="font-medium ml-1 text-foreground">{workspace.chat_context.length}</span>
               </div>
               <div className="mb-1">
-                <span style={{ color: 'var(--muted)' }}>Elements:</span>
-                <span className="font-medium ml-1" style={{ color: 'var(--foreground)' }}>{workspace.canvas_elements.length}</span>
+                <span className="text-muted-foreground">Elements:</span>
+                <span className="font-medium ml-1 text-foreground">{workspace.canvas_elements.length}</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-forest"></div>
-                <span style={{ color: 'var(--muted)' }}>Auto-saved</span>
+                <span className="text-muted-foreground">Auto-saved</span>
               </div>
             </div>
           </header>

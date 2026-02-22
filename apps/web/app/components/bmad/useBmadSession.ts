@@ -2,8 +2,6 @@
 
 import { useState, useCallback } from 'react'
 import { BmadSession, PathwayType } from '@/lib/bmad/types'
-import { BmadErrorHandler } from '@/lib/bmad/error-handler'
-import { BmadErrorMonitor } from '@/lib/bmad/error-monitor'
 
 interface UseBmadSessionReturn {
   currentSession: BmadSession | null
@@ -77,17 +75,9 @@ export function useBmadSession(): UseBmadSessionReturn {
         throw new Error(result.error || 'Failed to create session')
       }
     } catch (err) {
-      // Monitor error for analytics and debugging
-      BmadErrorMonitor.captureSessionError(err as Error, {
-        workspaceId,
-        pathway,
-        action: 'create-session'
-      })
-
-      const userError = BmadErrorHandler.handleError(err, 'session-creation')
-      setError(userError.message)
-      console.error('BMad Session Creation Error:', BmadErrorHandler.formatErrorForLogging(err, 'session-creation'))
-      throw err
+      const message = err instanceof Error ? err.message : 'Failed to create session'
+      setError(message)
+      console.error('BMad Session Creation Error:', err)
     } finally {
       setIsLoading(false)
     }
@@ -141,16 +131,9 @@ export function useBmadSession(): UseBmadSessionReturn {
         throw new Error(result.error || 'Failed to advance session')
       }
     } catch (err) {
-      // Monitor error for analytics and debugging
-      BmadErrorMonitor.captureSessionError(err as Error, {
-        sessionId,
-        action: 'advance-session'
-      })
-
-      const userError = BmadErrorHandler.handleError(err, 'session-advance')
-      setError(userError.message)
-      console.error('BMad Session Advance Error:', BmadErrorHandler.formatErrorForLogging(err, 'session-advance'))
-      throw err
+      const message = err instanceof Error ? err.message : 'Failed to advance session'
+      setError(message)
+      console.error('BMad Session Advance Error:', err)
     } finally {
       setIsLoading(false)
     }
@@ -184,16 +167,9 @@ export function useBmadSession(): UseBmadSessionReturn {
         throw new Error(result.error || 'Failed to get session')
       }
     } catch (err) {
-      // Monitor error for analytics and debugging
-      BmadErrorMonitor.captureSessionError(err as Error, {
-        sessionId,
-        action: 'get-session'
-      })
-
-      const userError = BmadErrorHandler.handleError(err, 'session-retrieval')
-      setError(userError.message)
-      console.error('BMad Session Retrieval Error:', BmadErrorHandler.formatErrorForLogging(err, 'session-retrieval'))
-      throw err
+      const message = err instanceof Error ? err.message : 'Failed to load session'
+      setError(message)
+      console.error('BMad Session Retrieval Error:', err)
     } finally {
       setIsLoading(false)
     }
