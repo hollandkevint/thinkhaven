@@ -1,99 +1,80 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { WaitlistForm } from '@/components/waitlist/WaitlistForm'
-import { Search, ClipboardCheck, FileText, CheckCircle, Mail, MapPin, Quote, ArrowRight } from 'lucide-react'
+import { ArrowRight, Mail, MapPin } from 'lucide-react'
+import { BOARD_MEMBERS } from '@/lib/ai/board-members'
+import type { BoardMemberId } from '@/lib/ai/board-types'
+
+const LANDING_QUOTES: Record<BoardMemberId, string> = {
+  mary: 'Let me bring in Victoria here, because this is really a question about whether the economics work.',
+  victoria: 'Who signs the check? Walk me through your unit economics.',
+  casey: 'Real talk, do you actually want to spend two years on this?',
+  elaine: 'I have seen this pattern before. What usually happens next is...',
+  omar: 'What ships this quarter? Who is building this? What is the critical path?',
+  taylor: 'How does this decision sit with you emotionally?',
+}
+
+const boardMembers = BOARD_MEMBERS.map(member => ({
+  ...member,
+  quote: LANDING_QUOTES[member.id],
+  cssColor: `var(--board-${member.id})`,
+}))
 
 export default function Home() {
-  const router = useRouter()
-
   return (
     <div className="min-h-screen bg-cream overflow-hidden">
-      {/* Subtle texture overlay for depth */}
-      <div
-        className="fixed inset-0 pointer-events-none opacity-[0.015] z-0"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        }}
-      />
-
-      {/* Hero Section - Deliberate Symmetry + Bold Statement */}
+      {/* Hero Section */}
       <div className="relative z-10">
         <div className="container mx-auto px-4 pt-20 pb-16">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Decorative frame element - Wes Anderson touch */}
-            <div className="relative inline-block mb-8 animate-fadeIn">
-              <div className="absolute -inset-4 border border-ink/10 rounded-sm" />
-              <Badge
-                variant="secondary"
-                className="relative px-6 py-2.5 text-sm font-medium font-display tracking-wide bg-parchment text-ink border-0 shadow-sm"
-              >
-                Join the Beta — Limited Spots Available
-              </Badge>
-            </div>
-
             <h1
               className="text-5xl md:text-6xl lg:text-7xl font-medium font-display text-ink mb-8 leading-[1.1] tracking-tight animate-fadeIn"
-              style={{ animationDelay: '100ms' }}
             >
-              Don&apos;t waste 6 months
+              Pressure-test your strategy
               <br />
-              building something
-              <br />
-              <span className="text-rust italic">nobody wants</span>
+              <span className="text-rust italic">before the room does.</span>
             </h1>
 
             <p
               className="text-xl md:text-2xl text-ink-light font-body mb-10 max-w-2xl mx-auto leading-relaxed animate-fadeIn"
-              style={{ animationDelay: '200ms' }}
+              style={{ animationDelay: '100ms' }}
             >
-              Get your startup idea validated by AI in 30 minutes.
+              Your AI won&apos;t tell you your idea is bad.
               <br className="hidden md:block" />
-              <strong className="text-ink">Know if you should build it</strong> before you invest.
+              <strong className="text-ink">ThinkHaven will.</strong>
             </p>
 
-            {/* Primary CTA - Framed */}
             <div
-              className="mb-6 animate-fadeIn"
-              style={{ animationDelay: '300ms' }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 animate-fadeIn"
+              style={{ animationDelay: '200ms' }}
             >
-              <WaitlistForm />
-            </div>
-
-            <div
-              className="flex justify-center mb-6 animate-fadeIn"
-              style={{ animationDelay: '400ms' }}
-            >
+              <Button
+                size="lg"
+                className="group px-8 py-5 text-lg font-medium font-display bg-terracotta hover:bg-terracotta-hover text-cream transition-all duration-200"
+                asChild
+              >
+                <Link href="/try">
+                  Try a Free Session
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="group px-8 py-5 text-lg font-medium font-display border-2 border-ink/20 hover:border-ink hover:bg-ink hover:text-cream transition-all duration-200"
-                onClick={() => router.push('/assessment')}
+                asChild
               >
-                Try Free Assessment First
-                <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                <Link href="/assessment">
+                  Take the 5-Minute Assessment
+                </Link>
               </Button>
             </div>
 
             <p
-              className="text-sm text-slate-blue flex items-center justify-center gap-8 flex-wrap animate-fadeIn"
-              style={{ animationDelay: '500ms' }}
+              className="text-sm text-slate-blue animate-fadeIn"
+              style={{ animationDelay: '300ms' }}
             >
-              <span className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-forest" />
-                30-minute AI validation
-              </span>
-              <span className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-forest" />
-                10 critical questions
-              </span>
-              <span className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-forest" />
-                Professional report
-              </span>
+              No account required. 5 free messages to see if it&apos;s for you.
             </p>
           </div>
         </div>
@@ -106,211 +87,171 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Value Proposition - Framed Cards with Asymmetric Layout */}
+      {/* Board of Directors Section */}
       <div className="relative z-10 py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            {/* Section Header with Frame */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-4">
               <h2 className="inline-block text-3xl md:text-4xl font-medium font-display text-ink relative">
-                What you get in 30 minutes
+                Your Personal Board of Directors
                 <div className="absolute -bottom-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-terracotta/40 to-transparent" />
               </h2>
             </div>
+            <p className="text-center text-ink-light font-body max-w-2xl mx-auto mb-12 text-lg leading-relaxed">
+              Six AI advisors with distinct worldviews challenge your thinking from every angle. They disagree with each other. That&apos;s the point.
+            </p>
 
-            {/* Feature Cards - Staggered Animation */}
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                {
-                  icon: Search,
-                  color: 'terracotta',
-                  title: '10 Critical Questions',
-                  description: 'Problem clarity, target market, competition, differentiation — the questions that matter.',
-                  delay: '0ms'
-                },
-                {
-                  icon: ClipboardCheck,
-                  color: 'forest',
-                  title: 'Validation Scorecard',
-                  description: 'Clear verdict: Build it, Pivot, or Kill it — with reasoning you can share.',
-                  delay: '100ms'
-                },
-                {
-                  icon: FileText,
-                  color: 'mustard',
-                  title: 'Professional Report',
-                  description: 'Export your validation to share with advisors, investors, or your team.',
-                  delay: '200ms'
-                }
-              ].map((feature, index) => {
-                const Icon = feature.icon
-                const colorClasses = {
-                  terracotta: 'bg-terracotta/8 text-terracotta border-terracotta/20',
-                  forest: 'bg-forest/8 text-forest border-forest/20',
-                  mustard: 'bg-mustard/8 text-mustard border-mustard/20'
-                }
-                return (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {boardMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="relative bg-parchment rounded-lg p-6 border border-ink/8 shadow-sm hover:shadow-md transition-shadow duration-300"
+                >
                   <div
-                    key={index}
-                    className="group relative animate-fadeIn h-full"
-                    style={{ animationDelay: feature.delay }}
-                  >
-                    {/* Card with decorative corner */}
-                    <div className="relative h-full bg-parchment rounded-lg p-6 border border-ink/8 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
-                      {/* Decorative corner accent */}
-                      <div className={`absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-lg ${
-                        feature.color === 'terracotta' ? 'border-terracotta/30' :
-                        feature.color === 'forest' ? 'border-forest/30' : 'border-mustard/30'
-                      }`} />
+                    className="absolute top-0 left-0 right-0 h-1 rounded-t-lg"
+                    style={{ backgroundColor: member.cssColor }}
+                  />
 
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${colorClasses[feature.color as keyof typeof colorClasses]}`}>
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <h3 className="text-lg font-medium font-display text-ink mb-2">{feature.title}</h3>
-                      <p className="text-ink-light font-body text-sm leading-relaxed flex-grow">{feature.description}</p>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-cream font-display font-bold text-sm"
+                      style={{ backgroundColor: member.cssColor }}
+                    >
+                      {member.name[0]}
+                    </div>
+                    <div>
+                      <p className="font-display font-medium text-ink text-sm">
+                        {member.name}
+                      </p>
+                      <p className="text-xs text-slate-blue">
+                        {member.role}
+                        {member.isOptIn && <span className="ml-1 text-ink/40">(opt-in)</span>}
+                      </p>
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Social Proof - Distinct Color Block */}
-      <div className="relative z-10 bg-parchment border-y border-ink/8">
-        {/* Subtle pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, #2C2416 1px, transparent 0)',
-            backgroundSize: '24px 24px'
-          }}
-        />
-
-        <div className="relative container mx-auto px-4 py-20">
-          <div className="max-w-4xl mx-auto">
-            {/* Statement stat - Bold focal point */}
-            <div className="text-center mb-16">
-              <div className="inline-block relative">
-                <span className="text-8xl md:text-9xl font-display font-medium text-terracotta leading-none">50+</span>
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-terracotta/30 rounded-full" />
-              </div>
-              <p className="mt-4 text-lg text-slate-blue font-body">Sparring Sessions Completed</p>
-            </div>
-
-            <h2 className="text-2xl md:text-3xl font-medium font-display text-center text-ink mb-12">
-              What Strategic Thinkers Are Saying
-            </h2>
-
-            {/* Testimonials - Framed quotes */}
-            <div className="grid md:grid-cols-2 gap-8">
-              {[
-                {
-                  quote: "The assessment pinpointed exactly where my strategic thinking was weak. Within 2 weeks, my recommendations started getting approved consistently.",
-                  name: "Sarah Chen",
-                  role: "Senior Product Manager, Healthcare SaaS"
-                },
-                {
-                  quote: "I've tried other strategic frameworks, but ThinkHaven is the first that felt systematic enough for someone with a technical background.",
-                  name: "Marcus Rodriguez",
-                  role: "Engineering Director, Biotech"
-                }
-              ].map((testimonial, index) => (
-                <Card
-                  key={index}
-                  className="group bg-cream border-ink/10 hover:border-ink/20 transition-all duration-300 overflow-hidden"
-                >
-                  <CardContent className="relative p-6">
-                    {/* Quote mark decoration */}
-                    <Quote className="absolute top-4 right-4 w-8 h-8 text-terracotta/10 transform rotate-180" />
-
-                    <p className="text-ink-light font-body mb-6 leading-relaxed relative z-10 italic">
-                      "{testimonial.quote}"
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-terracotta/20 to-forest/20 flex items-center justify-center">
-                        <span className="font-display text-sm text-ink font-medium">
-                          {testimonial.name.split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-ink font-medium font-display text-sm">{testimonial.name}</p>
-                        <p className="text-slate-blue text-xs">{testimonial.role}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <p className="text-ink-light font-body text-sm leading-relaxed italic">
+                    &ldquo;{member.quote}&rdquo;
+                  </p>
+                </div>
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Final CTA Section - Bold Color Block */}
-      <div className="relative z-10 bg-terracotta overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-8 left-8 w-24 h-24 border border-cream/10 rounded-full" />
-          <div className="absolute bottom-8 right-8 w-32 h-32 border border-cream/10 rounded-full" />
-          <div className="absolute top-1/2 left-1/4 w-16 h-16 border border-cream/5 rounded-full" />
-        </div>
-
-        <div className="relative container mx-auto px-4 py-20 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-medium font-display text-cream mb-6 leading-tight">
-              Stop guessing.
-              <br />
-              Start validating.
-            </h2>
-            <p className="text-xl text-cream/85 font-body mb-10 max-w-xl mx-auto">
-              73% of startups fail because they build something nobody wants.
-              Join the beta and validate before you build.
-            </p>
-
-            <div className="bg-cream/10 backdrop-blur-sm rounded-xl p-6 mb-8 border border-cream/10">
-              <WaitlistForm />
+      {/* What Actually Changes */}
+      <div className="relative z-10 bg-parchment border-y border-ink/8">
+        <div className="container mx-auto px-4 py-20">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="inline-block text-3xl md:text-4xl font-medium font-display text-ink relative">
+                What Actually Changes
+                <div className="absolute -bottom-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-terracotta/40 to-transparent" />
+              </h2>
             </div>
 
-            <p className="text-cream/70 text-sm flex items-center justify-center gap-8 flex-wrap mb-8">
-              <span className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-cream/60" />
-                Limited beta spots
-              </span>
-              <span className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-cream/60" />
-                Early access pricing
-              </span>
-              <span className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-cream/60" />
-                Direct founder support
-              </span>
-            </p>
+            <div className="grid md:grid-cols-2 gap-x-12 gap-y-10">
+              {[
+                {
+                  title: 'Blind spots surfaced',
+                  description: 'Six perspectives find gaps your thinking can\u2019t. The investor sees what the operator misses. The coach sees what the investor ignores.',
+                },
+                {
+                  title: 'Kill-or-go decisions, faster',
+                  description: 'Accelerates the decision you\u2019re avoiding. Not more data, just sharper questions from people who aren\u2019t afraid to ask them.',
+                },
+                {
+                  title: 'Challenged thinking, not validated thinking',
+                  description: 'Names tensions, pokes weak spots, surfaces the thing nobody in the room wants to say. That\u2019s the value.',
+                },
+                {
+                  title: 'A session artifact you can share',
+                  description: 'Scorecard and reasoning you can hand to a co-founder, advisor, or investor. Not a chatbot transcript.',
+                },
+              ].map((outcome, index) => (
+                <div key={index} className="flex gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center mt-0.5">
+                    <span className="text-terracotta font-display font-bold text-sm">{index + 1}</span>
+                  </div>
+                  <div>
+                    <h3 className="font-display font-medium text-ink mb-1">{outcome.title}</h3>
+                    <p className="text-ink-light font-body text-sm leading-relaxed">{outcome.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <div className="pt-6 border-t border-cream/20">
-              <p className="text-cream text-sm">
-                Not ready to commit?{' '}
-                <a
-                  href="/assessment"
-                  className="text-cream underline underline-offset-4 font-semibold hover:text-parchment transition-colors"
-                >
-                  Take the free 5-minute assessment first
-                </a>
+      {/* Who Built This */}
+      <div className="relative z-10 py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center justify-center gap-4 mb-12">
+              <div className="w-16 h-px bg-ink/10" />
+              <span className="text-sm font-display text-ink/40 tracking-widest uppercase">Built by</span>
+              <div className="w-16 h-px bg-ink/10" />
+            </div>
+
+            <div className="text-center">
+              <h3 className="text-2xl md:text-3xl font-medium font-display text-ink mb-2">
+                Kevin Holland
+              </h3>
+              <p className="text-ink-light font-body mb-6 text-sm">
+                Naval officer. Healthcare data product leader. 15 years building products that ship. $9M ARR. 800+ hours in Claude Code.
+              </p>
+              <p className="text-ink-light font-body leading-relaxed max-w-2xl mx-auto italic">
+                ThinkHaven exists because I kept watching smart people build the wrong thing. Not because the idea was bad, but because nobody challenged it hard enough, early enough.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer - Refined */}
+      {/* Final CTA Section */}
+      <div className="relative z-10 bg-terracotta">
+        <div className="container mx-auto px-4 py-20 text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-medium font-display text-cream mb-6 leading-tight">
+              Building is easier than ever.
+              <br />
+              <span className="italic">Deciding what to build is hard.</span>
+            </h2>
+
+            <div className="mb-10">
+              <Button
+                size="lg"
+                className="group px-10 py-6 text-lg font-medium font-display bg-cream text-ink hover:bg-parchment transition-all duration-200"
+                asChild
+              >
+                <Link href="/try">
+                  Start a Free Session
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </div>
+
+            <div className="border-t border-cream/20 pt-8">
+              <p className="text-cream/70 text-sm mb-4">Want updates instead? Leave your email.</p>
+              <div className="max-w-md mx-auto">
+                <WaitlistForm />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
       <div className="relative z-10 bg-ink text-cream">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-4 gap-12">
-              <div className="md:col-span-2">
+            <div className="grid md:grid-cols-3 gap-12">
+              <div className="md:col-span-1">
                 <h3 className="text-2xl font-medium font-display mb-3 text-cream">ThinkHaven</h3>
                 <p className="text-cream/60 font-body mb-6 max-w-sm">
-                  Transform strategic analysis from art into science. Make better decisions, faster.
+                  Pressure-test your thinking before the room does.
                 </p>
                 <div className="space-y-2">
                   <a href="mailto:kevin@kevintholland.com" className="text-sm text-cream/60 hover:text-cream flex items-center gap-2 transition-colors">
@@ -324,31 +265,27 @@ export default function Home() {
                 </div>
               </div>
               <div>
-                <h4 className="font-medium font-display mb-4 text-cream/90">Resources</h4>
+                <h4 className="font-medium font-display mb-4 text-cream/90">Try It</h4>
                 <ul className="space-y-3 text-sm">
                   <li>
-                    <a href="/assessment" className="text-cream/60 hover:text-cream transition-colors">
-                      Free Assessment
-                    </a>
+                    <Link href="/try" className="text-cream/60 hover:text-cream transition-colors">
+                      Free Session
+                    </Link>
                   </li>
                   <li>
-                    <a href="/try" className="text-cream/60 hover:text-cream transition-colors">
-                      Try Free
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/blog" className="text-cream/60 hover:text-cream transition-colors">Blog</a>
+                    <Link href="/assessment" className="text-cream/60 hover:text-cream transition-colors">
+                      Strategy Assessment
+                    </Link>
                   </li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-medium font-display mb-4 text-cream/90">Legal</h4>
+                <h4 className="font-medium font-display mb-4 text-cream/90">Connect</h4>
                 <ul className="space-y-3 text-sm">
                   <li>
-                    <span className="text-cream/30">Privacy Policy (Coming Soon)</span>
-                  </li>
-                  <li>
-                    <span className="text-cream/30">Terms of Service (Coming Soon)</span>
+                    <a href="mailto:kevin@kevintholland.com" className="text-cream/60 hover:text-cream transition-colors">
+                      Email Kevin
+                    </a>
                   </li>
                 </ul>
               </div>

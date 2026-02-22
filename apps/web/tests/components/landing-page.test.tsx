@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock Next.js navigation
-const mockPush = vi.fn()
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush })
+  useRouter: () => ({ push: vi.fn() })
+}))
+
+// Mock next/link to render as a plain anchor
+vi.mock('next/link', () => ({
+  default: ({ children, href, ...props }: any) => (
+    <a href={href} {...props}>{children}</a>
+  )
 }))
 
 // Mock Supabase client (used by WaitlistForm)
@@ -17,23 +23,16 @@ vi.mock('@/lib/supabase/client', () => ({
 
 // Mock UI components
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, ...props }: any) => (
-    <button onClick={onClick} {...props}>
-      {children}
-    </button>
-  )
+  Button: ({ children, asChild, ...props }: any) => {
+    if (asChild) {
+      // When asChild, render children directly (Radix Slot behavior)
+      return <>{children}</>
+    }
+    return <button {...props}>{children}</button>
+  }
 }))
 
-vi.mock('@/components/ui/card', () => ({
-  Card: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  CardContent: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-}))
-
-vi.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>
-}))
-
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import Home from '../../app/page'
 
 describe('Landing Page', () => {
@@ -47,44 +46,57 @@ describe('Landing Page', () => {
       expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
     })
 
-    it('should render the beta badge', () => {
+    it('should render board member names', () => {
       render(<Home />)
-      expect(screen.getByText(/Join the Beta/)).toBeInTheDocument()
+      expect(screen.getByText('Mary')).toBeInTheDocument()
+      expect(screen.getByText('Victoria')).toBeInTheDocument()
+      expect(screen.getByText('Omar')).toBeInTheDocument()
     })
 
-    it('should render value proposition cards', () => {
+    it('should render Kevin Holland credibility section', () => {
       render(<Home />)
-      expect(screen.getByText('10 Critical Questions')).toBeInTheDocument()
-      expect(screen.getByText('Validation Scorecard')).toBeInTheDocument()
-      expect(screen.getByText('Professional Report')).toBeInTheDocument()
+      expect(screen.getByText('Kevin Holland')).toBeInTheDocument()
     })
 
-    it('should render testimonials', () => {
+    it('should render the board of directors section heading', () => {
       render(<Home />)
-      expect(screen.getByText('Sarah Chen')).toBeInTheDocument()
-      expect(screen.getByText('Marcus Rodriguez')).toBeInTheDocument()
+      expect(screen.getByText('Your Personal Board of Directors')).toBeInTheDocument()
+    })
+
+    it('should render the outcomes section heading', () => {
+      render(<Home />)
+      expect(screen.getByText('What Actually Changes')).toBeInTheDocument()
     })
   })
 
   describe('Navigation', () => {
-    it('should navigate to /assessment when "Try Free Assessment First" is clicked', () => {
+    it('should link to /try from hero CTA', () => {
       render(<Home />)
-      const assessmentButton = screen.getByText('Try Free Assessment First')
+      const tryLink = screen.getByText('Try a Free Session')
+      expect(tryLink.closest('a')).toHaveAttribute('href', '/try')
+    })
 
-      fireEvent.click(assessmentButton)
+    it('should link to /assessment from hero', () => {
+      render(<Home />)
+      const assessmentLink = screen.getByText('Take the 5-Minute Assessment')
+      expect(assessmentLink.closest('a')).toHaveAttribute('href', '/assessment')
+    })
 
-      expect(mockPush).toHaveBeenCalledWith('/assessment')
+    it('should link to /try from final CTA', () => {
+      render(<Home />)
+      const startLink = screen.getByText('Start a Free Session')
+      expect(startLink.closest('a')).toHaveAttribute('href', '/try')
     })
 
     it('should have footer link to /try', () => {
       render(<Home />)
-      const tryLink = screen.getByText('Try Free')
+      const tryLink = screen.getByText('Free Session')
       expect(tryLink).toHaveAttribute('href', '/try')
     })
 
     it('should have footer link to /assessment', () => {
       render(<Home />)
-      const assessmentLink = screen.getByText('Free Assessment')
+      const assessmentLink = screen.getByText('Strategy Assessment')
       expect(assessmentLink).toHaveAttribute('href', '/assessment')
     })
   })

@@ -46,7 +46,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
   if (loading) {
     return (
       <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
-        <div className="font-bold text-xl text-ink">Thinkhaven</div>
+        <div className="font-bold text-xl text-ink font-display">ThinkHaven</div>
         <div className="w-8 h-8 bg-parchment rounded-full animate-pulse"></div>
       </nav>
     )
@@ -56,10 +56,10 @@ export default function Navigation({ className = '' }: NavigationProps) {
     <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
       {/* Logo/Brand */}
       <div
-        className="font-bold text-xl text-ink cursor-pointer hover:text-terracotta transition-colors"
+        className="font-bold text-xl text-ink font-display cursor-pointer hover:text-terracotta transition-colors"
         onClick={() => router.push('/')}
       >
-        Thinkhaven
+        ThinkHaven
       </div>
 
       {/* Desktop Navigation */}

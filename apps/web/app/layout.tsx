@@ -29,8 +29,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Thinkhaven",
-  description: "AI-powered strategic thinking workspace with dual-pane interface for coaching and visual exploration",
+  title: "ThinkHaven",
+  description: "Pressure-test your strategy before the room does. AI that challenges your thinking instead of validating it.",
 };
 
 export default function RootLayout({
