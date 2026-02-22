@@ -111,7 +111,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             
             await getSession(activeSession.id)
             setCurrentStep('session-active')
-                } else if (allSessions.length === 0) {
+          } else if (allSessions.length === 0) {
             // First-time user - show onboarding
             setShowOnboarding(true)
           }
@@ -225,7 +225,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                   try {
                     await getSession(sessionId)
                     setCurrentStep('session-active')
-                                } catch (error) {
+                  } catch (error) {
                     console.error('Error resuming session:', error)
                   }
                 }}
@@ -305,7 +305,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                   if (sessionId !== currentSession.id) {
                     try {
                       await getSession(sessionId)
-                                    } catch (error) {
+                    } catch (error) {
                       console.error('Error switching session:', error)
                     }
                   }

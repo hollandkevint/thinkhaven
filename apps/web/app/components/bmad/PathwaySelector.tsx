@@ -19,9 +19,8 @@ interface PathwaySelectorProps {
   preservedInput?: string
 }
 
-export default function PathwaySelector({ 
-  onPathwaySelected, 
-  workspaceId: _workspaceId, 
+export default function PathwaySelector({
+  onPathwaySelected,
   className = '',
   preservedInput
 }: PathwaySelectorProps) {
