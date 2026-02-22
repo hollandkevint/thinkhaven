@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { PathwayType, BmadPathway } from '@/lib/bmad/types'
 import { SessionCreationLoader, PathwayAnalysisLoader, SkeletonLoader } from './LoadingIndicator'
 import { GracefulDegradation } from '@/lib/bmad/service-status'
-import { BmadErrorMonitor } from '@/lib/bmad/error-monitor'
 
 interface PathwayRecommendation {
   recommendedPathway: PathwayType
@@ -63,12 +62,6 @@ export default function PathwaySelector({
 
       setPathways(pathways)
     } catch (error) {
-      // Monitor error for analytics and debugging
-      BmadErrorMonitor.capturePathwayError(error as Error, {
-        workspaceId: _workspaceId,
-        action: 'fetch-pathways'
-      })
-
       console.error('Error fetching pathways:', error)
       // Final fallback if everything fails
       setPathways(getDefaultPathways())
@@ -193,13 +186,6 @@ export default function PathwaySelector({
       setRecommendation(result)
       setShowRecommendation(true)
     } catch (error) {
-      // Monitor error for analytics and debugging
-      BmadErrorMonitor.capturePathwayError(error as Error, {
-        workspaceId: _workspaceId,
-        userInput: userInput.trim(),
-        action: 'analyze-intent'
-      })
-
       console.error('Error analyzing intent:', error)
       // Even if both primary and fallback fail, show a basic recommendation
       setRecommendation({
@@ -235,14 +221,6 @@ export default function PathwaySelector({
     try {
       await onPathwaySelected(pathway, userInput.trim() || undefined, recommendation)
     } catch (error) {
-      // Monitor error for analytics and debugging
-      BmadErrorMonitor.capturePathwayError(error as Error, {
-        workspaceId: _workspaceId,
-        pathway,
-        userInput: userInput.trim() || undefined,
-        action: 'select-pathway'
-      })
-
       console.error('Error selecting pathway:', error)
       setSelectedPathway(null)
     } finally {

@@ -1,13 +1,11 @@
 'use client'
 
 import { Component, ReactNode, ErrorInfo } from 'react'
-import { BmadErrorMonitor } from '@/lib/bmad/error-monitor'
 
 interface ErrorBoundaryState {
   hasError: boolean
   error: Error | null
   errorInfo: ErrorInfo | null
-  errorId?: string
 }
 
 interface ErrorBoundaryProps {
@@ -24,8 +22,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null,
-      errorId: undefined
+      errorInfo: null
     }
   }
 
@@ -33,31 +30,18 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     return {
       hasError: true,
       error,
-      errorInfo: null,
-      errorId: undefined
+      errorInfo: null
     }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Capture error in monitoring system
-    const errorId = BmadErrorMonitor.captureBoundaryError(
-      error, 
-      errorInfo, 
-      this.props.component || 'Unknown'
-    )
+    this.setState({ errorInfo })
 
-    this.setState({
-      errorInfo,
-      errorId
-    })
-
-    // Call optional error handler
     if (this.props.onError) {
       this.props.onError(error, errorInfo)
     }
 
-    // Log error for debugging (now handled by BmadErrorMonitor)
-    console.error('ErrorBoundary caught an error:', error, errorInfo, `Error ID: ${errorId}`)
+    console.error(`ErrorBoundary [${this.props.component || 'Unknown'}]:`, error, errorInfo)
   }
 
   retry = () => {
