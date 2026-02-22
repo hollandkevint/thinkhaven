@@ -14,12 +14,6 @@ export async function GET(request: NextRequest) {
   // Generate correlation ID for this authentication attempt
   const correlationId = `oauth_callback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-  console.log('OAuth Callback: Received request with params:', {
-    hasCode: !!code,
-    hasError: !!error,
-    correlationId
-  })
-
   // Handle OAuth errors
   if (error) {
     const latencyMs = Date.now() - startTime
@@ -111,7 +105,7 @@ export async function GET(request: NextRequest) {
         data.user.app_metadata?.provider
       )
 
-      console.log('OAuth callback: Redirecting to app')
+      console.log('[AUTH] OAuth login complete, redirecting to /app')
       return NextResponse.redirect(`${requestUrl.origin}/app`)
 
     } catch (err) {
@@ -134,6 +128,6 @@ export async function GET(request: NextRequest) {
   }
 
   // No code or error, redirect to login
-  console.log('OAuth callback: No code or error parameter, redirecting to login')
+  console.warn('[AUTH] OAuth callback hit with no code or error param, redirecting to /login')
   return NextResponse.redirect(`${requestUrl.origin}/login`)
 }

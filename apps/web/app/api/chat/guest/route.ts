@@ -46,23 +46,12 @@ export async function POST(request: NextRequest) {
       limitedHistory
     );
 
-    console.log('[Guest Chat] Request:', {
-      messageLength: message.length,
-      historyLength: limitedHistory.length,
-      currentMode: subPersonaState.currentMode,
-      detectedUserState: subPersonaState.detectedUserState,
-      exchangeCount: subPersonaState.exchangeCount,
-      timestamp: new Date().toISOString()
-    });
-
     const encoder = new StreamEncoder();
 
     // Create streaming response
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          console.log('[Guest Chat] Stream started');
-
           // Send initial metadata (including sub-persona mode)
           controller.enqueue(encoder.encodeMetadata({
             messageId: `guest-msg-${Date.now()}`,
@@ -76,8 +65,6 @@ export async function POST(request: NextRequest) {
               userControlEnabled: subPersonaState.userControlEnabled,
             },
           }));
-
-          console.log('[Guest Chat] Calling Claude API...');
 
           // Guest-specific coaching context with sub-persona system
           const guestCoachingContext: CoachingContext = {
@@ -96,8 +83,6 @@ export async function POST(request: NextRequest) {
             limitedHistory,
             guestCoachingContext
           );
-
-          console.log('[Guest Chat] Claude API responded, streaming content');
 
           // Stream the response
           let fullContent = '';
@@ -132,11 +117,6 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          console.log('[Guest Chat] Stream complete:', {
-            contentLength: fullContent.length,
-            usage: claudeResponse.usage
-          });
-
           // Send completion signal with sub-persona state for client persistence
           // (no usage data for guests to prevent API exposure)
           controller.enqueue(encoder.encodeComplete(undefined, undefined, {
@@ -163,7 +143,7 @@ export async function POST(request: NextRequest) {
       },
 
       cancel() {
-        console.log('[Guest Chat] Stream cancelled by client');
+        // Client disconnected
       }
     });
 

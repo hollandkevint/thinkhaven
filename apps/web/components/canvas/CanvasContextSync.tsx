@@ -34,6 +34,7 @@ interface CanvasContextSyncProps {
   canvasState: CanvasState | null
   onCanvasUpdate?: (diagramCode: string, type: string) => void
   onContextShare?: (context: string) => void
+  onScrollToCanvas?: (suggestionId: string) => void
   autoPopulate?: boolean
   autoDismissDelay?: number // Auto-dismiss notification after N milliseconds
   className?: string
@@ -48,6 +49,7 @@ export default function CanvasContextSync({
   canvasState,
   onCanvasUpdate,
   onContextShare,
+  onScrollToCanvas,
   autoPopulate = false,
   autoDismissDelay = 8000, // 8 seconds default
   className = '',
@@ -248,17 +250,8 @@ export default function CanvasContextSync({
             </div>
             <button
               onClick={() => {
-                // Scroll canvas into view and highlight the new element
-                const canvasContainer = document.querySelector('[data-canvas-container]');
-                if (canvasContainer) {
-                  canvasContainer.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                  });
-                  // Dispatch event for canvas to highlight the new element
-                  window.dispatchEvent(new CustomEvent('canvas:highlight', {
-                    detail: { suggestionId: activeSuggestion.id }
-                  }));
+                if (onScrollToCanvas) {
+                  onScrollToCanvas(activeSuggestion.id);
                 }
               }}
               className="flex-shrink-0 px-3 py-1.5 bg-forest hover:bg-forest/90 text-white text-xs font-medium rounded-md transition-colors shadow-sm hover:shadow"

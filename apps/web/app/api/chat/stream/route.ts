@@ -82,8 +82,6 @@ async function executeAgenticLoop(
   while (response.stopReason === 'tool_use' && rounds < MAX_TOOL_ROUNDS) {
     rounds++;
 
-    console.log('[Agentic Loop] Round', rounds, 'processing', response.toolUses.length, 'tool calls');
-
     // Convert tool uses to ToolCall format
     const toolCalls: ToolCall[] = response.toolUses.map(tu => ({
       id: tu.id,
@@ -175,16 +173,6 @@ export async function POST(request: NextRequest) {
   try {
     const { message, workspaceId, conversationHistory, coachingContext, useTools } = await request.json();
 
-    // Log incoming request (sanitized)
-    console.log('[Chat Stream] Incoming request:', {
-      messageLength: message?.length || 0,
-      workspaceId,
-      historyLength: conversationHistory?.length || 0,
-      hasCoachingContext: !!coachingContext,
-      useTools: !!useTools,
-      timestamp: new Date().toISOString()
-    });
-
     // Validate request
     if (!message || !workspaceId) {
       console.error('[Chat Stream] Validation failed:', { hasMessage: !!message, hasWorkspaceId: !!workspaceId });
@@ -208,16 +196,6 @@ export async function POST(request: NextRequest) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
-    console.log('[Chat Stream] User authenticated:', {
-      userId: user.id,
-    });
-
-    // Verify workspace access - using user_workspace table
-    console.log('[Chat Stream] Looking up workspace:', {
-      queryUserId: user.id,
-      requestWorkspaceId: workspaceId
-    });
 
     const { data: workspace, error: workspaceError } = await supabase
       .from('user_workspace')
@@ -243,11 +221,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log('[Chat Stream] Workspace found:', {
-      workspaceUserId: workspace.user_id,
-      hasState: !!workspace.workspace_state
-    });
-
     // ADMIN BYPASS CHECK: unlimited messages (check BEFORE any message limit logic)
     const isAdmin = isAdminEmail(user.email);
 
@@ -269,8 +242,6 @@ export async function POST(request: NextRequest) {
 
       // If no session exists, auto-create one for message limit tracking
       if (!sessionId) {
-        console.log('[Chat Stream] No BMad session found, creating one for message tracking');
-
         const { data: newSession, error: createError } = await supabase
           .from('bmad_sessions')
           .insert({
@@ -295,7 +266,6 @@ export async function POST(request: NextRequest) {
           // Don't fail the request - continue without tracking (fail open for session creation)
         } else {
           sessionId = newSession?.id || null;
-          console.log('[Chat Stream] Created tracking session:', { sessionId });
         }
       }
     } catch (error) {
@@ -321,11 +291,7 @@ export async function POST(request: NextRequest) {
 
       // Check if THIS increment pushed us over the limit (simplified check)
       if (incrementResult.limitReached) {
-        console.log('[Chat Stream] Message limit exceeded:', {
-          sessionId,
-          newCount: incrementResult.newCount,
-          limit: incrementResult.messageLimit
-        });
+        console.log('[LIMIT] Message limit reached:', { sessionId, count: incrementResult.newCount, limit: incrementResult.messageLimit });
 
         // Get current status for error response
         limitStatus = await checkMessageLimit(sessionId);
@@ -343,14 +309,8 @@ export async function POST(request: NextRequest) {
       // Update limitStatus for later use in response
       limitStatus = await checkMessageLimit(sessionId);
 
-      console.log('[Chat Stream] Message count pre-incremented:', {
-        sessionId,
-        newCount: incrementResult.newCount,
-        remaining: limitStatus?.remaining,
-      });
     } else if (isAdmin) {
       // Admin: Skip increment, set limitStatus to look unlimited so UI doesn't warn
-      console.log('[Chat Stream] Admin bypass: Skipping message limit tracking');
       limitStatus = {
         currentCount: 0,
         messageLimit: -1,
@@ -440,19 +400,7 @@ export async function POST(request: NextRequest) {
         managedHistory
       );
 
-      console.log('[Chat Stream] Sub-persona state updated:', {
-        currentMode: updatedSubPersonaState?.currentMode,
-        detectedUserState: updatedSubPersonaState?.detectedUserState,
-        exchangeCount: updatedSubPersonaState?.exchangeCount,
-        userControlEnabled: updatedSubPersonaState?.userControlEnabled,
-      });
     }
-
-    console.log('[Chat Stream] Preparing to call Claude:', {
-      messageLength: message.length,
-      historyMessages: managedHistory.length,
-      hasCoachingContext: !!finalCoachingContext
-    });
 
     const encoder = new StreamEncoder();
 
@@ -460,8 +408,6 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          console.log('[Chat Stream] Stream started, sending metadata');
-
           // Send initial metadata (including sub-persona mode for UI)
           controller.enqueue(encoder.encodeMetadata({
             coachingContext: finalCoachingContext,
@@ -477,17 +423,12 @@ export async function POST(request: NextRequest) {
             useTools: !!useTools,
           }));
 
-          console.log('[Chat Stream] Calling Claude API...', { useTools: !!useTools });
-
           let fullContent = '';
           let toolsExecuted: Array<{ name: string; success: boolean }> = [];
           let agenticRounds = 0;
 
           // Branch: Agentic loop with tools OR standard streaming
           if (useTools && bmadSessionForUpdate?.id) {
-            // Use agentic loop with tool execution
-            console.log('[Chat Stream] Using agentic tool loop');
-
             const agenticResult = await executeAgenticLoop(
               message,
               managedHistory,
@@ -499,13 +440,6 @@ export async function POST(request: NextRequest) {
             fullContent = agenticResult.finalText;
             toolsExecuted = agenticResult.toolsExecuted;
             agenticRounds = agenticResult.rounds;
-
-            console.log('[Chat Stream] Agentic loop complete:', {
-              textLength: fullContent.length,
-              toolsExecuted: toolsExecuted.length,
-              rounds: agenticRounds,
-              segments: agenticResult.segments.length,
-            });
 
             // Stream segments with speaker attribution
             if (agenticResult.segments.length > 0) {
@@ -541,16 +475,12 @@ export async function POST(request: NextRequest) {
 
           } else {
             // Standard streaming (no tools)
-            console.log('[Chat Stream] Using standard streaming');
-
             // Get Claude streaming response with coaching context
             const claudeResponse = await claudeClient.sendMessage(
               message,
               managedHistory,
               finalCoachingContext
             );
-
-            console.log('[Chat Stream] Claude API responded, starting to stream content');
 
             // Stream the response
             const reader = claudeResponse.content[Symbol.asyncIterator] ?
@@ -604,23 +534,11 @@ export async function POST(request: NextRequest) {
 
               if (updateError) {
                 console.error('[Chat Stream] Failed to persist sub-persona state:', updateError);
-              } else {
-                console.log('[Chat Stream] Sub-persona state persisted:', {
-                  sessionId: bmadSessionForUpdate.id,
-                  mode: updatedSubPersonaState.currentMode,
-                });
               }
             } catch (persistError) {
               console.error('[Chat Stream] Error persisting sub-persona state:', persistError);
             }
           }
-
-          console.log('[Chat Stream] Stream complete:', {
-            contentLength: fullContent.length,
-            limitStatus,
-            toolsExecuted: toolsExecuted.length > 0 ? toolsExecuted : undefined,
-            agenticRounds: agenticRounds > 0 ? agenticRounds : undefined,
-          });
 
           // Send completion signal with usage data, limit status, and tool info
           controller.enqueue(encoder.encodeComplete(
@@ -649,7 +567,7 @@ export async function POST(request: NextRequest) {
       },
 
       cancel() {
-        console.log('[Chat Stream] Stream cancelled by client');
+        // Client disconnected
       }
     });
 

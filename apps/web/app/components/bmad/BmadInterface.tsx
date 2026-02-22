@@ -8,6 +8,7 @@ import EnhancedSessionManager from './EnhancedSessionManager'
 import SessionHistoryManager from './SessionHistoryManager'
 import { SkeletonLoader } from './LoadingIndicator'
 import ErrorBoundary from './ErrorBoundary'
+import { ErrorState } from '@/app/components/ui/ErrorState'
 import NewIdeaPathway from './pathways/NewIdeaPathway'
 
 interface BmadInterfaceProps {
@@ -234,15 +235,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             </ErrorBoundary>
             
             {error && (
-              <div className="bg-error/5 border border-error/20 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <svg className="w-5 h-5 text-error" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                  <span className="text-error font-medium">Error</span>
-                </div>
-                <p className="text-error text-sm">{error}</p>
-              </div>
+              <ErrorState error={error} />
             )}
           </div>
         )
@@ -315,15 +308,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             </ErrorBoundary>
 
             {error && (
-              <div className="bg-error/5 border border-error/20 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <svg className="w-5 h-5 text-error" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                  </svg>
-                  <span className="text-error font-medium">Session Error</span>
-                </div>
-                <p className="text-error text-sm">{error}</p>
-              </div>
+              <ErrorState error={error} />
             )}
           </div>
         )

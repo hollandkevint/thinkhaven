@@ -15,7 +15,6 @@ import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/comp
 import { useSharedInput } from '@/app/components/workspace/useSharedInput'
 import CanvasContextSync from '@/components/canvas/CanvasContextSync'
 import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
-import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager'
 import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
 import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
@@ -27,6 +26,7 @@ import { ArtifactProvider } from '@/lib/artifact'
 import { ArtifactPanel, ArtifactList, ArtifactKeyboardHandler } from '@/app/components/artifact'
 import { ErrorState } from '@/app/components/ui/ErrorState'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
+import { useStreamingChat } from './useStreamingChat'
 
 // Dynamically import canvas components (SSR-safe)
 const EnhancedCanvasWorkspace = dynamic(
@@ -48,11 +48,9 @@ type WorkspaceTab = 'chat' | 'bmad'
 export default function WorkspacePage() {
   const params = useParams()
   const { user, loading: authLoading, signOut } = useAuth()
-  const [workspace, setWorkspace] = useState<Workspace | null>(null)
+  const [fetchedWorkspace, setFetchedWorkspace] = useState<Workspace | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [messageInput, setMessageInput] = useState('')
-  const [sendingMessage, setSendingMessage] = useState(false)
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('bmad')
   const [canvasState, setCanvasState] = useState<{
     mode: 'draw' | 'diagram'
@@ -61,13 +59,24 @@ export default function WorkspacePage() {
     drawingSnapshot?: string
     lastModified: Date
   } | null>(null)
-  const [limitStatus, setLimitStatus] = useState<MessageLimitStatus | null>(null)
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
-  const [boardState, setBoardState] = useState<BoardState | null>(null)
-  const workspaceRef = useRef<Workspace | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
+
+  // Streaming chat logic extracted to hook
+  const {
+    workspace,
+    setWorkspace,
+    messageInput,
+    setMessageInput,
+    sendingMessage,
+    limitStatus,
+    boardState,
+    setBoardState,
+    handleSendMessage,
+  } = useStreamingChat(fetchedWorkspace)
   const isOnline = useOnlineStatus()
   const { preserveInput, hasPreservedInput, peekPreservedInput, clearPreservedInput } = useSharedInput(params.id as string)
 
@@ -93,7 +102,7 @@ export default function WorkspacePage() {
         user_id: data.user_id
       }
 
-      setWorkspace(transformedWorkspace)
+      setFetchedWorkspace(transformedWorkspace)
     } catch (err) {
       console.error('Error fetching workspace:', err)
       const errorMessage = err instanceof Error ? err.message : 'Workspace not found or you do not have access to it'
@@ -118,317 +127,17 @@ export default function WorkspacePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, params.id])
 
-  const addChatMessage = async (message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
-    if (!workspace) return
-
-    const newMessage: ChatMessage = {
-      ...message,
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString()
-    }
-
-    const updatedChatContext = [...workspace.chat_context, newMessage]
-
-    try {
-      const { error } = await supabase
-        .from('user_workspace')
-        .update({
-          workspace_state: {
-            name: workspace.name,
-            description: workspace.description,
-            chat_context: updatedChatContext,
-            canvas_elements: workspace.canvas_elements,
-            updated_at: new Date().toISOString()
-          },
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', workspace.id)
-
-      if (error) throw error
-
-      setWorkspace({
-        ...workspace,
-        chat_context: updatedChatContext
-      })
-    } catch (error) {
-      console.error('Error saving message:', error)
-    }
-  }
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!messageInput.trim() || sendingMessage) return
-
-    const userMessage = messageInput
-    setSendingMessage(true)
-    setMessageInput('')
-
-    try {
-      // Add user message immediately
-      await addChatMessage({
-        role: 'user',
-        content: userMessage
-      })
-      
-      // Stream Mary's response from Claude API
-      await streamClaudeResponse(userMessage)
-      
-    } catch (err) {
-      console.error('[Workspace] Error sending message:', {
-        error: err instanceof Error ? err.message : 'Unknown error',
-        stack: err instanceof Error ? err.stack : undefined
+  const handleScrollToCanvas = useCallback((suggestionId: string) => {
+    if (canvasContainerRef.current) {
+      canvasContainerRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
       });
-
-      // Add detailed error message for user
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      await addChatMessage({
-        role: 'system',
-        content: `❌ **Error:** ${errorMessage}\n\n**Troubleshooting:**\n- Check your internet connection\n- Verify you're signed in\n- Try refreshing the page\n- If the problem persists, contact support`
-      })
-    } finally {
-      setSendingMessage(false)
+      window.dispatchEvent(new CustomEvent('canvas:highlight', {
+        detail: { suggestionId }
+      }));
     }
-  }
-
-  const streamClaudeResponse = async (message: string) => {
-    try {
-      const response = await fetch('/api/chat/stream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message,
-          workspaceId: workspace?.id,
-          conversationHistory: workspace?.chat_context?.slice(-10) || [] // Last 10 messages for context
-        }),
-      });
-
-      if (!response.ok) {
-        // Try to parse error details from response
-        const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.details || errorData?.error || response.statusText || 'Unknown error';
-        const errorHint = errorData?.hint || 'Please try again';
-
-        console.error('[Workspace] HTTP error:', {
-          status: response.status,
-          message: errorMessage,
-          hint: errorHint
-        });
-
-        throw new Error(`${errorMessage} (${errorHint})`);
-      }
-
-      if (!response.body) {
-        throw new Error('No response stream available')
-      }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      
-      let assistantContent = ''
-      let assistantMessageId = crypto.randomUUID()
-      let chunkCount = 0;
-      let currentSpeaker: string | undefined = undefined;
-      let previousSpeaker: string | undefined = undefined;
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) {
-          break;
-        }
-
-        chunkCount++;
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.slice(6).trim()
-
-            // Skip [DONE] signal
-            if (dataStr === '[DONE]') {
-              continue
-            }
-
-            try {
-              const data = JSON.parse(dataStr)
-
-              if (data.type === 'speaker_change') {
-                // A new board member is about to speak
-                const newSpeaker = data.metadata?.speaker
-                const handoffReason = data.metadata?.handoffReason
-
-                if (newSpeaker && newSpeaker !== currentSpeaker) {
-                  // Finalize current message if there's content
-                  if (assistantContent.trim()) {
-                    await finalizeAssistantMessage(assistantContent, assistantMessageId)
-                  }
-
-                  // Insert handoff annotation
-                  if (currentSpeaker && handoffReason) {
-                    const fromMember = getBoardMember(currentSpeaker as any)
-                    const toMember = getBoardMember(newSpeaker as any)
-                    const annotationId = crypto.randomUUID()
-                    const current = workspaceRef.current
-                    if (current) {
-                      const updatedContext = [...current.chat_context, {
-                        id: annotationId,
-                        role: 'system' as const,
-                        content: `__handoff__${fromMember.name}__${toMember.name}__${handoffReason}`,
-                        timestamp: new Date().toISOString(),
-                        metadata: {
-                          speaker: currentSpeaker as any,
-                          handoff_reason: handoffReason,
-                        },
-                      }]
-                      const updated = { ...current, chat_context: updatedContext }
-                      workspaceRef.current = updated
-                      setWorkspace(updated)
-                    }
-                  }
-
-                  // Start new message for new speaker
-                  previousSpeaker = currentSpeaker
-                  currentSpeaker = newSpeaker
-                  assistantContent = ''
-                  assistantMessageId = crypto.randomUUID()
-
-                  // Update board state
-                  setBoardState(prev => prev
-                    ? { ...prev, activeSpeaker: newSpeaker as any }
-                    : { activeSpeaker: newSpeaker as any, taylorOptedIn: false }
-                  )
-                }
-              } else if (data.type === 'content') {
-                // Track speaker from content metadata if present
-                const contentSpeaker = data.metadata?.speaker
-                if (contentSpeaker && !currentSpeaker) {
-                  currentSpeaker = contentSpeaker
-                }
-
-                assistantContent += data.content
-                updateStreamingMessage(
-                  assistantMessageId,
-                  assistantContent,
-                  currentSpeaker as any
-                )
-              } else if (data.type === 'complete') {
-                if (data.limitStatus) {
-                  setLimitStatus(data.limitStatus);
-                }
-                // Update board state from completion metadata
-                if (data.additionalData?.boardState) {
-                  setBoardState(data.additionalData.boardState as BoardState)
-                }
-                await finalizeAssistantMessage(assistantContent, assistantMessageId)
-              } else if (data.type === 'error') {
-                console.error('[Workspace] Received error from stream:', data);
-                throw new Error(data.error || 'Stream error')
-              } else if (data.type === 'metadata') {
-                // Initialize board state from metadata if present
-                if (data.metadata?.boardState) {
-                  setBoardState(data.metadata.boardState as BoardState)
-                }
-              }
-            } catch (parseError) {
-              console.error('[Workspace] Failed to parse stream data:', {
-                dataStr: dataStr.substring(0, 100),
-                error: parseError instanceof Error ? parseError.message : 'Unknown error'
-              });
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('[Workspace] Streaming error:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
-    }
-  }
-
-  // Keep ref in sync with state for use in streaming callbacks
-  useEffect(() => {
-    workspaceRef.current = workspace
-  }, [workspace])
-
-  const updateStreamingMessage = (messageId: string, content: string, speaker?: string) => {
-    const current = workspaceRef.current
-    if (!current) return
-
-    // Update the workspace state with streaming content
-    const updatedChatContext = [...current.chat_context]
-    const existingIndex = updatedChatContext.findIndex(msg => msg.id === messageId)
-
-    if (existingIndex >= 0) {
-      updatedChatContext[existingIndex] = {
-        ...updatedChatContext[existingIndex],
-        content: content,
-        metadata: {
-          ...updatedChatContext[existingIndex].metadata,
-          ...(speaker ? { speaker: speaker as any } : {}),
-        },
-      }
-    } else {
-      updatedChatContext.push({
-        id: messageId,
-        role: 'assistant',
-        content: content,
-        timestamp: new Date().toISOString(),
-        metadata: speaker ? { speaker: speaker as any } : undefined,
-      })
-    }
-
-    const updated = {
-      ...current,
-      chat_context: updatedChatContext
-    }
-    workspaceRef.current = updated
-    setWorkspace(updated)
-  }
-
-  const finalizeAssistantMessage = async (content: string, messageId: string) => {
-    if (!workspace) return
-
-    // Find the existing streaming message in chat_context
-    const existingMessageIndex = workspace.chat_context.findIndex(msg => msg.id === messageId)
-
-    if (existingMessageIndex === -1) {
-      console.error('[Workspace] Could not find streaming message to finalize:', messageId)
-      // Fallback: add as new message
-      await addChatMessage({
-        role: 'assistant',
-        content: content
-      })
-      return
-    }
-
-    // The message is already in the state from streaming, just save it to database
-    const updatedChatContext = [...workspace.chat_context]
-
-    try {
-      const { error } = await supabase
-        .from('user_workspace')
-        .update({
-          workspace_state: {
-            name: workspace.name,
-            description: workspace.description,
-            chat_context: updatedChatContext,
-            canvas_elements: workspace.canvas_elements,
-            updated_at: new Date().toISOString()
-          },
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', workspace.id)
-
-      if (error) throw error
-
-    } catch (error) {
-      console.error('[Workspace] Error finalizing message:', error)
-    }
-  }
+  }, [])
 
   const handleTabSwitch = (tab: WorkspaceTab) => {
     // Preserve input when switching from chat to BMad Method
@@ -448,79 +157,65 @@ export default function WorkspacePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex h-screen bg-background">
+      <div className="dual-pane-container canvas-closed">
         {/* Chat pane skeleton */}
-        <div className="flex-[6] border-r border-border flex flex-col">
-          {/* Header skeleton */}
+        <div className="chat-pane">
+          {/* Header skeleton — back arrow, title, action buttons */}
           <header className="h-14 mb-4 flex justify-between items-center px-4 border-b border-border">
             <div className="flex items-center gap-2">
               <div className="h-5 w-5 bg-muted rounded animate-pulse" />
               <div className="h-6 w-48 bg-muted rounded animate-pulse" />
             </div>
-            <div className="flex items-center gap-3">
-              <div className="h-6 w-24 bg-muted/50 rounded animate-pulse" />
-              <div className="h-6 w-20 bg-muted/50 rounded animate-pulse" />
-              <div className="h-6 w-16 bg-muted/50 rounded animate-pulse" />
+            <div className="flex items-center gap-2 text-xs">
+              <div className="h-7 w-24 bg-muted/50 rounded animate-pulse" />
+              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
+              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
+              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
+              <div className="h-4 w-32 bg-muted/30 rounded animate-pulse" />
+              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
+              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
             </div>
           </header>
-          {/* Tab navigation skeleton */}
+
+          {/* Tab navigation skeleton — "Mary Chat" (inactive) and "BMad Method" (active) */}
           <div className="mb-4 px-4 border-b border-border">
-            <div className="flex gap-4 pb-3">
-              <div className="h-5 w-24 bg-muted rounded animate-pulse" />
-              <div className="h-5 w-28 bg-muted/50 rounded animate-pulse" />
-            </div>
-          </div>
-          {/* Chat messages skeleton */}
-          <div className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-4xl mx-auto space-y-6">
-              {/* Welcome card skeleton */}
-              <div className="bg-muted/20 p-6 rounded-lg border border-border">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-muted rounded-full animate-pulse" />
-                  <div className="flex-1 space-y-3">
-                    <div className="h-5 w-48 bg-muted rounded animate-pulse" />
-                    <div className="h-4 w-full bg-muted/50 rounded animate-pulse" />
-                    <div className="h-4 w-3/4 bg-muted/50 rounded animate-pulse" />
-                  </div>
-                </div>
+            <div className="flex gap-4">
+              <div className="pb-3 px-1 flex items-center gap-2 border-b-2 border-transparent">
+                <div className="h-4 w-4 bg-muted/50 rounded animate-pulse" />
+                <div className="h-4 w-20 bg-muted/50 rounded animate-pulse" />
               </div>
-              {/* Message skeletons */}
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
-                  <div className="flex items-start gap-3 max-w-[70%]">
-                    {i % 2 !== 0 && <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />}
-                    <div className="px-5 py-4 rounded-xl bg-muted/30 min-w-[200px]">
-                      <div className="h-4 w-full bg-muted/50 rounded animate-pulse mb-2" />
-                      <div className="h-4 w-2/3 bg-muted/50 rounded animate-pulse" />
-                    </div>
-                    {i % 2 === 0 && <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />}
-                  </div>
-                </div>
-              ))}
+              <div className="pb-3 px-1 flex items-center gap-2 border-b-2 border-primary">
+                <div className="w-4 h-4 bg-muted rounded animate-pulse" />
+                <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+              </div>
             </div>
           </div>
-          {/* Input skeleton */}
-          <div className="mt-4 px-4 pb-4">
-            <div className="flex gap-2">
-              <div className="flex-1 h-12 bg-muted/30 border border-border rounded-lg animate-pulse" />
-              <div className="h-12 w-20 bg-muted rounded-lg animate-pulse" />
+
+          {/* BMad content area skeleton (default active tab) */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-8">
+              <div className="max-w-4xl mx-auto space-y-4">
+                <div className="h-6 w-56 bg-muted rounded animate-pulse" />
+                <div className="h-4 w-full bg-muted/40 rounded animate-pulse" />
+                <div className="h-4 w-5/6 bg-muted/40 rounded animate-pulse" />
+                <div className="h-4 w-2/3 bg-muted/40 rounded animate-pulse" />
+                <div className="mt-6 h-4 w-full bg-muted/30 rounded animate-pulse" />
+                <div className="h-4 w-4/5 bg-muted/30 rounded animate-pulse" />
+              </div>
+            </div>
+
+            {/* Input skeleton — textarea and send button */}
+            <div className="mt-4">
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 h-[50px] bg-muted/20 border border-border rounded-lg animate-pulse" />
+                <div className="h-[50px] w-16 bg-muted rounded-lg animate-pulse" />
+              </div>
             </div>
           </div>
         </div>
-        {/* Canvas pane skeleton */}
-        <div className="flex-[4] p-4 flex flex-col">
-          <header className="h-14 mb-4 flex justify-between items-center border-b border-border">
-            <div>
-              <div className="h-6 w-32 bg-muted rounded animate-pulse mb-1" />
-              <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />
-            </div>
-            <div className="space-y-1">
-              <div className="h-3 w-20 bg-muted/30 rounded animate-pulse" />
-              <div className="h-3 w-16 bg-muted/30 rounded animate-pulse" />
-            </div>
-          </header>
-          <div className="flex-1 bg-muted/10 rounded-lg border border-border animate-pulse" />
-        </div>
+
+        {/* Canvas pane skeleton (hidden by canvas-closed) */}
+        <div className="canvas-pane" />
       </div>
     )
   }
@@ -894,6 +589,7 @@ export default function WorkspacePage() {
                         lastModified: new Date()
                       })
                     }}
+                    onScrollToCanvas={handleScrollToCanvas}
                     autoPopulate={false}
                   />
                 </div>
@@ -989,7 +685,7 @@ export default function WorkspacePage() {
             </div>
           </header>
 
-          <div className="canvas-container">
+          <div className="canvas-container" ref={canvasContainerRef}>
             <EnhancedCanvasWorkspace
               workspaceId={workspace.id}
               initialMode={canvasState?.mode || 'draw'}
