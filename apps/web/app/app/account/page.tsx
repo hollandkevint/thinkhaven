@@ -9,7 +9,7 @@ import Link from 'next/link'
 export default function AccountPage() {
   const { user, signOut } = useAuth()
   const workspaceState = null // Mock empty state
-  const saveWorkspace = async () => { console.log('Workspace save disabled') }
+  const saveWorkspace = async () => { /* disabled */ }
   const router = useRouter()
 
   const [newPassword, setNewPassword] = useState('')

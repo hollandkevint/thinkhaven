@@ -65,6 +65,7 @@ export default function WorkspacePage() {
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
   const [boardState, setBoardState] = useState<BoardState | null>(null)
   const workspaceRef = useRef<Workspace | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
   const isOnline = useOnlineStatus()
@@ -191,12 +192,6 @@ export default function WorkspacePage() {
 
   const streamClaudeResponse = async (message: string) => {
     try {
-      console.log('[Workspace] Sending message to Claude:', {
-        messageLength: message.length,
-        workspaceId: workspace?.id,
-        historyLength: workspace?.chat_context?.length || 0
-      });
-
       const response = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: {
@@ -207,12 +202,6 @@ export default function WorkspacePage() {
           workspaceId: workspace?.id,
           conversationHistory: workspace?.chat_context?.slice(-10) || [] // Last 10 messages for context
         }),
-      });
-
-      console.log('[Workspace] Got response:', {
-        ok: response.ok,
-        status: response.status,
-        statusText: response.statusText
       });
 
       if (!response.ok) {
@@ -243,12 +232,9 @@ export default function WorkspacePage() {
       let currentSpeaker: string | undefined = undefined;
       let previousSpeaker: string | undefined = undefined;
 
-      console.log('[Workspace] Starting to read stream...');
-
       while (true) {
         const { done, value } = await reader.read()
         if (done) {
-          console.log('[Workspace] Stream complete, received', chunkCount, 'chunks');
           break;
         }
 
@@ -262,7 +248,6 @@ export default function WorkspacePage() {
 
             // Skip [DONE] signal
             if (dataStr === '[DONE]') {
-              console.log('[Workspace] Received [DONE] signal');
               continue
             }
 
@@ -329,7 +314,6 @@ export default function WorkspacePage() {
                   currentSpeaker as any
                 )
               } else if (data.type === 'complete') {
-                console.log('[Workspace] Stream marked complete');
                 if (data.limitStatus) {
                   setLimitStatus(data.limitStatus);
                 }
@@ -342,7 +326,6 @@ export default function WorkspacePage() {
                 console.error('[Workspace] Received error from stream:', data);
                 throw new Error(data.error || 'Stream error')
               } else if (data.type === 'metadata') {
-                console.log('[Workspace] Received metadata:', data);
                 // Initialize board state from metadata if present
                 if (data.metadata?.boardState) {
                   setBoardState(data.metadata.boardState as BoardState)
@@ -442,7 +425,6 @@ export default function WorkspacePage() {
 
       if (error) throw error
 
-      console.log('[Workspace] Finalized assistant message:', messageId)
     } catch (error) {
       console.error('[Workspace] Error finalizing message:', error)
     }
@@ -698,9 +680,8 @@ export default function WorkspacePage() {
                             onClick={() => {
                               setMessageInput("I have a new product idea I want to validate")
                               setTimeout(() => {
-                                const input = document.querySelector('input[type="text"]') as HTMLInputElement
-                                input?.focus()
-                                input?.select()
+                                textareaRef.current?.focus()
+                                textareaRef.current?.select()
                               }, 100)
                             }}
                             className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
@@ -711,9 +692,8 @@ export default function WorkspacePage() {
                             onClick={() => {
                               setMessageInput("I need help analyzing my competitive landscape")
                               setTimeout(() => {
-                                const input = document.querySelector('input[type="text"]') as HTMLInputElement
-                                input?.focus()
-                                input?.select()
+                                textareaRef.current?.focus()
+                                textareaRef.current?.select()
                               }, 100)
                             }}
                             className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
@@ -724,9 +704,8 @@ export default function WorkspacePage() {
                             onClick={() => {
                               setMessageInput("I'm stuck on my business model and need guidance")
                               setTimeout(() => {
-                                const input = document.querySelector('input[type="text"]') as HTMLInputElement
-                                input?.focus()
-                                input?.select()
+                                textareaRef.current?.focus()
+                                textareaRef.current?.select()
                               }, 100)
                             }}
                             className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
@@ -737,9 +716,8 @@ export default function WorkspacePage() {
                             onClick={() => {
                               setMessageInput("Help me prioritize my product features")
                               setTimeout(() => {
-                                const input = document.querySelector('input[type="text"]') as HTMLInputElement
-                                input?.focus()
-                                input?.select()
+                                textareaRef.current?.focus()
+                                textareaRef.current?.select()
                               }, 100)
                             }}
                             className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
@@ -939,6 +917,7 @@ export default function WorkspacePage() {
               <form onSubmit={handleSendMessage} className="mt-4">
                 <div className="flex gap-2 items-end">
                   <textarea
+                    ref={textareaRef}
                     value={messageInput}
                     onChange={(e) => {
                       setMessageInput(e.target.value)

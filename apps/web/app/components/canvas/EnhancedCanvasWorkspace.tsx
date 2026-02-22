@@ -44,14 +44,6 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
   onSave,
   readOnly = false
 }) => {
-  console.log('[EnhancedCanvasWorkspace] Component mounted/updated:', {
-    workspaceId,
-    sessionId,
-    initialMode,
-    hasInitialDiagramCode: !!initialDiagramCode,
-    readOnly
-  });
-
   const [mode, setMode] = useState<CanvasMode>(initialMode);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [mermaidCode, setMermaidCode] = useState(initialDiagramCode);
@@ -158,13 +150,10 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
     const loadCanvasState = async () => {
       // Skip loading if no sessionId
       if (!sessionId) {
-        console.log('[EnhancedCanvasWorkspace] No sessionId, skipping canvas state load');
         return;
       }
 
       try {
-        console.log('[EnhancedCanvasWorkspace] Loading canvas state for session:', sessionId);
-
         const response = await fetch('/api/bmad', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -176,8 +165,6 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
 
         if (response.ok) {
           const { data } = await response.json();
-          console.log('[EnhancedCanvasWorkspace] Loaded canvas state:', data);
-
           if (data?.canvasState) {
             if (data.canvasState.mode === 'diagram' && data.canvasState.mermaidCode) {
               setMermaidCode(data.canvasState.mermaidCode);

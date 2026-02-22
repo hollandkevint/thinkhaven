@@ -161,8 +161,7 @@ export default function MessageActionMenu({
               <button
                 onClick={() => {
                   if (isBookmarked) {
-                    // Show existing bookmarks or bookmark management
-                    console.log('Show bookmark management')
+                    // TODO: Show existing bookmarks or bookmark management
                   } else {
                     setShowBookmarkForm(true)
                   }
@@ -195,8 +194,7 @@ export default function MessageActionMenu({
               {/* Create Reference */}
               <button
                 onClick={() => {
-                  // This would open a reference creation modal
-                  console.log('Create reference')
+                  // TODO: Open reference creation modal
                   setIsOpen(false)
                 }}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-parchment flex items-center gap-3"

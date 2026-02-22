@@ -280,7 +280,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
         (attempt, error) => {
           setConnectionStatus('retrying')
           setRetryCount(attempt)
-          console.log(`Retry attempt ${attempt}:`, error.message)
+          // Retry state tracked via setRetryCount
         }
       )
     } catch (error: any) {
