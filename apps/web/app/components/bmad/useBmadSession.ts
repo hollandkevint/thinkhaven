@@ -170,6 +170,7 @@ export function useBmadSession(): UseBmadSessionReturn {
       const message = err instanceof Error ? err.message : 'Failed to load session'
       setError(message)
       console.error('BMad Session Retrieval Error:', err)
+      throw err
     } finally {
       setIsLoading(false)
     }

@@ -94,24 +94,30 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
           if (activeSessions.length > 0) {
             // Load the most recent active session
             const activeSession = activeSessions[0]
-            
+
             // Calculate session continuation info
             const createdAt = new Date(activeSession.createdAt)
             const now = new Date()
             const timeElapsed = formatTimeElapsed(now.getTime() - createdAt.getTime())
             const lastActivity = formatLastActivity(activeSession.lastActivityAt || activeSession.createdAt)
-            
+
             setContinuationSessionInfo({
               pathway: getPathwayDisplayName(activeSession.pathway),
               timeElapsed,
               lastActivity,
               progress: Math.round(activeSession.progress?.overallCompletion || 0)
             })
-            
+
             setShowContinuationGuidance(true)
-            
-            await getSession(activeSession.id)
-            setCurrentStep('session-active')
+
+            try {
+              await getSession(activeSession.id)
+              setCurrentStep('session-active')
+            } catch {
+              // getSession failed (auth race, 404, network) - stay on pathway selection
+              // Error state is already set by the hook
+              setShowContinuationGuidance(false)
+            }
           } else if (allSessions.length === 0) {
             // First-time user - show onboarding
             setShowOnboarding(true)
@@ -158,8 +164,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
   const handleSessionExit = () => {
     exitSession()
     setCurrentStep('pathway-selection')
-    setMockElicitationData(null)
-    
+
     // Clear any preserved input when returning to workspace
     if (onInputConsumed) {
       onInputConsumed()
@@ -241,13 +246,33 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
         )
 
       case 'session-active':
+        if (!currentSession && !isLoading) {
+          // Session fetch completed but failed - show error with recovery
+          return (
+            <div className="space-y-4">
+              <ErrorState
+                error={error || 'Session could not be loaded'}
+                onRetry={() => checkForActiveSessions()}
+              />
+              <button
+                onClick={() => {
+                  exitSession()
+                  setCurrentStep('pathway-selection')
+                }}
+                className="w-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg transition-colors"
+              >
+                Back to pathway selection
+              </button>
+            </div>
+          )
+        }
         if (!currentSession) {
           return (
             <div className="space-y-6">
               <div className="bg-white rounded-lg border border-divider p-6">
                 <div className="text-center mb-6">
                   <h3 className="text-lg font-semibold text-primary mb-2">Loading Your Session</h3>
-                  <p className="text-secondary text-sm">Preparing your strategic thinking workspace...</p>
+                  <p className="text-muted-foreground text-sm">Preparing your strategic thinking workspace...</p>
                 </div>
                 <SkeletonLoader />
               </div>
