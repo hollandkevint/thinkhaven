@@ -69,6 +69,10 @@ See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_
 12. **SSG safety** - `lib/supabase/client.ts` exports a no-op Proxy for SSG; use for client components
 13. **Monorepo git paths** - Always use absolute paths or run git commands from repo root, not `apps/web/`
 14. **Claude Code Review CI** - `anthropics/claude-code-action@v1` has known SDK crash (issue #911). `continue-on-error: true` is set. Job may show failed but workflow passes.
+15. **Never use `text-secondary` for text** - shadcn maps `--secondary` to parchment (a background color), producing invisible text on cream/parchment. Use `text-muted-foreground` (slate-blue) for secondary text, or `text-ink-light` for warm secondary text.
+16. **Hooks must re-throw or return errors** - If a hook catches an error and only sets state, callers can't detect failure. Always re-throw after setting error state, or return a success/failure indicator. Silent swallowing creates impossible UI states.
+17. **IDOR checks on every session-scoped handler** - When adding ownership verification to API routes, audit ALL handlers in the file, not just the ones that triggered the fix. Partial coverage is worse than none (false sense of security).
+18. **React ErrorBoundaries don't catch event handlers** - Errors in `onClick`, `onSubmit`, etc. are not caught by ErrorBoundary. Wrap event handler bodies in try/catch or use error state for recovery.
 
 ## Production Deployment
 
