@@ -530,6 +530,12 @@ async function handleSaveFeatureInput(
     );
   }
 
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   // Validate the input
   const validation = validateFeatureInput(featureData);
   if (!validation.isValid) {
@@ -651,6 +657,12 @@ async function handleSavePriorityScoring(
     );
   }
 
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   try {
     // Validate priority scoring data
     const validation = validatePriorityScoring(priorityScoring);
@@ -718,7 +730,8 @@ async function handleGenerateFeatureBrief(
     // Get feature input and priority scoring from session
     const session = await sessionOrchestrator.getSession(sessionId);
 
-    if (!session) {
+    // SECURITY: Verify session ownership
+    if (!session || session.userId !== userId) {
       return NextResponse.json(
         { error: 'Session not found' },
         { status: 404 }
@@ -798,6 +811,12 @@ async function handleUpdateFeatureBrief(
     );
   }
 
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   try {
     const generator = new FeatureBriefGenerator();
     const updatedBrief = await generator.update(briefId, updates);
@@ -851,6 +870,12 @@ async function handleRegenerateFeatureBrief(
       { error: 'sessionId and briefId are required' },
       { status: 400 }
     );
+  }
+
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
   try {
@@ -1024,6 +1049,12 @@ async function handleExportFeatureBrief(userId: string, params: {
 // Universal Session State Management Handlers
 
 async function handleSwitchPathway(userId: string, params: { sessionId: string, newPathway: PathwayType, transferContext?: boolean }) {
+  // SECURITY: Verify session ownership
+  const session = await sessionOrchestrator.getSession(params.sessionId);
+  if (!session || session.userId !== userId) {
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
   try {
     const { universalSessionStateManager } = await import('@/lib/bmad/session/universal-state-manager');
     const { pathwaySwitcher } = await import('@/lib/bmad/session/pathway-switcher');
