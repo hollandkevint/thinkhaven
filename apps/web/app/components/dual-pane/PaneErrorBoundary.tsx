@@ -57,13 +57,13 @@ export class PaneErrorBoundary extends Component<Props, State> {
               {this.props.paneName === 'chat' ? 'Chat Pane Error' : 'Canvas Pane Error'}
             </h3>
             
-            <p className="text-secondary mb-4 max-w-md">
+            <p className="text-muted-foreground mb-4 max-w-md">
               Something went wrong in the {this.props.paneName} pane. This is likely a temporary issue.
             </p>
             
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mb-4 text-xs text-left max-w-md">
-                <summary className="cursor-pointer text-secondary hover:text-primary mb-2">
+                <summary className="cursor-pointer text-muted-foreground hover:text-primary mb-2">
                   Technical Details
                 </summary>
                 <div className="bg-parchment p-3 rounded border text-ink-light overflow-auto max-h-32">
@@ -93,7 +93,7 @@ export class PaneErrorBoundary extends Component<Props, State> {
               </button>
             </div>
             
-            <p className="text-xs text-secondary mt-4">
+            <p className="text-xs text-muted-foreground mt-4">
               If this error persists, please contact support with the technical details above.
             </p>
           </div>
@@ -127,7 +127,7 @@ export function LoadingPane({ paneName, message }: LoadingPaneProps) {
           Loading {paneName === 'chat' ? 'Chat' : 'Canvas'}
         </h3>
         
-        <p className="text-secondary mb-4">
+        <p className="text-muted-foreground mb-4">
           {message || defaultMessage}
         </p>
         

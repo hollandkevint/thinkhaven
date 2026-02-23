@@ -96,7 +96,7 @@ export default function ContextTransfer({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-primary mb-2">Context Transfer</h2>
-              <p className="text-secondary">
+              <p className="text-muted-foreground">
                 Your strategic insights preserved across pathways
               </p>
             </div>

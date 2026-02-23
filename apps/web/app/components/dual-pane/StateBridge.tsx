@@ -96,7 +96,7 @@ export default function StateBridge({ workspaceId, className = '' }: StateBridge
       {/* Sync Status Indicator (hidden in production) */}
       {process.env.NODE_ENV === 'development' && (
         <div className="sync-indicator">
-          <div className="flex items-center gap-2 text-xs text-secondary p-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground p-2">
             <div className={`w-2 h-2 rounded-full ${
               getSyncStatus() === 'active' ? 'bg-success' :
               getSyncStatus() === 'syncing' ? 'bg-warning animate-pulse' :
@@ -116,7 +116,7 @@ export default function StateBridge({ workspaceId, className = '' }: StateBridge
       {/* Context Bridge Visualizations (development only) */}
       {process.env.NODE_ENV === 'development' && sync.contextBridges.length > 0 && (
         <details className="mt-2 text-xs">
-          <summary className="cursor-pointer text-secondary hover:text-primary">
+          <summary className="cursor-pointer text-muted-foreground hover:text-primary">
             Context Bridges ({sync.contextBridges.length})
           </summary>
           <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">

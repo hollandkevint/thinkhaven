@@ -315,7 +315,7 @@ export default function MessageHistorySidebar({
           <h2 className="text-lg font-semibold text-primary">Conversations</h2>
           <button
             onClick={handleNewConversation}
-            className="p-2 text-secondary hover:text-primary hover:bg-parchment rounded-lg transition-colors"
+            className="p-2 text-muted-foreground hover:text-primary hover:bg-parchment rounded-lg transition-colors"
             title="New conversation"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -327,7 +327,7 @@ export default function MessageHistorySidebar({
         {/* Search Input */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -354,7 +354,7 @@ export default function MessageHistorySidebar({
                   <button
                     key={index}
                     onClick={() => handleSuggestionSelect(suggestion)}
-                    className="w-full px-3 py-2 text-left text-sm text-secondary hover:bg-parchment hover:text-primary transition-colors"
+                    className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-parchment hover:text-primary transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <svg className="w-3 h-3 text-slate-blue/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -376,7 +376,7 @@ export default function MessageHistorySidebar({
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
               viewMode === 'conversations' 
                 ? 'bg-white text-primary shadow-sm' 
-                : 'text-secondary hover:text-primary'
+                : 'text-muted-foreground hover:text-primary'
             }`}
           >
             Conversations
@@ -386,7 +386,7 @@ export default function MessageHistorySidebar({
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
               viewMode === 'messages' 
                 ? 'bg-white text-primary shadow-sm' 
-                : 'text-secondary hover:text-primary'
+                : 'text-muted-foreground hover:text-primary'
             }`}
           >
             Messages
@@ -412,7 +412,7 @@ export default function MessageHistorySidebar({
               </div>
             ) : conversations.length === 0 ? (
               <div className="p-4 text-center">
-                <div className="text-secondary text-sm">
+                <div className="text-muted-foreground text-sm">
                   <div className="mb-2">
                     <svg className="w-12 h-12 mx-auto text-ink/15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -445,12 +445,12 @@ export default function MessageHistorySidebar({
                             )}
                           </div>
                           
-                          <p className="text-xs text-secondary mb-2 line-clamp-2">
+                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                             {truncateMessage(conversation.lastMessage)}
                           </p>
                           
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-xs text-secondary">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span>{conversation.messageCount} messages</span>
                               {conversation.pathway && (
                                 <>
@@ -459,7 +459,7 @@ export default function MessageHistorySidebar({
                                 </>
                               )}
                             </div>
-                            <span className="text-xs text-secondary">
+                            <span className="text-xs text-muted-foreground">
                               {formatTimestamp(conversation.lastActivity)}
                             </span>
                           </div>
@@ -473,7 +473,7 @@ export default function MessageHistorySidebar({
                           }}
                         >
                           <svg 
-                            className={`w-4 h-4 text-secondary transition-transform ${
+                            className={`w-4 h-4 text-muted-foreground transition-transform ${
                               expandedConversations.has(conversation.id) ? 'rotate-90' : ''
                             }`} 
                             fill="none" 
@@ -497,17 +497,17 @@ export default function MessageHistorySidebar({
                               }`}>
                                 {message.role === 'assistant' ? 'Mary' : 'You'}
                               </span>
-                              <span className="text-xs text-secondary">
+                              <span className="text-xs text-muted-foreground">
                                 {formatTimestamp(message.timestamp)}
                               </span>
                             </div>
-                            <p className="text-xs text-secondary leading-relaxed">
+                            <p className="text-xs text-muted-foreground leading-relaxed">
                               {truncateMessage(message.content, 60)}
                             </p>
                           </div>
                         ))}
                         {messages.length > 3 && (
-                          <div className="text-xs text-secondary italic">
+                          <div className="text-xs text-muted-foreground italic">
                             +{messages.length - 3} more messages
                           </div>
                         )}
@@ -542,10 +542,10 @@ export default function MessageHistorySidebar({
               {searchLoading ? (
                 <div className="p-4 text-center">
                   <div className="animate-spin w-6 h-6 border-2 border-terracotta border-t-transparent rounded-full mx-auto mb-2"></div>
-                  <p className="text-sm text-secondary">Searching messages...</p>
+                  <p className="text-sm text-muted-foreground">Searching messages...</p>
                 </div>
               ) : messages.length === 0 ? (
-                <div className="p-4 text-center text-sm text-secondary">
+                <div className="p-4 text-center text-sm text-muted-foreground">
                   {searchQuery.trim() 
                     ? 'No messages found matching your search'
                     : 'Enter a search term to find messages'
@@ -587,12 +587,12 @@ export default function MessageHistorySidebar({
                       <span className="text-sm font-medium text-primary">
                         {message.role === 'assistant' ? 'Mary' : 'You'}
                       </span>
-                      <span className="text-xs text-secondary ml-auto">
+                      <span className="text-xs text-muted-foreground ml-auto">
                         {formatTimestamp(message.timestamp)}
                       </span>
                     </div>
                     
-                    <p className="text-sm text-secondary leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {message.content.length > 200
                         ? `${message.content.substring(0, 200)}...`
                         : message.content}
@@ -607,7 +607,7 @@ export default function MessageHistorySidebar({
 
       {/* Footer */}
       <div className="flex-shrink-0 p-3 border-t border-divider bg-parchment">
-        <div className="text-xs text-secondary text-center">
+        <div className="text-xs text-muted-foreground text-center">
           {conversations.length} conversations • {messages.length} messages
         </div>
       </div>

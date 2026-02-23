@@ -46,7 +46,7 @@ export default function LoadingIndicator({
   const renderProgress = () => (
     <div className="w-full">
       <div className="flex justify-between items-center mb-2">
-        {message && <span className={`text-secondary ${sizeClasses.text}`}>{message}</span>}
+        {message && <span className={`text-muted-foreground ${sizeClasses.text}`}>{message}</span>}
         {progress !== undefined && (
           <span className={`text-primary font-medium ${sizeClasses.text}`}>
             {Math.round(progress)}%
@@ -88,7 +88,7 @@ export default function LoadingIndicator({
       {renderLoadingContent()}
       
       {message && variant !== 'progress' && (
-        <span className={`text-secondary ${sizeClasses.text}`}>
+        <span className={`text-muted-foreground ${sizeClasses.text}`}>
           {message}
         </span>
       )}

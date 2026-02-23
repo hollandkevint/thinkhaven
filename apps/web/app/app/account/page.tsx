@@ -93,7 +93,7 @@ export default function AccountPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-secondary mb-4">Please sign in to access account settings</p>
+          <p className="text-muted-foreground mb-4">Please sign in to access account settings</p>
           <Link href="/login" className="text-primary hover:underline">
             Go to Login
           </Link>
@@ -108,7 +108,7 @@ export default function AccountPage() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-primary">Account Settings</h1>
-            <p className="text-secondary mt-2">Manage your strategic workspace account</p>
+            <p className="text-muted-foreground mt-2">Manage your strategic workspace account</p>
           </div>
           <Link
             href="/app"
@@ -204,7 +204,7 @@ export default function AccountPage() {
             <div className="flex justify-between items-center">
               <div>
                 <p className="font-medium">Manual Save</p>
-                <p className="text-sm text-secondary">Force save your current workspace state</p>
+                <p className="text-sm text-muted-foreground">Force save your current workspace state</p>
               </div>
               <button
                 onClick={handleSaveWorkspace}
@@ -223,7 +223,7 @@ export default function AccountPage() {
           <div className="space-y-4">
             <div>
               <p className="font-medium text-error mb-2">Delete Account</p>
-              <p className="text-sm text-secondary mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 This will permanently delete your account and all workspace data. This action cannot be undone.
               </p>
 

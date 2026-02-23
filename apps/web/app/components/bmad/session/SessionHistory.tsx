@@ -43,7 +43,7 @@ export default function SessionHistory({
           >
             <span className="font-medium text-primary">Shared Context</span>
             <svg
-              className={`w-5 h-5 text-secondary transition-transform ${
+              className={`w-5 h-5 text-muted-foreground transition-transform ${
                 expandedSection === 'context' ? 'rotate-180' : ''
               }`}
               fill="none"
@@ -59,7 +59,7 @@ export default function SessionHistory({
               {/* User Inputs */}
               {universalState.sharedContext.userInputs.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-secondary mb-2">User Inputs</h4>
+                  <h4 className="font-medium text-muted-foreground mb-2">User Inputs</h4>
                   <div className="space-y-2">
                     {universalState.sharedContext.userInputs.slice(-5).map((input, index) => (
                       <div key={index} className="p-3 bg-white rounded border text-sm">
@@ -67,7 +67,7 @@ export default function SessionHistory({
                       </div>
                     ))}
                     {universalState.sharedContext.userInputs.length > 5 && (
-                      <div className="text-xs text-secondary text-center">
+                      <div className="text-xs text-muted-foreground text-center">
                         ... and {universalState.sharedContext.userInputs.length - 5} more
                       </div>
                     )}
@@ -78,7 +78,7 @@ export default function SessionHistory({
               {/* Key Insights */}
               {universalState.sharedContext.keyInsights.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-secondary mb-2">Key Insights</h4>
+                  <h4 className="font-medium text-muted-foreground mb-2">Key Insights</h4>
                   <div className="space-y-2">
                     {universalState.sharedContext.keyInsights.map((insight, index) => (
                       <div key={index} className="p-3 bg-terracotta/5 rounded border-l-4 border-terracotta text-sm">
@@ -92,7 +92,7 @@ export default function SessionHistory({
               {/* Recommendations */}
               {universalState.sharedContext.recommendations.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-secondary mb-2">Recommendations</h4>
+                  <h4 className="font-medium text-muted-foreground mb-2">Recommendations</h4>
                   <div className="space-y-2">
                     {universalState.sharedContext.recommendations.map((rec, index) => (
                       <div key={index} className="p-3 bg-forest/5 rounded border-l-4 border-forest text-sm">
@@ -115,7 +115,7 @@ export default function SessionHistory({
             >
               <span className="font-medium text-primary">Pathway History</span>
               <svg
-                className={`w-5 h-5 text-secondary transition-transform ${
+                className={`w-5 h-5 text-muted-foreground transition-transform ${
                   expandedSection === 'history' ? 'rotate-180' : ''
                 }`}
                 fill="none"
@@ -148,7 +148,7 @@ export default function SessionHistory({
                             {transition.toPathway.replace('-', ' ')}
                           </span>
                         </div>
-                        <div className="text-sm text-secondary mb-1">
+                        <div className="text-sm text-muted-foreground mb-1">
                           Reason: <span className="capitalize">{transition.reason.replace('_', ' ')}</span>
                         </div>
                         <div className="text-xs text-slate-blue">
@@ -176,7 +176,7 @@ export default function SessionHistory({
           >
             <span className="font-medium text-primary">Progress Tracking</span>
             <svg
-              className={`w-5 h-5 text-secondary transition-transform ${
+              className={`w-5 h-5 text-muted-foreground transition-transform ${
                 expandedSection === 'progress' ? 'rotate-180' : ''
               }`}
               fill="none"
@@ -192,7 +192,7 @@ export default function SessionHistory({
               {/* Overall Progress */}
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-secondary">Overall Progress</span>
+                  <span className="text-sm font-medium text-muted-foreground">Overall Progress</span>
                   <span className="text-sm font-semibold text-primary">
                     {Math.round(universalState.globalProgress.overallCompletion)}%
                   </span>
@@ -208,12 +208,12 @@ export default function SessionHistory({
               {/* Pathway Completions */}
               {Object.entries(universalState.globalProgress.pathwayCompletions).length > 0 && (
                 <div>
-                  <h4 className="font-medium text-secondary mb-3">Pathway Progress</h4>
+                  <h4 className="font-medium text-muted-foreground mb-3">Pathway Progress</h4>
                   <div className="space-y-3">
                     {Object.entries(universalState.globalProgress.pathwayCompletions).map(([pathway, completion]) => (
                       <div key={pathway}>
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm text-secondary capitalize">
+                          <span className="text-sm text-muted-foreground capitalize">
                             {pathway.replace('-', ' ')}
                           </span>
                           <span className="text-sm font-medium">
@@ -235,7 +235,7 @@ export default function SessionHistory({
               {/* Time Tracking */}
               {Object.entries(universalState.globalProgress.timeSpent).length > 0 && (
                 <div>
-                  <h4 className="font-medium text-secondary mb-3">Time Spent</h4>
+                  <h4 className="font-medium text-muted-foreground mb-3">Time Spent</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="bg-white rounded p-3">
                       <div className="text-ink-light mb-1">Total Session</div>
@@ -268,7 +268,7 @@ export default function SessionHistory({
           >
             <span className="font-medium text-primary">Analytics Summary</span>
             <svg
-              className={`w-5 h-5 text-secondary transition-transform ${
+              className={`w-5 h-5 text-muted-foreground transition-transform ${
                 expandedSection === 'analytics' ? 'rotate-180' : ''
               }`}
               fill="none"

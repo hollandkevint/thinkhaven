@@ -132,7 +132,7 @@ export default function PathwaySwitcher({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-primary mb-2">Switch Strategic Pathway</h2>
-              <p className="text-secondary">
+              <p className="text-muted-foreground">
                 Choose a new pathway to continue your strategic thinking journey
               </p>
             </div>
@@ -189,7 +189,7 @@ export default function PathwaySwitcher({
                         disabled={isLoading}
                       >
                         <div className="flex items-center gap-3 mb-3">
-                          <div className={isSelected ? 'text-primary' : 'text-secondary'}>
+                          <div className={isSelected ? 'text-primary' : 'text-muted-foreground'}>
                             {getPathwayIcon(pathway)}
                           </div>
                           <div className="flex-1">
@@ -205,7 +205,7 @@ export default function PathwaySwitcher({
                             )}
                           </div>
                         </div>
-                        <p className="text-secondary text-sm mb-3">
+                        <p className="text-muted-foreground text-sm mb-3">
                           {getPathwayDescription(pathway)}
                         </p>
                         {recommendation && (
@@ -264,7 +264,7 @@ export default function PathwaySwitcher({
                       />
                       <div className="flex-1">
                         <div className="font-medium text-primary">Transfer Context</div>
-                        <div className="text-sm text-secondary">
+                        <div className="text-sm text-muted-foreground">
                           Preserve your insights, user inputs, and key findings when switching pathways
                         </div>
                       </div>
@@ -277,7 +277,7 @@ export default function PathwaySwitcher({
               <div className="flex justify-between items-center">
                 <button
                   onClick={onCancel}
-                  className="px-6 py-3 border border-divider text-secondary rounded-lg hover:bg-parchment transition-colors"
+                  className="px-6 py-3 border border-divider text-muted-foreground rounded-lg hover:bg-parchment transition-colors"
                 >
                   Cancel
                 </button>
@@ -300,7 +300,7 @@ export default function PathwaySwitcher({
               </div>
 
               <h3 className="text-xl font-bold text-primary mb-2">Confirm Pathway Switch</h3>
-              <p className="text-secondary mb-6">
+              <p className="text-muted-foreground mb-6">
                 You're about to switch from <strong>{getPathwayDisplayName(currentPathway)}</strong> to{' '}
                 <strong>{selectedPathway && getPathwayDisplayName(selectedPathway)}</strong>.
               </p>
@@ -326,7 +326,7 @@ export default function PathwaySwitcher({
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() => setShowConfirmation(false)}
-                  className="px-6 py-3 border border-divider text-secondary rounded-lg hover:bg-parchment transition-colors"
+                  className="px-6 py-3 border border-divider text-muted-foreground rounded-lg hover:bg-parchment transition-colors"
                 >
                   Go Back
                 </button>

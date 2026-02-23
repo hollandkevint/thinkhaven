@@ -225,7 +225,7 @@ export default function WorkspacePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-primary mb-4">Access Required</h1>
-          <p className="text-secondary mb-4">Please sign in to access your workspace.</p>
+          <p className="text-muted-foreground mb-4">Please sign in to access your workspace.</p>
           <Link href="/login" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover">
             Sign In
           </Link>
