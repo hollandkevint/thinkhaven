@@ -661,7 +661,10 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                       Refresh Page
                     </button>
                     <button
-                      onClick={() => setCurrentStep('pathway-selection')}
+                      onClick={() => {
+                        exitSession()
+                        setCurrentStep('pathway-selection')
+                      }}
                       className="px-4 py-2 border border-rust/40 text-rust rounded-lg hover:bg-rust/10 transition-colors"
                     >
                       Reset Session
