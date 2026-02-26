@@ -46,7 +46,10 @@ export default function Navigation({ className = '' }: NavigationProps) {
   if (loading) {
     return (
       <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
-        <div className="font-bold text-xl text-ink font-display">ThinkHaven</div>
+        <div className="font-bold text-xl text-ink font-display flex items-center gap-2">
+          ThinkHaven
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-forest/10 text-forest text-[10px] font-display font-medium tracking-wider uppercase">Alpha</span>
+        </div>
         <div className="w-8 h-8 bg-parchment rounded-full animate-pulse"></div>
       </nav>
     )
@@ -56,10 +59,11 @@ export default function Navigation({ className = '' }: NavigationProps) {
     <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
       {/* Logo/Brand */}
       <div
-        className="font-bold text-xl text-ink font-display cursor-pointer hover:text-terracotta transition-colors"
+        className="font-bold text-xl text-ink font-display cursor-pointer hover:text-terracotta transition-colors flex items-center gap-2"
         onClick={() => router.push('/')}
       >
         ThinkHaven
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-forest/10 text-forest text-[10px] font-display font-medium tracking-wider uppercase">Alpha</span>
       </div>
 
       {/* Desktop Navigation */}
