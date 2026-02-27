@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { WaitlistForm } from '@/components/waitlist/WaitlistForm'
 import { ArrowRight, Mail, MapPin } from 'lucide-react'
-import { BOARD_MEMBERS } from '@/lib/ai/board-members'
+import { BOARD_MEMBERS, getBoardMember } from '@/lib/ai/board-members'
 import type { BoardMemberId } from '@/lib/ai/board-types'
 
 const LANDING_QUOTES: Record<BoardMemberId, string> = {
@@ -21,8 +21,8 @@ const boardMembers = BOARD_MEMBERS.map(member => ({
 }))
 
 // Board members used in chat preview mock
-const mary = BOARD_MEMBERS.find(m => m.id === 'mary')!
-const victoria = BOARD_MEMBERS.find(m => m.id === 'victoria')!
+const mary = getBoardMember('mary')
+const victoria = getBoardMember('victoria')
 
 export default function Home() {
   return (

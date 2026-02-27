@@ -11,8 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu'
+import Link from 'next/link'
 import { Menu, User, LogOut, LogIn, UserPlus, ChevronDown } from 'lucide-react'
 import { CreditGuard } from '../monetization/CreditGuard'
+
+const AlphaBadge = (
+  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-forest/10 text-forest text-[10px] font-display font-medium tracking-wider uppercase">Alpha</span>
+)
 
 interface NavigationProps {
   className?: string
@@ -48,7 +53,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
       <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
         <div className="font-bold text-xl text-ink font-display flex items-center gap-2">
           ThinkHaven
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-forest/10 text-forest text-[10px] font-display font-medium tracking-wider uppercase">Alpha</span>
+          {AlphaBadge}
         </div>
         <div className="w-8 h-8 bg-parchment rounded-full animate-pulse"></div>
       </nav>
@@ -58,13 +63,13 @@ export default function Navigation({ className = '' }: NavigationProps) {
   return (
     <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
       {/* Logo/Brand */}
-      <div
-        className="font-bold text-xl text-ink font-display cursor-pointer hover:text-terracotta transition-colors flex items-center gap-2"
-        onClick={() => router.push('/')}
+      <Link
+        href="/"
+        className="font-bold text-xl text-ink font-display hover:text-terracotta transition-colors flex items-center gap-2"
       >
         ThinkHaven
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-forest/10 text-forest text-[10px] font-display font-medium tracking-wider uppercase">Alpha</span>
-      </div>
+        {AlphaBadge}
+      </Link>
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex items-center gap-4">
