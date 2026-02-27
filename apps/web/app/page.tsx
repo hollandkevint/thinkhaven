@@ -187,7 +187,7 @@ export default function Home() {
       {/* Social Proof Bar */}
       <div className="relative z-10 py-6">
         <p className="text-center text-sm font-display text-ink-light tracking-wide">
-          Join <strong className="text-ink">50+ product leaders and founders</strong> pressure-testing their strategies in Alpha
+          <strong className="text-ink">Product leaders and founders</strong> are pressure-testing their strategies in Alpha
         </p>
       </div>
 
