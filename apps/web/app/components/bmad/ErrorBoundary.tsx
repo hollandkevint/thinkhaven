@@ -182,7 +182,7 @@ function BmadErrorFallback({
         </h3>
 
         {/* Error Message */}
-        <p className="text-secondary mb-6">
+        <p className="text-muted-foreground mb-6">
           {guidance.message}
         </p>
 
@@ -191,7 +191,7 @@ function BmadErrorFallback({
           <h4 className="font-medium text-primary mb-3">What you can do:</h4>
           <ul className="space-y-2">
             {guidance.actions.map((action, index) => (
-              <li key={index} className="flex items-start gap-2 text-sm text-secondary">
+              <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <span className="w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-medium text-primary">{index + 1}</span>
                 </span>
@@ -211,7 +211,7 @@ function BmadErrorFallback({
           </button>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 border border-divider text-secondary rounded-lg hover:bg-primary/5 transition-colors"
+            className="px-6 py-2 border border-divider text-muted-foreground rounded-lg hover:bg-primary/5 transition-colors"
           >
             Refresh Page
           </button>
@@ -219,10 +219,10 @@ function BmadErrorFallback({
 
         {/* Technical Details (Collapsible) */}
         <details className="mt-6 text-left">
-          <summary className="text-xs text-secondary cursor-pointer hover:text-primary">
+          <summary className="text-xs text-muted-foreground cursor-pointer hover:text-primary">
             Technical Details (for support)
           </summary>
-          <div className="mt-2 p-3 bg-gray-50 rounded text-xs text-secondary font-mono">
+          <div className="mt-2 p-3 bg-gray-50 rounded text-xs text-muted-foreground font-mono">
             <div className="mb-2">
               <strong>Error:</strong> {error.name}: {error.message}
             </div>

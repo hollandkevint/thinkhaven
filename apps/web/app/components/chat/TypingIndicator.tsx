@@ -54,7 +54,7 @@ export default function TypingIndicator({
           </div>
           
           {/* Status text */}
-          <span className="text-sm text-secondary">
+          <span className="text-sm text-muted-foreground">
             {userName} is thinking{dots}
           </span>
         </div>
@@ -96,7 +96,7 @@ export function MessageTypingStatus({
   }[typingSpeed]
 
   return (
-    <div className={`flex items-center gap-2 text-xs text-secondary ${className}`}>
+    <div className={`flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
       <span>{speedIndicator}</span>
       <span>Composing response...</span>
     </div>
@@ -120,7 +120,7 @@ export function StreamingProgress({
   const percentage = estimatedTotal ? Math.min(100, (progress / estimatedTotal) * 100) : undefined
 
   return (
-    <div className={`text-xs text-secondary flex items-center gap-2 ${className}`}>
+    <div className={`text-xs text-muted-foreground flex items-center gap-2 ${className}`}>
       {percentage !== undefined ? (
         <>
           <div className="w-16 h-1 bg-ink/10 rounded-full overflow-hidden">

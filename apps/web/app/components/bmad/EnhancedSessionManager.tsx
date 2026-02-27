@@ -241,7 +241,7 @@ export default function EnhancedSessionManager({
       case 'abandoned':
         return 'text-error bg-error/10 border-error/20'
       default:
-        return 'text-secondary bg-secondary/10 border-secondary/20'
+        return 'text-muted-foreground bg-secondary/10 border-secondary/20'
     }
   }
 
@@ -263,7 +263,7 @@ export default function EnhancedSessionManager({
               <h3 className="text-lg font-semibold text-primary">
                 {getPathwayName(session.pathway)}
               </h3>
-              <p className="text-sm text-secondary">Session ID: {session.id.slice(-8)}</p>
+              <p className="text-sm text-muted-foreground">Session ID: {session.id.slice(-8)}</p>
             </div>
           </div>
           
@@ -276,7 +276,7 @@ export default function EnhancedSessionManager({
               <div className="text-lg font-bold text-foreground">
                 {formatTime(timeElapsed)}
               </div>
-              <div className="text-xs text-secondary">Total Time</div>
+              <div className="text-xs text-muted-foreground">Total Time</div>
             </div>
           </div>
         </div>
@@ -288,14 +288,14 @@ export default function EnhancedSessionManager({
               <span className="font-semibold text-primary">Session Progress</span>
               <button
                 onClick={() => setShowProgressDetails(!showProgressDetails)}
-                className="text-xs text-secondary hover:text-primary transition-colors px-2 py-1 rounded border"
+                className="text-xs text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded border"
               >
                 {showProgressDetails ? 'Hide details' : 'Show details'}
               </button>
             </div>
             <div className="text-right">
               <div className="text-lg font-bold text-primary">{Math.round(session.progress.overallCompletion)}%</div>
-              <div className="text-xs text-secondary">
+              <div className="text-xs text-muted-foreground">
                 ~{estimatedTimeRemaining}m remaining
               </div>
             </div>
@@ -343,7 +343,7 @@ export default function EnhancedSessionManager({
                   {Math.round(phaseProgress)}% complete
                 </span>
               </div>
-              <p className="text-secondary text-sm mb-4 leading-relaxed">
+              <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
                 {currentPhaseInfo.description}
               </p>
               
@@ -361,21 +361,21 @@ export default function EnhancedSessionManager({
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                 <div className="bg-white/60 p-3 rounded-lg text-center">
                   <div className="font-bold text-lg text-primary">{formatTime(currentPhaseTime)}</div>
-                  <div className="text-secondary text-xs">Phase Time</div>
+                  <div className="text-muted-foreground text-xs">Phase Time</div>
                 </div>
                 {currentAllocation && (
                   <div className="bg-white/60 p-3 rounded-lg text-center">
                     <div className="font-bold text-lg text-primary">{currentAllocation.allocatedMinutes}m</div>
-                    <div className="text-secondary text-xs">Allocated</div>
+                    <div className="text-muted-foreground text-xs">Allocated</div>
                   </div>
                 )}
                 <div className="bg-white/60 p-3 rounded-lg text-center">
                   <div className="font-bold text-lg text-primary">{formatTime(timeElapsed)}</div>
-                  <div className="text-secondary text-xs">Total Time</div>
+                  <div className="text-muted-foreground text-xs">Total Time</div>
                 </div>
                 <div className="bg-white/60 p-3 rounded-lg text-center">
                   <div className="font-bold text-lg text-primary">~{estimatedTimeRemaining}m</div>
-                  <div className="text-secondary text-xs">Est. Remaining</div>
+                  <div className="text-muted-foreground text-xs">Est. Remaining</div>
                 </div>
               </div>
             </div>
@@ -411,7 +411,7 @@ export default function EnhancedSessionManager({
                     <div className="flex justify-between items-center mb-2">
                       <div>
                         <span className={`font-semibold ${
-                          phase.isActive ? 'text-primary' : 'text-secondary'
+                          phase.isActive ? 'text-primary' : 'text-muted-foreground'
                         }`}>
                           {phase.title}
                         </span>
@@ -423,7 +423,7 @@ export default function EnhancedSessionManager({
                       </div>
                       <span className="text-sm font-medium text-primary">{Math.round(phase.progress)}%</span>
                     </div>
-                    <p className="text-xs text-secondary mb-2">{phase.description}</p>
+                    <p className="text-xs text-muted-foreground mb-2">{phase.description}</p>
                     <div className="w-full bg-ink/10 rounded-full h-2">
                       <div 
                         className={`bg-terracotta h-2 rounded-full transition-all duration-500`}

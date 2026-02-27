@@ -181,7 +181,7 @@ export default function UniversalSessionManager({
             <h3 className="text-lg font-semibold text-primary mb-1">
               Universal Session Management
             </h3>
-            <p className="text-secondary text-sm">
+            <p className="text-muted-foreground text-sm">
               Cross-pathway state management and analytics
             </p>
           </div>
@@ -230,7 +230,7 @@ export default function UniversalSessionManager({
         {/* Pathway History */}
         {universalState.pathwayHistory.length > 0 && (
           <div className="border-t border-divider pt-4">
-            <h4 className="text-sm font-medium text-secondary mb-3">Pathway Journey</h4>
+            <h4 className="text-sm font-medium text-muted-foreground mb-3">Pathway Journey</h4>
             <div className="flex items-center gap-2 overflow-x-auto">
               {universalState.pathwayHistory.map((transition, index) => (
                 <React.Fragment key={index}>
@@ -258,7 +258,7 @@ export default function UniversalSessionManager({
         {/* Backup Status */}
         {lastBackupTime && (
           <div className="border-t border-divider pt-4 mt-4">
-            <div className="flex items-center gap-2 text-sm text-secondary">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <svg className="w-4 h-4 text-forest" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
@@ -279,7 +279,7 @@ export default function UniversalSessionManager({
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-primary mb-2">Pathway Switch Opportunities</h4>
-              <p className="text-secondary text-sm mb-3">
+              <p className="text-muted-foreground text-sm mb-3">
                 Based on your current progress and insights, you might benefit from exploring:
               </p>
               <div className="space-y-2">
@@ -289,7 +289,7 @@ export default function UniversalSessionManager({
                       <div className="font-medium text-primary mb-1">
                         {rec.recommendedPathway.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </div>
-                      <div className="text-sm text-secondary">{rec.reasoning}</div>
+                      <div className="text-sm text-muted-foreground">{rec.reasoning}</div>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
                       <span className="text-sm font-medium text-terracotta">

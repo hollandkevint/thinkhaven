@@ -311,7 +311,7 @@ export default function ElicitationPanel({
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <h3 className="text-xl font-semibold text-primary mb-2">{phaseTitle}</h3>
-            <p className="text-secondary leading-relaxed mb-4">{prompt}</p>
+            <p className="text-muted-foreground leading-relaxed mb-4">{prompt}</p>
             
             {/* Phase-Specific Strategic Context */}
             <div className="bg-terracotta/5 rounded-lg p-4 border-l-4 border-terracotta">
@@ -334,7 +334,7 @@ export default function ElicitationPanel({
             </div>
           </div>
           <div className="ml-4 text-right">
-            <div className="text-sm text-secondary">Current Phase</div>
+            <div className="text-sm text-muted-foreground">Current Phase</div>
             <div className="text-xs font-mono text-primary bg-parchment px-2 py-1 rounded">
               {phaseId.replace(/_/g, '-').toUpperCase()}
             </div>
@@ -347,7 +347,7 @@ export default function ElicitationPanel({
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-lg font-medium text-primary">Choose your strategic approach:</h4>
-            <div className="text-sm text-secondary">
+            <div className="text-sm text-muted-foreground">
               {options.length} strategic options available
             </div>
           </div>
@@ -385,14 +385,14 @@ export default function ElicitationPanel({
                         <p className="text-foreground font-medium leading-relaxed mb-2">{option.text}</p>
                         
                         {/* Strategic Rationale */}
-                        <div className="text-sm text-secondary leading-relaxed">
+                        <div className="text-sm text-muted-foreground leading-relaxed">
                           <strong>Why choose this:</strong> {getStrategicRationale(option.category, option.text)}
                         </div>
                       </div>
                       
                       {/* Time Estimate */}
                       <div className="flex-shrink-0 text-right">
-                        <div className="text-xs text-secondary mb-1">Duration</div>
+                        <div className="text-xs text-muted-foreground mb-1">Duration</div>
                         <div className="text-sm font-medium text-primary bg-parchment px-2 py-1 rounded">
                           {formatEstimatedTime(option.estimatedTime)}
                         </div>
@@ -408,13 +408,13 @@ export default function ElicitationPanel({
                         `}>
                           {option.category.charAt(0).toUpperCase() + option.category.slice(1)}
                         </span>
-                        <span className="text-xs text-secondary">
+                        <span className="text-xs text-muted-foreground">
                           • {getStrategicImpact(option.category)}
                         </span>
                       </div>
                       
                       {/* Strategic Difficulty */}
-                      <div className="text-xs text-secondary">
+                      <div className="text-xs text-muted-foreground">
                         {getStrategicDifficulty(option.estimatedTime)}
                       </div>
                     </div>
@@ -443,7 +443,7 @@ export default function ElicitationPanel({
                 disabled={isSubmitting}
                 className={`
                   flex items-center gap-2 text-sm font-medium transition-colors
-                  ${showCustomInput ? 'text-primary' : 'text-secondary hover:text-primary'}
+                  ${showCustomInput ? 'text-primary' : 'text-muted-foreground hover:text-primary'}
                   ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                 `}
               >
@@ -472,7 +472,7 @@ export default function ElicitationPanel({
                   className="w-full px-4 py-3 border border-divider rounded-lg focus:border-primary focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <div className="flex justify-between items-center mt-2">
-                  <div className="text-xs text-secondary">
+                  <div className="text-xs text-muted-foreground">
                     {customInput.length}/500 characters
                   </div>
                   {customInput.length > 500 && (
@@ -578,7 +578,7 @@ export default function ElicitationPanel({
           
           <div className="flex items-center justify-between">
             {/* Progress indicator */}
-            <div className="text-sm text-secondary">
+            <div className="text-sm text-muted-foreground">
               {canSubmit ? (
                 <span className="text-forest">✓ Ready to proceed</span>
               ) : (
@@ -636,7 +636,7 @@ export default function ElicitationPanel({
 
         {/* Progress Indicator */}
         <div className="mt-4 text-center">
-          <div className="text-xs text-secondary">
+          <div className="text-xs text-muted-foreground">
             Session ID: {sessionId.slice(-8)}
           </div>
         </div>

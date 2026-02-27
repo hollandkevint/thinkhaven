@@ -121,7 +121,7 @@ export default function BranchDialog({
           <h2 className="text-xl font-semibold text-primary">Create Conversation Branch</h2>
           <button
             onClick={handleCancel}
-            className="text-secondary hover:text-primary transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -159,7 +159,7 @@ export default function BranchDialog({
               className="w-full px-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
               maxLength={100}
             />
-            <p className="text-xs text-secondary mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Give this branch a descriptive title that explains the alternative direction
             </p>
           </div>
@@ -183,7 +183,7 @@ export default function BranchDialog({
                   <div className="font-medium text-sm text-primary mb-1">
                     {direction.label}
                   </div>
-                  <p className="text-xs text-secondary">
+                  <p className="text-xs text-muted-foreground">
                     {direction.description}
                   </p>
                 </div>
@@ -204,7 +204,7 @@ export default function BranchDialog({
               className="w-full px-4 py-2 border border-divider rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent resize-none"
               maxLength={500}
             />
-            <p className="text-xs text-secondary mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Optional: Explain the specific alternative approach you want to explore
             </p>
           </div>
@@ -220,7 +220,7 @@ export default function BranchDialog({
               />
               <div>
                 <span className="text-sm font-medium text-primary">Preserve Context</span>
-                <p className="text-xs text-secondary">
+                <p className="text-xs text-muted-foreground">
                   Include the conversation history up to this point in the new branch
                 </p>
               </div>
@@ -247,14 +247,14 @@ export default function BranchDialog({
 
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-divider bg-parchment">
-          <div className="text-sm text-secondary">
+          <div className="text-sm text-muted-foreground">
             This will create a new conversation that you can explore independently.
           </div>
           <div className="flex gap-3">
             <button
               onClick={handleCancel}
               disabled={creating}
-              className="px-4 py-2 text-sm text-secondary hover:text-primary border border-divider rounded hover:bg-white transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-primary border border-divider rounded hover:bg-white transition-colors disabled:opacity-50"
             >
               Cancel
             </button>

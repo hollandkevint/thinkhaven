@@ -146,7 +146,7 @@ export default function BookmarksPanel({
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-primary">Bookmarks</h2>
           {stats && (
-            <div className="text-xs text-secondary">
+            <div className="text-xs text-muted-foreground">
               {stats.totalBookmarks} bookmarks • {stats.totalTags} tags
             </div>
           )}
@@ -155,7 +155,7 @@ export default function BookmarksPanel({
         {/* Search */}
         <div className="relative mb-3">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -171,7 +171,7 @@ export default function BookmarksPanel({
         {/* Tag Filters */}
         {availableTags.length > 0 && (
           <div>
-            <div className="text-xs font-medium text-secondary mb-2">Filter by tags:</div>
+            <div className="text-xs font-medium text-muted-foreground mb-2">Filter by tags:</div>
             <div className="flex flex-wrap gap-1">
               {availableTags.slice(0, 8).map(({ tag, count }) => (
                 <button
@@ -217,7 +217,7 @@ export default function BookmarksPanel({
           </div>
         ) : bookmarks.length === 0 ? (
           <div className="p-4 text-center">
-            <div className="text-secondary text-sm">
+            <div className="text-muted-foreground text-sm">
               <div className="mb-2">
                 <svg className="w-12 h-12 mx-auto text-ink/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -249,10 +249,10 @@ export default function BookmarksPanel({
                       {bookmark.title}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-secondary">
+                      <span className="text-xs text-muted-foreground">
                         {bookmark.conversation.title || 'Untitled Conversation'}
                       </span>
-                      <span className="text-xs text-secondary">
+                      <span className="text-xs text-muted-foreground">
                         {formatTimestamp(bookmark.created_at)}
                       </span>
                     </div>
@@ -282,13 +282,13 @@ export default function BookmarksPanel({
 
                 {/* Description */}
                 {bookmark.description && (
-                  <p className="text-sm text-secondary mb-2 leading-relaxed">
+                  <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
                     {truncateText(bookmark.description)}
                   </p>
                 )}
 
                 {/* Message preview */}
-                <div className="text-sm text-secondary bg-parchment rounded p-2 mb-2 border-l-2 border-ink/8">
+                <div className="text-sm text-muted-foreground bg-parchment rounded p-2 mb-2 border-l-2 border-ink/8">
                   {truncateText(bookmark.message.content, 120)}
                 </div>
 

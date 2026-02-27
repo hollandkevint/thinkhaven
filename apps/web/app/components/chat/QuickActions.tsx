@@ -213,7 +213,7 @@ export default function QuickActions({
         {allActions.length > 4 && (
           <button
             onClick={() => setShowAll(!showAll)}
-            className="text-xs text-secondary hover:text-primary transition-colors"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors"
           >
             {showAll ? 'Show less' : `+${allActions.length - 4} more`}
           </button>
@@ -226,8 +226,8 @@ export default function QuickActions({
           {phaseGroups.map((group) => (
             <div key={group.id} className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="text-secondary">{group.icon}</div>
-                <h4 className="text-xs font-medium text-secondary uppercase tracking-wider">
+                <div className="text-muted-foreground">{group.icon}</div>
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {group.label}
                 </h4>
               </div>
@@ -237,7 +237,7 @@ export default function QuickActions({
                     key={`${group.id}-${index}`}
                     onClick={() => handleActionClick(action)}
                     disabled={disabled}
-                    className="text-left px-3 py-2 bg-white border border-ink/8 rounded-lg text-sm text-secondary hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-left px-3 py-2 bg-white border border-ink/8 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {action}
                   </button>
@@ -254,7 +254,7 @@ export default function QuickActions({
               key={index}
               onClick={() => handleActionClick(action)}
               disabled={disabled}
-              className="text-left px-3 py-2 bg-white border border-ink/8 rounded-lg text-sm text-secondary hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+              className="text-left px-3 py-2 bg-white border border-ink/8 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
             >
               <div className="flex items-center gap-2">
                 <svg className="w-3 h-3 text-slate-blue/60 group-hover:text-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

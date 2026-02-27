@@ -113,7 +113,7 @@ export default function SessionManager({
       case 'abandoned':
         return 'text-error bg-error/10 border-error/20'
       default:
-        return 'text-secondary bg-secondary/10 border-secondary/20'
+        return 'text-muted-foreground bg-secondary/10 border-secondary/20'
     }
   }
 
@@ -129,7 +129,7 @@ export default function SessionManager({
             <h3 className="text-lg font-semibold text-primary">
               {getPathwayName(session.pathway)}
             </h3>
-            <p className="text-sm text-secondary">Session ID: {session.id.slice(-8)}</p>
+            <p className="text-sm text-muted-foreground">Session ID: {session.id.slice(-8)}</p>
           </div>
           
           <div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ export default function SessionManager({
               <div className="text-sm font-medium text-foreground">
                 {formatTime(timeElapsed)}
               </div>
-              <div className="text-xs text-secondary">Total Time</div>
+              <div className="text-xs text-muted-foreground">Total Time</div>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function SessionManager({
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-2">
             <span className="font-medium text-primary">Overall Progress</span>
-            <span className="text-secondary">{Math.round(session.progress.overallCompletion)}%</span>
+            <span className="text-muted-foreground">{Math.round(session.progress.overallCompletion)}%</span>
           </div>
           <div className="w-full bg-ink/10 rounded-full h-2">
             <div 
@@ -208,7 +208,7 @@ export default function SessionManager({
               {session.progress.nextSteps.slice(0, 3).map((step, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
                   <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
-                  <span className="text-secondary">{step}</span>
+                  <span className="text-muted-foreground">{step}</span>
                 </div>
               ))}
             </div>
@@ -221,7 +221,7 @@ export default function SessionManager({
             <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
             <span className="text-sm font-medium text-primary">Current Step</span>
           </div>
-          <p className="text-sm text-secondary">{session.progress.currentStep}</p>
+          <p className="text-sm text-muted-foreground">{session.progress.currentStep}</p>
         </div>
       </div>
 

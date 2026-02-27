@@ -162,7 +162,7 @@ export default function FeatureInput({
   return (
     <div className={`feature-input ${className}`}>
       {/* Progress Indicator */}
-      <div className="flex items-center gap-2 mb-6 text-sm text-secondary">
+      <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
         <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs font-medium">
           1
         </div>
@@ -174,7 +174,7 @@ export default function FeatureInput({
           <h2 className="text-xl font-semibold text-primary mb-2">
             Describe Your Feature Concept
           </h2>
-          <p className="text-secondary text-sm">
+          <p className="text-muted-foreground text-sm">
             Provide details about the feature you want to validate and refine.
             The more specific you are, the better guidance you'll receive.
           </p>
@@ -195,7 +195,7 @@ export default function FeatureInput({
               className="w-full px-3 py-2 border border-divider rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"
             />
             <div className="flex justify-between items-center mt-1">
-              <div className="text-xs text-secondary">
+              <div className="text-xs text-muted-foreground">
                 {featureDescription.length < 50 ? (
                   <span className="text-mustard">
                     {50 - featureDescription.length} more characters needed
@@ -204,7 +204,7 @@ export default function FeatureInput({
                   <span className="text-forest">✓ Minimum length met</span>
                 )}
               </div>
-              <div className="text-xs text-secondary">
+              <div className="text-xs text-muted-foreground">
                 {featureDescription.length}/500
               </div>
             </div>
@@ -213,7 +213,7 @@ export default function FeatureInput({
           {/* Target Users - Optional */}
           <div>
             <label htmlFor="target-users" className="block text-sm font-medium text-primary mb-2">
-              Target Users <span className="text-secondary text-xs">(optional)</span>
+              Target Users <span className="text-muted-foreground text-xs">(optional)</span>
             </label>
             <textarea
               id="target-users"
@@ -223,7 +223,7 @@ export default function FeatureInput({
               rows={2}
               className="w-full px-3 py-2 border border-divider rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"
             />
-            <div className="text-xs text-secondary text-right mt-1">
+            <div className="text-xs text-muted-foreground text-right mt-1">
               {targetUsers.length}/200
             </div>
           </div>
@@ -231,7 +231,7 @@ export default function FeatureInput({
           {/* Current Problems - Optional */}
           <div>
             <label htmlFor="current-problems" className="block text-sm font-medium text-primary mb-2">
-              Current Problems <span className="text-secondary text-xs">(optional)</span>
+              Current Problems <span className="text-muted-foreground text-xs">(optional)</span>
             </label>
             <textarea
               id="current-problems"
@@ -241,7 +241,7 @@ export default function FeatureInput({
               rows={2}
               className="w-full px-3 py-2 border border-divider rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"
             />
-            <div className="text-xs text-secondary text-right mt-1">
+            <div className="text-xs text-muted-foreground text-right mt-1">
               {currentProblems.length}/200
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function FeatureInput({
           {/* Success Definition - Optional */}
           <div>
             <label htmlFor="success-definition" className="block text-sm font-medium text-primary mb-2">
-              Success Definition <span className="text-secondary text-xs">(optional)</span>
+              Success Definition <span className="text-muted-foreground text-xs">(optional)</span>
             </label>
             <textarea
               id="success-definition"
@@ -259,7 +259,7 @@ export default function FeatureInput({
               rows={2}
               className="w-full px-3 py-2 border border-divider rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"
             />
-            <div className="text-xs text-secondary text-right mt-1">
+            <div className="text-xs text-muted-foreground text-right mt-1">
               {successDefinition.length}/200
             </div>
           </div>
@@ -278,7 +278,7 @@ export default function FeatureInput({
 
           {/* Generate Analysis Button */}
           <div className="flex justify-between items-center pt-4 border-t border-divider">
-            <div className="text-sm text-secondary">
+            <div className="text-sm text-muted-foreground">
               {hasGeneratedQuestions ? (
                 <span className="text-forest">✓ Analysis questions generated</span>
               ) : (

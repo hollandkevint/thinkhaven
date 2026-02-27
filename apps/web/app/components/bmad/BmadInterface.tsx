@@ -94,24 +94,30 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
           if (activeSessions.length > 0) {
             // Load the most recent active session
             const activeSession = activeSessions[0]
-            
+
             // Calculate session continuation info
             const createdAt = new Date(activeSession.createdAt)
             const now = new Date()
             const timeElapsed = formatTimeElapsed(now.getTime() - createdAt.getTime())
             const lastActivity = formatLastActivity(activeSession.lastActivityAt || activeSession.createdAt)
-            
+
             setContinuationSessionInfo({
               pathway: getPathwayDisplayName(activeSession.pathway),
               timeElapsed,
               lastActivity,
               progress: Math.round(activeSession.progress?.overallCompletion || 0)
             })
-            
+
             setShowContinuationGuidance(true)
-            
-            await getSession(activeSession.id)
-            setCurrentStep('session-active')
+
+            try {
+              await getSession(activeSession.id)
+              setCurrentStep('session-active')
+            } catch {
+              // getSession failed (auth race, 404, network) - stay on pathway selection
+              // Error state is already set by the hook
+              setShowContinuationGuidance(false)
+            }
           } else if (allSessions.length === 0) {
             // First-time user - show onboarding
             setShowOnboarding(true)
@@ -158,8 +164,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
   const handleSessionExit = () => {
     exitSession()
     setCurrentStep('pathway-selection')
-    setMockElicitationData(null)
-    
+
     // Clear any preserved input when returning to workspace
     if (onInputConsumed) {
       onInputConsumed()
@@ -177,7 +182,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
       <div className="flex items-center space-x-2 mb-6 p-4 bg-white/50 rounded-lg border border-divider/30">
         {steps.map((step, index) => (
           <div key={step.key} className="flex items-center">
-            <div className={`flex items-center ${step.isActive ? 'text-primary font-medium' : 'text-secondary'}`}>
+            <div className={`flex items-center ${step.isActive ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2 ${
                 step.isActive 
                   ? 'bg-primary text-white' 
@@ -241,13 +246,33 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
         )
 
       case 'session-active':
+        if (!currentSession && !isLoading) {
+          // Session fetch completed but failed - show error with recovery
+          return (
+            <div className="space-y-4">
+              <ErrorState
+                error={error || 'Session could not be loaded'}
+                onRetry={() => checkForActiveSessions()}
+              />
+              <button
+                onClick={() => {
+                  exitSession()
+                  setCurrentStep('pathway-selection')
+                }}
+                className="w-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg transition-colors"
+              >
+                Back to pathway selection
+              </button>
+            </div>
+          )
+        }
         if (!currentSession) {
           return (
             <div className="space-y-6">
               <div className="bg-white rounded-lg border border-divider p-6">
                 <div className="text-center mb-6">
                   <h3 className="text-lg font-semibold text-primary mb-2">Loading Your Session</h3>
-                  <p className="text-secondary text-sm">Preparing your strategic thinking workspace...</p>
+                  <p className="text-muted-foreground text-sm">Preparing your strategic thinking workspace...</p>
                 </div>
                 <SkeletonLoader />
               </div>
@@ -323,7 +348,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-primary mb-2">Session Completed!</h2>
-              <p className="text-secondary">
+              <p className="text-muted-foreground">
                 Your strategic session has been completed successfully. Your insights and outputs have been saved.
               </p>
             </div>
@@ -343,7 +368,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
               </button>
               <button
                 onClick={handleSessionExit}
-                className="px-6 py-3 border border-divider text-secondary rounded-lg hover:bg-primary/5 transition-colors"
+                className="px-6 py-3 border border-divider text-muted-foreground rounded-lg hover:bg-primary/5 transition-colors"
               >
                 Return to Workspace
               </button>
@@ -366,7 +391,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-xl max-w-md w-full p-6">
                 <h2 className="text-xl font-bold text-primary mb-4">Unable to Load Onboarding</h2>
-                <p className="text-secondary mb-4">
+                <p className="text-muted-foreground mb-4">
                   There was an issue loading the onboarding content. You can still continue to your session.
                 </p>
                 <button
@@ -389,7 +414,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-primary">Welcome to ThinkHaven</h2>
-                  <p className="text-secondary">Strategic frameworks for breakthrough thinking</p>
+                  <p className="text-muted-foreground">Strategic frameworks for breakthrough thinking</p>
                 </div>
               </div>
             </div>
@@ -399,7 +424,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
               {/* Introduction */}
               <div>
                 <h3 className="text-lg font-semibold text-primary mb-3">How It Works</h3>
-                <p className="text-secondary leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   ThinkHaven provides a structured approach to strategic thinking that guides you through proven frameworks
                   to develop ideas, analyze business models, and optimize strategies. Each session is designed to take
                   25-45 minutes and produces actionable insights.
@@ -455,17 +480,17 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                   <div className="text-center">
                     <div className="w-10 h-10 bg-terracotta/10 text-terracotta rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">1</div>
                     <h4 className="font-medium text-primary mb-1">Select Pathway</h4>
-                    <p className="text-secondary text-sm">Choose the strategic approach that best fits your current challenge</p>
+                    <p className="text-muted-foreground text-sm">Choose the strategic approach that best fits your current challenge</p>
                   </div>
                   <div className="text-center">
                     <div className="w-10 h-10 bg-forest/10 text-forest rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">2</div>
                     <h4 className="font-medium text-primary mb-1">Guided Session</h4>
-                    <p className="text-secondary text-sm">Work through structured phases with strategic frameworks and tools</p>
+                    <p className="text-muted-foreground text-sm">Work through structured phases with strategic frameworks and tools</p>
                   </div>
                   <div className="text-center">
                     <div className="w-10 h-10 bg-terracotta/10 text-terracotta rounded-full flex items-center justify-center mx-auto mb-2 font-semibold">3</div>
                     <h4 className="font-medium text-primary mb-1">Actionable Results</h4>
-                    <p className="text-secondary text-sm">Get specific next steps and a strategic framework to guide your decisions</p>
+                    <p className="text-muted-foreground text-sm">Get specific next steps and a strategic framework to guide your decisions</p>
                   </div>
                 </div>
               </div>
@@ -474,13 +499,13 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             {/* Footer */}
             <div className="p-6 border-t border-divider bg-parchment">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-secondary">
+                <div className="text-sm text-muted-foreground">
                   Ready to begin your strategic thinking journey?
                 </div>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowOnboarding(false)}
-                    className="px-4 py-2 text-secondary hover:text-primary transition-colors"
+                    className="px-4 py-2 text-muted-foreground hover:text-primary transition-colors"
                   >
                     Skip intro
                   </button>
@@ -507,7 +532,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
             </div>
             <div>
               <h1 className="text-2xl font-bold text-primary">BMad Method</h1>
-              <p className="text-secondary text-sm">Strategic frameworks for breakthrough thinking</p>
+              <p className="text-muted-foreground text-sm">Strategic frameworks for breakthrough thinking</p>
             </div>
           </div>
         </div>
@@ -555,21 +580,21 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-secondary">Pathway:</span>
+                    <span className="text-muted-foreground">Pathway:</span>
                     <span className="font-medium text-primary">{continuationSessionInfo.pathway}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-secondary">Started:</span>
+                    <span className="text-muted-foreground">Started:</span>
                     <span className="text-primary">{continuationSessionInfo.timeElapsed}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-secondary">Progress:</span>
+                    <span className="text-muted-foreground">Progress:</span>
                     <span className="text-primary font-medium">{continuationSessionInfo.progress}% complete</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-secondary">Last activity:</span>
+                    <span className="text-muted-foreground">Last activity:</span>
                     <span className="text-primary">{continuationSessionInfo.lastActivity}</span>
                   </div>
                 </div>
@@ -583,17 +608,17 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowContinuationGuidance(false)}
-                  className="text-xs text-secondary hover:text-primary transition-colors"
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   Dismiss guidance
                 </button>
-                <span className="text-divider text-xs">•</span>
+                <span className="text-muted-foreground text-xs">•</span>
                 <button
                   onClick={() => {
                     setShowContinuationGuidance(false)
                     handleSessionExit()
                   }}
-                  className="text-xs text-secondary hover:text-primary transition-colors"
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   Start fresh session
                 </button>
@@ -636,7 +661,10 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
                       Refresh Page
                     </button>
                     <button
-                      onClick={() => setCurrentStep('pathway-selection')}
+                      onClick={() => {
+                        exitSession()
+                        setCurrentStep('pathway-selection')
+                      }}
                       className="px-4 py-2 border border-rust/40 text-rust rounded-lg hover:bg-rust/10 transition-colors"
                     >
                       Reset Session

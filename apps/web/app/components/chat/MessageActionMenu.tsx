@@ -140,7 +140,7 @@ export default function MessageActionMenu({
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-secondary hover:text-primary hover:bg-parchment rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+        className="p-2 text-muted-foreground hover:text-primary hover:bg-parchment rounded-lg transition-colors opacity-0 group-hover:opacity-100"
         title="Message actions"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +184,7 @@ export default function MessageActionMenu({
                     {isBookmarked ? 'Bookmarked' : 'Add Bookmark'}
                   </div>
                   {isBookmarked && bookmarks.length > 0 && (
-                    <div className="text-xs text-secondary">
+                    <div className="text-xs text-muted-foreground">
                       {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
                     </div>
                   )}
@@ -204,7 +204,7 @@ export default function MessageActionMenu({
                 </svg>
                 <div>
                   <div className="font-medium">Create Reference</div>
-                  <div className="text-xs text-secondary">Link to another message</div>
+                  <div className="text-xs text-muted-foreground">Link to another message</div>
                 </div>
               </button>
 
@@ -221,7 +221,7 @@ export default function MessageActionMenu({
                 </svg>
                 <div>
                   <div className="font-medium">View References</div>
-                  <div className="text-xs text-secondary">See related messages</div>
+                  <div className="text-xs text-muted-foreground">See related messages</div>
                 </div>
               </button>
 
@@ -239,7 +239,7 @@ export default function MessageActionMenu({
                   </svg>
                   <div>
                     <div className="font-medium">Create Branch</div>
-                    <div className="text-xs text-secondary">Explore alternative direction</div>
+                    <div className="text-xs text-muted-foreground">Explore alternative direction</div>
                   </div>
                 </button>
               )}
@@ -267,7 +267,7 @@ export default function MessageActionMenu({
                 <h3 className="font-medium text-primary">Add Bookmark</h3>
                 <button
                   onClick={() => setShowBookmarkForm(false)}
-                  className="text-secondary hover:text-primary"
+                  className="text-muted-foreground hover:text-primary"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -278,7 +278,7 @@ export default function MessageActionMenu({
               <div className="space-y-3">
                 {/* Title */}
                 <div>
-                  <label className="block text-xs font-medium text-secondary mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Title *
                   </label>
                   <input
@@ -293,7 +293,7 @@ export default function MessageActionMenu({
 
                 {/* Description */}
                 <div>
-                  <label className="block text-xs font-medium text-secondary mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Description
                   </label>
                   <textarea
@@ -308,7 +308,7 @@ export default function MessageActionMenu({
 
                 {/* Tags */}
                 <div>
-                  <label className="block text-xs font-medium text-secondary mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Tags
                   </label>
                   <div className="flex gap-1 mb-2 flex-wrap">
@@ -351,7 +351,7 @@ export default function MessageActionMenu({
 
                 {/* Color */}
                 <div>
-                  <label className="block text-xs font-medium text-secondary mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Color
                   </label>
                   <div className="flex gap-1 flex-wrap">
@@ -375,7 +375,7 @@ export default function MessageActionMenu({
               <div className="flex gap-2 mt-4 pt-3 border-t border-divider">
                 <button
                   onClick={() => setShowBookmarkForm(false)}
-                  className="flex-1 px-3 py-2 text-sm text-secondary hover:text-primary border border-divider rounded hover:bg-parchment transition-colors"
+                  className="flex-1 px-3 py-2 text-sm text-muted-foreground hover:text-primary border border-divider rounded hover:bg-parchment transition-colors"
                 >
                   Cancel
                 </button>

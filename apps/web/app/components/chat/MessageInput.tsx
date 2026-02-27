@@ -230,7 +230,7 @@ export default function MessageInput({
             <button
               key={action.id}
               onClick={action.action}
-              className="p-2 text-secondary hover:text-primary hover:bg-parchment rounded transition-colors"
+              className="p-2 text-muted-foreground hover:text-primary hover:bg-parchment rounded transition-colors"
               title={`${action.label}${action.shortcut ? ` (${action.shortcut})` : ''}`}
               type="button"
             >
@@ -240,7 +240,7 @@ export default function MessageInput({
           <div className="h-6 w-px bg-divider mx-1"></div>
           <button
             onClick={() => setShowToolbar(false)}
-            className="p-2 text-secondary hover:text-primary hover:bg-parchment rounded transition-colors"
+            className="p-2 text-muted-foreground hover:text-primary hover:bg-parchment rounded transition-colors"
             title="Hide toolbar"
             type="button"
           >
@@ -263,7 +263,7 @@ export default function MessageInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="w-full px-4 py-3 pr-20 resize-none bg-transparent border-none outline-none text-secondary placeholder:text-slate-blue/60 min-h-[50px] max-h-[200px]"
+          className="w-full px-4 py-3 pr-20 resize-none bg-transparent border-none outline-none text-muted-foreground placeholder:text-slate-blue/60 min-h-[50px] max-h-[200px]"
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: 'var(--slate-blue) transparent'
@@ -279,7 +279,7 @@ export default function MessageInput({
               className={`p-1.5 rounded transition-colors ${
                 showToolbar
                   ? 'text-primary bg-terracotta/10'
-                  : 'text-slate-blue/60 hover:text-secondary hover:bg-parchment'
+                  : 'text-slate-blue/60 hover:text-muted-foreground hover:bg-parchment'
               }`}
               title="Format text"
               type="button"

@@ -209,7 +209,7 @@ export default function StreamingMessage({
             {isAssistant ? 'Mary' : 'You'}
           </span>
           {timestamp && (
-            <span className="text-xs text-secondary">
+            <span className="text-xs text-muted-foreground">
               {formatTimestamp(timestamp)}
             </span>
           )}
@@ -279,7 +279,7 @@ export default function StreamingMessage({
           <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-xs text-secondary hover:text-primary flex items-center gap-1"
+              className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
             >
               <svg 
                 className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
@@ -296,19 +296,19 @@ export default function StreamingMessage({
                 {tokenUsage && (
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <span className="text-secondary">Tokens:</span>
+                      <span className="text-muted-foreground">Tokens:</span>
                       <span className="ml-1 font-mono">{tokenUsage.total_tokens.toLocaleString()}</span>
                     </div>
                     <div>
-                      <span className="text-secondary">Cost:</span>
+                      <span className="text-muted-foreground">Cost:</span>
                       <span className="ml-1 font-mono">{formatCost(tokenUsage.cost_estimate_usd)}</span>
                     </div>
                     <div>
-                      <span className="text-secondary">Input:</span>
+                      <span className="text-muted-foreground">Input:</span>
                       <span className="ml-1 font-mono">{tokenUsage.input_tokens.toLocaleString()}</span>
                     </div>
                     <div>
-                      <span className="text-secondary">Output:</span>
+                      <span className="text-muted-foreground">Output:</span>
                       <span className="ml-1 font-mono">{tokenUsage.output_tokens.toLocaleString()}</span>
                     </div>
                   </div>
@@ -316,7 +316,7 @@ export default function StreamingMessage({
                 
                 {coachingContext?.userProfile && (
                   <div className="border-t pt-2">
-                    <div className="text-secondary mb-1">Context:</div>
+                    <div className="text-muted-foreground mb-1">Context:</div>
                     <div className="space-y-1">
                       {coachingContext.userProfile.experienceLevel && (
                         <div>Experience: <span className="text-primary capitalize">{coachingContext.userProfile.experienceLevel}</span></div>

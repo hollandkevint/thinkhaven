@@ -191,7 +191,7 @@ export default function ExportDialog({
           <h2 className="text-xl font-semibold text-primary">Export Conversations</h2>
           <button
             onClick={onClose}
-            className="text-secondary hover:text-primary transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -216,11 +216,11 @@ export default function ExportDialog({
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-primary">{format.name}</span>
-                    <span className="text-xs text-secondary bg-parchment px-2 py-1 rounded">
+                    <span className="text-xs text-muted-foreground bg-parchment px-2 py-1 rounded">
                       {format.extension}
                     </span>
                   </div>
-                  <p className="text-sm text-secondary mb-2">
+                  <p className="text-sm text-muted-foreground mb-2">
                     {format.description}
                   </p>
                   {format.note && (
@@ -246,7 +246,7 @@ export default function ExportDialog({
                 />
                 <div>
                   <span className="text-sm font-medium text-primary">Metadata</span>
-                  <p className="text-xs text-secondary">Timestamps, token usage, conversation details</p>
+                  <p className="text-xs text-muted-foreground">Timestamps, token usage, conversation details</p>
                 </div>
               </label>
 
@@ -259,10 +259,10 @@ export default function ExportDialog({
                   className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta disabled:opacity-50"
                 />
                 <div>
-                  <span className={`text-sm font-medium ${supportsFeature('bookmarks') ? 'text-primary' : 'text-secondary'}`}>
+                  <span className={`text-sm font-medium ${supportsFeature('bookmarks') ? 'text-primary' : 'text-muted-foreground'}`}>
                     Bookmarks
                   </span>
-                  <p className="text-xs text-secondary">Bookmarked messages with tags and descriptions</p>
+                  <p className="text-xs text-muted-foreground">Bookmarked messages with tags and descriptions</p>
                   {!supportsFeature('bookmarks') && (
                     <p className="text-xs text-mustard">Not supported by {currentFormatInfo?.name}</p>
                   )}
@@ -278,10 +278,10 @@ export default function ExportDialog({
                   className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta disabled:opacity-50"
                 />
                 <div>
-                  <span className={`text-sm font-medium ${supportsFeature('references') ? 'text-primary' : 'text-secondary'}`}>
+                  <span className={`text-sm font-medium ${supportsFeature('references') ? 'text-primary' : 'text-muted-foreground'}`}>
                     Message References
                   </span>
-                  <p className="text-xs text-secondary">Links between related messages</p>
+                  <p className="text-xs text-muted-foreground">Links between related messages</p>
                   {!supportsFeature('references') && (
                     <p className="text-xs text-mustard">Not supported by {currentFormatInfo?.name}</p>
                   )}
@@ -297,10 +297,10 @@ export default function ExportDialog({
                   className="w-4 h-4 text-terracotta border-ink/8 rounded focus:ring-terracotta disabled:opacity-50"
                 />
                 <div>
-                  <span className={`text-sm font-medium ${supportsFeature('context') ? 'text-primary' : 'text-secondary'}`}>
+                  <span className={`text-sm font-medium ${supportsFeature('context') ? 'text-primary' : 'text-muted-foreground'}`}>
                     Context & Insights
                   </span>
-                  <p className="text-xs text-secondary">Key insights, summaries, and conversation context</p>
+                  <p className="text-xs text-muted-foreground">Key insights, summaries, and conversation context</p>
                   {!supportsFeature('context') && (
                     <p className="text-xs text-mustard">Not supported by {currentFormatInfo?.name}</p>
                   )}
@@ -328,7 +328,7 @@ export default function ExportDialog({
                 {dateRangeEnabled && (
                   <div className="flex gap-3 items-center ml-7">
                     <div>
-                      <label className="block text-xs text-secondary mb-1">From</label>
+                      <label className="block text-xs text-muted-foreground mb-1">From</label>
                       <input
                         type="date"
                         value={options.dateRange?.start ? formatDate(options.dateRange.start) : ''}
@@ -337,7 +337,7 @@ export default function ExportDialog({
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-secondary mb-1">To</label>
+                      <label className="block text-xs text-muted-foreground mb-1">To</label>
                       <input
                         type="date"
                         value={options.dateRange?.end ? formatDate(options.dateRange.end) : ''}
@@ -363,7 +363,7 @@ export default function ExportDialog({
                 
                 {maxMessagesEnabled && (
                   <div className="ml-7">
-                    <label className="block text-xs text-secondary mb-1">Maximum messages per conversation</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Maximum messages per conversation</label>
                     <input
                       type="number"
                       min="1"
@@ -372,7 +372,7 @@ export default function ExportDialog({
                       onChange={(e) => handleOptionChange('maxMessages', parseInt(e.target.value))}
                       className="w-32 px-3 py-2 border border-ink/8 rounded text-sm focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-transparent"
                     />
-                    <p className="text-xs text-secondary mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Keep most recent messages if limit is reached
                     </p>
                   </div>
@@ -421,7 +421,7 @@ export default function ExportDialog({
 
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-divider bg-parchment">
-          <div className="text-sm text-secondary">
+          <div className="text-sm text-muted-foreground">
             {conversationIds?.length 
               ? `Exporting ${conversationIds.length} selected conversation${conversationIds.length !== 1 ? 's' : ''}`
               : 'Exporting all conversations in workspace'
@@ -431,7 +431,7 @@ export default function ExportDialog({
             <button
               onClick={onClose}
               disabled={exporting}
-              className="px-4 py-2 text-sm text-secondary hover:text-primary border border-divider rounded hover:bg-cream transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-primary border border-divider rounded hover:bg-cream transition-colors disabled:opacity-50"
             >
               Cancel
             </button>

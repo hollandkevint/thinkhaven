@@ -298,7 +298,7 @@ export default function PathwaySelector({
     <div className={`bg-white rounded-lg border border-divider p-6 ${className}`}>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-primary mb-2">Choose Your Strategic Pathway</h2>
-        <p className="text-secondary">
+        <p className="text-muted-foreground">
           Select the pathway that best matches your current challenge, or describe your situation for a personalized recommendation.
         </p>
       </div>
@@ -391,26 +391,26 @@ export default function PathwaySelector({
                           </span>
                         )}
                       </div>
-                      <p className="text-secondary text-sm mb-4">{pathway.description}</p>
+                      <p className="text-muted-foreground text-sm mb-4">{pathway.description}</p>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                         <div>
-                          <span className="text-secondary">Target User:</span>
+                          <span className="text-muted-foreground">Target User:</span>
                           <p className="text-foreground">{pathway.targetUser}</p>
                         </div>
                         <div>
-                          <span className="text-secondary">Duration:</span>
+                          <span className="text-muted-foreground">Duration:</span>
                           <p className="text-foreground">{pathway.timeCommitment} minutes</p>
                         </div>
                       </div>
                       
                       <div className="mt-4">
-                        <span className="text-secondary text-sm">Expected Outcome:</span>
+                        <span className="text-muted-foreground text-sm">Expected Outcome:</span>
                         <p className="text-foreground text-sm">{pathway.expectedOutcome}</p>
                       </div>
 
                       <div className="mt-4 pt-3 border-t border-divider/50">
-                        <span className="text-secondary text-sm">Methodology:</span>
+                        <span className="text-muted-foreground text-sm">Methodology:</span>
                         <p className="text-foreground text-sm font-mono mt-1 text-xs leading-relaxed">
                           {getMethodologyPreview(pathway.id)}
                         </p>
@@ -421,7 +421,7 @@ export default function PathwaySelector({
                       {isLoading ? (
                         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                       ) : (
-                        <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       )}

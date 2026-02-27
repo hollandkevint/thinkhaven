@@ -42,7 +42,7 @@ export default function ResendConfirmationPage() {
       <div className="max-w-md w-full space-y-8 p-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-primary">Resend Confirmation Email</h1>
-          <p className="mt-2 text-secondary">
+          <p className="mt-2 text-muted-foreground">
             Enter your email address to receive a new confirmation link
           </p>
         </div>
@@ -87,12 +87,12 @@ export default function ResendConfirmationPage() {
           </div>
 
           <div className="text-center space-y-2">
-            <p className="text-secondary">
+            <p className="text-muted-foreground">
               <Link href="/login" className="font-medium text-primary hover:text-primary-hover">
                 Back to Sign In
               </Link>
             </p>
-            <p className="text-secondary">
+            <p className="text-muted-foreground">
               Need a new account?{' '}
               <Link href="/signup" className="font-medium text-primary hover:text-primary-hover">
                 Sign up here

@@ -199,7 +199,7 @@ export default function SessionHistoryManager({
             </div>
             <div>
               <h3 className="text-lg font-semibold text-primary">Session History & Resumption</h3>
-              <p className="text-sm text-secondary">Track and resume your strategic sessions</p>
+              <p className="text-sm text-muted-foreground">Track and resume your strategic sessions</p>
             </div>
           </div>
           
@@ -239,7 +239,7 @@ export default function SessionHistoryManager({
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-4 text-sm text-secondary">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span>Phase: {session.currentPhase.replace(/_/g, ' ')}</span>
                         <span>Started: {formatTimeAgo(new Date(session.startTime))}</span>
                         <span>Status: {session.metadata.status}</span>
@@ -277,11 +277,11 @@ export default function SessionHistoryManager({
                     <div className="mt-4 pt-4 border-t border-ink/8">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="font-medium text-secondary">Current Step:</span>
+                          <span className="font-medium text-muted-foreground">Current Step:</span>
                           <p className="text-primary">{session.progress.currentStep}</p>
                         </div>
                         <div>
-                          <span className="font-medium text-secondary">Next Steps:</span>
+                          <span className="font-medium text-muted-foreground">Next Steps:</span>
                           <ul className="text-primary space-y-1">
                             {session.progress.nextSteps.slice(0, 2).map((step, idx) => (
                               <li key={idx} className="flex items-center gap-2">
@@ -311,7 +311,7 @@ export default function SessionHistoryManager({
             </h4>
             
             {sessionHistory.length === 0 ? (
-              <div className="text-center py-8 text-secondary">
+              <div className="text-center py-8 text-muted-foreground">
                 <svg className="w-12 h-12 mx-auto mb-4 text-ink/15" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
                 </svg>
@@ -334,7 +334,7 @@ export default function SessionHistoryManager({
                           {entry.progress.toFixed(0)}%
                         </span>
                       </div>
-                      <p className="text-xs text-secondary mb-1">
+                      <p className="text-xs text-muted-foreground mb-1">
                         Session: {entry.sessionId.slice(-8)} • Phase: {entry.phase.replace(/_/g, ' ')}
                       </p>
                       {entry.details && (

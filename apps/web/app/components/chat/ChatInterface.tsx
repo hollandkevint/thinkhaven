@@ -363,7 +363,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
             </div>
             <div>
               <h1 className="text-xl font-bold text-primary">Mary</h1>
-              <p className="text-sm text-secondary">AI Business Strategist</p>
+              <p className="text-sm text-muted-foreground">AI Business Strategist</p>
             </div>
             {coachingContext?.currentBmadSession && (
               <div className="flex items-center gap-2 px-3 py-1.5 bg-terracotta/10 rounded-full">
@@ -384,14 +384,14 @@ I'm here to help you think through strategic challenges, validate your assumptio
                 connectionStatus === 'retrying' ? 'bg-mustard animate-pulse' :
                 'bg-rust'
               }`} />
-              <span className="text-xs text-secondary capitalize">
+              <span className="text-xs text-muted-foreground capitalize">
                 {connectionStatus === 'retrying' ? `Retrying (${retryCount}/3)` : connectionStatus}
               </span>
             </div>
             
             {/* Token Usage Display */}
             {totalTokens > 0 && (
-              <div className="text-xs text-secondary bg-parchment rounded-lg px-3 py-1.5">
+              <div className="text-xs text-muted-foreground bg-parchment rounded-lg px-3 py-1.5">
                 <span className="font-mono">{totalTokens.toLocaleString()}</span> tokens • 
                 <span className="font-mono ml-1">
                   ${totalCost.toFixed(4)}
@@ -403,7 +403,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
             {messages.length > 1 && (
               <button
                 onClick={clearConversation}
-                className="text-secondary hover:text-primary p-2 rounded-lg hover:bg-parchment transition-colors"
+                className="text-muted-foreground hover:text-primary p-2 rounded-lg hover:bg-parchment transition-colors"
                 title="Clear conversation"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
