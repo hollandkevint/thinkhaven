@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-*Last Updated: 2026-02-15*
+*Last Updated: 2026-02-27*
 
 ## Project Context
 **ThinkHaven** - Decision accelerator for structured AI sessions
@@ -17,11 +17,11 @@ npm run build            # Production build
 npm run lint             # ESLint
 npm test                 # Unit tests (Vitest, watch mode)
 npm run test:run         # Unit tests (once)
-npm run test:e2e         # E2E tests (Playwright, 7 smoke tests)
-npm run test:prod        # Smoke tests against production (15 tests)
+npm run test:e2e         # E2E tests (Playwright, 16 smoke tests)
+npm run test:prod        # Smoke tests against production (16 tests)
 ```
 
-Migrations: `apps/web/supabase/migrations/` (001 → 011, sequential, never skip)
+Migrations: `apps/web/supabase/migrations/` (001 → 019, sequential, never skip)
 
 ## Route Architecture
 
@@ -42,10 +42,12 @@ See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_
 ## Testing
 
 - Unit tests: `**/*.test.{ts,tsx}`, setup in `tests/setup.ts`
-- E2E: `tests/e2e/smoke/health.spec.ts` - 7 public route smoke tests, all passing in CI
-- Prod: `tests/e2e/smoke/beta-checklist.spec.ts` - 9 production verification tests (`npm run test:prod`)
+- E2E: `tests/e2e/smoke/health.spec.ts` - 6 public route smoke tests, all passing in CI
+- E2E: `tests/e2e/smoke/beta-checklist.spec.ts` - 9 beta checklist tests (public routes, mobile, feedback)
+- E2E: `tests/e2e/smoke/auth-session.spec.ts` - 1 authenticated flow test (requires TEST_ADMIN_EMAIL/PASSWORD)
+- Prod: `npm run test:prod` runs all smoke tests against thinkhaven.co (15 pass, 1 skipped)
 - Config: `vitest.config.ts`, `playwright.config.ts`, `playwright.prod.config.ts` (production)
-- 45/71 unit test files fail (pre-existing, not regressions). mary-persona: 67/67 pass.
+- 22 test files pass, 2 skipped (login needs env, canvas-export needs browser). 369 tests pass, 0 failures.
 
 ## Configuration
 
@@ -55,10 +57,10 @@ See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_
 
 ## Common Pitfalls
 
-1. **Middleware disabled** (`middleware.ts.disabled`) - Edge Runtime incompatibility. Auth via API routes only.
+1. **Middleware is active** (`middleware.ts`) - Runs `getUser()` on every request for JWT refresh. Supabase Edge Runtime warnings exist but don't block functionality.
 2. **Credit deduction** - ALWAYS use `deduct_credit_transaction()` for atomicity, never manual UPDATE
 3. **File-system routing** - Every route needs a `page.tsx` file
-4. **Migration order** - Sequential (001 → 011), never skip
+4. **Migration order** - Sequential (001 → 019), never skip
 5. **Stripe webhooks** - Verify signatures with `stripe-service.ts.constructWebhookEvent()`
 6. **Tldraw v4** - Use `getSnapshot(store)` / `loadSnapshot(store, data)`, NOT instance methods
 7. **Agentic tool loop** - Max 5 rounds per message (`MAX_TOOL_ROUNDS` in `/api/chat/stream/route.ts`)
