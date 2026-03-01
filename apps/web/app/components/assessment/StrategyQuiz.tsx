@@ -236,7 +236,7 @@ export function StrategyQuiz() {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>🎉 Assessment Complete!</CardTitle>
+          <CardTitle>Assessment Complete!</CardTitle>
           <CardDescription>
             Get your personalized strategic thinking scorecard
           </CardDescription>
@@ -299,9 +299,9 @@ export function StrategyQuiz() {
         <CardHeader>
           <div className="flex items-center justify-between mb-2">
             <Badge variant="secondary">
-              {question.category === 'evidence' && '📊 Evidence-Based'}
-              {question.category === 'framework' && '🎯 Framework Mastery'}
-              {question.category === 'execution' && '🚀 Execution Excellence'}
+              {question.category === 'evidence' && 'Evidence-Based'}
+              {question.category === 'framework' && 'Framework Mastery'}
+              {question.category === 'execution' && 'Execution Excellence'}
             </Badge>
           </div>
           <CardTitle className="text-xl">{question.question}</CardTitle>
@@ -312,7 +312,7 @@ export function StrategyQuiz() {
               <button
                 key={option.value}
                 onClick={() => handleAnswer(question.id, option.value)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all hover:border-terracotta hover:bg-terracotta/5 ${
+                className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer active:scale-[0.98] hover:border-terracotta hover:bg-terracotta/5 ${
                   answers[question.id] === option.value
                     ? 'border-terracotta bg-terracotta/5'
                     : 'border-ink/8'

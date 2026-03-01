@@ -251,7 +251,7 @@ export default function EnhancedSessionManager({
   const progressPhases = getProgressPhases()
 
   return (
-    <div className={`bg-white rounded-lg border border-divider shadow-sm ${className}`}>
+    <div className={`bg-cream rounded-lg border border-divider shadow-sm ${className}`}>
       {/* Enhanced Header */}
       <div className="p-6 border-b border-divider">
         <div className="flex items-center justify-between mb-4">
@@ -308,7 +308,7 @@ export default function EnhancedSessionManager({
                 className="bg-terracotta h-4 rounded-full transition-all duration-700 relative overflow-hidden"
                 style={{ width: `${session.progress.overallCompletion}%` }}
               >
-                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                <div className="absolute inset-0 bg-cream/20 animate-pulse"></div>
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white text-xs font-medium">
                   {session.progress.overallCompletion > 15 ? `${Math.round(session.progress.overallCompletion)}%` : ''}
                 </div>
@@ -332,14 +332,14 @@ export default function EnhancedSessionManager({
         <div className="bg-cream border border-terracotta/20 p-5 rounded-lg">
           <div className="flex items-start gap-4 mb-4">
             <div className={`w-12 h-12 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0 shadow-lg`}>
-              <div className="w-4 h-4 bg-white rounded-full animate-pulse"></div>
+              <div className="w-4 h-4 bg-cream rounded-full animate-pulse"></div>
             </div>
             <div className="flex-1">
               <div className="flex justify-between items-start mb-2">
                 <h4 className="text-lg font-semibold text-primary">
                   {currentPhaseInfo.title}
                 </h4>
-                <span className="text-sm font-semibold px-3 py-1 bg-white/80 rounded-full border">
+                <span className="text-sm font-semibold px-3 py-1 bg-cream/80 rounded-full border">
                   {Math.round(phaseProgress)}% complete
                 </span>
               </div>
@@ -349,7 +349,7 @@ export default function EnhancedSessionManager({
               
               {/* Phase Progress Bar */}
               <div className="mb-4">
-                <div className="w-full bg-white/60 rounded-full h-3 shadow-inner">
+                <div className="w-full bg-cream/60 rounded-full h-3 shadow-inner">
                   <div 
                     className={`bg-terracotta h-3 rounded-full transition-all duration-500 shadow-sm`}
                     style={{ width: `${phaseProgress}%` }}
@@ -359,21 +359,21 @@ export default function EnhancedSessionManager({
               
               {/* Time Information Grid */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                <div className="bg-white/60 p-3 rounded-lg text-center">
+                <div className="bg-cream/60 p-3 rounded-lg text-center">
                   <div className="font-bold text-lg text-primary">{formatTime(currentPhaseTime)}</div>
                   <div className="text-muted-foreground text-xs">Phase Time</div>
                 </div>
                 {currentAllocation && (
-                  <div className="bg-white/60 p-3 rounded-lg text-center">
+                  <div className="bg-cream/60 p-3 rounded-lg text-center">
                     <div className="font-bold text-lg text-primary">{currentAllocation.allocatedMinutes}m</div>
                     <div className="text-muted-foreground text-xs">Allocated</div>
                   </div>
                 )}
-                <div className="bg-white/60 p-3 rounded-lg text-center">
+                <div className="bg-cream/60 p-3 rounded-lg text-center">
                   <div className="font-bold text-lg text-primary">{formatTime(timeElapsed)}</div>
                   <div className="text-muted-foreground text-xs">Total Time</div>
                 </div>
-                <div className="bg-white/60 p-3 rounded-lg text-center">
+                <div className="bg-cream/60 p-3 rounded-lg text-center">
                   <div className="font-bold text-lg text-primary">~{estimatedTimeRemaining}m</div>
                   <div className="text-muted-foreground text-xs">Est. Remaining</div>
                 </div>
@@ -394,7 +394,7 @@ export default function EnhancedSessionManager({
             <div className="space-y-4">
               {progressPhases.map((phase, index) => (
                 <div key={phase.id} className={`flex items-center gap-4 p-4 rounded-lg transition-all ${
-                  phase.isActive ? 'bg-white shadow-md border-l-4 border-terracotta' : 'bg-white/50'
+                  phase.isActive ? 'bg-cream shadow-md border-l-4 border-terracotta' : 'bg-cream/50'
                 }`}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${
                     phase.isActive 
@@ -453,7 +453,7 @@ export default function EnhancedSessionManager({
               <div className="space-y-3">
                 {session.progress.nextSteps.slice(0, 4).map((step, index) => (
                   <div key={index} className="flex items-start gap-3 text-sm">
-                    <div className="w-6 h-6 bg-white text-mustard rounded-full flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0 shadow-sm">
+                    <div className="w-6 h-6 bg-cream text-mustard rounded-full flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0 shadow-sm">
                       {index + 1}
                     </div>
                     <span className="text-ink leading-relaxed">{step}</span>
@@ -528,7 +528,7 @@ export default function EnhancedSessionManager({
           </button>
           
           {showSessionHistory && sessionHistory.length > 0 && (
-            <div className="mt-4 bg-white border border-ink/8 rounded-lg p-4">
+            <div className="mt-4 bg-cream border border-ink/8 rounded-lg p-4">
               <h5 className="font-medium text-primary mb-3 flex items-center gap-2">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>

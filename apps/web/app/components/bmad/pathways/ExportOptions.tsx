@@ -155,7 +155,7 @@ export default function ExportOptions({
             <button
               onClick={() => handleExport('markdown')}
               disabled={isExporting}
-              className="flex flex-col items-center p-4 bg-white border-2 border-terracotta/20 rounded-lg hover:border-terracotta hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex flex-col items-center p-4 bg-cream border-2 border-terracotta/20 rounded-lg hover:border-terracotta hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-3xl mb-2">📄</span>
               <span className="text-sm font-semibold text-ink">Markdown</span>
@@ -171,7 +171,7 @@ export default function ExportOptions({
             <button
               onClick={() => handleExport('text')}
               disabled={isExporting}
-              className="flex flex-col items-center p-4 bg-white border-2 border-forest/20 rounded-lg hover:border-forest hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex flex-col items-center p-4 bg-cream border-2 border-forest/20 rounded-lg hover:border-forest hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-3xl mb-2">📝</span>
               <span className="text-sm font-semibold text-ink">Plain Text</span>
@@ -187,7 +187,7 @@ export default function ExportOptions({
             <button
               onClick={() => handleExport('pdf')}
               disabled={isExporting}
-              className="flex flex-col items-center p-4 bg-white border-2 border-terracotta/20 rounded-lg hover:border-terracotta hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex flex-col items-center p-4 bg-cream border-2 border-terracotta/20 rounded-lg hover:border-terracotta hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-3xl mb-2">📑</span>
               <span className="text-sm font-semibold text-ink">PDF</span>
@@ -211,7 +211,7 @@ export default function ExportOptions({
             {/* Copy Markdown to Clipboard */}
             <button
               onClick={handleCopyToClipboard}
-              className={`flex items-center gap-2 px-4 py-2 bg-white border-2 rounded-lg transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 bg-cream border-2 rounded-lg transition-all ${
                 copySuccess
                   ? 'border-forest bg-forest/5'
                   : 'border-terracotta/20 hover:border-terracotta hover:bg-terracotta/5'
@@ -226,7 +226,7 @@ export default function ExportOptions({
             {/* Email Share */}
             <button
               onClick={handleEmailShare}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-ink/8 rounded-lg hover:bg-parchment transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-cream border border-ink/8 rounded-lg hover:bg-parchment transition-colors"
             >
               <span className="text-lg">📧</span>
               <span className="text-sm font-medium text-ink-light">

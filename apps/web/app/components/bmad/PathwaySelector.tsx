@@ -278,7 +278,7 @@ export default function PathwaySelector({
 
   if (loadingPathways) {
     return (
-      <div className={`bg-white rounded-lg border border-divider p-6 ${className}`}>
+      <div className={`bg-cream rounded-lg border border-divider p-6 ${className}`}>
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-primary mb-2">Loading Strategic Pathways</h2>
           <PathwayAnalysisLoader />
@@ -295,7 +295,7 @@ export default function PathwaySelector({
   }
 
   return (
-    <div className={`bg-white rounded-lg border border-divider p-6 ${className}`}>
+    <div className={`bg-cream rounded-lg border border-divider p-6 ${className}`}>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-primary mb-2">Choose Your Strategic Pathway</h2>
         <p className="text-muted-foreground">

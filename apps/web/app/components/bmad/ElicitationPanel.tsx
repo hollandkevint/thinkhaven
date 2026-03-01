@@ -305,7 +305,7 @@ export default function ElicitationPanel({
   }
 
   return (
-    <div className={`bg-white rounded-lg border border-divider ${className}`}>
+    <div className={`bg-cream rounded-lg border border-divider ${className}`}>
       {/* Header */}
       <div className="p-6 border-b border-divider">
         <div className="flex items-start justify-between mb-4">

@@ -263,14 +263,14 @@ export default function AuthMetricsDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border rounded-lg p-6">
+        <div className="bg-cream border rounded-lg p-6">
           <DistributionChart
             data={currentMetrics.method_distribution}
             title="Authentication Methods"
           />
         </div>
 
-        <div className="bg-white border rounded-lg p-6">
+        <div className="bg-cream border rounded-lg p-6">
           <DistributionChart
             data={currentMetrics.error_distribution}
             title="Error Types"
@@ -279,14 +279,14 @@ export default function AuthMetricsDashboard() {
 
         {detailed && 'device_distribution' in currentMetrics && (
           <>
-            <div className="bg-white border rounded-lg p-6">
+            <div className="bg-cream border rounded-lg p-6">
               <DistributionChart
                 data={currentMetrics.device_distribution || {}}
                 title="Device Types"
               />
             </div>
 
-            <div className="bg-white border rounded-lg p-6">
+            <div className="bg-cream border rounded-lg p-6">
               <DistributionChart
                 data={currentMetrics.browser_distribution || {}}
                 title="Browser Distribution"

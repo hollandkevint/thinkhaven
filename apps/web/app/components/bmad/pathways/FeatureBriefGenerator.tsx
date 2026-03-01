@@ -128,7 +128,7 @@ export default function FeatureBriefGenerator({
 
   return (
     <div className={`feature-brief-generator ${className}`}>
-      <div className="bg-white rounded-lg border border-ink/8 p-6">
+      <div className="bg-cream rounded-lg border border-ink/8 p-6">
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-ink mb-2">
@@ -200,14 +200,14 @@ export default function FeatureBriefGenerator({
                   <div className="flex gap-2">
                     <button
                       onClick={() => setEditMode(!editMode)}
-                      className="px-4 py-2 bg-white border border-ink/8 rounded-lg text-sm font-medium text-ink-light hover:bg-parchment transition-colors"
+                      className="px-4 py-2 bg-cream border border-ink/8 rounded-lg text-sm font-medium text-ink-light hover:bg-parchment transition-colors"
                     >
                       {editMode ? 'View Mode' : 'Edit Mode'}
                     </button>
                     <button
                       onClick={regenerateBrief}
                       disabled={isRegenerating}
-                      className="px-4 py-2 bg-white border border-ink/8 rounded-lg text-sm font-medium text-ink-light hover:bg-parchment transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 bg-cream border border-ink/8 rounded-lg text-sm font-medium text-ink-light hover:bg-parchment transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isRegenerating ? 'Regenerating...' : '↻ Regenerate'}
                     </button>

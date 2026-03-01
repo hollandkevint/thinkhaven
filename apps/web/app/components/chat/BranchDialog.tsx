@@ -115,7 +115,7 @@ export default function BranchDialog({
 
   return (
     <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${className}`}>
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-cream rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-divider">
           <h2 className="text-xl font-semibold text-primary">Create Conversation Branch</h2>
@@ -136,7 +136,7 @@ export default function BranchDialog({
             <p className="text-sm text-ink mb-2">
               From: <span className="font-medium">{conversationTitle || 'Untitled Conversation'}</span>
             </p>
-            <div className="bg-white border rounded p-3">
+            <div className="bg-cream border rounded p-3">
               <p className="text-sm text-ink-light leading-relaxed">
                 {truncateMessage(messageContent)}
               </p>
@@ -254,7 +254,7 @@ export default function BranchDialog({
             <button
               onClick={handleCancel}
               disabled={creating}
-              className="px-4 py-2 text-sm text-muted-foreground hover:text-primary border border-divider rounded hover:bg-white transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-primary border border-divider rounded hover:bg-cream transition-colors disabled:opacity-50"
             >
               Cancel
             </button>

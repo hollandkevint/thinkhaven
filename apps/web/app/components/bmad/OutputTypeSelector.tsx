@@ -74,7 +74,7 @@ export default function OutputTypeSelector({
         disabled={isGenerating}
         className={`
           w-full flex items-center justify-between gap-3 p-4
-          bg-white border border-ink/8 rounded-lg
+          bg-cream border border-ink/8 rounded-lg
           hover:border-terracotta hover:bg-terracotta/5
           focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-1
           transition-all disabled:opacity-50 disabled:cursor-not-allowed
@@ -107,7 +107,7 @@ export default function OutputTypeSelector({
           />
 
           {/* Options */}
-          <div className="absolute z-20 w-full mt-2 bg-white border border-ink/8 rounded-xl shadow-lg overflow-hidden">
+          <div className="absolute z-20 w-full mt-2 bg-cream border border-ink/8 rounded-xl shadow-lg overflow-hidden">
             <div className="p-2">
               <p className="text-xs font-medium text-slate-blue uppercase tracking-wide px-3 py-2">
                 Choose Output Format
@@ -198,7 +198,7 @@ export function OutputTypeSelectorCompact({
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 z-20 w-72 mt-2 bg-white border border-ink/8 rounded-xl shadow-lg overflow-hidden">
+          <div className="absolute right-0 z-20 w-72 mt-2 bg-cream border border-ink/8 rounded-xl shadow-lg overflow-hidden">
             <div className="p-2">
               {outputTypes.map((option) => (
                 <button

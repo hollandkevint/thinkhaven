@@ -93,7 +93,7 @@ export default function VisualSuggestionIndicator({
               className={`border rounded-lg transition-all ${
                 highConf
                   ? 'border-terracotta/20 bg-terracotta/5'
-                  : 'border-ink/8 bg-white hover:border-terracotta/30'
+                  : 'border-ink/8 bg-cream hover:border-terracotta/30'
               }`}
             >
               {/* Suggestion Header */}
@@ -193,7 +193,7 @@ export default function VisualSuggestionIndicator({
                   <div className="text-xs text-ink-light mb-2 font-medium">
                     Preview Code:
                   </div>
-                  <pre className="text-xs bg-white border border-ink/8 rounded p-2 overflow-x-auto max-h-48">
+                  <pre className="text-xs bg-cream border border-ink/8 rounded p-2 overflow-x-auto max-h-48">
                     <code className="text-ink">{suggestion.diagramCode}</code>
                   </pre>
                 </div>

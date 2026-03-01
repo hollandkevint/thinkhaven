@@ -256,7 +256,7 @@ export default function StreamingMessage({
           rounded-2xl px-4 py-3 max-w-full break-words
           ${isUser 
             ? 'bg-primary text-white rounded-br-md' 
-            : 'bg-white border border-divider rounded-bl-md'
+            : 'bg-cream border border-divider rounded-bl-md'
           }
           ${isStreaming ? 'shadow-sm ring-2 ring-terracotta/20' : 'shadow-sm'}
         `}>

@@ -170,7 +170,7 @@ export const DualPaneLayout: React.FC<DualPaneLayoutProps> = ({
       <div className="flex flex-col h-full w-full">
         {/* Mobile tab switcher */}
         {showMobileToggle && (
-          <div className="flex border-b border-ink/8 bg-white">
+          <div className="flex border-b border-ink/8 bg-cream">
             <button
               onClick={() => setMobileActivePane('left')}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
@@ -255,7 +255,7 @@ export const DualPaneLayout: React.FC<DualPaneLayoutProps> = ({
         <button
           onClick={handleResetSplit}
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-                     bg-white border border-ink/8 rounded px-2 py-1 text-xs
+                     bg-cream border border-ink/8 rounded px-2 py-1 text-xs
                      opacity-0 group-hover:opacity-100 transition-opacity shadow-sm
                      hover:bg-parchment z-10"
           title="Reset to 50/50 split (Ctrl+Shift+R)"

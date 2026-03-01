@@ -225,7 +225,7 @@ export default function MessageInput({
     <div className={`relative ${className}`}>
       {/* Formatting Toolbar */}
       {showToolbar && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-divider rounded-lg shadow-lg p-2 flex items-center gap-1 z-10">
+        <div className="absolute bottom-full left-0 right-0 mb-2 bg-cream border border-divider rounded-lg shadow-lg p-2 flex items-center gap-1 z-10">
           {formatActions.map((action) => (
             <button
               key={action.id}
@@ -252,7 +252,7 @@ export default function MessageInput({
       )}
 
       {/* Input Container */}
-      <div className="relative bg-white border border-divider rounded-lg focus-within:ring-2 focus-within:ring-terracotta/20 focus-within:border-terracotta/30 transition-colors">
+      <div className="relative bg-cream border border-divider rounded-lg focus-within:ring-2 focus-within:ring-terracotta/20 focus-within:border-terracotta/30 transition-colors">
         {/* Textarea */}
         <textarea
           ref={textareaRef}

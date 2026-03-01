@@ -15,7 +15,7 @@ export default function ConceptDocument({
   showExportButton = true
 }: ConceptDocumentProps) {
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 space-y-8">
+    <div className="max-w-4xl mx-auto bg-cream rounded-lg shadow-lg p-8 space-y-8">
       {/* Header */}
       <div className="border-b pb-6">
         <h1 className="text-3xl font-bold text-ink mb-2">

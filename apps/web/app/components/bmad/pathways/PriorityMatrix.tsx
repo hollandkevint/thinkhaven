@@ -62,7 +62,7 @@ export default function PriorityMatrix({
 
   return (
     <div className={`priority-matrix ${className}`}>
-      <div className="bg-white rounded-lg border border-ink/8 p-6">
+      <div className="bg-cream rounded-lg border border-ink/8 p-6">
         <h3 className="text-xl font-semibold text-ink mb-4">
           Priority Matrix
         </h3>

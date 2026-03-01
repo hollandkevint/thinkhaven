@@ -1,7 +1,7 @@
 export default function WaitlistPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-cream">
-      <div className="max-w-md text-center p-8 bg-white rounded-2xl shadow-sm border border-ink/8">
+      <div className="max-w-md text-center p-8 bg-cream rounded-2xl shadow-sm border border-ink/8">
         <div className="text-6xl mb-6">🎉</div>
         <h1 className="text-3xl font-bold text-ink mb-4 font-display">
           You're on the waitlist!

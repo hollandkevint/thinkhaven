@@ -140,7 +140,7 @@ export default function BookmarksPanel({
   }, [workspaceId])
 
   return (
-    <div className={`bookmarks-panel flex flex-col h-full bg-white ${className}`}>
+    <div className={`bookmarks-panel flex flex-col h-full bg-cream ${className}`}>
       {/* Header */}
       <div className="flex-shrink-0 p-4 border-b border-divider">
         <div className="flex items-center justify-between mb-4">

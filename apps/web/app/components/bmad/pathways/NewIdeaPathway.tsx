@@ -262,7 +262,7 @@ export default function NewIdeaPathway({
       )}
 
       {/* Current Phase */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-cream rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-ink" data-testid="current-phase">
             {NEW_IDEA_PHASES[currentPhase]?.name || 'Loading...'}

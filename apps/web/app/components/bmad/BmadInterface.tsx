@@ -179,7 +179,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
     ]
 
     return (
-      <div className="flex items-center space-x-2 mb-6 p-4 bg-white/50 rounded-lg border border-divider/30">
+      <div className="flex items-center space-x-2 mb-6 p-4 bg-cream/50 rounded-lg border border-divider/30">
         {steps.map((step, index) => (
           <div key={step.key} className="flex items-center">
             <div className={`flex items-center ${step.isActive ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
@@ -269,14 +269,14 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
         if (!currentSession) {
           return (
             <div className="space-y-6">
-              <div className="bg-white rounded-lg border border-divider p-6">
+              <div className="bg-cream rounded-lg border border-divider p-6">
                 <div className="text-center mb-6">
                   <h3 className="text-lg font-semibold text-primary mb-2">Loading Your Session</h3>
                   <p className="text-muted-foreground text-sm">Preparing your strategic thinking workspace...</p>
                 </div>
                 <SkeletonLoader />
               </div>
-              <div className="bg-white rounded-lg border border-divider p-6">
+              <div className="bg-cream rounded-lg border border-divider p-6">
                 <SkeletonLoader />
               </div>
             </div>
@@ -340,7 +340,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
 
       case 'session-completed':
         return (
-          <div className="bg-white rounded-lg border border-divider p-8 text-center">
+          <div className="bg-cream rounded-lg border border-divider p-8 text-center">
             <div className="mb-6">
               <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-success" fill="currentColor" viewBox="0 0 24 24">
@@ -389,7 +389,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
           component="OnboardingModal"
           fallback={() => (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <div className="bg-cream rounded-xl max-w-md w-full p-6">
                 <h2 className="text-xl font-bold text-primary mb-4">Unable to Load Onboarding</h2>
                 <p className="text-muted-foreground mb-4">
                   There was an issue loading the onboarding content. You can still continue to your session.
@@ -405,7 +405,7 @@ export default function BmadInterface({ workspaceId, className = '', preservedIn
           )}
         >
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-cream rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="p-6 border-b border-divider">
               <div className="flex items-center gap-4 mb-4">

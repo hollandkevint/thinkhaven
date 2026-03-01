@@ -10,7 +10,7 @@ interface BriefPreviewProps {
 export default function BriefPreview({ brief, className = '' }: BriefPreviewProps) {
   return (
     <div className={`brief-preview ${className}`}>
-      <div className="bg-white border border-ink/8 rounded-lg overflow-hidden">
+      <div className="bg-cream border border-ink/8 rounded-lg overflow-hidden">
         <div className="p-6 space-y-6">
           {/* Title */}
           <div>
@@ -42,13 +42,13 @@ export default function BriefPreview({ brief, className = '' }: BriefPreviewProp
                 <div className="text-xs text-terracotta mt-1">Priority Score</div>
               </div>
               <div className="text-center">
-                <div className="text-sm font-semibold text-ink px-2 py-1 bg-white rounded">
+                <div className="text-sm font-semibold text-ink px-2 py-1 bg-cream rounded">
                   {brief.priorityContext.category}
                 </div>
                 <div className="text-xs text-terracotta mt-1">Category</div>
               </div>
               <div className="text-center">
-                <div className="text-sm font-semibold text-ink px-2 py-1 bg-white rounded">
+                <div className="text-sm font-semibold text-ink px-2 py-1 bg-cream rounded">
                   {brief.priorityContext.quadrant}
                 </div>
                 <div className="text-xs text-terracotta mt-1">Quadrant</div>

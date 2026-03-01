@@ -240,7 +240,7 @@ export default function GuestChatInterface() {
   return (
     <div className="chat-interface flex flex-col h-full">
       {/* Header */}
-      <div className="flex-shrink-0 px-6 py-4 bg-white border-b border-divider">
+      <div className="flex-shrink-0 px-6 py-4 bg-cream border-b border-divider">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--terracotta)' }}>
@@ -362,7 +362,7 @@ export default function GuestChatInterface() {
       </div>
 
       {/* Message Input */}
-      <div className="flex-shrink-0 px-6 py-4 bg-white border-t border-divider">
+      <div className="flex-shrink-0 px-6 py-4 bg-cream border-t border-divider">
         <MessageInput
           value={currentInput}
           onChange={setCurrentInput}

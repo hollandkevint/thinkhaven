@@ -214,7 +214,7 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
     <div className="flex flex-col h-full w-full bg-parchment">
       {/* Toolbar */}
       {!readOnly && (
-        <div className="flex items-center gap-2 p-3 bg-white border-b border-ink/8 shadow-sm">
+        <div className="flex items-center gap-2 p-3 bg-cream border-b border-ink/8 shadow-sm">
           <div className="flex items-center gap-1 mr-4">
             <button
               onClick={() => setMode('draw')}
@@ -300,7 +300,7 @@ export const EnhancedCanvasWorkspace: React.FC<EnhancedCanvasWorkspaceProps> = (
 
       {/* Help Text */}
       {!readOnly && (
-        <div className="p-2 bg-white border-t border-ink/8 text-xs text-slate-blue flex items-center gap-4">
+        <div className="p-2 bg-cream border-t border-ink/8 text-xs text-slate-blue flex items-center gap-4">
           <span>💡 Press <kbd className="px-1 py-0.5 bg-parchment rounded text-ink-light">Ctrl+Shift+M</kbd> to toggle between drawing and diagrams</span>
           <span className="text-slate-blue/60">•</span>
           <span>Auto-save every 30 seconds</span>

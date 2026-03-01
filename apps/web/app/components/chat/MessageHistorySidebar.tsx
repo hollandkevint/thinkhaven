@@ -308,7 +308,7 @@ export default function MessageHistorySidebar({
   }, [currentConversationId])
 
   return (
-    <div className={`message-history-sidebar flex flex-col h-full bg-white border-r border-divider ${className}`}>
+    <div className={`message-history-sidebar flex flex-col h-full bg-cream border-r border-divider ${className}`}>
       {/* Header */}
       <div className="flex-shrink-0 p-4 border-b border-divider">
         <div className="flex items-center justify-between mb-4">
@@ -348,7 +348,7 @@ export default function MessageHistorySidebar({
           
           {/* Search Suggestions Dropdown */}
           {showSuggestions && searchSuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-divider rounded-lg shadow-lg z-10">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-cream border border-divider rounded-lg shadow-lg z-10">
               <div className="py-1">
                 {searchSuggestions.map((suggestion, index) => (
                   <button
@@ -375,7 +375,7 @@ export default function MessageHistorySidebar({
             onClick={() => setViewMode('conversations')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
               viewMode === 'conversations' 
-                ? 'bg-white text-primary shadow-sm' 
+                ? 'bg-cream text-primary shadow-sm' 
                 : 'text-muted-foreground hover:text-primary'
             }`}
           >
@@ -385,7 +385,7 @@ export default function MessageHistorySidebar({
             onClick={() => setViewMode('messages')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
               viewMode === 'messages' 
-                ? 'bg-white text-primary shadow-sm' 
+                ? 'bg-cream text-primary shadow-sm' 
                 : 'text-muted-foreground hover:text-primary'
             }`}
           >

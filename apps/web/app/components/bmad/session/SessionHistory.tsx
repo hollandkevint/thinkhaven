@@ -32,7 +32,7 @@ export default function SessionHistory({
 
   return (
     <div className={`session-history ${className}`}>
-      <div className="bg-white rounded-lg border border-divider p-6">
+      <div className="bg-cream rounded-lg border border-divider p-6">
         <h3 className="text-lg font-semibold text-primary mb-4">Session History & Context</h3>
 
         {/* Shared Context */}
@@ -62,7 +62,7 @@ export default function SessionHistory({
                   <h4 className="font-medium text-muted-foreground mb-2">User Inputs</h4>
                   <div className="space-y-2">
                     {universalState.sharedContext.userInputs.slice(-5).map((input, index) => (
-                      <div key={index} className="p-3 bg-white rounded border text-sm">
+                      <div key={index} className="p-3 bg-cream rounded border text-sm">
                         {input}
                       </div>
                     ))}
@@ -130,7 +130,7 @@ export default function SessionHistory({
               <div className="mt-3 p-4 bg-parchment rounded-lg">
                 <div className="space-y-4">
                   {universalState.pathwayHistory.map((transition, index) => (
-                    <div key={index} className="flex items-start gap-4 p-3 bg-white rounded border">
+                    <div key={index} className="flex items-start gap-4 p-3 bg-cream rounded border">
                       <div className="w-8 h-8 bg-terracotta/10 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-terracotta text-sm font-medium">{index + 1}</span>
                       </div>
@@ -237,14 +237,14 @@ export default function SessionHistory({
                 <div>
                   <h4 className="font-medium text-muted-foreground mb-3">Time Spent</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="bg-white rounded p-3">
+                    <div className="bg-cream rounded p-3">
                       <div className="text-ink-light mb-1">Total Session</div>
                       <div className="font-semibold">
                         {Math.round(universalState.globalProgress.totalSessionTime / 60000)} min
                       </div>
                     </div>
                     {Object.entries(universalState.globalProgress.timeSpent).map(([pathway, time]) => (
-                      <div key={pathway} className="bg-white rounded p-3">
+                      <div key={pathway} className="bg-cream rounded p-3">
                         <div className="text-ink-light mb-1 capitalize">
                           {pathway.replace('-', ' ')}
                         </div>
@@ -282,25 +282,25 @@ export default function SessionHistory({
           {expandedSection === 'analytics' && (
             <div className="mt-3 p-4 bg-parchment rounded-lg">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div className="bg-white rounded p-3 text-center">
+                <div className="bg-cream rounded p-3 text-center">
                   <div className="text-2xl font-bold text-primary mb-1">
                     {universalState.analytics.pathwaySwitches}
                   </div>
                   <div className="text-ink-light">Pathway Switches</div>
                 </div>
-                <div className="bg-white rounded p-3 text-center">
+                <div className="bg-cream rounded p-3 text-center">
                   <div className="text-2xl font-bold text-forest mb-1">
                     {Math.round(universalState.analytics.completionRate * 100)}%
                   </div>
                   <div className="text-ink-light">Completion Rate</div>
                 </div>
-                <div className="bg-white rounded p-3 text-center">
+                <div className="bg-cream rounded p-3 text-center">
                   <div className="text-2xl font-bold text-terracotta mb-1">
                     {universalState.sharedContext.keyInsights.length}
                   </div>
                   <div className="text-ink-light">Key Insights</div>
                 </div>
-                <div className="bg-white rounded p-3 text-center">
+                <div className="bg-cream rounded p-3 text-center">
                   <div className="text-2xl font-bold text-terracotta mb-1">
                     {universalState.sharedContext.generatedDocuments.length}
                   </div>

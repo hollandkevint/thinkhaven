@@ -155,7 +155,7 @@ export default function UniversalSessionManager({
   if (isLoading || !universalState) {
     return (
       <div className={`universal-session-manager ${className}`}>
-        <div className="bg-white rounded-lg border border-divider p-6">
+        <div className="bg-cream rounded-lg border border-divider p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 bg-terracotta/10 rounded-full animate-pulse"></div>
             <div className="space-y-2">
@@ -175,7 +175,7 @@ export default function UniversalSessionManager({
   return (
     <div className={`universal-session-manager ${className}`}>
       {/* Session State Overview */}
-      <div className="bg-white rounded-lg border border-divider p-6 mb-6">
+      <div className="bg-cream rounded-lg border border-divider p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-primary mb-1">
@@ -284,7 +284,7 @@ export default function UniversalSessionManager({
               </p>
               <div className="space-y-2">
                 {switchRecommendations.slice(0, 2).map((rec, index) => (
-                  <div key={index} className="flex items-center justify-between bg-white rounded-lg p-3">
+                  <div key={index} className="flex items-center justify-between bg-cream rounded-lg p-3">
                     <div className="flex-1">
                       <div className="font-medium text-primary mb-1">
                         {rec.recommendedPathway.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
