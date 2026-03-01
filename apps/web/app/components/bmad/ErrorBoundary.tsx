@@ -55,15 +55,16 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   render() {
     if (this.state.hasError && this.state.error) {
       // Use custom fallback if provided
+      const errorInfo = this.state.errorInfo ?? { componentStack: '' } as ErrorInfo
       if (this.props.fallback) {
-        return this.props.fallback(this.state.error, this.state.errorInfo!, this.retry)
+        return this.props.fallback(this.state.error, errorInfo, this.retry)
       }
 
       // Default BMad-specific error UI
       return (
-        <BmadErrorFallback 
-          error={this.state.error} 
-          errorInfo={this.state.errorInfo!}
+        <BmadErrorFallback
+          error={this.state.error}
+          errorInfo={errorInfo}
           onRetry={this.retry}
         />
       )
