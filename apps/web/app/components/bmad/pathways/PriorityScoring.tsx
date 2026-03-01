@@ -49,7 +49,7 @@ export default function PriorityScoring({
 
   return (
     <div className={`priority-scoring-container ${className}`}>
-      <div className="bg-white rounded-lg border border-ink/8 p-6">
+      <div className="bg-cream rounded-lg border border-ink/8 p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-ink mb-2">
             Priority Scoring

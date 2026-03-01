@@ -36,7 +36,7 @@ export default function PhaseProgress({
   const remainingTime = Math.ceil(pathway.getRemainingTime() / (60 * 1000));
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6">
+    <div className="bg-cream rounded-lg shadow-sm border p-6">
       {/* Overall Progress */}
       <div className="flex justify-between items-center mb-6">
         <div>

@@ -355,7 +355,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
   return (
     <div className={`chat-interface flex flex-col h-full ${className}`}>
       {/* Header */}
-      <div className="flex-shrink-0 px-6 py-4 bg-white border-b border-divider">
+      <div className="flex-shrink-0 px-6 py-4 bg-cream border-b border-divider">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center">
@@ -459,7 +459,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
       </div>
 
       {/* Message Input */}
-      <div className="flex-shrink-0 px-6 py-4 bg-white border-t border-divider">
+      <div className="flex-shrink-0 px-6 py-4 bg-cream border-t border-divider">
         <MessageInput
           value={currentInput}
           onChange={setCurrentInput}

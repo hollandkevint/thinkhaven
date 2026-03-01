@@ -169,7 +169,7 @@ export default function FeatureInput({
         <span>Step 1 of 4: Feature Input & Validation</span>
       </div>
 
-      <div className="bg-white rounded-lg border border-divider p-6">
+      <div className="bg-cream rounded-lg border border-divider p-6">
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-primary mb-2">
             Describe Your Feature Concept

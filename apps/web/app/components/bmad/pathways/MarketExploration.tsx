@@ -191,13 +191,13 @@ export default function MarketExploration({
 
             {showInsights && (
               <div className="space-y-3 text-sm">
-                <div className="bg-white p-3 rounded border-l-4 border-terracotta">
+                <div className="bg-cream p-3 rounded border-l-4 border-terracotta">
                   <div className="font-medium text-ink">Market Opportunity Score: 8/10</div>
                   <div className="text-ink-light mt-1">
                     Strong market potential with {marketSize.toLowerCase()} reach and clear customer need
                   </div>
                 </div>
-                <div data-testid="market-insights" className="bg-white p-3 rounded border-l-4 border-forest">
+                <div data-testid="market-insights" className="bg-cream p-3 rounded border-l-4 border-forest">
                   <div className="font-medium text-ink">Key Insight</div>
                   <div className="text-ink-light mt-1">
                     Target market shows high engagement potential with growing demand trends

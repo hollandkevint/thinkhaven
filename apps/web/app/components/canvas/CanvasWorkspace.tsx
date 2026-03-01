@@ -247,7 +247,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
     <div className="flex flex-col h-full w-full bg-parchment">
       {/* Toolbar */}
       {!readOnly && (
-        <div className="flex items-center gap-2 p-3 bg-white border-b border-ink/8 shadow-sm">
+        <div className="flex items-center gap-2 p-3 bg-cream border-b border-ink/8 shadow-sm">
           <div className="flex items-center gap-1 mr-4">
             <ToolButton
               icon="↖"
@@ -343,7 +343,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         </div>
 
         {/* Status bar */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-ink/8 px-4 py-2 text-xs text-ink-light flex justify-between">
+        <div className="absolute bottom-0 left-0 right-0 bg-cream border-t border-ink/8 px-4 py-2 text-xs text-ink-light flex justify-between">
           <span>
             {canvasState.selectedElementIds.length > 0
               ? `${canvasState.selectedElementIds.length} selected`

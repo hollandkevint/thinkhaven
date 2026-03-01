@@ -12,7 +12,7 @@ interface MarkdownRendererProps {
 export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   return (
     <ReactMarkdown
-      className={`prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-p:text-muted-foreground-foreground prose-p:leading-relaxed prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-gray-50 prose-pre:border prose-pre:border-divider prose-blockquote:border-l-primary prose-blockquote:pl-4 prose-blockquote:italic prose-ul:text-muted-foreground-foreground prose-ol:text-muted-foreground-foreground prose-li:mb-1 ${className}`}
+      className={`prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-p:text-muted-foreground-foreground prose-p:leading-relaxed prose-code:bg-parchment prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-parchment prose-pre:border prose-pre:border-divider prose-blockquote:border-l-primary prose-blockquote:pl-4 prose-blockquote:italic prose-ul:text-muted-foreground-foreground prose-ol:text-muted-foreground-foreground prose-li:mb-1 ${className}`}
       components={{
         code: ({ node, inline, className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || '')
@@ -25,7 +25,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                 onClick={() => {
                   navigator.clipboard.writeText(String(children).replace(/\n$/, ''))
                 }}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white text-slate-blue hover:text-ink rounded p-1.5 text-xs border shadow-sm"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-cream/80 hover:bg-cream text-slate-blue hover:text-ink rounded p-1.5 text-xs border shadow-sm"
                 title="Copy code"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
               
               {/* Language label */}
               {language !== 'text' && (
-                <div className="absolute top-2 left-2 bg-gray-800/80 text-white px-2 py-1 rounded text-xs font-mono">
+                <div className="absolute top-2 left-2 bg-ink/80 text-cream px-2 py-1 rounded text-xs font-mono">
                   {language}
                 </div>
               )}
@@ -44,7 +44,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                 style={tomorrow}
                 language={language}
                 PreTag="div"
-                className="rounded-lg !bg-gray-900 !p-4 !m-0 text-sm"
+                className="rounded-lg !bg-ink !p-4 !m-0 text-sm"
                 showLineNumbers={String(children).split('\n').length > 5}
                 lineNumberStyle={{
                   color: '#6B7280',
@@ -57,7 +57,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
               </SyntaxHighlighter>
             </div>
           ) : (
-            <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800" {...props}>
+            <code className="bg-parchment px-1.5 py-0.5 rounded text-sm font-mono text-ink" {...props}>
               {children}
             </code>
           )
@@ -159,7 +159,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </thead>
         ),
         tbody: ({ children, ...props }) => (
-          <tbody className="bg-white divide-y divide-ink/10" {...props}>
+          <tbody className="bg-cream divide-y divide-ink/10" {...props}>
             {children}
           </tbody>
         ),

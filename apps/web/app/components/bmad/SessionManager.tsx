@@ -121,7 +121,7 @@ export default function SessionManager({
   const phaseProgress = getCurrentPhaseProgress()
 
   return (
-    <div className={`bg-white rounded-lg border border-divider ${className}`}>
+    <div className={`bg-cream rounded-lg border border-divider ${className}`}>
       {/* Header */}
       <div className="p-4 border-b border-divider">
         <div className="flex items-center justify-between">

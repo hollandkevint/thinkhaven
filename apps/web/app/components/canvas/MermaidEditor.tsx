@@ -110,7 +110,7 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
   }, [code]);
 
   return (
-    <div className="flex flex-col h-full border border-ink/8 rounded-lg overflow-hidden bg-white">
+    <div className="flex flex-col h-full border border-ink/8 rounded-lg overflow-hidden bg-cream">
       {/* Toolbar */}
       <div className="flex items-center gap-2 p-3 bg-parchment border-b border-ink/8">
         <div className="flex items-center gap-1 mr-auto">
@@ -122,7 +122,7 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
               className={`px-3 py-1.5 text-sm rounded transition-colors ${
                 activeTemplate === template
                   ? 'bg-terracotta/10 text-terracotta'
-                  : 'bg-white text-ink-light hover:bg-parchment'
+                  : 'bg-cream text-ink-light hover:bg-parchment'
               }`}
             >
               {template}
@@ -133,13 +133,13 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowPreview(!showPreview)}
-            className="px-3 py-1.5 text-sm bg-white rounded hover:bg-parchment"
+            className="px-3 py-1.5 text-sm bg-cream rounded hover:bg-parchment"
           >
             {showPreview ? '👁️ Hide Preview' : '👁️ Show Preview'}
           </button>
           <button
             onClick={handleCopy}
-            className="px-3 py-1.5 text-sm bg-white rounded hover:bg-parchment"
+            className="px-3 py-1.5 text-sm bg-cream rounded hover:bg-parchment"
             title="Copy to clipboard"
           >
             📋 Copy
@@ -178,7 +178,7 @@ export const MermaidEditor: React.FC<MermaidEditorProps> = ({
             <div className="flex items-center justify-between p-2 bg-parchment border-b border-ink/8">
               <span className="text-xs font-medium text-ink-light">Preview</span>
             </div>
-            <div className="flex-1 overflow-auto p-4 bg-white">
+            <div className="flex-1 overflow-auto p-4 bg-cream">
               <MermaidRenderer code={code} />
             </div>
           </div>

@@ -137,7 +137,7 @@ export default function BriefEditor({
 
   return (
     <div className={`brief-editor ${className}`}>
-      <div className="bg-white border border-ink/8 rounded-lg">
+      <div className="bg-cream border border-ink/8 rounded-lg">
         <div className="p-6 space-y-6">
           {/* Title */}
           <div>

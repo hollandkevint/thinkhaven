@@ -237,7 +237,7 @@ export default function QuickActions({
                     key={`${group.id}-${index}`}
                     onClick={() => handleActionClick(action)}
                     disabled={disabled}
-                    className="text-left px-3 py-2 bg-white border border-ink/8 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-left px-3 py-2 bg-cream border border-ink/8 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {action}
                   </button>
@@ -254,7 +254,7 @@ export default function QuickActions({
               key={index}
               onClick={() => handleActionClick(action)}
               disabled={disabled}
-              className="text-left px-3 py-2 bg-white border border-ink/8 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+              className="text-left px-3 py-2 bg-cream border border-ink/8 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-terracotta/5 hover:border-terracotta/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
             >
               <div className="flex items-center gap-2">
                 <svg className="w-3 h-3 text-slate-blue/60 group-hover:text-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

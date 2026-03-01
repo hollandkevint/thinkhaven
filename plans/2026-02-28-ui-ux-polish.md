@@ -50,11 +50,11 @@ const buttonVariants = cva(
 ```
 
 ## Acceptance Criteria
-- [ ] All buttons physically depress (`scale-[0.98]`) on click.
-- [ ] No `bg-white` or `bg-gray-*` classes exist in the main layout and dashboard views.
-- [ ] All mobile touch targets (buttons/inputs) evaluate to at least 44x44 pixels bounds.
+- [x] All buttons physically depress (`scale-[0.98]`) on click.
+- [x] No `bg-white` or `bg-gray-*` classes exist in the main layout and dashboard views.
+- [x] All mobile touch targets (buttons/inputs) evaluate to at least 44x44 pixels bounds.
 - [ ] Forms provide explicit `<Skeleton>` loading feedback rather than freezing the UI.
-- [ ] Focus rings use the Terracotta brand color for high visibility on Cream/Parchment.
+- [x] Focus rings use the Terracotta brand color for high visibility on Cream/Parchment.
 
 ## Technical Considerations
 

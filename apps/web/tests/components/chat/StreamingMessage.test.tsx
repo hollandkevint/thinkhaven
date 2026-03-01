@@ -105,7 +105,7 @@ describe('StreamingMessage', () => {
       
       // Assistant messages should have different styling
       const messageElement = screen.getByTestId('markdown-content').closest('div')
-      expect(messageElement).toHaveClass('bg-white', 'border')
+      expect(messageElement).toHaveClass('bg-cream', 'border')
     })
 
     it('should show timestamp when provided', () => {

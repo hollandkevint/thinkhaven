@@ -379,7 +379,7 @@ export default function WorkspacePage() {
                                 textareaRef.current?.select()
                               }, 100)
                             }}
-                            className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
+                            className="text-left px-4 py-3 bg-cream hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
                           >
                             💡 Validate a new product idea
                           </button>
@@ -391,7 +391,7 @@ export default function WorkspacePage() {
                                 textareaRef.current?.select()
                               }, 100)
                             }}
-                            className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
+                            className="text-left px-4 py-3 bg-cream hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
                           >
                             📊 Analyze competitive landscape
                           </button>
@@ -403,7 +403,7 @@ export default function WorkspacePage() {
                                 textareaRef.current?.select()
                               }, 100)
                             }}
-                            className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
+                            className="text-left px-4 py-3 bg-cream hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
                           >
                             🎯 Refine business model
                           </button>
@@ -415,7 +415,7 @@ export default function WorkspacePage() {
                                 textareaRef.current?.select()
                               }, 100)
                             }}
-                            className="text-left px-4 py-3 bg-white hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
+                            className="text-left px-4 py-3 bg-cream hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
                           >
                             ⚡ Prioritize features
                           </button>
@@ -424,7 +424,7 @@ export default function WorkspacePage() {
                     </div>
                     <div className="mt-4 p-3 bg-terracotta/10 rounded-lg">
                       <p className="text-sm text-ink">
-                        💬 <strong>Tip:</strong> Click a suggestion above to populate the input field, then press <kbd className="px-2 py-1 bg-white border border-ink/15 rounded text-xs font-mono">Send</kbd> or <kbd className="px-2 py-1 bg-white border border-ink/15 rounded text-xs font-mono">Enter</kbd> to chat with Mary!
+                        💬 <strong>Tip:</strong> Click a suggestion above to populate the input field, then press <kbd className="px-2 py-1 bg-cream border border-ink/15 rounded text-xs font-mono">Send</kbd> or <kbd className="px-2 py-1 bg-cream border border-ink/15 rounded text-xs font-mono">Enter</kbd> to chat with Mary!
                       </p>
                     </div>
                   </div>

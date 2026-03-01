@@ -152,7 +152,7 @@ export default function MessageActionMenu({
       {isOpen && (
         <div 
           ref={menuRef}
-          className="absolute right-0 top-full mt-1 w-64 bg-white border border-divider rounded-lg shadow-lg z-20"
+          className="absolute right-0 top-full mt-1 w-64 bg-cream border border-divider rounded-lg shadow-lg z-20"
         >
           {!showBookmarkForm ? (
             /* Main Menu */

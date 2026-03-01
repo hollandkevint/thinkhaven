@@ -77,7 +77,7 @@ export default function ScoreSlider({
               <div
                 key={index}
                 className={`flex items-start gap-3 p-2 rounded ${
-                  value === example.score ? 'bg-terracotta/10 border border-terracotta/20' : 'bg-white'
+                  value === example.score ? 'bg-terracotta/10 border border-terracotta/20' : 'bg-cream'
                 }`}
               >
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${

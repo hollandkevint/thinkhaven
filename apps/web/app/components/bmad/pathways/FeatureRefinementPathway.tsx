@@ -168,7 +168,7 @@ export default function FeatureRefinementPathway({
                   }
                 })
               }}
-              className="w-full px-6 py-3 bg-white border border-forest/40 text-forest rounded-lg font-semibold hover:bg-forest/5 transition-colors"
+              className="w-full px-6 py-3 bg-cream border border-forest/40 text-forest rounded-lg font-semibold hover:bg-forest/5 transition-colors"
             >
               Refine Another Feature
             </button>

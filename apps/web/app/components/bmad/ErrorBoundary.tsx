@@ -167,7 +167,7 @@ function BmadErrorFallback({
   const guidance = getErrorGuidance(error)
 
   return (
-    <div className="bg-white rounded-lg border border-error/20 p-6 max-w-lg mx-auto">
+    <div className="bg-cream rounded-lg border border-error/20 p-6 max-w-lg mx-auto">
       <div className="text-center">
         {/* Error Icon */}
         <div className="w-12 h-12 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -222,7 +222,7 @@ function BmadErrorFallback({
           <summary className="text-xs text-muted-foreground cursor-pointer hover:text-primary">
             Technical Details (for support)
           </summary>
-          <div className="mt-2 p-3 bg-gray-50 rounded text-xs text-muted-foreground font-mono">
+          <div className="mt-2 p-3 bg-parchment rounded text-xs text-muted-foreground font-mono">
             <div className="mb-2">
               <strong>Error:</strong> {error.name}: {error.message}
             </div>

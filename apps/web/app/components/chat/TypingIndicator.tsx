@@ -44,7 +44,7 @@ export default function TypingIndicator({
       </div>
 
       {/* Typing indicator */}
-      <div className="bg-white border border-divider rounded-2xl rounded-bl-md px-4 py-3 shadow-sm max-w-xs">
+      <div className="bg-cream border border-divider rounded-2xl rounded-bl-md px-4 py-3 shadow-sm max-w-xs">
         <div className="flex items-center gap-3">
           {/* Animated dots */}
           <div className="flex gap-1">

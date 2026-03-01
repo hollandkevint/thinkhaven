@@ -173,7 +173,7 @@ export default function SessionHistoryManager({
 
   if (loading) {
     return (
-      <div className={`bg-white rounded-lg border border-divider p-6 ${className}`}>
+      <div className={`bg-cream rounded-lg border border-divider p-6 ${className}`}>
         <div className="animate-pulse">
           <div className="h-6 bg-ink/10 rounded mb-4 w-1/3"></div>
           <div className="space-y-3">
@@ -187,7 +187,7 @@ export default function SessionHistoryManager({
   }
 
   return (
-    <div className={`bg-white rounded-lg border border-divider ${className}`}>
+    <div className={`bg-cream rounded-lg border border-divider ${className}`}>
       {/* Header */}
       <div className="p-6 border-b border-divider">
         <div className="flex items-center justify-between">
@@ -322,7 +322,7 @@ export default function SessionHistoryManager({
               <div className="space-y-3 max-h-80 overflow-y-auto">
                 {sessionHistory.slice(-20).reverse().map((entry, index) => (
                   <div key={entry.id} className="flex items-start gap-4 p-3 bg-parchment rounded-lg">
-                    <div className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm border border-ink/8">
+                    <div className="flex-shrink-0 w-8 h-8 bg-cream rounded-full flex items-center justify-center text-sm border border-ink/8">
                       {getActionIcon(entry.action)}
                     </div>
                     <div className="flex-1 min-w-0">
