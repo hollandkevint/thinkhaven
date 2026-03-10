@@ -48,6 +48,12 @@ module.exports = {
         rust: '#8B4D3B',
         sage: '#A3B18A',
 
+        /* Pathway Card Backgrounds */
+        'pathway-warm': '#F3EBE2',
+        'pathway-teal': '#C3DED8',
+        'pathway-slate': '#C4CFDE',
+        'pathway-sage': '#D5DCBA',
+
         /* Sub-Persona Mode Colors */
         mode: {
           inquisitive: '#D4A84B',

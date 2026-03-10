@@ -1,51 +1,57 @@
-'use client'
+'use client';
 
-import type { BoardState } from '@/lib/ai/board-types'
-import { BOARD_MEMBERS } from '@/lib/ai/board-members'
-import BoardMemberCard from './BoardMemberCard'
+import { Timer } from 'lucide-react';
+import type { BoardState } from '@/lib/ai/board-types';
+import { BOARD_MEMBERS, getBoardMember } from '@/lib/ai/board-members';
+import BoardMemberCard from './BoardMemberCard';
 
 interface BoardOverviewProps {
-  boardState: BoardState
+  boardState: BoardState;
+  currentPhase?: string;
 }
 
-export default function BoardOverview({ boardState }: BoardOverviewProps) {
-  const hasSpoken = boardState.activeSpeaker !== 'mary'
+const PHASES = [
+  { id: 'discovery', label: 'Discovery', color: '#C4785C' },
+  { id: 'analysis', label: 'Analysis', color: '#D4A84B' },
+  { id: 'synthesis', label: 'Synthesis', color: '#A3B18A' },
+];
+
+export default function BoardOverview({
+  boardState,
+  currentPhase = 'discovery',
+}: BoardOverviewProps) {
+  const activeMember = getBoardMember(boardState.activeSpeaker);
+  const activePhaseIndex = PHASES.findIndex((p) => p.id === currentPhase);
 
   return (
-    <div className="board-overview">
-      <header
-        className="h-14 mb-4 flex justify-between items-center"
-        style={{ borderBottom: '1px solid var(--border)' }}
-      >
-        <div>
-          <h2
-            className="text-xl font-bold"
-            style={{ color: 'var(--foreground)' }}
-          >
-            Board of Directors
-          </h2>
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>
-            Advisory perspectives
-          </p>
+    <div className="bg-cream rounded-2xl shadow-lg border border-ink/8 overflow-hidden flex flex-col h-full">
+      {/* Header */}
+      <div className="bg-parchment px-6 py-5">
+        <h2 className="font-display text-xl font-semibold text-ink">
+          Board Members
+        </h2>
+        <p className="font-body text-sm text-muted-foreground mt-0.5">
+          Your advisory perspectives
+        </p>
+        <div className="flex items-center gap-2.5 mt-3">
+          <div
+            className="w-2.5 h-2.5 rounded-full"
+            style={{ backgroundColor: activeMember.color }}
+          />
+          <span className="font-display text-sm font-medium text-ink">
+            Currently: {activeMember.name}
+          </span>
         </div>
-      </header>
+      </div>
 
-      <div className="flex-1 overflow-y-auto space-y-1">
+      {/* Divider */}
+      <div className="border-t border-ink/8" />
+
+      {/* Member list */}
+      <div className="px-4 py-3 space-y-2.5 flex-1 overflow-y-auto">
         {BOARD_MEMBERS.map((member) => {
-          const isTaylor = member.id === 'taylor'
-          const isTaylorDormant = isTaylor && !boardState.taylorOptedIn
-
-          // Hide Taylor entirely when not opted in
-          if (isTaylor && !boardState.taylorOptedIn) {
-            return (
-              <BoardMemberCard
-                key={member.id}
-                member={member}
-                isActive={false}
-                isTaylorDormant
-              />
-            )
-          }
+          const isTaylor = member.id === 'taylor';
+          const isTaylorDormant = isTaylor && !boardState.taylorOptedIn;
 
           return (
             <BoardMemberCard
@@ -54,23 +60,58 @@ export default function BoardOverview({ boardState }: BoardOverviewProps) {
               isActive={boardState.activeSpeaker === member.id}
               isTaylorDormant={isTaylorDormant}
             />
-          )
+          );
         })}
       </div>
 
-      {!hasSpoken && (
-        <div
-          className="mt-4 p-4 rounded-lg text-center text-sm"
-          style={{
-            backgroundColor: 'rgba(44, 36, 22, 0.03)',
-            color: 'var(--slate-blue)',
-            fontStyle: 'italic',
-          }}
-        >
-          Board members will share their perspectives as the conversation
-          develops.
+      {/* Divider */}
+      <div className="border-t border-ink/8" />
+
+      {/* Footer - Session Progress */}
+      <div className="bg-parchment px-6 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="font-display text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-light/70">
+            Session Progress
+          </span>
+          <div className="flex items-center gap-1.5">
+            <Timer className="w-3.5 h-3.5 text-terracotta" />
+            <span className="font-display text-sm font-semibold text-terracotta">
+              --:--
+            </span>
+          </div>
         </div>
-      )}
+
+        {/* Progress bar */}
+        <div className="flex gap-0.5 h-1.5 rounded-full overflow-hidden bg-ink/5 mb-2">
+          {PHASES.map((phase, i) => (
+            <div
+              key={phase.id}
+              className="flex-1 rounded-full transition-colors duration-300"
+              style={{
+                backgroundColor:
+                  i <= activePhaseIndex ? phase.color : 'transparent',
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Phase labels */}
+        <div className="flex justify-between">
+          {PHASES.map((phase, i) => (
+            <span
+              key={phase.id}
+              className={`font-body text-xs ${
+                i <= activePhaseIndex ? 'font-semibold' : 'font-normal'
+              }`}
+              style={{
+                color: i <= activePhaseIndex ? phase.color : '#B5B3B0',
+              }}
+            >
+              {phase.label}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
-  )
+  );
 }

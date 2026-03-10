@@ -20,10 +20,28 @@ import {
   Sparkles,
   Folder,
   Home,
+  Timer,
+  Zap,
+  Search,
+  Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
 import { ErrorState } from '@/app/components/ui/ErrorState';
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
+import { PATHWAYS } from '@/lib/pathways';
+
+const ICON_MAP: Record<string, typeof Zap> = { Zap, Search, Rocket };
+
+const DASHBOARD_PATHWAYS = PATHWAYS.filter(
+  (p) => p.id !== 'board-of-directors'
+);
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
 
 interface BmadSession {
   id: string;
@@ -244,8 +262,8 @@ export default function AppDashboardPage() {
 
         {/* Session List */}
         <div className="flex-1 overflow-y-auto px-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wider mb-3 text-muted-foreground">
-            Recent Sessions
+          <h2 className="font-display text-xs font-semibold uppercase tracking-[0.15em] mb-3 text-muted-foreground">
+            Recent
           </h2>
           <div className="space-y-1">
             {sessions.slice(0, 5).map((session) => (
@@ -256,10 +274,13 @@ export default function AppDashboardPage() {
               >
                 <div className="flex items-center gap-2">
                   <Folder className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
-                  <span className="text-sm truncate text-foreground">
+                  <span className="text-sm truncate text-foreground font-display">
                     {getSessionTitle(session)}
                   </span>
                 </div>
+                <span className="text-xs text-muted-foreground ml-6">
+                  {formatTimestamp(session.updated_at)}
+                </span>
               </button>
             ))}
           </div>
@@ -299,20 +320,48 @@ export default function AppDashboardPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-2 text-foreground">
-                  Welcome back, {firstName}
+                <h1 className="text-3xl font-bold mb-2 text-foreground font-display">
+                  {getGreeting()}, {firstName}
                 </h1>
-                <p className="text-muted-foreground">
-                  Continue your strategic thinking journey
+                <p className="text-muted-foreground font-body">
+                  What strategic challenge are you working on today?
                 </p>
               </div>
-              <Button
-                onClick={handleNewSession}
-                size="lg"
-              >
-                <PlusIcon className="w-5 h-5 mr-2" />
-                New Session
-              </Button>
+            </div>
+          </div>
+
+          {/* Pathway Preview Cards */}
+          <div className="mb-10">
+            <h2 className="font-display text-xs font-semibold uppercase tracking-[0.15em] text-ink-light mb-5">
+              Start a New Session
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {DASHBOARD_PATHWAYS.map((pathway) => {
+                const Icon = ICON_MAP[pathway.icon] ?? Sparkles;
+                return (
+                  <Link
+                    key={pathway.id}
+                    href={`/app/new?pathway=${pathway.id}`}
+                    className={`${pathway.bgColor} rounded-2xl shadow border border-ink/8 p-6 flex flex-col gap-4 transition-all duration-200 hover:shadow-md active:scale-[0.98] cursor-pointer`}
+                  >
+                    <Icon className={`w-6 h-6 ${pathway.accentColor}`} />
+                    <div>
+                      <h3 className="font-display text-lg font-medium text-ink mb-1">
+                        {pathway.title}
+                      </h3>
+                      <p className="font-body text-sm leading-relaxed text-ink-light line-clamp-2">
+                        {pathway.description}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-auto">
+                      <Timer className="w-3.5 h-3.5 text-ink-light/60" />
+                      <span className="font-display text-xs text-ink-light/60">
+                        {pathway.duration}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -341,8 +390,8 @@ export default function AppDashboardPage() {
           ) : (
             /* Session Grid */
             <div>
-              <h2 className="text-xl font-bold mb-6 text-foreground">
-                All Sessions
+              <h2 className="font-display text-xs font-semibold uppercase tracking-[0.15em] text-ink-light mb-6">
+                Recent Sessions
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sessions.map((session) => (
