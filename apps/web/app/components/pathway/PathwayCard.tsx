@@ -1,15 +1,8 @@
 'use client';
 
-import { Timer, Zap, Search, Users, Rocket } from 'lucide-react';
+import { Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { PathwayDefinition } from '@/lib/pathways';
-
-const ICON_MAP: Record<string, typeof Zap> = {
-  Zap,
-  Search,
-  Users,
-  Rocket,
-};
 
 interface PathwayCardProps {
   pathway: PathwayDefinition;
@@ -22,7 +15,7 @@ export default function PathwayCard({
   onSelect,
   disabled,
 }: PathwayCardProps) {
-  const Icon = ICON_MAP[pathway.icon] ?? Zap;
+  const Icon = pathway.icon;
 
   return (
     <div

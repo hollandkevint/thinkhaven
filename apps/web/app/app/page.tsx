@@ -21,16 +21,11 @@ import {
   Folder,
   Home,
   Timer,
-  Zap,
-  Search,
-  Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
 import { ErrorState } from '@/app/components/ui/ErrorState';
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
 import { PATHWAYS } from '@/lib/pathways';
-
-const ICON_MAP: Record<string, typeof Zap> = { Zap, Search, Rocket };
 
 const DASHBOARD_PATHWAYS = PATHWAYS.filter(
   (p) => p.id !== 'board-of-directors'
@@ -122,12 +117,14 @@ export default function AppDashboardPage() {
   const [isRetrying, setIsRetrying] = useState(false);
 
   const fetchSessions = useCallback(async () => {
+    const userId = user?.id;
+    if (!userId) return;
     try {
       setError(null);
       const { data, error: fetchError } = await supabase
         .from('bmad_sessions')
-        .select('*')
-        .eq('user_id', user?.id)
+        .select('id, user_id, pathway, current_step, session_data, created_at, updated_at')
+        .eq('user_id', userId)
         .order('updated_at', { ascending: false });
 
       if (fetchError) throw fetchError;
@@ -155,10 +152,6 @@ export default function AppDashboardPage() {
     fetchSessions();
   };
 
-  const handleNewSession = () => {
-    router.push('/app/new');
-  };
-
   const handleSessionClick = (sessionId: string) => {
     router.push(`/app/session/${sessionId}`);
   };
@@ -170,7 +163,8 @@ export default function AppDashboardPage() {
       const { error } = await supabase
         .from('bmad_sessions')
         .delete()
-        .eq('id', sessionId);
+        .eq('id', sessionId)
+        .eq('user_id', user?.id);
 
       if (error) throw error;
 
@@ -187,6 +181,7 @@ export default function AppDashboardPage() {
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
     if (diffInHours < 1) return 'Just now';
+    if (diffInHours === 1) return '1 hour ago';
     if (diffInHours < 24) return `${diffInHours} hours ago`;
     if (diffInHours < 48) return 'Yesterday';
     if (diffInHours < 168) return `${Math.floor(diffInHours / 24)} days ago`;
@@ -246,17 +241,16 @@ export default function AppDashboardPage() {
       <aside className="fixed left-0 top-0 h-full w-60 border-r border-border flex flex-col bg-card">
         {/* Logo */}
         <div className="px-4 py-6">
-          <a href="/" className="text-xl font-bold text-foreground">ThinkHaven</a>
+          <Link href="/" className="text-xl font-bold text-foreground">ThinkHaven</Link>
         </div>
 
         {/* New Session Button */}
         <div className="px-4 mb-6">
-          <Button
-            onClick={handleNewSession}
-            className="w-full"
-          >
-            <PlusIcon className="w-4 h-4 mr-2" />
-            New Session
+          <Button asChild className="w-full">
+            <Link href="/app/new">
+              <PlusIcon className="w-4 h-4 mr-2" />
+              New Session
+            </Link>
           </Button>
         </div>
 
@@ -288,20 +282,20 @@ export default function AppDashboardPage() {
 
         {/* Settings and Account */}
         <div className="border-t border-border px-4 py-4 space-y-2">
-          <button
-            onClick={() => router.push('/')}
+          <Link
+            href="/"
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-foreground"
           >
             <Home className="w-4 h-4" />
             <span className="text-sm">Home</span>
-          </button>
-          <button
-            onClick={() => router.push('/app/account')}
+          </Link>
+          <Link
+            href="/app/account"
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-foreground"
           >
             <Settings className="w-4 h-4" />
             <span className="text-sm">Settings</span>
-          </button>
+          </Link>
           <FeedbackButton variant="sidebar" />
           <button
             onClick={() => signOut()}
@@ -337,7 +331,7 @@ export default function AppDashboardPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {DASHBOARD_PATHWAYS.map((pathway) => {
-                const Icon = ICON_MAP[pathway.icon] ?? Sparkles;
+                const Icon = pathway.icon;
                 return (
                   <Link
                     key={pathway.id}
@@ -378,13 +372,11 @@ export default function AppDashboardPage() {
               <p className="mb-8 text-center max-w-md text-muted-foreground">
                 Create a new session to begin your strategic thinking journey with AI-powered insights
               </p>
-              <Button
-                onClick={handleNewSession}
-                size="lg"
-                className="px-8 py-6 text-lg"
-              >
-                <PlusIcon className="w-5 h-5 mr-2" />
-                New Session
+              <Button asChild size="lg" className="px-8 py-6 text-lg">
+                <Link href="/app/new">
+                  <PlusIcon className="w-5 h-5 mr-2" />
+                  New Session
+                </Link>
               </Button>
             </div>
           ) : (

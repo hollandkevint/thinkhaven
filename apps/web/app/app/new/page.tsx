@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { supabase } from '@/lib/supabase/client';
-import { PATHWAYS, getPathway } from '@/lib/pathways';
-import { createInitialBoardState } from '@/lib/ai/board-members';
+import { PATHWAYS } from '@/lib/pathways';
 import PathwayCard from '@/app/components/pathway/PathwayCard';
 import AnimatedLoader from '@/app/components/ui/AnimatedLoader';
 import { ErrorState } from '@/app/components/ui/ErrorState';
@@ -26,8 +24,9 @@ export default function NewSessionPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
-  const [selectedPathway, setSelectedPathway] = useState<string | null>(null);
+  const [createdSessionId, setCreatedSessionId] = useState<string | null>(null);
   const creatingRef = useRef(false);
+  const selectedPathwayRef = useRef<string | null>(null);
 
   const createSession = useCallback(
     async (pathwayId: string) => {
@@ -39,48 +38,31 @@ export default function NewSessionPage() {
       if (creatingRef.current) return;
       creatingRef.current = true;
 
-      const pathway = getPathway(pathwayId);
-      if (!pathway) {
-        setError('Invalid pathway selected');
-        creatingRef.current = false;
-        return;
-      }
-
       try {
         setError(null);
         setCreating(true);
-        setSelectedPathway(pathwayId);
+        selectedPathwayRef.current = pathwayId;
 
-        const workspaceId = user.id;
-
-        const sessionInsert: Record<string, unknown> = {
-          user_id: user.id,
-          workspace_id: workspaceId,
-          pathway: pathway.id,
-          current_phase: pathway.phase,
-          current_template: 'general',
-          current_step: 'chat',
-          templates: [],
-          next_steps: [],
-          status: 'active',
-          overall_completion: 0,
-          message_count: 0,
-          message_limit: pathway.messageLimit,
-        };
-
-        if (pathway.activatesBoard) {
-          sessionInsert.sub_persona_state = createInitialBoardState();
+        // If session already created (retry after nav failure), just navigate
+        if (createdSessionId) {
+          router.push(`/app/session/${createdSessionId}`);
+          return;
         }
 
-        const { data: session, error: createError } = await supabase
-          .from('bmad_sessions')
-          .insert(sessionInsert)
-          .select()
-          .single();
+        const res = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pathwayId }),
+        });
 
-        if (createError) throw createError;
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Session creation failed (${res.status})`);
+        }
 
-        router.push(`/app/session/${session.id}`);
+        const { sessionId } = await res.json();
+        setCreatedSessionId(sessionId);
+        router.push(`/app/session/${sessionId}`);
       } catch (err) {
         creatingRef.current = false;
         setCreating(false);
@@ -91,20 +73,16 @@ export default function NewSessionPage() {
         setIsRetrying(false);
       }
     },
-    [user, router]
+    [user, router, createdSessionId]
   );
 
-  const handleSelect = (pathwayId: string) => {
-    createSession(pathwayId);
-  };
-
   const handleRetry = () => {
+    const pathway = selectedPathwayRef.current;
+    if (!pathway) return;
     setIsRetrying(true);
     setRetryCount((c) => c + 1);
-    if (selectedPathway) {
-      creatingRef.current = false;
-      createSession(selectedPathway);
-    }
+    creatingRef.current = false;
+    createSession(pathway);
   };
 
   if (!user) return null;
@@ -170,7 +148,7 @@ export default function NewSessionPage() {
             <PathwayCard
               key={pathway.id}
               pathway={pathway}
-              onSelect={handleSelect}
+              onSelect={createSession}
               disabled={creating}
             />
           ))}
