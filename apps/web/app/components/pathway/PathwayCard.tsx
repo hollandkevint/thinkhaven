@@ -3,7 +3,6 @@
 import { Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { PathwayDefinition } from '@/lib/pathways';
-import { getPathwayIcon } from '@/lib/pathways';
 
 interface PathwayCardProps {
   pathway: PathwayDefinition;
@@ -16,7 +15,7 @@ export default function PathwayCard({
   onSelect,
   disabled,
 }: PathwayCardProps) {
-  const Icon = getPathwayIcon(pathway.icon);
+  const Icon = pathway.icon;
 
   return (
     <div

@@ -25,7 +25,7 @@ import {
 import Link from 'next/link';
 import { ErrorState } from '@/app/components/ui/ErrorState';
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
-import { PATHWAYS, getPathwayIcon } from '@/lib/pathways';
+import { PATHWAYS } from '@/lib/pathways';
 
 const DASHBOARD_PATHWAYS = PATHWAYS.filter(
   (p) => p.id !== 'board-of-directors'
@@ -331,7 +331,7 @@ export default function AppDashboardPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {DASHBOARD_PATHWAYS.map((pathway) => {
-                const Icon = getPathwayIcon(pathway.icon);
+                const Icon = pathway.icon;
                 return (
                   <Link
                     key={pathway.id}

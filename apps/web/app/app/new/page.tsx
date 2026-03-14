@@ -24,9 +24,9 @@ export default function NewSessionPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
-  const [selectedPathway, setSelectedPathway] = useState<string | null>(null);
   const [createdSessionId, setCreatedSessionId] = useState<string | null>(null);
   const creatingRef = useRef(false);
+  const selectedPathwayRef = useRef<string | null>(null);
 
   const createSession = useCallback(
     async (pathwayId: string) => {
@@ -41,7 +41,7 @@ export default function NewSessionPage() {
       try {
         setError(null);
         setCreating(true);
-        setSelectedPathway(pathwayId);
+        selectedPathwayRef.current = pathwayId;
 
         // If session already created (retry after nav failure), just navigate
         if (createdSessionId) {
@@ -77,12 +77,12 @@ export default function NewSessionPage() {
   );
 
   const handleRetry = () => {
+    const pathway = selectedPathwayRef.current;
+    if (!pathway) return;
     setIsRetrying(true);
     setRetryCount((c) => c + 1);
     creatingRef.current = false;
-    if (selectedPathway) {
-      createSession(selectedPathway);
-    }
+    createSession(pathway);
   };
 
   if (!user) return null;

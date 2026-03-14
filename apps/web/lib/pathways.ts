@@ -19,7 +19,7 @@ export interface PathwayDefinition {
   title: string;
   description: string;
   duration: string;
-  icon: string;
+  icon: LucideIcon;
   bgColor: string;
   accentColor: string;
   messageLimit: number;
@@ -33,7 +33,7 @@ export const PATHWAYS: PathwayDefinition[] = [
     description:
       'Cut through noise with a focused, rapid-fire session. Best for straightforward choices.',
     duration: '5\u201310 min',
-    icon: 'Zap',
+    icon: Zap,
     bgColor: 'bg-pathway-warm',
     accentColor: 'text-terracotta',
     messageLimit: 10,
@@ -45,7 +45,7 @@ export const PATHWAYS: PathwayDefinition[] = [
     description:
       'Methodically examine every angle. Ideal for high-stakes decisions where thorough exploration matters.',
     duration: '20\u201330 min',
-    icon: 'Search',
+    icon: Search,
     bgColor: 'bg-pathway-teal',
     accentColor: 'text-forest',
     messageLimit: 30,
@@ -57,7 +57,7 @@ export const PATHWAYS: PathwayDefinition[] = [
     description:
       'Convene a panel of AI advisors with diverse expertise. Multiple perspectives on one decision.',
     duration: '30\u201345 min',
-    icon: 'Users',
+    icon: Users,
     bgColor: 'bg-pathway-slate',
     accentColor: 'text-slate-blue',
     messageLimit: 40,
@@ -69,24 +69,13 @@ export const PATHWAYS: PathwayDefinition[] = [
     description:
       'Time-boxed, action-oriented session. Walk away with a concrete plan and next steps.',
     duration: '15\u201320 min',
-    icon: 'Rocket',
+    icon: Rocket,
     bgColor: 'bg-pathway-sage',
     accentColor: 'text-rust',
     messageLimit: 20,
     activatesBoard: false,
   },
 ];
-
-export const PATHWAY_ICONS: Record<string, LucideIcon> = {
-  Zap,
-  Search,
-  Users,
-  Rocket,
-};
-
-export function getPathwayIcon(iconName: string): LucideIcon {
-  return PATHWAY_ICONS[iconName] ?? Zap;
-}
 
 export function getPathway(id: string): PathwayDefinition | undefined {
   return PATHWAYS.find((p) => p.id === id);
