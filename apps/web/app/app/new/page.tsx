@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -21,6 +21,7 @@ const sessionMessages = [
 
 export default function NewSessionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +94,15 @@ export default function NewSessionPage() {
     },
     [user, router]
   );
+
+  // Auto-create session when a valid pathway query param is present
+  // (e.g., /app/new?pathway=quick-decision from dashboard cards)
+  useEffect(() => {
+    const pathwayParam = searchParams.get('pathway');
+    if (pathwayParam && user && getPathway(pathwayParam)) {
+      createSession(pathwayParam);
+    }
+  }, [searchParams, user, createSession]);
 
   const handleSelect = (pathwayId: string) => {
     createSession(pathwayId);
