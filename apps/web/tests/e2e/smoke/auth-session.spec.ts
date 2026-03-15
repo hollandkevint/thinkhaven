@@ -31,22 +31,12 @@ test.describe('Authenticated Session - test-admin', () => {
     await page.waitForURL('**/app/session/**', { timeout: 30000 });
     console.log('PASS: Session created:', page.url());
 
-    // Step 5: Wait for page to fully hydrate — look for the workspace header or tab bar
+    // Step 5: Wait for page to fully hydrate — chat is now the default view
     await page.waitForLoadState('networkidle');
-    const maryChatTab = page.locator('button', { hasText: 'Mary Chat' }).first();
-    await expect(maryChatTab).toBeVisible({ timeout: 15000 });
-    console.log('PASS: Session page hydrated');
-    await page.screenshot({ path: '/tmp/thinkhaven-01-session.png', fullPage: true });
-
-    // Step 6: Switch to Mary Chat tab (default may be BMad Method)
-    await maryChatTab.click();
-    await page.waitForTimeout(500);
-    console.log('PASS: Clicked Mary Chat tab');
-
-    // Step 7: Find the chat textarea by placeholder
     const chatInput = page.locator('textarea[placeholder*="strategic question"]');
-    await expect(chatInput).toBeVisible({ timeout: 10000 });
-    console.log('PASS: Chat input found');
+    await expect(chatInput).toBeVisible({ timeout: 15000 });
+    console.log('PASS: Session page hydrated with chat ready');
+    await page.screenshot({ path: '/tmp/thinkhaven-01-session.png', fullPage: true });
     await page.screenshot({ path: '/tmp/thinkhaven-02-chat-ready.png', fullPage: true });
 
     // Step 8: Type and send a message
