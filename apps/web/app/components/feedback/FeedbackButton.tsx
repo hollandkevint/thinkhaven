@@ -1,6 +1,6 @@
 import { MessageSquare } from 'lucide-react'
 
-const FEEDBACK_MAILTO = 'mailto:kevin@kevintholland.com?subject=ThinkHaven%20Beta%20Feedback'
+export const FEEDBACK_MAILTO = 'mailto:kevin@kevintholland.com?subject=ThinkHaven%20Beta%20Feedback'
 
 interface FeedbackButtonProps {
   variant?: 'sidebar' | 'header' | 'nav'

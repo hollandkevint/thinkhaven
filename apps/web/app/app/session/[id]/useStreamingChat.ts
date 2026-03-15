@@ -5,6 +5,9 @@ import { supabase } from '@/lib/supabase/client'
 import { getBoardMember } from '@/lib/ai/board-members'
 import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
 import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager'
+import type { SessionMode } from '@/lib/ai/session-mode-types'
+import { getSessionModeConfig, TONE_LABELS } from '@/lib/ai/session-mode-types'
+import type { SubPersonaMode } from '@/lib/ai/mary-persona'
 
 interface Workspace {
   id: string
@@ -26,6 +29,11 @@ interface UseStreamingChatReturn {
   setBoardState: (bs: BoardState | null) => void
   handleSendMessage: (e: React.FormEvent) => Promise<void>
   addChatMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => Promise<void>
+  sessionMode: SessionMode
+  currentTone: SubPersonaMode
+  switchMode: (mode: SessionMode) => Promise<void>
+  switchTone: (tone: SubPersonaMode) => Promise<void>
+  bmadSessionId: string | null
 }
 
 export function useStreamingChat(initialWorkspace: Workspace | null): UseStreamingChatReturn {
@@ -34,6 +42,9 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
   const [sendingMessage, setSendingMessage] = useState(false)
   const [limitStatus, setLimitStatus] = useState<MessageLimitStatus | null>(null)
   const [boardState, setBoardState] = useState<BoardState | null>(null)
+  const [sessionMode, setSessionMode] = useState<SessionMode>('assessment')
+  const [currentTone, setCurrentTone] = useState<SubPersonaMode>('inquisitive')
+  const [bmadSessionId, setBmadSessionId] = useState<string | null>(null)
   const workspaceRef = useRef<Workspace | null>(initialWorkspace)
 
   // Keep ref in sync with state for use in streaming callbacks
@@ -264,6 +275,16 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
                 if (data.metadata?.boardState) {
                   setBoardState(data.metadata.boardState as BoardState)
                 }
+                // Extract session mode and tone from metadata
+                if (data.metadata?.sessionMode) {
+                  setSessionMode(data.metadata.sessionMode as SessionMode)
+                }
+                if (data.metadata?.subPersona?.currentMode) {
+                  setCurrentTone(data.metadata.subPersona.currentMode as SubPersonaMode)
+                }
+                if (data.metadata?.bmadSessionId) {
+                  setBmadSessionId(data.metadata.bmadSessionId)
+                }
               }
             } catch (parseError) {
               console.error('[Workspace] Failed to parse stream data:', {
@@ -282,6 +303,64 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
       throw error
     }
   }, [finalizeAssistantMessage, updateStreamingMessage])
+
+  const switchMode = useCallback(async (mode: SessionMode) => {
+    if (!bmadSessionId) return
+    try {
+      const response = await fetch('/api/session/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: bmadSessionId, mode }),
+      })
+      if (!response.ok) {
+        console.error('[Mode Switch] Failed:', await response.text())
+        return
+      }
+
+      const modeConfig = getSessionModeConfig(mode)
+      setSessionMode(mode)
+
+      // Reset board to Mary
+      setBoardState(prev => prev ? { ...prev, activeSpeaker: 'mary' } : null)
+
+      // Insert transition system message
+      await addChatMessage({
+        role: 'system',
+        content: `Switching to ${modeConfig.label} mode. ${modeConfig.subtitle}.`,
+      })
+    } catch (error) {
+      console.error('[Mode Switch] Error:', error)
+    }
+  }, [bmadSessionId, addChatMessage])
+
+  const switchTone = useCallback(async (tone: SubPersonaMode) => {
+    if (!bmadSessionId) return
+    try {
+      const response = await fetch('/api/session/tone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: bmadSessionId, tone }),
+      })
+      if (!response.ok) {
+        console.error('[Tone Switch] Failed:', await response.text())
+        return
+      }
+
+      const toneLabel = TONE_LABELS[tone]?.label || tone
+      setCurrentTone(tone)
+
+      // Reset board to Mary
+      setBoardState(prev => prev ? { ...prev, activeSpeaker: 'mary' } : null)
+
+      // Insert transition system message
+      await addChatMessage({
+        role: 'system',
+        content: `Mary is now in ${toneLabel} mode.`,
+      })
+    } catch (error) {
+      console.error('[Tone Switch] Error:', error)
+    }
+  }, [bmadSessionId, addChatMessage])
 
   const handleSendMessage = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -321,5 +400,10 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
     setBoardState,
     handleSendMessage,
     addChatMessage,
+    sessionMode,
+    currentTone,
+    switchMode,
+    switchTone,
+    bmadSessionId,
   }
 }

@@ -101,10 +101,8 @@ export const SELECTORS = {
     chatPane: '[data-testid="chat-pane"], .chat-pane',
     canvasPane: '[data-testid="canvas-pane"], .canvas-pane',
 
-    // Tabs
-    chatTab: 'button:has-text("Mary Chat"), [data-testid="chat-tab"]',
-    bmadTab: 'button:has-text("BMad Method"), [data-testid="bmad-tab"]',
-    tabBadge: '[data-testid="tab-badge"], span.badge',
+    // Header actions
+    overflowMenu: 'button[aria-label="More options"]',
 
     // Chat interface
     chatMessages: '[data-testid="chat-messages"], .chat-messages',

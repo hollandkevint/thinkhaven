@@ -5,14 +5,11 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { LayoutTemplate, ArrowLeft, MessageCircle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import BmadInterface from '@/app/components/bmad/BmadInterface'
 import StateBridge from '@/app/components/dual-pane/StateBridge'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
-import { useSharedInput } from '@/app/components/workspace/useSharedInput'
 import CanvasContextSync from '@/components/canvas/CanvasContextSync'
 import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
 import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
@@ -21,11 +18,13 @@ import SpeakerMessage from '@/app/components/board/SpeakerMessage'
 import HandoffAnnotation from '@/app/components/board/HandoffAnnotation'
 import BoardOverview from '@/app/components/board/BoardOverview'
 import ExportPanel from '@/app/components/workspace/ExportPanel'
+import HeaderOverflowMenu from '@/app/components/session/HeaderOverflowMenu'
 import dynamic from 'next/dynamic'
 import { ArtifactProvider } from '@/lib/artifact'
-import { ArtifactPanel, ArtifactList, ArtifactKeyboardHandler } from '@/app/components/artifact'
+import { ArtifactPanel, ArtifactKeyboardHandler } from '@/app/components/artifact'
 import { ErrorState } from '@/app/components/ui/ErrorState'
-import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
+import ModeIndicator from '@/app/components/session/ModeIndicator'
+import ToneSelector from '@/app/components/session/ToneSelector'
 import { useStreamingChat } from './useStreamingChat'
 
 // Dynamically import canvas components (SSR-safe)
@@ -43,15 +42,12 @@ interface Workspace {
   user_id: string
 }
 
-type WorkspaceTab = 'chat' | 'bmad'
-
 export default function WorkspacePage() {
   const params = useParams()
   const { user, loading: authLoading, signOut } = useAuth()
   const [fetchedWorkspace, setFetchedWorkspace] = useState<Workspace | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>('bmad')
   const [canvasState, setCanvasState] = useState<{
     mode: 'draw' | 'diagram'
     diagramCode?: string
@@ -60,8 +56,9 @@ export default function WorkspacePage() {
     lastModified: Date
   } | null>(null)
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
+  const [userDismissedBoard, setUserDismissedBoard] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const canvasContainerRef = useRef<HTMLDivElement>(null)
+  const [showExport, setShowExport] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
 
@@ -76,9 +73,20 @@ export default function WorkspacePage() {
     boardState,
     setBoardState,
     handleSendMessage,
+    sessionMode,
+    currentTone,
+    switchMode,
+    switchTone,
   } = useStreamingChat(fetchedWorkspace)
   const isOnline = useOnlineStatus()
-  const { preserveInput, hasPreservedInput, peekPreservedInput, clearPreservedInput } = useSharedInput(params.id as string)
+
+  // Auto-open right pane when Board of Directors activates
+  // Respects user dismissal to prevent force-reopening on streaming events
+  useEffect(() => {
+    if (boardState && !userDismissedBoard) {
+      setIsCanvasOpen(true)
+    }
+  }, [boardState, userDismissedBoard])
 
   const fetchWorkspace = useCallback(async () => {
     if (!user) return
@@ -127,94 +135,47 @@ export default function WorkspacePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, params.id])
 
-  const handleScrollToCanvas = useCallback((suggestionId: string) => {
-    if (canvasContainerRef.current) {
-      canvasContainerRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-      window.dispatchEvent(new CustomEvent('canvas:highlight', {
-        detail: { suggestionId }
-      }));
-    }
-  }, [])
-
-  const handleTabSwitch = (tab: WorkspaceTab) => {
-    // Preserve input when switching from chat to BMad Method
-    if (activeTab === 'chat' && tab === 'bmad' && messageInput.trim()) {
-      preserveInput(messageInput)
-    }
-    
-    setActiveTab(tab)
-  }
-
-  // Restore preserved input when returning to chat tab
-  useEffect(() => {
-    if (activeTab === 'chat' && hasPreservedInput() && !messageInput) {
-      setMessageInput(peekPreservedInput())
-    }
-  }, [activeTab, hasPreservedInput, peekPreservedInput, messageInput])
 
   if (authLoading || loading) {
     return (
       <div className="dual-pane-container canvas-closed">
-        {/* Chat pane skeleton */}
         <div className="chat-pane">
-          {/* Header skeleton — back arrow, title, action buttons */}
+          {/* Simplified header skeleton */}
           <header className="h-14 mb-4 flex justify-between items-center px-4 border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-5 w-5 bg-muted rounded animate-pulse" />
-              <div className="h-6 w-48 bg-muted rounded animate-pulse" />
+              <div className="h-5 w-5 bg-parchment rounded animate-pulse" />
+              <div className="h-6 w-48 bg-parchment rounded animate-pulse" />
+              <div className="h-7 w-24 bg-parchment/50 rounded-full animate-pulse" />
+              <div className="h-7 w-28 bg-parchment/50 rounded-full animate-pulse" />
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="h-7 w-24 bg-muted/50 rounded animate-pulse" />
-              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
-              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
-              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
-              <div className="h-4 w-32 bg-muted/30 rounded animate-pulse" />
-              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
-              <div className="h-7 w-16 bg-muted/50 rounded animate-pulse" />
-            </div>
+            <div className="h-8 w-8 bg-parchment/50 rounded animate-pulse" />
           </header>
 
-          {/* Tab navigation skeleton — "Mary Chat" (inactive) and "BMad Method" (active) */}
-          <div className="mb-4 px-4 border-b border-border">
-            <div className="flex gap-4">
-              <div className="pb-3 px-1 flex items-center gap-2 border-b-2 border-transparent">
-                <div className="h-4 w-4 bg-muted/50 rounded animate-pulse" />
-                <div className="h-4 w-20 bg-muted/50 rounded animate-pulse" />
-              </div>
-              <div className="pb-3 px-1 flex items-center gap-2 border-b-2 border-primary">
-                <div className="w-4 h-4 bg-muted rounded animate-pulse" />
-                <div className="h-4 w-24 bg-muted rounded animate-pulse" />
-              </div>
-            </div>
-          </div>
-
-          {/* BMad content area skeleton (default active tab) */}
+          {/* Chat content skeleton */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto p-8">
-              <div className="max-w-4xl mx-auto space-y-4">
-                <div className="h-6 w-56 bg-muted rounded animate-pulse" />
-                <div className="h-4 w-full bg-muted/40 rounded animate-pulse" />
-                <div className="h-4 w-5/6 bg-muted/40 rounded animate-pulse" />
-                <div className="h-4 w-2/3 bg-muted/40 rounded animate-pulse" />
-                <div className="mt-6 h-4 w-full bg-muted/30 rounded animate-pulse" />
-                <div className="h-4 w-4/5 bg-muted/30 rounded animate-pulse" />
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-parchment/50 p-6 rounded-lg animate-pulse">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-terracotta/30 rounded-full" />
+                    <div className="flex-1 space-y-3">
+                      <div className="h-5 w-64 bg-parchment rounded" />
+                      <div className="h-4 w-full bg-parchment/70 rounded" />
+                      <div className="h-4 w-4/5 bg-parchment/70 rounded" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Input skeleton — textarea and send button */}
             <div className="mt-4">
               <div className="flex gap-2 items-end">
-                <div className="flex-1 h-[50px] bg-muted/20 border border-border rounded-lg animate-pulse" />
-                <div className="h-[50px] w-16 bg-muted rounded-lg animate-pulse" />
+                <div className="flex-1 h-[50px] bg-parchment/20 border border-border rounded-lg animate-pulse" />
+                <div className="h-[50px] w-16 bg-parchment rounded-lg animate-pulse" />
               </div>
             </div>
           </div>
         </div>
-
-        {/* Canvas pane skeleton (hidden by canvas-closed) */}
         <div className="canvas-pane" />
       </div>
     )
@@ -276,84 +237,26 @@ export default function WorkspacePage() {
             <Link href="/app" className="text-primary hover:opacity-80 transition-opacity">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-xl font-bold font-display text-foreground">{workspace.name}</h1>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsCanvasOpen(!isCanvasOpen)}
-              className="h-7 text-xs"
-            >
-              <LayoutTemplate className="w-3 h-3 mr-1" />
-              {boardState
-                ? (isCanvasOpen ? 'Hide Board' : 'Show Board')
-                : (isCanvasOpen ? 'Hide Canvas' : 'Show Canvas')}
-            </Button>
-            <ArtifactList mode="badge" />
-            <ExportPanel
-              messages={workspace.chat_context}
-              workspaceName={workspace.name}
-              workspaceId={workspace.id}
+            <h1 className="text-xl font-bold font-display text-foreground truncate max-w-[200px]">{workspace.name}</h1>
+            <ModeIndicator
+              currentMode={sessionMode}
+              onModeChange={switchMode}
+              disabled={sendingMessage}
             />
-            <FeedbackButton variant="header" />
-            <span className="text-muted-foreground">{user.email}</span>
-            <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-              <Link href="/app/account">Account</Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs text-destructive hover:text-destructive"
-              onClick={signOut}
-            >
-              Sign Out
-            </Button>
+            <ToneSelector
+              currentTone={currentTone}
+              onToneChange={switchTone}
+              disabled={sendingMessage}
+            />
           </div>
+          <HeaderOverflowMenu
+            onExportClick={() => setShowExport(true)}
+            onSignOut={signOut}
+          />
         </header>
         
-        {/* Tab Navigation */}
-        <div className="mb-4 px-4 border-b border-border">
-          <div className="flex gap-4">
-            <button
-              onClick={() => handleTabSwitch('chat')}
-              className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'chat'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-primary hover:border-primary/50'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4" />
-                Mary Chat
-                {workspace.chat_context.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-terracotta/10 text-terracotta">
-                    {workspace.chat_context.length}
-                  </span>
-                )}
-              </div>
-            </button>
-            <button
-              onClick={() => handleTabSwitch('bmad')}
-              className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'bmad'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-primary hover:border-primary/50'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-terracotta rounded flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">B</span>
-                </div>
-                BMad Method
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Tab Content */}
+        {/* Chat Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {activeTab === 'chat' ? (
             <>
               <div className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-4xl mx-auto space-y-6">
@@ -589,8 +492,18 @@ export default function WorkspacePage() {
                         lastModified: new Date()
                       })
                     }}
-                    onScrollToCanvas={handleScrollToCanvas}
                     autoPopulate={false}
+                  />
+                </div>
+              )}
+
+              {/* Export Panel - conditionally rendered from overflow menu */}
+              {showExport && (
+                <div className="relative mb-4">
+                  <ExportPanel
+                    messages={workspace.chat_context}
+                    workspaceName={workspace.name}
+                    workspaceId={workspace.id}
                   />
                 </div>
               )}
@@ -598,13 +511,7 @@ export default function WorkspacePage() {
               {/* Message Limit Warning */}
               <MessageLimitWarning
                 limitStatus={limitStatus}
-                onExport={() => {
-                  // Trigger export panel - user can export via header
-                  const exportButton = document.querySelector('[title="Export chat conversation"]') as HTMLButtonElement;
-                  if (exportButton) {
-                    exportButton.click();
-                  }
-                }}
+                onExport={() => setShowExport(true)}
                 onNewSession={() => {
                   window.location.href = '/app'
                 }}
@@ -644,16 +551,6 @@ export default function WorkspacePage() {
                 </div>
               </form>
             </>
-          ) : (
-            <div className="flex-1 overflow-y-auto">
-              <BmadInterface 
-                workspaceId={workspace.id} 
-                className="w-full"
-                preservedInput={hasPreservedInput() ? peekPreservedInput() : undefined}
-                onInputConsumed={clearPreservedInput}
-              />
-            </div>
-          )}
         </div>
         </div>
       </PaneErrorBoundary>
@@ -661,7 +558,13 @@ export default function WorkspacePage() {
       {/* Right Pane - 40% (Board Overview or Canvas) */}
       <PaneErrorBoundary paneName={boardState ? 'board' : 'canvas'}>
         {boardState ? (
-          <BoardOverview boardState={boardState} />
+          <BoardOverview
+            boardState={boardState}
+            onClose={() => {
+              setIsCanvasOpen(false)
+              setUserDismissedBoard(true)
+            }}
+          />
         ) : (
           <div className="canvas-pane">
           <header className="h-14 mb-4 flex justify-between items-center border-b border-border">
@@ -685,7 +588,7 @@ export default function WorkspacePage() {
             </div>
           </header>
 
-          <div className="canvas-container" ref={canvasContainerRef}>
+          <div className="canvas-container">
             <EnhancedCanvasWorkspace
               workspaceId={workspace.id}
               initialMode={canvasState?.mode || 'draw'}
