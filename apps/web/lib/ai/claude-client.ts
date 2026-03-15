@@ -3,42 +3,21 @@ import type { Tool, ContentBlock, ToolUseBlock, TextBlock } from '@anthropic-ai/
 import { maryPersona, type CoachingContext } from './mary-persona';
 import { MARY_TOOLS } from './tools/index';
 
+// Model configurable via env var, defaults to Sonnet 4.5
+const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5-20250514';
+
 // Initialize Anthropic client (lazy initialization to avoid build-time errors)
 let anthropic: Anthropic | null = null;
 
 function getAnthropicClient(): Anthropic {
   if (!anthropic) {
-    // Get and sanitize API key (remove whitespace/newlines)
-    const rawApiKey = process.env.ANTHROPIC_API_KEY;
-    const apiKey = rawApiKey?.trim();
+    const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
 
-    console.log('[Claude Client] DEBUG: Getting Anthropic client', {
-      hasRawKey: !!rawApiKey,
-      rawKeyLength: rawApiKey?.length || 0,
-      hasApiKey: !!apiKey,
-      apiKeyLength: apiKey?.length || 0,
-      apiKeyPrefix: apiKey?.substring(0, 15) || 'undefined',
-      nodeEnv: process.env.NODE_ENV,
-      timestamp: new Date().toISOString()
-    });
-
-    // Validate API key at runtime (not module load time)
     if (!apiKey) {
-      console.error('[Claude Client] FATAL: ANTHROPIC_API_KEY environment variable is not set or empty after trim');
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
 
-    console.log('[Claude Client] Initializing Anthropic client...');
-
-    try {
-      anthropic = new Anthropic({
-        apiKey: apiKey,
-      });
-      console.log('[Claude Client] Successfully initialized Anthropic client');
-    } catch (error) {
-      console.error('[Claude Client] Failed to initialize Anthropic client:', error);
-      throw error;
-    }
+    anthropic = new Anthropic({ apiKey });
   }
   return anthropic;
 }
@@ -88,14 +67,6 @@ export class ClaudeClient {
     coachingContext?: CoachingContext
   ): Promise<StreamingResponse> {
     try {
-      console.log('[Claude Client] sendMessage called', {
-        messageLength: message.length,
-        historyLength: conversationHistory.length,
-        hasCoachingContext: !!coachingContext,
-        timestamp: new Date().toISOString()
-      });
-
-      // Filter conversation history to only include role and content
       const cleanHistory = conversationHistory.map(msg => ({
         role: msg.role,
         content: msg.content
@@ -106,24 +77,16 @@ export class ClaudeClient {
         { role: 'user' as const, content: message }
       ];
 
-      console.log('[Claude Client] Getting Anthropic client...');
       const client = getAnthropicClient();
 
-      console.log('[Claude Client] Calling Anthropic API...', {
-        model: 'claude-sonnet-4-20250514',
-        messageCount: messages.length
-      });
-
       const stream = await client.messages.create({
-        model: 'claude-sonnet-4-20250514', // Claude Sonnet 4 - upgraded per API docs
+        model: CLAUDE_MODEL,
         max_tokens: 4096,
         temperature: 0.7,
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages,
         stream: true,
       });
-
-      console.log('[Claude Client] Successfully created Anthropic stream');
 
       const { content, usage } = await this.processStreamWithUsage(stream);
       
@@ -179,7 +142,7 @@ export class ClaudeClient {
                 cost_estimate_usd: 0
               };
               usage.total_tokens = usage.input_tokens + usage.output_tokens;
-              // Rough cost estimate for Claude 3.5 Sonnet (input: $3/1M tokens, output: $15/1M tokens)
+              // Cost estimate: Sonnet 4.5 (input: $3/1M tokens, output: $15/1M tokens)
               usage.cost_estimate_usd = (usage.input_tokens * 0.000003) + (usage.output_tokens * 0.000015);
             }
           }
@@ -220,7 +183,7 @@ export class ClaudeClient {
     try {
       const client = getAnthropicClient();
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514', // Claude Sonnet 4 - upgraded per API docs
+        model: CLAUDE_MODEL,
         max_tokens: 10,
         messages: [{ role: 'user', content: 'test' }],
       });
@@ -245,14 +208,6 @@ export class ClaudeClient {
     }
   ): Promise<MessageWithToolUse> {
     try {
-      console.log('[Claude Client] sendMessageWithTools called', {
-        messageLength: message.length,
-        historyLength: conversationHistory.length,
-        hasCoachingContext: !!coachingContext,
-        toolCount: options?.tools?.length || MARY_TOOLS.length,
-        timestamp: new Date().toISOString()
-      });
-
       const cleanHistory = conversationHistory.map(msg => ({
         role: msg.role,
         content: msg.content
@@ -267,17 +222,12 @@ export class ClaudeClient {
       const tools = options?.tools || MARY_TOOLS;
 
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: options?.maxTokens || 4096,
         temperature: 0.7,
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages,
         tools: tools,
-      });
-
-      console.log('[Claude Client] Response received', {
-        stopReason: response.stop_reason,
-        contentBlocks: response.content.length,
       });
 
       // Extract text and tool use blocks
@@ -297,7 +247,6 @@ export class ClaudeClient {
         }
       }
 
-      // Calculate token usage
       const usage: TokenUsage = {
         input_tokens: response.usage.input_tokens,
         output_tokens: response.usage.output_tokens,
@@ -343,12 +292,6 @@ export class ClaudeClient {
     }
   ): Promise<MessageWithToolUse> {
     try {
-      console.log('[Claude Client] continueWithToolResults called', {
-        historyLength: conversationHistory.length,
-        toolResultCount: toolResults.length,
-        timestamp: new Date().toISOString()
-      });
-
       const client = getAnthropicClient();
       const tools = options?.tools || MARY_TOOLS;
 
@@ -359,17 +302,12 @@ export class ClaudeClient {
       ];
 
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: options?.maxTokens || 4096,
         temperature: 0.7,
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages as Anthropic.MessageParam[],
         tools: tools,
-      });
-
-      console.log('[Claude Client] Tool continuation response received', {
-        stopReason: response.stop_reason,
-        contentBlocks: response.content.length,
       });
 
       // Extract text and tool use blocks
