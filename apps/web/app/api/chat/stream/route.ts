@@ -14,9 +14,6 @@ import {
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
 import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
 import type { BoardMemberId } from '@/lib/ai/board-types';
-import type { SessionMode } from '@/lib/ai/session-mode-types';
-import { getExecutivePhase, generateExecutiveSystemPrompt, type ExecutivePhase } from '@/lib/ai/executive-persona';
-import { requireExecutiveTier } from '@/lib/auth/tier-guard';
 
 /** A segment of text attributed to a specific speaker */
 interface SpeakerSegment {
@@ -324,20 +321,6 @@ export async function POST(request: NextRequest) {
           };
         }
 
-        // Executive tier gate: verify user has executive access before proceeding
-        if (bmadSession?.session_mode === 'executive-prep' && !isAdmin) {
-          const hasExecutive = await requireExecutiveTier(user.id);
-          if (!hasExecutive) {
-            return new Response(JSON.stringify({
-              error: 'EXECUTIVE_TIER_REQUIRED',
-              message: 'Executive Prep mode requires an Executive subscription.',
-            }), {
-              status: 403,
-              headers: { 'Content-Type': 'application/json' },
-            });
-          }
-        }
-
         finalCoachingContext = await WorkspaceContextBuilder.buildCoachingContext(
           workspaceId,
           user.id,
@@ -353,7 +336,7 @@ export async function POST(request: NextRequest) {
           };
         }
         if (bmadSession?.session_mode) {
-          finalCoachingContext.sessionMode = bmadSession.session_mode as SessionMode;
+          (finalCoachingContext as any).sessionMode = bmadSession.session_mode;
         }
 
         // Phase 2: Enrich with dynamic context from database
