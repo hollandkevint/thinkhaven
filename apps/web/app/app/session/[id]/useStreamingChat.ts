@@ -6,18 +6,38 @@ import { getBoardMember } from '@/lib/ai/board-members'
 import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
 import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager'
 
-interface Workspace {
+/**
+ * Session data loaded from bmad_sessions.
+ * Replaces the old Workspace interface that read from user_workspace.
+ */
+export interface SessionData {
   id: string
-  name: string
-  description: string
-  chat_context: ChatMessage[]
-  canvas_elements: Array<Record<string, unknown>>
   user_id: string
+  chat_context: ChatMessage[]
+  title: string | null
+  pathway: string
+  current_phase: string
+  message_count: number
+  message_limit: number
+  sub_persona_state: BoardState | null
+  session_mode: string | null
+}
+
+/**
+ * Validates JSONB chat_context from Supabase (typed as Json | null).
+ * Guards against malformed data (e.g., guest migration wrapping).
+ */
+export function parseChatContext(raw: unknown): ChatMessage[] {
+  if (!Array.isArray(raw)) return []
+  return raw.filter((msg): msg is ChatMessage =>
+    typeof msg === 'object' && msg !== null &&
+    'id' in msg && 'role' in msg && 'content' in msg && 'timestamp' in msg
+  )
 }
 
 interface UseStreamingChatReturn {
-  workspace: Workspace | null
-  setWorkspace: (ws: Workspace | null) => void
+  session: SessionData | null
+  setSession: (s: SessionData | null) => void
   messageInput: string
   setMessageInput: (input: string) => void
   sendingMessage: boolean
@@ -25,33 +45,59 @@ interface UseStreamingChatReturn {
   boardState: BoardState | null
   setBoardState: (bs: BoardState | null) => void
   handleSendMessage: (e: React.FormEvent) => Promise<void>
-  addChatMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => Promise<void>
+  sessionMode: string | null
+  currentTone: string
+  switchMode: (mode: string) => Promise<void>
+  switchTone: (tone: string) => Promise<void>
 }
 
-export function useStreamingChat(initialWorkspace: Workspace | null): UseStreamingChatReturn {
-  const [workspace, setWorkspace] = useState<Workspace | null>(initialWorkspace)
+export function useStreamingChat(
+  initialSession: SessionData | null,
+  userId: string | undefined
+): UseStreamingChatReturn {
+  const [session, setSession] = useState<SessionData | null>(initialSession)
   const [messageInput, setMessageInput] = useState('')
   const [sendingMessage, setSendingMessage] = useState(false)
   const [limitStatus, setLimitStatus] = useState<MessageLimitStatus | null>(null)
-  const [boardState, setBoardState] = useState<BoardState | null>(null)
-  const workspaceRef = useRef<Workspace | null>(initialWorkspace)
+  const [boardState, setBoardState] = useState<BoardState | null>(
+    initialSession?.sub_persona_state || null
+  )
+  const [sessionMode, setSessionMode] = useState<string | null>(
+    initialSession?.session_mode || null
+  )
+  const [currentTone, setCurrentTone] = useState('inquisitive')
+  const [bmadSessionId, setBmadSessionId] = useState<string | null>(
+    initialSession?.id || null
+  )
+  const sessionRef = useRef<SessionData | null>(initialSession)
 
-  // Keep ref in sync with state for use in streaming callbacks
+  // Keep ref in sync with state
   useEffect(() => {
-    workspaceRef.current = workspace
-  }, [workspace])
+    sessionRef.current = session
+  }, [session])
 
-  // Sync when parent provides a new workspace (e.g., after fetch)
+  // Sync when parent provides new session data
   useEffect(() => {
-    if (initialWorkspace) {
-      setWorkspace(initialWorkspace)
-      workspaceRef.current = initialWorkspace
+    if (initialSession) {
+      setSession(initialSession)
+      sessionRef.current = initialSession
+      setBmadSessionId(initialSession.id)
+      if (initialSession.sub_persona_state) {
+        setBoardState(initialSession.sub_persona_state)
+      }
+      if (initialSession.session_mode) {
+        setSessionMode(initialSession.session_mode)
+      }
     }
-  }, [initialWorkspace])
+  }, [initialSession])
 
+  /**
+   * Append a message using the atomic RPC (no read-modify-write race).
+   * Also updates local state optimistically.
+   */
   const addChatMessage = useCallback(async (message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
-    const current = workspaceRef.current
-    if (!current) return
+    const current = sessionRef.current
+    if (!current || !userId) return
 
     const newMessage: ChatMessage = {
       ...message,
@@ -59,35 +105,28 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
       timestamp: new Date().toISOString()
     }
 
+    // Optimistic local update
     const updatedChatContext = [...current.chat_context, newMessage]
+    const updated = { ...current, chat_context: updatedChatContext }
+    sessionRef.current = updated
+    setSession(updated)
 
     try {
-      const { error } = await supabase
-        .from('user_workspace')
-        .update({
-          workspace_state: {
-            name: current.name,
-            description: current.description,
-            chat_context: updatedChatContext,
-            canvas_elements: current.canvas_elements,
-            updated_at: new Date().toISOString()
-          },
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', current.id)
+      // Atomic append via RPC (O(1), race-free)
+      const { error } = await supabase.rpc('append_chat_message', {
+        p_session_id: current.id,
+        p_user_id: userId,
+        p_message: newMessage as unknown as Record<string, unknown>,
+      })
 
       if (error) throw error
-
-      const updated = { ...current, chat_context: updatedChatContext }
-      workspaceRef.current = updated
-      setWorkspace(updated)
     } catch (error) {
       console.error('Error saving message:', error)
     }
-  }, [])
+  }, [userId])
 
   const updateStreamingMessage = useCallback((messageId: string, content: string, speaker?: string) => {
-    const current = workspaceRef.current
+    const current = sessionRef.current
     if (!current) return
 
     const updatedChatContext = [...current.chat_context]
@@ -113,47 +152,46 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
     }
 
     const updated = { ...current, chat_context: updatedChatContext }
-    workspaceRef.current = updated
-    setWorkspace(updated)
+    sessionRef.current = updated
+    setSession(updated)
   }, [])
 
+  /**
+   * Finalize an assistant message by persisting via RPC.
+   * The streaming message is already in local state from updateStreamingMessage.
+   */
   const finalizeAssistantMessage = useCallback(async (content: string, messageId: string) => {
-    const current = workspaceRef.current
-    if (!current) return
+    const current = sessionRef.current
+    if (!current || !userId) return
 
-    const existingMessageIndex = current.chat_context.findIndex(msg => msg.id === messageId)
+    const existingMessage = current.chat_context.find(msg => msg.id === messageId)
 
-    if (existingMessageIndex === -1) {
-      console.error('[Workspace] Could not find streaming message to finalize:', messageId)
+    if (!existingMessage) {
+      console.error('[Session] Could not find streaming message to finalize:', messageId)
       await addChatMessage({ role: 'assistant', content })
       return
     }
 
-    const updatedChatContext = [...current.chat_context]
-
     try {
+      // The message is already in local state. Persist the finalized version.
+      // We write the full chat_context here since the streaming message was only local.
       const { error } = await supabase
-        .from('user_workspace')
+        .from('bmad_sessions')
         .update({
-          workspace_state: {
-            name: current.name,
-            description: current.description,
-            chat_context: updatedChatContext,
-            canvas_elements: current.canvas_elements,
-            updated_at: new Date().toISOString()
-          },
+          chat_context: current.chat_context,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', current.id)
+        .eq('id', current.id)
+        .eq('user_id', userId)
 
       if (error) throw error
     } catch (error) {
-      console.error('[Workspace] Error finalizing message:', error)
+      console.error('[Session] Error finalizing message:', error)
     }
-  }, [addChatMessage])
+  }, [addChatMessage, userId])
 
   const streamClaudeResponse = useCallback(async (message: string) => {
-    const current = workspaceRef.current
+    const current = sessionRef.current
     if (!current) return
 
     try {
@@ -162,7 +200,7 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message,
-          workspaceId: current.id,
+          sessionId: current.id,
           conversationHistory: current.chat_context?.slice(-10) || []
         }),
       })
@@ -171,7 +209,7 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
         const errorData = await response.json().catch(() => null)
         const errorMessage = errorData?.details || errorData?.error || response.statusText || 'Unknown error'
         const errorHint = errorData?.hint || 'Please try again'
-        console.error('[Workspace] HTTP error:', { status: response.status, message: errorMessage, hint: errorHint })
+        console.error('[Session] HTTP error:', { status: response.status, message: errorMessage, hint: errorHint })
         throw new Error(`${errorMessage} (${errorHint})`)
       }
 
@@ -215,7 +253,7 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
                     const fromMember = getBoardMember(currentSpeaker as any)
                     const toMember = getBoardMember(newSpeaker as any)
                     const annotationId = crypto.randomUUID()
-                    const ws = workspaceRef.current
+                    const ws = sessionRef.current
                     if (ws) {
                       const updatedContext = [...ws.chat_context, {
                         id: annotationId,
@@ -228,8 +266,8 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
                         },
                       }]
                       const updated = { ...ws, chat_context: updatedContext }
-                      workspaceRef.current = updated
-                      setWorkspace(updated)
+                      sessionRef.current = updated
+                      setSession(updated)
                     }
                   }
 
@@ -256,17 +294,23 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
                 if (data.additionalData?.boardState) {
                   setBoardState(data.additionalData.boardState as BoardState)
                 }
+                if (data.bmadSessionId) {
+                  setBmadSessionId(data.bmadSessionId)
+                }
                 await finalizeAssistantMessage(assistantContent, assistantMessageId)
               } else if (data.type === 'error') {
-                console.error('[Workspace] Received error from stream:', data)
+                console.error('[Session] Received error from stream:', data)
                 throw new Error(data.error || 'Stream error')
               } else if (data.type === 'metadata') {
                 if (data.metadata?.boardState) {
                   setBoardState(data.metadata.boardState as BoardState)
                 }
+                if (data.metadata?.bmadSessionId) {
+                  setBmadSessionId(data.metadata.bmadSessionId)
+                }
               }
             } catch (parseError) {
-              console.error('[Workspace] Failed to parse stream data:', {
+              console.error('[Session] Failed to parse stream data:', {
                 dataStr: dataStr.substring(0, 100),
                 error: parseError instanceof Error ? parseError.message : 'Unknown error'
               })
@@ -275,13 +319,53 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
         }
       }
     } catch (error) {
-      console.error('[Workspace] Streaming error:', {
+      console.error('[Session] Streaming error:', {
         error: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
       })
       throw error
     }
   }, [finalizeAssistantMessage, updateStreamingMessage])
+
+  const switchMode = useCallback(async (mode: string) => {
+    if (!bmadSessionId) return
+    try {
+      const response = await fetch('/api/session/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: bmadSessionId, mode }),
+      })
+      if (response.ok) {
+        setSessionMode(mode)
+        await addChatMessage({
+          role: 'system',
+          content: `Thinking mode switched to **${mode}**.`,
+        })
+      }
+    } catch (err) {
+      console.error('[Session] Error switching mode:', err)
+    }
+  }, [bmadSessionId, addChatMessage])
+
+  const switchTone = useCallback(async (tone: string) => {
+    if (!bmadSessionId) return
+    try {
+      const response = await fetch('/api/session/tone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: bmadSessionId, tone }),
+      })
+      if (response.ok) {
+        setCurrentTone(tone)
+        await addChatMessage({
+          role: 'system',
+          content: `Tone adjusted to **${tone}**.`,
+        })
+      }
+    } catch (err) {
+      console.error('[Session] Error switching tone:', err)
+    }
+  }, [bmadSessionId, addChatMessage])
 
   const handleSendMessage = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -295,7 +379,7 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
       await addChatMessage({ role: 'user', content: userMessage })
       await streamClaudeResponse(userMessage)
     } catch (err) {
-      console.error('[Workspace] Error sending message:', {
+      console.error('[Session] Error sending message:', {
         error: err instanceof Error ? err.message : 'Unknown error',
         stack: err instanceof Error ? err.stack : undefined
       })
@@ -303,7 +387,7 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       await addChatMessage({
         role: 'system',
-        content: `❌ **Error:** ${errorMessage}\n\n**Troubleshooting:**\n- Check your internet connection\n- Verify you're signed in\n- Try refreshing the page\n- If the problem persists, contact support`
+        content: `Error: ${errorMessage}\n\nTry refreshing the page or check your connection.`
       })
     } finally {
       setSendingMessage(false)
@@ -311,8 +395,8 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
   }, [messageInput, sendingMessage, addChatMessage, streamClaudeResponse])
 
   return {
-    workspace,
-    setWorkspace,
+    session,
+    setSession,
     messageInput,
     setMessageInput,
     sendingMessage,
@@ -320,6 +404,9 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
     boardState,
     setBoardState,
     handleSendMessage,
-    addChatMessage,
+    sessionMode,
+    currentTone,
+    switchMode,
+    switchTone,
   }
 }

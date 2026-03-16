@@ -5,70 +5,42 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { LayoutTemplate, ArrowLeft, MessageCircle } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import BmadInterface from '@/app/components/bmad/BmadInterface'
-import StateBridge from '@/app/components/dual-pane/StateBridge'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
-import { useSharedInput } from '@/app/components/workspace/useSharedInput'
-import CanvasContextSync from '@/components/canvas/CanvasContextSync'
 import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
-import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
+import type { ChatMessage } from '@/lib/ai/board-types'
 import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
 import HandoffAnnotation from '@/app/components/board/HandoffAnnotation'
 import BoardOverview from '@/app/components/board/BoardOverview'
 import ExportPanel from '@/app/components/workspace/ExportPanel'
-import dynamic from 'next/dynamic'
 import { ArtifactProvider } from '@/lib/artifact'
-import { ArtifactPanel, ArtifactList, ArtifactKeyboardHandler } from '@/app/components/artifact'
+import { ArtifactPanel, ArtifactKeyboardHandler } from '@/app/components/artifact'
 import { ErrorState } from '@/app/components/ui/ErrorState'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
-import { useStreamingChat } from './useStreamingChat'
-
-// Dynamically import canvas components (SSR-safe)
-const EnhancedCanvasWorkspace = dynamic(
-  () => import('@/app/components/canvas/EnhancedCanvasWorkspace'),
-  { ssr: false }
-)
-
-interface Workspace {
-  id: string
-  name: string
-  description: string
-  chat_context: ChatMessage[]
-  canvas_elements: Array<Record<string, unknown>>
-  user_id: string
-}
-
-type WorkspaceTab = 'chat' | 'bmad'
+import { useStreamingChat, parseChatContext } from './useStreamingChat'
+import type { SessionData } from './useStreamingChat'
 
 export default function WorkspacePage() {
   const params = useParams()
   const { user, loading: authLoading, signOut } = useAuth()
-  const [fetchedWorkspace, setFetchedWorkspace] = useState<Workspace | null>(null)
+  const [fetchedSession, setFetchedSession] = useState<SessionData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>('bmad')
-  const [canvasState, setCanvasState] = useState<{
-    mode: 'draw' | 'diagram'
-    diagramCode?: string
-    diagramType?: string
-    drawingSnapshot?: string
-    lastModified: Date
-  } | null>(null)
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
+  const [userDismissedBoard, setUserDismissedBoard] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const canvasContainerRef = useRef<HTMLDivElement>(null)
+  const [showExport, setShowExport] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
 
   // Streaming chat logic extracted to hook
   const {
-    workspace,
-    setWorkspace,
+    session,
+    setSession,
     messageInput,
     setMessageInput,
     sendingMessage,
@@ -76,84 +48,70 @@ export default function WorkspacePage() {
     boardState,
     setBoardState,
     handleSendMessage,
-  } = useStreamingChat(fetchedWorkspace)
+    sessionMode,
+    currentTone,
+    switchMode,
+    switchTone,
+  } = useStreamingChat(fetchedSession, user?.id)
   const isOnline = useOnlineStatus()
-  const { preserveInput, hasPreservedInput, peekPreservedInput, clearPreservedInput } = useSharedInput(params.id as string)
 
-  const fetchWorkspace = useCallback(async () => {
+  // Auto-open board pane when Board of Directors activates
+  useEffect(() => {
+    if (boardState && !userDismissedBoard) {
+      setIsCanvasOpen(true)
+    }
+  }, [boardState, userDismissedBoard])
+
+  const fetchSession = useCallback(async () => {
     if (!user) return
     try {
       setError('')
+      // Fetch per-session data from bmad_sessions (not user_workspace)
       const { data, error: fetchError } = await supabase
-        .from('user_workspace')
-        .select('user_id, workspace_state, updated_at')
+        .from('bmad_sessions')
+        .select('id, user_id, chat_context, title, pathway, current_phase, message_count, message_limit, sub_persona_state, session_mode, updated_at')
+        .eq('id', params.id)
         .eq('user_id', user.id)
         .single()
 
       if (fetchError) throw fetchError
 
-      // Transform user_workspace data to Workspace format
-      const transformedWorkspace: Workspace = {
-        id: data.user_id,
-        name: data.workspace_state?.name || 'My Strategic Workspace',
-        description: data.workspace_state?.description || 'Strategic thinking workspace',
-        chat_context: data.workspace_state?.chat_context || [],
-        canvas_elements: data.workspace_state?.canvas_elements || [],
-        user_id: data.user_id
+      const sessionData: SessionData = {
+        id: data.id,
+        user_id: data.user_id,
+        chat_context: parseChatContext(data.chat_context),
+        title: data.title,
+        pathway: data.pathway,
+        current_phase: data.current_phase,
+        message_count: data.message_count,
+        message_limit: data.message_limit,
+        sub_persona_state: data.sub_persona_state as any,
+        session_mode: data.session_mode,
       }
 
-      setFetchedWorkspace(transformedWorkspace)
+      setFetchedSession(sessionData)
     } catch (err) {
-      console.error('Error fetching workspace:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Workspace not found or you do not have access to it'
-      setError(errorMessage)
+      console.error('Error fetching session:', err)
+      setError('Session not found or you don\'t have access.')
     } finally {
       setLoading(false)
       setIsRetrying(false)
     }
-  }, [user])
+  }, [user, params.id])
 
   const handleRetry = () => {
     setIsRetrying(true)
     setRetryCount(c => c + 1)
     setLoading(true)
-    fetchWorkspace()
+    fetchSession()
   }
 
   useEffect(() => {
     if (user && params.id) {
-      fetchWorkspace()
+      fetchSession()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, params.id])
-
-  const handleScrollToCanvas = useCallback((suggestionId: string) => {
-    if (canvasContainerRef.current) {
-      canvasContainerRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-      window.dispatchEvent(new CustomEvent('canvas:highlight', {
-        detail: { suggestionId }
-      }));
-    }
-  }, [])
-
-  const handleTabSwitch = (tab: WorkspaceTab) => {
-    // Preserve input when switching from chat to BMad Method
-    if (activeTab === 'chat' && tab === 'bmad' && messageInput.trim()) {
-      preserveInput(messageInput)
-    }
-    
-    setActiveTab(tab)
-  }
-
-  // Restore preserved input when returning to chat tab
-  useEffect(() => {
-    if (activeTab === 'chat' && hasPreservedInput() && !messageInput) {
-      setMessageInput(peekPreservedInput())
-    }
-  }, [activeTab, hasPreservedInput, peekPreservedInput, messageInput])
 
   if (authLoading || loading) {
     return (
@@ -234,11 +192,11 @@ export default function WorkspacePage() {
     )
   }
 
-  if (error || !workspace) {
+  if (error || !session) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
         <ErrorState
-          error={error || 'Workspace not found'}
+          error={error || 'Session not found'}
           onRetry={handleRetry}
           onSignOut={signOut}
           retryCount={retryCount}
@@ -262,9 +220,6 @@ export default function WorkspacePage() {
     {/* Keyboard Shortcuts Handler */}
     <ArtifactKeyboardHandler />
     <div className={`dual-pane-container ${!isCanvasOpen ? 'canvas-closed' : ''}`}>
-      {/* State Bridge Component for Sync */}
-      <StateBridge workspaceId={workspace.id} className="hidden" />
-      
       {/* Offline Indicator */}
       {!isOnline && <OfflineIndicator />}
       
@@ -276,7 +231,7 @@ export default function WorkspacePage() {
             <Link href="/app" className="text-primary hover:opacity-80 transition-opacity">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-xl font-bold font-display text-foreground">{workspace.name}</h1>
+            <h1 className="text-xl font-bold font-display text-foreground">{(session.title || 'Strategic Session')}</h1>
           </div>
           <div className="flex items-center gap-2 text-xs">
             <Button
@@ -292,9 +247,9 @@ export default function WorkspacePage() {
             </Button>
             <ArtifactList mode="badge" />
             <ExportPanel
-              messages={workspace.chat_context}
-              workspaceName={workspace.name}
-              workspaceId={workspace.id}
+              messages={session.chat_context}
+              workspaceName={(session.title || 'Strategic Session')}
+              workspaceId={session.id}
             />
             <FeedbackButton variant="header" />
             <span className="text-muted-foreground">{user.email}</span>
@@ -326,9 +281,9 @@ export default function WorkspacePage() {
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4" />
                 Mary Chat
-                {workspace.chat_context.length > 0 && (
+                {session.chat_context.length > 0 && (
                   <span className="text-xs px-2 py-0.5 rounded-full bg-terracotta/10 text-terracotta">
-                    {workspace.chat_context.length}
+                    {session.chat_context.length}
                   </span>
                 )}
               </div>
@@ -357,7 +312,7 @@ export default function WorkspacePage() {
             <>
               <div className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-4xl mx-auto space-y-6">
-                {workspace.chat_context.length === 0 && (
+                {session.chat_context.length === 0 && (
                   <div className="bg-parchment p-6 rounded-lg border border-ink/8 mb-4">
                     <div className="flex items-start gap-3 mb-4">
                       <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
@@ -430,7 +385,7 @@ export default function WorkspacePage() {
                   </div>
                 )}
                 
-                {workspace.chat_context.map((message) => {
+                {session.chat_context.map((message) => {
                   // Handoff annotation (encoded as system message)
                   if (message.role === 'system' && message.content.startsWith('__handoff__')) {
                     const parts = message.content.split('__')
@@ -573,8 +528,8 @@ export default function WorkspacePage() {
               {process.env.NEXT_PUBLIC_ENABLE_CANVAS === 'true' && (
                 <div className="mt-4">
                   <CanvasContextSync
-                    workspaceId={workspace.id}
-                    messages={workspace.chat_context.map(msg => ({
+                    workspaceId={session.id}
+                    messages={session.chat_context.map(msg => ({
                       id: msg.id,
                       role: msg.role as 'user' | 'assistant',
                       content: msg.content,
@@ -647,7 +602,7 @@ export default function WorkspacePage() {
           ) : (
             <div className="flex-1 overflow-y-auto">
               <BmadInterface 
-                workspaceId={workspace.id} 
+                workspaceId={session.id} 
                 className="w-full"
                 preservedInput={hasPreservedInput() ? peekPreservedInput() : undefined}
                 onInputConsumed={clearPreservedInput}
@@ -672,7 +627,7 @@ export default function WorkspacePage() {
             <div className="text-right text-xs">
               <div className="mb-1">
                 <span className="text-muted-foreground">Messages:</span>
-                <span className="font-medium ml-1 text-foreground">{workspace.chat_context.length}</span>
+                <span className="font-medium ml-1 text-foreground">{session.chat_context.length}</span>
               </div>
               <div className="mb-1">
                 <span className="text-muted-foreground">Elements:</span>
@@ -687,7 +642,7 @@ export default function WorkspacePage() {
 
           <div className="canvas-container" ref={canvasContainerRef}>
             <EnhancedCanvasWorkspace
-              workspaceId={workspace.id}
+              workspaceId={session.id}
               initialMode={canvasState?.mode || 'draw'}
               initialDiagramCode={canvasState?.diagramCode}
               initialDiagramType={canvasState?.diagramType as any}
