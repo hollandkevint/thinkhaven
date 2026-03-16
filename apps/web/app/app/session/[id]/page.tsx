@@ -32,7 +32,6 @@ export default function SessionPage() {
   const [userDismissedBoard, setUserDismissedBoard] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const [showExport, setShowExport] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
 
@@ -374,20 +373,13 @@ export default function SessionPage() {
             </div>
           </div>
 
-          {/* Export Panel (conditionally rendered from header) */}
-          {showExport && (
-            <div className="relative mb-4">
-              <ExportPanel
-                messages={session.chat_context}
-                workspaceName={session.title || 'Strategic Session'}
-                workspaceId={session.id}
-              />
-            </div>
-          )}
-
           <MessageLimitWarning
             limitStatus={limitStatus}
-            onExport={() => setShowExport(true)}
+            onExport={() => {
+              // Click the header ExportPanel trigger button
+              const exportBtn = document.querySelector('[title="Export chat conversation"]') as HTMLButtonElement
+              if (exportBtn) exportBtn.click()
+            }}
             onNewSession={() => { window.location.href = '/app' }}
           />
 

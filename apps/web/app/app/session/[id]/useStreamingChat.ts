@@ -19,7 +19,7 @@ export interface SessionData {
   current_phase: string
   message_count: number
   message_limit: number
-  sub_persona_state: BoardState | null
+  sub_persona_state: Record<string, unknown> | null
   session_mode: string | null
 }
 
@@ -59,9 +59,11 @@ export function useStreamingChat(
   const [messageInput, setMessageInput] = useState('')
   const [sendingMessage, setSendingMessage] = useState(false)
   const [limitStatus, setLimitStatus] = useState<MessageLimitStatus | null>(null)
-  const [boardState, setBoardState] = useState<BoardState | null>(
-    initialSession?.sub_persona_state || null
-  )
+  const [boardState, setBoardState] = useState<BoardState | null>(() => {
+    const sps = initialSession?.sub_persona_state
+    if (sps && 'activeSpeaker' in sps) return sps as unknown as BoardState
+    return null
+  })
   const [sessionMode, setSessionMode] = useState<string | null>(
     initialSession?.session_mode || null
   )
@@ -82,8 +84,10 @@ export function useStreamingChat(
       setSession(initialSession)
       sessionRef.current = initialSession
       setBmadSessionId(initialSession.id)
-      if (initialSession.sub_persona_state) {
-        setBoardState(initialSession.sub_persona_state)
+      // Extract board state if the sub_persona_state contains activeSpeaker
+      const sps = initialSession.sub_persona_state
+      if (sps && 'activeSpeaker' in sps) {
+        setBoardState(sps as unknown as BoardState)
       }
       if (initialSession.session_mode) {
         setSessionMode(initialSession.session_mode)
@@ -160,12 +164,13 @@ export function useStreamingChat(
   }, [])
 
   /**
-   * Finalize an assistant message by persisting via RPC.
+   * Finalize an assistant message by persisting via atomic RPC append.
    * The streaming message is already in local state from updateStreamingMessage.
+   * We append the finalized version to the DB (the streaming updates were local-only).
    */
   const finalizeAssistantMessage = useCallback(async (content: string, messageId: string) => {
     const current = sessionRef.current
-    if (!current || !userId) return
+    if (!current) return
 
     const existingMessage = current.chat_context.find(msg => msg.id === messageId)
 
@@ -176,22 +181,26 @@ export function useStreamingChat(
     }
 
     try {
-      // The message is already in local state. Persist the finalized version.
-      // We write the full chat_context here since the streaming message was only local.
-      const { error } = await supabase
-        .from('bmad_sessions')
-        .update({
-          chat_context: current.chat_context,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', current.id)
-        .eq('user_id', userId)
+      // Use atomic RPC append (same as addChatMessage) instead of full JSONB write.
+      // The streaming message was only in local state, so we append the final version to DB.
+      const finalMessage = {
+        id: existingMessage.id,
+        role: existingMessage.role,
+        content,
+        timestamp: existingMessage.timestamp,
+        metadata: existingMessage.metadata,
+      }
+
+      const { error } = await supabase.rpc('append_chat_message', {
+        p_session_id: current.id,
+        p_message: finalMessage as unknown as Record<string, unknown>,
+      })
 
       if (error) throw error
     } catch (error) {
       console.error('[Session] Error finalizing message:', error)
     }
-  }, [addChatMessage, userId])
+  }, [addChatMessage])
 
   const streamClaudeResponse = useCallback(async (message: string) => {
     const current = sessionRef.current
@@ -251,27 +260,18 @@ export function useStreamingChat(
                     await finalizeAssistantMessage(assistantContent, assistantMessageId)
                   }
 
-                  // Insert handoff annotation
+                  // Insert handoff annotation (persisted via RPC, not just local state)
                   if (currentSpeaker && handoffReason) {
                     const fromMember = getBoardMember(currentSpeaker as any)
                     const toMember = getBoardMember(newSpeaker as any)
-                    const annotationId = crypto.randomUUID()
-                    const ws = sessionRef.current
-                    if (ws) {
-                      const updatedContext = [...ws.chat_context, {
-                        id: annotationId,
-                        role: 'system' as const,
-                        content: `__handoff__${fromMember.name}__${toMember.name}__${handoffReason}`,
-                        timestamp: new Date().toISOString(),
-                        metadata: {
-                          speaker: currentSpeaker as any,
-                          handoff_reason: handoffReason,
-                        },
-                      }]
-                      const updated = { ...ws, chat_context: updatedContext }
-                      sessionRef.current = updated
-                      setSession(updated)
-                    }
+                    await addChatMessage({
+                      role: 'system',
+                      content: `__handoff__${fromMember.name}__${toMember.name}__${handoffReason}`,
+                      metadata: {
+                        speaker: currentSpeaker as any,
+                        handoff_reason: handoffReason,
+                      },
+                    })
                   }
 
                   currentSpeaker = newSpeaker
