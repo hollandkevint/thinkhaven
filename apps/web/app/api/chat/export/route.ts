@@ -5,17 +5,16 @@ import {
   exportChatToText,
   exportChatToJSON,
   validateMessages,
-  type ChatMessage,
 } from '@/lib/export/chat-export';
 
 export async function POST(request: NextRequest) {
   try {
-    const { workspaceId, format = 'markdown' } = await request.json();
+    const { sessionId, workspaceId, format = 'markdown' } = await request.json();
 
-    // Validate request
-    if (!workspaceId) {
+    // Accept sessionId (new) or workspaceId (legacy)
+    if (!sessionId && !workspaceId) {
       return NextResponse.json(
-        { error: 'Missing workspaceId' },
+        { error: 'Missing sessionId' },
         { status: 400 }
       );
     }
@@ -27,8 +26,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user context
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+    }
+
     const {
       data: { user },
       error: authError,
@@ -38,24 +40,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get workspace data
-    const { data: workspace, error: workspaceError } = await supabase
-      .from('user_workspace')
-      .select('user_id, workspace_state')
-      .eq('user_id', user.id)
-      .single();
+    let chatContext: unknown[] = [];
+    let sessionTitle = 'Strategic Session';
 
-    if (workspaceError || !workspace) {
-      return NextResponse.json(
-        { error: 'Workspace not found' },
-        { status: 404 }
-      );
+    if (sessionId) {
+      // New path: read from bmad_sessions
+      const { data: session, error: sessionError } = await supabase
+        .from('bmad_sessions')
+        .select('chat_context, title')
+        .eq('id', sessionId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (sessionError || !session) {
+        return NextResponse.json(
+          { error: 'Session not found' },
+          { status: 404 }
+        );
+      }
+
+      chatContext = Array.isArray(session.chat_context) ? session.chat_context : [];
+      sessionTitle = session.title || 'Strategic Session';
+    } else {
+      // Legacy path: read from user_workspace
+      const { data: workspace, error: workspaceError } = await supabase
+        .from('user_workspace')
+        .select('user_id, workspace_state')
+        .eq('user_id', user.id)
+        .single();
+
+      if (workspaceError || !workspace) {
+        return NextResponse.json(
+          { error: 'Workspace not found' },
+          { status: 404 }
+        );
+      }
+
+      chatContext = workspace.workspace_state?.chat_context || [];
+      sessionTitle = workspace.workspace_state?.name || 'Strategic Session';
     }
 
-    // Extract chat messages
-    const chatContext = workspace.workspace_state?.chat_context || [];
-
-    // Validate messages
     const validation = validateMessages(chatContext);
     if (!validation.valid) {
       return NextResponse.json(
@@ -64,29 +88,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get workspace name
-    const workspaceName =
-      workspace.workspace_state?.name || 'Strategic Session';
-
-    // Export based on format
     let result;
     switch (format) {
       case 'markdown':
         result = exportChatToMarkdown(chatContext, {
-          workspaceName,
+          workspaceName: sessionTitle,
           includeMetadata: true,
           includeTimestamps: true,
         });
         break;
       case 'text':
         result = exportChatToText(chatContext, {
-          workspaceName,
+          workspaceName: sessionTitle,
           includeMetadata: true,
           includeTimestamps: true,
         });
         break;
       case 'json':
-        result = exportChatToJSON(chatContext, { workspaceName });
+        result = exportChatToJSON(chatContext, { workspaceName: sessionTitle });
         break;
       default:
         return NextResponse.json(
@@ -102,7 +121,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return export data
     return NextResponse.json({
       success: true,
       content: result.content,
