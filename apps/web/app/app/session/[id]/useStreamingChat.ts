@@ -112,12 +112,15 @@ export function useStreamingChat(
     setSession(updated)
 
     try {
-      // Atomic append via RPC (O(1), race-free)
-      const { error } = await supabase.rpc('append_chat_message', {
+      // Atomic append via RPC (server-side, race-free, uses auth.uid() for ownership)
+      const { data: success, error } = await supabase.rpc('append_chat_message', {
         p_session_id: current.id,
-        p_user_id: userId,
         p_message: newMessage as unknown as Record<string, unknown>,
       })
+
+      if (!error && success === false) {
+        console.error('Message append failed: session not found or ownership mismatch')
+      }
 
       if (error) throw error
     } catch (error) {

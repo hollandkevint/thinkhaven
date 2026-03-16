@@ -9,21 +9,28 @@ ALTER TABLE bmad_sessions
 
 -- 2. RPC for atomic message append
 -- Eliminates read-modify-write race condition.
--- Uses Postgres || operator for O(1) append instead of full JSONB rewrite.
+-- Uses Postgres || operator for server-side append (avoids client read-modify-write race).
+-- Uses auth.uid() for ownership, not a caller-supplied parameter, since SECURITY DEFINER bypasses RLS.
 CREATE OR REPLACE FUNCTION append_chat_message(
   p_session_id UUID,
-  p_user_id UUID,
   p_message JSONB
 )
-RETURNS void
-LANGUAGE sql
+RETURNS boolean
+LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
+DECLARE
+  rows_affected integer;
+BEGIN
   UPDATE bmad_sessions
-  SET chat_context = chat_context || jsonb_build_array(p_message),
-      updated_at = now()
+  SET chat_context = chat_context || jsonb_build_array(p_message)
   WHERE id = p_session_id
-    AND user_id = p_user_id;
+    AND user_id = auth.uid();
+
+  GET DIAGNOSTICS rows_affected = ROW_COUNT;
+  RETURN rows_affected > 0;
+END;
 $$;
 
 -- 3. Missing DELETE policy (only SELECT, INSERT, UPDATE existed)
