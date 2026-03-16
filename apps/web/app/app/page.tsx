@@ -129,7 +129,8 @@ export default function AppDashboardPage() {
         .from('bmad_sessions')
         .select('id, user_id, pathway, title, current_phase, session_mode, message_count, message_limit, status, created_at, updated_at')
         .eq('user_id', user?.id)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .limit(50);
 
       if (fetchError) throw fetchError;
       setSessions(data || []);

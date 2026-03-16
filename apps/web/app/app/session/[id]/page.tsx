@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
+import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
 import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
 import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
@@ -420,13 +420,15 @@ export default function SessionPage() {
 
       {/* Right Pane - Board Overview (only when board is active) */}
       {boardState && (
-        <BoardOverview
-          boardState={boardState}
-          onClose={() => {
-            setIsCanvasOpen(false)
-            setUserDismissedBoard(true)
-          }}
-        />
+        <PaneErrorBoundary paneName="board">
+          <BoardOverview
+            boardState={boardState}
+            onClose={() => {
+              setIsCanvasOpen(false)
+              setUserDismissedBoard(true)
+            }}
+          />
+        </PaneErrorBoundary>
       )}
     </div>
     </ArtifactProvider>

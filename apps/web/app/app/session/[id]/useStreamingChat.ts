@@ -23,32 +23,32 @@ export interface SessionData {
   session_mode: string | null
 }
 
+const VALID_ROLES = ['user', 'assistant', 'system'] as const
+
 /**
  * Validates JSONB chat_context from Supabase (typed as Json | null).
  * Guards against malformed data (e.g., guest migration wrapping).
+ * Checks value types, not just key existence.
  */
 export function parseChatContext(raw: unknown): ChatMessage[] {
   if (!Array.isArray(raw)) return []
   return raw.filter((msg): msg is ChatMessage =>
     typeof msg === 'object' && msg !== null &&
-    'id' in msg && 'role' in msg && 'content' in msg && 'timestamp' in msg
+    typeof (msg as any).id === 'string' &&
+    typeof (msg as any).content === 'string' &&
+    typeof (msg as any).timestamp === 'string' &&
+    VALID_ROLES.includes((msg as any).role)
   )
 }
 
 interface UseStreamingChatReturn {
   session: SessionData | null
-  setSession: (s: SessionData | null) => void
   messageInput: string
   setMessageInput: (input: string) => void
   sendingMessage: boolean
   limitStatus: MessageLimitStatus | null
   boardState: BoardState | null
-  setBoardState: (bs: BoardState | null) => void
   handleSendMessage: (e: React.FormEvent) => Promise<void>
-  sessionMode: string | null
-  currentTone: string
-  switchMode: (mode: string) => Promise<void>
-  switchTone: (tone: string) => Promise<void>
 }
 
 export function useStreamingChat(
@@ -64,13 +64,6 @@ export function useStreamingChat(
     if (sps && 'activeSpeaker' in sps) return sps as unknown as BoardState
     return null
   })
-  const [sessionMode, setSessionMode] = useState<string | null>(
-    initialSession?.session_mode || null
-  )
-  const [currentTone, setCurrentTone] = useState('inquisitive')
-  const [bmadSessionId, setBmadSessionId] = useState<string | null>(
-    initialSession?.id || null
-  )
   const sessionRef = useRef<SessionData | null>(initialSession)
 
   // Keep ref in sync with state
@@ -83,14 +76,9 @@ export function useStreamingChat(
     if (initialSession) {
       setSession(initialSession)
       sessionRef.current = initialSession
-      setBmadSessionId(initialSession.id)
-      // Extract board state if the sub_persona_state contains activeSpeaker
       const sps = initialSession.sub_persona_state
       if (sps && 'activeSpeaker' in sps) {
         setBoardState(sps as unknown as BoardState)
-      }
-      if (initialSession.session_mode) {
-        setSessionMode(initialSession.session_mode)
       }
     }
   }, [initialSession])
@@ -101,7 +89,7 @@ export function useStreamingChat(
    */
   const addChatMessage = useCallback(async (message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     const current = sessionRef.current
-    if (!current || !userId) return
+    if (!current) return
 
     const newMessage: ChatMessage = {
       ...message,
@@ -122,15 +110,14 @@ export function useStreamingChat(
         p_message: newMessage as unknown as Record<string, unknown>,
       })
 
-      if (!error && success === false) {
+      if (error) throw error
+      if (success === false) {
         console.error('Message append failed: session not found or ownership mismatch')
       }
-
-      if (error) throw error
     } catch (error) {
       console.error('Error saving message:', error)
     }
-  }, [userId])
+  }, [])
 
   const updateStreamingMessage = useCallback((messageId: string, content: string, speaker?: string) => {
     const current = sessionRef.current
@@ -181,8 +168,6 @@ export function useStreamingChat(
     }
 
     try {
-      // Use atomic RPC append (same as addChatMessage) instead of full JSONB write.
-      // The streaming message was only in local state, so we append the final version to DB.
       const finalMessage = {
         id: existingMessage.id,
         role: existingMessage.role,
@@ -221,7 +206,6 @@ export function useStreamingChat(
         const errorData = await response.json().catch(() => null)
         const errorMessage = errorData?.details || errorData?.error || response.statusText || 'Unknown error'
         const errorHint = errorData?.hint || 'Please try again'
-        console.error('[Session] HTTP error:', { status: response.status, message: errorMessage, hint: errorHint })
         throw new Error(`${errorMessage} (${errorHint})`)
       }
 
@@ -260,7 +244,7 @@ export function useStreamingChat(
                     await finalizeAssistantMessage(assistantContent, assistantMessageId)
                   }
 
-                  // Insert handoff annotation (persisted via RPC, not just local state)
+                  // Insert handoff annotation (persisted via RPC)
                   if (currentSpeaker && handoffReason) {
                     const fromMember = getBoardMember(currentSpeaker as any)
                     const toMember = getBoardMember(newSpeaker as any)
@@ -297,78 +281,29 @@ export function useStreamingChat(
                 if (data.additionalData?.boardState) {
                   setBoardState(data.additionalData.boardState as BoardState)
                 }
-                if (data.bmadSessionId) {
-                  setBmadSessionId(data.bmadSessionId)
-                }
                 await finalizeAssistantMessage(assistantContent, assistantMessageId)
               } else if (data.type === 'error') {
-                console.error('[Session] Received error from stream:', data)
                 throw new Error(data.error || 'Stream error')
               } else if (data.type === 'metadata') {
                 if (data.metadata?.boardState) {
                   setBoardState(data.metadata.boardState as BoardState)
                 }
-                if (data.metadata?.bmadSessionId) {
-                  setBmadSessionId(data.metadata.bmadSessionId)
-                }
               }
             } catch (parseError) {
-              console.error('[Session] Failed to parse stream data:', {
-                dataStr: dataStr.substring(0, 100),
-                error: parseError instanceof Error ? parseError.message : 'Unknown error'
-              })
+              if (parseError instanceof Error && parseError.message !== 'Stream error') {
+                console.error('[Session] Failed to parse stream data:', dataStr.substring(0, 100))
+              } else {
+                throw parseError
+              }
             }
           }
         }
       }
     } catch (error) {
-      console.error('[Session] Streaming error:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      })
+      console.error('[Session] Streaming error:', error instanceof Error ? error.message : 'Unknown')
       throw error
     }
-  }, [finalizeAssistantMessage, updateStreamingMessage])
-
-  const switchMode = useCallback(async (mode: string) => {
-    if (!bmadSessionId) return
-    try {
-      const response = await fetch('/api/session/mode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: bmadSessionId, mode }),
-      })
-      if (response.ok) {
-        setSessionMode(mode)
-        await addChatMessage({
-          role: 'system',
-          content: `Thinking mode switched to **${mode}**.`,
-        })
-      }
-    } catch (err) {
-      console.error('[Session] Error switching mode:', err)
-    }
-  }, [bmadSessionId, addChatMessage])
-
-  const switchTone = useCallback(async (tone: string) => {
-    if (!bmadSessionId) return
-    try {
-      const response = await fetch('/api/session/tone', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: bmadSessionId, tone }),
-      })
-      if (response.ok) {
-        setCurrentTone(tone)
-        await addChatMessage({
-          role: 'system',
-          content: `Tone adjusted to **${tone}**.`,
-        })
-      }
-    } catch (err) {
-      console.error('[Session] Error switching tone:', err)
-    }
-  }, [bmadSessionId, addChatMessage])
+  }, [finalizeAssistantMessage, updateStreamingMessage, addChatMessage])
 
   const handleSendMessage = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -382,11 +317,6 @@ export function useStreamingChat(
       await addChatMessage({ role: 'user', content: userMessage })
       await streamClaudeResponse(userMessage)
     } catch (err) {
-      console.error('[Session] Error sending message:', {
-        error: err instanceof Error ? err.message : 'Unknown error',
-        stack: err instanceof Error ? err.stack : undefined
-      })
-
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       await addChatMessage({
         role: 'system',
@@ -399,17 +329,11 @@ export function useStreamingChat(
 
   return {
     session,
-    setSession,
     messageInput,
     setMessageInput,
     sendingMessage,
     limitStatus,
     boardState,
-    setBoardState,
     handleSendMessage,
-    sessionMode,
-    currentTone,
-    switchMode,
-    switchTone,
   }
 }

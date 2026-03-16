@@ -9,14 +9,10 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, workspaceId, format = 'markdown' } = await request.json();
+    const { sessionId, format = 'markdown' } = await request.json();
 
-    // Accept sessionId (new) or workspaceId (legacy)
-    if (!sessionId && !workspaceId) {
-      return NextResponse.json(
-        { error: 'Missing sessionId' },
-        { status: 400 }
-      );
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Missing sessionId' }, { status: 400 });
     }
 
     if (!['markdown', 'text', 'json'].includes(format)) {
@@ -31,54 +27,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
     }
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    let chatContext: unknown[] = [];
-    let sessionTitle = 'Strategic Session';
+    const { data: session, error: sessionError } = await supabase
+      .from('bmad_sessions')
+      .select('chat_context, title')
+      .eq('id', sessionId)
+      .eq('user_id', user.id)
+      .single();
 
-    if (sessionId) {
-      // New path: read from bmad_sessions
-      const { data: session, error: sessionError } = await supabase
-        .from('bmad_sessions')
-        .select('chat_context, title')
-        .eq('id', sessionId)
-        .eq('user_id', user.id)
-        .single();
-
-      if (sessionError || !session) {
-        return NextResponse.json(
-          { error: 'Session not found' },
-          { status: 404 }
-        );
-      }
-
-      chatContext = Array.isArray(session.chat_context) ? session.chat_context : [];
-      sessionTitle = session.title || 'Strategic Session';
-    } else {
-      // Legacy path: read from user_workspace
-      const { data: workspace, error: workspaceError } = await supabase
-        .from('user_workspace')
-        .select('user_id, workspace_state')
-        .eq('user_id', user.id)
-        .single();
-
-      if (workspaceError || !workspace) {
-        return NextResponse.json(
-          { error: 'Workspace not found' },
-          { status: 404 }
-        );
-      }
-
-      chatContext = workspace.workspace_state?.chat_context || [];
-      sessionTitle = workspace.workspace_state?.name || 'Strategic Session';
+    if (sessionError || !session) {
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
+
+    const chatContext = Array.isArray(session.chat_context) ? session.chat_context : [];
+    const sessionTitle = session.title || 'Strategic Session';
 
     const validation = validateMessages(chatContext);
     if (!validation.valid) {
@@ -108,10 +74,7 @@ export async function POST(request: NextRequest) {
         result = exportChatToJSON(chatContext, { workspaceName: sessionTitle });
         break;
       default:
-        return NextResponse.json(
-          { error: 'Invalid format' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
     }
 
     if (!result.success || !result.content) {
@@ -130,10 +93,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Chat export API error:', error);
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -143,6 +103,5 @@ export async function GET() {
   return NextResponse.json({
     message: 'Chat export endpoint ready',
     supportedFormats: ['markdown', 'text', 'json'],
-    timestamp: new Date().toISOString(),
   });
 }

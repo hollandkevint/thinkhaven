@@ -170,15 +170,10 @@ async function executeAgenticLoop(
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, sessionId: clientSessionId, workspaceId, conversationHistory, coachingContext, useTools } = await request.json();
+    const { message, sessionId, conversationHistory, coachingContext, useTools } = await request.json();
 
-    // Accept sessionId (new) or workspaceId (legacy) for backward compatibility
-    const requestSessionId = clientSessionId || null;
-
-    // Validate request
-    if (!message || (!requestSessionId && !workspaceId)) {
-      console.error('[Chat Stream] Validation failed:', { hasMessage: !!message, hasSessionId: !!requestSessionId, hasWorkspaceId: !!workspaceId });
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+    if (!message || !sessionId) {
+      return new Response(JSON.stringify({ error: 'Missing required fields (message, sessionId)' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -203,51 +198,26 @@ export async function POST(request: NextRequest) {
     const isAdmin = isAdminEmail(user.email);
 
     // Validate session ownership
-    let sessionId: string | null = null;
     let limitStatus: MessageLimitStatus | null = null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let cachedBmadSession: any = null;
 
-    if (requestSessionId) {
-      // New path: client sends sessionId directly
-      const { data: bmadSession, error: sessionError } = await supabase
-        .from('bmad_sessions')
-        .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state, session_mode, message_count, message_limit')
-        .eq('id', requestSessionId)
-        .eq('user_id', user.id)
-        .single();
+    const { data: bmadSession, error: sessionError } = await supabase
+      .from('bmad_sessions')
+      .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state, session_mode, message_count, message_limit')
+      .eq('id', sessionId)
+      .eq('user_id', user.id)
+      .single();
 
-      if (sessionError || !bmadSession) {
-        return new Response(JSON.stringify({
-          error: 'Session not found',
-          details: 'The session does not exist or you do not have access.',
-        }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-
-      cachedBmadSession = bmadSession;
-      sessionId = bmadSession.id;
-    } else {
-      // Legacy path: find session by workspace_id (backward compatibility)
-      try {
-        const { data: bmadSession } = await supabase
-          .from('bmad_sessions')
-          .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state, session_mode, message_count, message_limit')
-          .eq('workspace_id', workspaceId)
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        cachedBmadSession = bmadSession;
-        sessionId = bmadSession?.id || null;
-      } catch (error) {
-        console.warn('Could not find BMad session via legacy path:', error);
-      }
+    if (sessionError || !bmadSession) {
+      return new Response(JSON.stringify({
+        error: 'Session not found',
+        details: 'The session does not exist or you do not have access.',
+      }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
+
+    const cachedBmadSession = bmadSession;
 
     // ATOMIC: Increment message count FIRST to prevent race conditions
     // Skip entirely for admin users to avoid DB state drift
