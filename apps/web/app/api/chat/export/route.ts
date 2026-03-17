@@ -5,19 +5,14 @@ import {
   exportChatToText,
   exportChatToJSON,
   validateMessages,
-  type ChatMessage,
 } from '@/lib/export/chat-export';
 
 export async function POST(request: NextRequest) {
   try {
-    const { workspaceId, format = 'markdown' } = await request.json();
+    const { sessionId, format = 'markdown' } = await request.json();
 
-    // Validate request
-    if (!workspaceId) {
-      return NextResponse.json(
-        { error: 'Missing workspaceId' },
-        { status: 400 }
-      );
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Missing sessionId' }, { status: 400 });
     }
 
     if (!['markdown', 'text', 'json'].includes(format)) {
@@ -27,35 +22,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user context
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+    }
 
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get workspace data
-    const { data: workspace, error: workspaceError } = await supabase
-      .from('user_workspace')
-      .select('user_id, workspace_state')
+    const { data: session, error: sessionError } = await supabase
+      .from('bmad_sessions')
+      .select('chat_context, title')
+      .eq('id', sessionId)
       .eq('user_id', user.id)
       .single();
 
-    if (workspaceError || !workspace) {
-      return NextResponse.json(
-        { error: 'Workspace not found' },
-        { status: 404 }
-      );
+    if (sessionError || !session) {
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    // Extract chat messages
-    const chatContext = workspace.workspace_state?.chat_context || [];
+    const chatContext = Array.isArray(session.chat_context) ? session.chat_context : [];
+    const sessionTitle = session.title || 'Strategic Session';
 
-    // Validate messages
     const validation = validateMessages(chatContext);
     if (!validation.valid) {
       return NextResponse.json(
@@ -64,35 +54,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get workspace name
-    const workspaceName =
-      workspace.workspace_state?.name || 'Strategic Session';
-
-    // Export based on format
     let result;
     switch (format) {
       case 'markdown':
         result = exportChatToMarkdown(chatContext, {
-          workspaceName,
+          workspaceName: sessionTitle,
           includeMetadata: true,
           includeTimestamps: true,
         });
         break;
       case 'text':
         result = exportChatToText(chatContext, {
-          workspaceName,
+          workspaceName: sessionTitle,
           includeMetadata: true,
           includeTimestamps: true,
         });
         break;
       case 'json':
-        result = exportChatToJSON(chatContext, { workspaceName });
+        result = exportChatToJSON(chatContext, { workspaceName: sessionTitle });
         break;
       default:
-        return NextResponse.json(
-          { error: 'Invalid format' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
     }
 
     if (!result.success || !result.content) {
@@ -102,7 +84,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return export data
     return NextResponse.json({
       success: true,
       content: result.content,
@@ -112,10 +93,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Chat export API error:', error);
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -125,6 +103,5 @@ export async function GET() {
   return NextResponse.json({
     message: 'Chat export endpoint ready',
     supportedFormats: ['markdown', 'text', 'json'],
-    timestamp: new Date().toISOString(),
   });
 }

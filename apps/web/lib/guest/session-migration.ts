@@ -30,48 +30,37 @@ export class SessionMigration {
         }
       }
 
-      // Get or create user workspace
-      const { data: workspace, error: workspaceError } = await supabase
-        .from('user_workspace')
-        .select('user_id, workspace_state')
-        .eq('user_id', userId)
+      // Create a bmad_sessions row with the guest messages as ChatMessage[]
+      const chatMessages = guestData.messages.map(msg => ({
+        id: msg.id || crypto.randomUUID(),
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp || new Date().toISOString(),
+      }))
+
+      const { data: newSession, error: createError } = await supabase
+        .from('bmad_sessions')
+        .insert({
+          user_id: userId,
+          workspace_id: userId,
+          pathway: 'quick-decision',
+          title: 'Guest Session',
+          current_phase: 'discovery',
+          current_template: 'general',
+          current_step: 'chat',
+          templates: [],
+          next_steps: [],
+          status: 'active',
+          overall_completion: 0,
+          message_count: chatMessages.length,
+          message_limit: 10,
+          chat_context: chatMessages,
+        })
+        .select('id')
         .single()
 
-      if (workspaceError) {
-        console.error('Failed to get workspace:', workspaceError)
-        return {
-          success: false,
-          error: 'Failed to access workspace'
-        }
-      }
-
-      // Prepare workspace state with migrated chat
-      const currentState = workspace.workspace_state || {}
-      const migratedChatContext = {
-        conversationHistory: guestData.messages.map(msg => ({
-          role: msg.role,
-          content: msg.content,
-          timestamp: msg.timestamp
-        })),
-        migratedFromGuest: true,
-        migratedAt: new Date().toISOString(),
-        originalGuestSessionId: guestData.sessionId
-      }
-
-      // Update workspace with migrated data
-      const { error: updateError } = await supabase
-        .from('user_workspace')
-        .update({
-          workspace_state: {
-            ...currentState,
-            chat_context: migratedChatContext
-          },
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-
-      if (updateError) {
-        console.error('Failed to migrate session:', updateError)
+      if (createError) {
+        console.error('Failed to migrate session:', createError)
         return {
           success: false,
           error: 'Failed to save migrated session'

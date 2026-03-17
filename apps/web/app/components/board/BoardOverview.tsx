@@ -1,6 +1,6 @@
 'use client';
 
-import { Timer } from 'lucide-react';
+import { Timer, X } from 'lucide-react';
 import type { BoardState } from '@/lib/ai/board-types';
 import { BOARD_MEMBERS, getBoardMember } from '@/lib/ai/board-members';
 import BoardMemberCard from './BoardMemberCard';
@@ -8,6 +8,7 @@ import BoardMemberCard from './BoardMemberCard';
 interface BoardOverviewProps {
   boardState: BoardState;
   currentPhase?: string;
+  onClose?: () => void;
 }
 
 const PHASES = [
@@ -19,6 +20,7 @@ const PHASES = [
 export default function BoardOverview({
   boardState,
   currentPhase = 'discovery',
+  onClose,
 }: BoardOverviewProps) {
   const activeMember = getBoardMember(boardState.activeSpeaker);
   const activePhaseIndex = PHASES.findIndex((p) => p.id === currentPhase);
@@ -27,9 +29,20 @@ export default function BoardOverview({
     <div className="bg-cream rounded-2xl shadow-lg border border-ink/8 overflow-hidden flex flex-col h-full">
       {/* Header */}
       <div className="bg-parchment px-6 py-5">
-        <h2 className="font-display text-xl font-semibold text-ink">
-          Board Members
-        </h2>
+        <div className="flex items-start justify-between">
+          <h2 className="font-display text-xl font-semibold text-ink">
+            Board Members
+          </h2>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1 rounded text-muted-foreground hover:text-ink hover:bg-parchment/50 transition-colors"
+              aria-label="Close board panel"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
         <p className="font-body text-sm text-muted-foreground mt-0.5">
           Your advisory perspectives
         </p>

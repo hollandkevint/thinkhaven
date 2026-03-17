@@ -124,11 +124,13 @@ export default function AppDashboardPage() {
   const fetchSessions = useCallback(async () => {
     try {
       setError(null);
+      // Select specific columns - exclude chat_context to avoid loading full JSONB blobs
       const { data, error: fetchError } = await supabase
         .from('bmad_sessions')
-        .select('*')
+        .select('id, user_id, pathway, title, current_phase, session_mode, message_count, message_limit, status, created_at, updated_at')
         .eq('user_id', user?.id)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .limit(50);
 
       if (fetchError) throw fetchError;
       setSessions(data || []);
@@ -170,7 +172,8 @@ export default function AppDashboardPage() {
       const { error } = await supabase
         .from('bmad_sessions')
         .delete()
-        .eq('id', sessionId);
+        .eq('id', sessionId)
+        .eq('user_id', user?.id);  // IDOR protection
 
       if (error) throw error;
 
@@ -194,17 +197,11 @@ export default function AppDashboardPage() {
   };
 
   const getSessionTitle = (session: BmadSession) => {
-    const data = session.session_data as { title?: string; concept?: { name?: string } };
-    return data?.title || data?.concept?.name || 'Untitled Session';
+    return session.title || 'Untitled Session';
   };
 
   const getSessionDescription = (session: BmadSession) => {
-    const data = session.session_data as { description?: string; concept?: { description?: string } };
-    return (
-      data?.description ||
-      data?.concept?.description ||
-      'No description available'
-    );
+    return session.pathway?.replace(/-/g, ' ') || '';
   };
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'User';
