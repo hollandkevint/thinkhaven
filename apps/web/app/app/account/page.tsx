@@ -8,8 +8,6 @@ import Link from 'next/link'
 
 export default function AccountPage() {
   const { user, signOut } = useAuth()
-  const workspaceState = null // Mock empty state
-  const saveWorkspace = async () => { /* disabled */ }
   const router = useRouter()
 
   const [newPassword, setNewPassword] = useState('')
@@ -17,9 +15,6 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-
-  const [deleteConfirm, setDeleteConfirm] = useState('')
-  const [deletingAccount, setDeletingAccount] = useState(false)
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,37 +50,6 @@ export default function AccountPage() {
       setError('Failed to update password')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleDeleteAccount = async () => {
-    if (deleteConfirm !== 'DELETE') {
-      setError('Please type DELETE to confirm account deletion')
-      return
-    }
-
-    setDeletingAccount(true)
-    setError('')
-
-    try {
-      setMessage('Account deletion initiated. Signing out...')
-      setTimeout(() => {
-        signOut()
-        router.push('/')
-      }, 2000)
-    } catch (_err) {
-      setError('Failed to delete account')
-    } finally {
-      setDeletingAccount(false)
-    }
-  }
-
-  const handleSaveWorkspace = async () => {
-    try {
-      await saveWorkspace()
-      setMessage('Workspace saved successfully!')
-    } catch (_err) {
-      setError('Failed to save workspace')
     }
   }
 
@@ -141,14 +105,11 @@ export default function AccountPage() {
 
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">
-                Workspace Status
+                Account Status
               </label>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-success rounded-full"></div>
-                <span className="text-foreground">
-                  {(workspaceState as { chat_context?: unknown[] })?.chat_context?.length || 0} messages,
-                  {(workspaceState as { canvas_elements?: unknown[] })?.canvas_elements?.length || 0} elements
-                </span>
+                <span className="text-foreground">Active</span>
               </div>
             </div>
           </div>
@@ -196,57 +157,9 @@ export default function AccountPage() {
           </form>
         </div>
 
-        {/* Workspace Management */}
-        <div className="bg-card border border-divider rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Workspace Management</h2>
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium">Manual Save</p>
-                <p className="text-sm text-muted-foreground">Force save your current workspace state</p>
-              </div>
-              <button
-                onClick={handleSaveWorkspace}
-                className="px-4 py-2 bg-accent text-white font-medium rounded hover:bg-accent/90"
-              >
-                Save Now
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Danger Zone */}
-        <div className="bg-card border border-error rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-error mb-4">Danger Zone</h2>
-
-          <div className="space-y-4">
-            <div>
-              <p className="font-medium text-error mb-2">Delete Account</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                This will permanently delete your account and all workspace data. This action cannot be undone.
-              </p>
-
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Type DELETE to confirm"
-                  value={deleteConfirm}
-                  onChange={(e) => setDeleteConfirm(e.target.value)}
-                  className="w-full px-3 py-2 border border-error rounded focus:ring-error focus:border-error"
-                />
-
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deletingAccount || deleteConfirm !== 'DELETE'}
-                  className="px-4 py-2 bg-error text-white font-medium rounded hover:bg-error/90 disabled:opacity-50"
-                >
-                  {deletingAccount ? 'Deleting...' : 'Delete Account'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Account Deletion - Coming Soon */}
+        {/* Real account deletion requires Supabase Edge Function for cascade delete.
+            Removed fake deletion UI that only signed out without deleting data. */}
 
         {/* Messages */}
         {error && (

@@ -48,6 +48,9 @@ module.exports = {
         rust: '#8B4D3B',
         sage: '#A3B18A',
 
+        /* Divider (resolves 93 border-divider references) */
+        divider: 'var(--divider, rgba(44, 36, 22, 0.12))',
+
         /* Pathway Card Backgrounds */
         'pathway-warm': '#F3EBE2',
         'pathway-teal': '#C3DED8',

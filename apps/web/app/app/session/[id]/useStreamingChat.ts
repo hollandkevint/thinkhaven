@@ -163,7 +163,8 @@ export function useStreamingChat(initialWorkspace: Workspace | null): UseStreami
         body: JSON.stringify({
           message,
           workspaceId: current.id,
-          conversationHistory: current.chat_context?.slice(-10) || []
+          conversationHistory: current.chat_context?.slice(-10) || [],
+          useTools: true,
         }),
       })
 
