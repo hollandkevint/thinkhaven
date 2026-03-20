@@ -94,7 +94,8 @@ export enum PathwayType {
   BUSINESS_MODEL = 'business-model',
   BUSINESS_MODEL_PROBLEM = 'business-model-problem',
   FEATURE_REFINEMENT = 'feature-refinement',
-  STRATEGIC_OPTIMIZATION = 'strategic-optimization'
+  STRATEGIC_OPTIMIZATION = 'strategic-optimization',
+  EXPLORE = 'explore',
 }
 
 export interface BmadPathway {

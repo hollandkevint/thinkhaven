@@ -230,39 +230,15 @@ export default function SessionPage() {
             <div className="max-w-4xl mx-auto space-y-6">
               {session.chat_context.length === 0 && (
                 <div className="bg-parchment p-6 rounded-lg border border-ink/8 mb-4">
-                  <div className="flex items-start gap-3 mb-4">
+                  <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-cream font-semibold font-display">M</span>
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-ink text-lg mb-2 font-display">Welcome to your Strategic Session!</p>
-                      <p className="text-ink-light mb-4">
-                        I&apos;m Mary, your AI strategic advisor. I&apos;m here to help you think through ideas, validate concepts,
-                        and develop actionable plans.
+                      <p className="font-semibold text-ink text-lg mb-2 font-display">Hey, I&apos;m Mary.</p>
+                      <p className="text-ink-light">
+                        What idea or decision are you working on? I&apos;ll help you pressure-test it.
                       </p>
-                      <p className="font-medium text-ink mb-3">Try asking me about:</p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {[
-                          { emoji: '💡', text: 'Validate a new product idea', prompt: 'I have a new product idea I want to validate' },
-                          { emoji: '📊', text: 'Analyze competitive landscape', prompt: 'I need help analyzing my competitive landscape' },
-                          { emoji: '🎯', text: 'Refine business model', prompt: "I'm stuck on my business model and need guidance" },
-                          { emoji: '⚡', text: 'Prioritize features', prompt: 'Help me prioritize my product features' },
-                        ].map((item) => (
-                          <button
-                            key={item.prompt}
-                            onClick={() => {
-                              setMessageInput(item.prompt)
-                              setTimeout(() => {
-                                textareaRef.current?.focus()
-                                textareaRef.current?.select()
-                              }, 100)
-                            }}
-                            className="text-left px-4 py-3 bg-cream hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
-                          >
-                            {item.emoji} {item.text}
-                          </button>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 </div>

@@ -12,7 +12,7 @@ export interface WorkspaceData {
 
 export interface BmadSessionData {
   id: string;
-  pathway: 'new-idea' | 'business-model' | 'strategic-optimization';
+  pathway: 'new-idea' | 'business-model' | 'strategic-optimization' | 'explore';
   current_phase: string;
   progress: number;
   context: Record<string, any>;

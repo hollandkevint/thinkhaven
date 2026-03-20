@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
         }
 
         finalCoachingContext = await WorkspaceContextBuilder.buildCoachingContext(
-          workspaceId,
+          user.id,
           user.id,
           bmadSessionForUpdate || undefined
         );
