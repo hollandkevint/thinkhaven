@@ -20,21 +20,10 @@ import {
   Sparkles,
   Folder,
   Home,
-  Timer,
-  Zap,
-  Search,
-  Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
 import { ErrorState } from '@/app/components/ui/ErrorState';
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
-import { PATHWAYS } from '@/lib/pathways';
-
-const ICON_MAP: Record<string, typeof Zap> = { Zap, Search, Rocket };
-
-const DASHBOARD_PATHWAYS = PATHWAYS.filter(
-  (p) => p.id !== 'board-of-directors'
-);
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -327,39 +316,24 @@ export default function AppDashboardPage() {
             </div>
           </div>
 
-          {/* Pathway Preview Cards */}
+          {/* New Session CTA */}
           <div className="mb-10">
-            <h2 className="font-display text-xs font-semibold uppercase tracking-[0.15em] text-ink-light mb-5">
-              Start a New Session
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {DASHBOARD_PATHWAYS.map((pathway) => {
-                const Icon = ICON_MAP[pathway.icon] ?? Sparkles;
-                return (
-                  <Link
-                    key={pathway.id}
-                    href={`/app/new?pathway=${pathway.id}`}
-                    className={`${pathway.bgColor} rounded-2xl shadow border border-ink/8 p-6 flex flex-col gap-4 transition-all duration-200 hover:shadow-md active:scale-[0.98] cursor-pointer`}
-                  >
-                    <Icon className={`w-6 h-6 ${pathway.accentColor}`} />
-                    <div>
-                      <h3 className="font-display text-lg font-medium text-ink mb-1">
-                        {pathway.title}
-                      </h3>
-                      <p className="font-body text-sm leading-relaxed text-ink-light line-clamp-2">
-                        {pathway.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-auto">
-                      <Timer className="w-3.5 h-3.5 text-ink-light/60" />
-                      <span className="font-display text-xs text-ink-light/60">
-                        {pathway.duration}
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+            <Link
+              href="/app/new"
+              className="bg-parchment rounded-2xl shadow border border-ink/8 p-6 flex items-center gap-4 transition-all duration-200 hover:shadow-md active:scale-[0.98] cursor-pointer"
+            >
+              <div className="w-12 h-12 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
+                <PlusIcon className="w-6 h-6 text-cream" />
+              </div>
+              <div>
+                <h3 className="font-display text-lg font-medium text-ink mb-1">
+                  Start a New Session
+                </h3>
+                <p className="font-body text-sm leading-relaxed text-ink-light">
+                  Share your idea and Mary will pressure-test it through structured loops.
+                </p>
+              </div>
+            </Link>
           </div>
 
           {/* Session Grid or Empty State */}

@@ -222,6 +222,11 @@ export const VALUE_ARTICULATION_PROMPTS = {
       'Where are users getting stuck that they shouldn\'t be?',
       'What value are you leaving on the table?',
     ],
+    'explore': [
+      'What is the fundamental problem this solves?',
+      'Who feels this pain most acutely, and how do you know?',
+      'What would have to be true for this to be a great business?',
+    ],
   },
 } as const;
 
@@ -427,24 +432,34 @@ You are NOT a yes-person. Your value comes from genuine strategic thinking, not 
 Remember: Users chose ThinkHaven BECAUSE they want genuine feedback. Sycophancy is a betrayal of that trust.`;
   }
 
+  /** Challenge loop phase boundaries */
+  private static readonly CHALLENGE_PHASE = {
+    ELICIT: 0,
+    CHALLENGE: 1,
+    SYNTHESIZE: 2,
+    DEEP_EXPLORATION_START: 3,
+  } as const;
+
   /**
    * Generate phase-specific challenge loop instructions based on exchange count.
    * Only current phase instructions are injected (not all phases at once).
    */
   private generateChallengeLoopSection(exchangeCount: number): string {
-    if (exchangeCount === 0) {
+    const { ELICIT, CHALLENGE, SYNTHESIZE } = MaryPersona.CHALLENGE_PHASE;
+
+    if (exchangeCount === ELICIT) {
       return `CHALLENGE LOOP — CURRENT PHASE: ELICIT
 Use First Principles Thinking. Ask exactly ONE question about the fundamental problem this solves and who feels the pain most acutely.
 Do NOT ask multiple questions. Do NOT call any tools yet.
 Keep your response to 2-3 sentences plus one question.`;
     }
-    if (exchangeCount === 1) {
+    if (exchangeCount === CHALLENGE) {
       return `CHALLENGE LOOP — CURRENT PHASE: CHALLENGE
 Use Assumption Reversal. Identify the user's riskiest assumption and challenge it directly.
 Ask exactly ONE follow-up question after your challenge.
 Keep your response focused — no more than 3-4 sentences plus one question.`;
     }
-    if (exchangeCount === 2) {
+    if (exchangeCount === SYNTHESIZE) {
       return `CHALLENGE LOOP — CURRENT PHASE: SYNTHESIZE
 Summarize what you've heard in 2-3 sentences.
 Then suggest bringing in the Board of Directors for investor, co-founder, and operator perspectives.
@@ -1159,6 +1174,7 @@ IMPORTANT: These questions should emerge naturally from the conversation. Don't 
       'business-model-problem': PathwayType.BUSINESS_MODEL_PROBLEM,
       'feature-refinement': PathwayType.FEATURE_REFINEMENT,
       'strategic-optimization': PathwayType.STRATEGIC_OPTIMIZATION,
+      'explore': PathwayType.EXPLORE,
     };
 
     const pathwayType = pathwayTypeMap[pathway];

@@ -271,8 +271,8 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // Build or use provided coaching context
-    let finalCoachingContext: CoachingContext | undefined = coachingContext;
+    // Always rebuild coaching context server-side (never trust client-supplied context)
+    let finalCoachingContext: CoachingContext | undefined = undefined;
     let bmadSessionForUpdate: BmadSessionData | null = null;
 
     if (!finalCoachingContext) {
@@ -484,7 +484,8 @@ export async function POST(request: NextRequest) {
               const { error: updateError } = await supabase
                 .from('bmad_sessions')
                 .update({ sub_persona_state: updatedSubPersonaState })
-                .eq('id', bmadSessionForUpdate.id);
+                .eq('id', bmadSessionForUpdate.id)
+                .eq('user_id', user.id);
 
               if (updateError) {
                 console.error('[Chat Stream] Failed to persist sub-persona state:', updateError);

@@ -71,6 +71,17 @@ export const PATHWAY_COGNITIVE_MODES: Record<PathwayType, CognitiveMode> = {
       'What feedback loops exist that could amplify or dampen this change?',
     ],
   },
+  [PathwayType.EXPLORE]: {
+    name: 'First Principles Exploration',
+    description: 'Challenge assumptions and pressure-test ideas through structured loops',
+    frameworks: ['First Principles', 'Assumption Reversal', 'Provocation Technique'],
+    keyQuestions: [
+      'What is the fundamental problem this solves?',
+      'Who feels this pain most acutely?',
+      'What is the riskiest assumption you are making?',
+      'What would have to be true for this to work?',
+    ],
+  },
 };
 
 /**

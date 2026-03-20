@@ -4,9 +4,10 @@ import { useCallback, useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { supabase } from '@/lib/supabase/client';
 import AnimatedLoader from '@/app/components/ui/AnimatedLoader';
 import { ErrorState } from '@/app/components/ui/ErrorState';
+
+const MAX_RETRIES = 3;
 
 const sessionMessages = [
   'Starting your session...',
@@ -29,28 +30,19 @@ export default function NewSessionPage() {
     try {
       setError(null);
 
-      const { data: session, error: createError } = await supabase
-        .from('bmad_sessions')
-        .insert({
-          user_id: user.id,
-          workspace_id: user.id,
-          pathway: 'explore',
-          title: 'New Session',
-          current_phase: 'discovery',
-          current_template: 'general',
-          current_step: 'chat',
-          templates: [],
-          next_steps: [],
-          status: 'active',
-          overall_completion: 0,
-          message_count: 0,
-          message_limit: 20,
-        })
-        .select('id')
-        .single();
+      const response = await fetch('/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pathway: 'explore' }),
+      });
 
-      if (createError) throw createError;
-      if (session) router.push(`/app/session/${session.id}`);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Failed to create session (${response.status})`);
+      }
+
+      const { id } = await response.json();
+      if (id) router.push(`/app/session/${id}`);
     } catch (err) {
       creatingRef.current = false;
       console.error('Error creating session:', err);
@@ -64,6 +56,10 @@ export default function NewSessionPage() {
   }, [user, createSession]);
 
   const handleRetry = () => {
+    if (retryCount >= MAX_RETRIES) {
+      setError('Too many retries. Please go back and try again.');
+      return;
+    }
     setIsRetrying(true);
     setRetryCount((c) => c + 1);
     creatingRef.current = false;
@@ -77,7 +73,7 @@ export default function NewSessionPage() {
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center">
         <ErrorState
           error={error}
-          onRetry={handleRetry}
+          onRetry={retryCount < MAX_RETRIES ? handleRetry : undefined}
           retryCount={retryCount}
           isRetrying={isRetrying}
         />

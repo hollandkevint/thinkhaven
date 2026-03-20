@@ -685,10 +685,10 @@ Phase 2: Lean Canvas sidebar              [2 days]  ← new component + tool + m
 8. Remove dead canvas components (7 files) and dead CSS tokens (~20 definitions)
 
 **Phase 1 commit order (PR #2: Skip Pathways + Challenge Loop):**
-1. Add `'explore'` to `PathwayType` enum, `PATHWAY_WEIGHTS`, `PHASE_ORDER`, `PATHWAYS`, DB CHECK
-2. Rewrite `new/page.tsx` to auto-create session
-3. Restructure Mary's system prompt with challenge loop
-4. Remove PathwayCard component (now dead)
+1. [x] Add `'explore'` to `PathwayType` enum, `PATHWAY_WEIGHTS`, `PHASE_ORDER`, `PATHWAYS`, DB CHECK
+2. [x] Rewrite `new/page.tsx` to auto-create session
+3. [x] Restructure Mary's system prompt with challenge loop
+4. [x] Remove PathwayCard component (now dead)
 
 **Phase 2 (PR #3: Lean Canvas Sidebar):**
 Migration + tool + component + canvas on `complete` event.
