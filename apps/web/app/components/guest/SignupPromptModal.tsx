@@ -23,7 +23,7 @@ export default function SignupPromptModal({
   const handleSignup = () => {
     // Redirect to signup page
     // Session will be migrated after successful authentication
-    router.push('/auth?mode=signup&from=guest')
+    router.push('/signup?from=guest')
   }
 
   const handleViewSummary = () => {

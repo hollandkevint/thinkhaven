@@ -24,7 +24,7 @@ export default function GuestChatInterface() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
-  const [remainingMessages, setRemainingMessages] = useState(5)
+  const [remainingMessages, setRemainingMessages] = useState(10)
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [showSavePrompt, setShowSavePrompt] = useState(false)
 
@@ -234,7 +234,7 @@ export default function GuestChatInterface() {
   }
 
   const handleSignupClick = () => {
-    router.push('/auth?mode=signup&from=guest')
+    router.push('/signup?from=guest')
   }
 
   return (

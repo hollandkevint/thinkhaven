@@ -198,7 +198,8 @@ export function useStreamingChat(
         body: JSON.stringify({
           message,
           sessionId: current.id,
-          conversationHistory: current.chat_context?.slice(-10) || []
+          conversationHistory: current.chat_context?.slice(-10) || [],
+          useTools: true,
         }),
       })
 
