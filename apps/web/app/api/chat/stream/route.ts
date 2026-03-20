@@ -8,7 +8,6 @@ import { WorkspaceContextBuilder, ConversationContextManager, BmadSessionData } 
 import { ContextBuilder } from '@/lib/ai/context-builder';
 import {
   incrementMessageCount,
-  checkMessageLimit,
   getLimitReachedMessage,
   type MessageLimitStatus,
 } from '@/lib/bmad/message-limit-manager';
@@ -171,12 +170,10 @@ async function executeAgenticLoop(
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, workspaceId, conversationHistory, coachingContext, useTools } = await request.json();
+    const { message, sessionId, conversationHistory, coachingContext, useTools } = await request.json();
 
-    // Validate request
-    if (!message || !workspaceId) {
-      console.error('[Chat Stream] Validation failed:', { hasMessage: !!message, hasWorkspaceId: !!workspaceId });
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+    if (!message || !sessionId) {
+      return new Response(JSON.stringify({ error: 'Missing required fields (message, sessionId)' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -197,80 +194,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { data: workspace, error: workspaceError } = await supabase
-      .from('user_workspace')
-      .select('user_id, workspace_state')
+    // ADMIN BYPASS CHECK: unlimited messages (check BEFORE any message limit logic)
+    const isAdmin = isAdminEmail(user.email);
+
+    // Validate session ownership
+    let limitStatus: MessageLimitStatus | null = null;
+
+    const { data: bmadSession, error: sessionError } = await supabase
+      .from('bmad_sessions')
+      .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state, session_mode, message_count, message_limit')
+      .eq('id', sessionId)
       .eq('user_id', user.id)
       .single();
 
-    if (workspaceError || !workspace) {
-      console.error('[Chat Stream] Workspace lookup error:', {
-        error: workspaceError?.message || 'No workspace found',
-        code: workspaceError?.code,
-        details: workspaceError?.details,
-        hint: workspaceError?.hint,
-        userId: user.id
-      });
+    if (sessionError || !bmadSession) {
       return new Response(JSON.stringify({
-        error: 'Workspace not found',
-        details: workspaceError?.message,
-        hint: 'Make sure you have created a workspace. Try signing out and back in.'
+        error: 'Session not found',
+        details: 'The session does not exist or you do not have access.',
       }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // ADMIN BYPASS CHECK: unlimited messages (check BEFORE any message limit logic)
-    const isAdmin = isAdminEmail(user.email);
-
-    // Get or create BMad session for message limit tracking
-    let sessionId: string | null = null;
-    let limitStatus: MessageLimitStatus | null = null;
-
-    try {
-      const { data: bmadSession } = await supabase
-        .from('bmad_sessions')
-        .select('id')
-        .eq('workspace_id', workspaceId)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      sessionId = bmadSession?.id || null;
-
-      // If no session exists, auto-create one for message limit tracking
-      if (!sessionId) {
-        const { data: newSession, error: createError } = await supabase
-          .from('bmad_sessions')
-          .insert({
-            user_id: user.id,
-            workspace_id: workspaceId,
-            pathway: 'new-idea', // Default pathway for tracking purposes
-            templates: [],
-            current_phase: 'discovery',
-            current_template: 'general',
-            current_step: 'chat',
-            next_steps: [],
-            status: 'active',
-            overall_completion: 0,
-            message_count: 0,
-            message_limit: 10, // Use 10-message limit as per current code standard
-          })
-          .select('id')
-          .single();
-
-        if (createError) {
-          console.error('[Chat Stream] Failed to create tracking session:', createError);
-          // Don't fail the request - continue without tracking (fail open for session creation)
-        } else {
-          sessionId = newSession?.id || null;
-        }
-      }
-    } catch (error) {
-      console.warn('Could not find/create BMad session for message limit tracking:', error);
-    }
+    const cachedBmadSession = bmadSession;
 
     // ATOMIC: Increment message count FIRST to prevent race conditions
     // Skip entirely for admin users to avoid DB state drift
@@ -289,12 +236,19 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Check if THIS increment pushed us over the limit (simplified check)
+      // Build limitStatus from incrementResult (avoids redundant DB round trip)
+      const remaining = incrementResult.messageLimit - incrementResult.newCount;
+      limitStatus = {
+        currentCount: incrementResult.newCount,
+        messageLimit: incrementResult.messageLimit,
+        remaining: Math.max(0, remaining),
+        limitReached: incrementResult.limitReached,
+        warningThreshold: remaining <= 5 && !incrementResult.limitReached,
+      };
+
+      // Check if THIS increment pushed us over the limit
       if (incrementResult.limitReached) {
         console.log('[LIMIT] Message limit reached:', { sessionId, count: incrementResult.newCount, limit: incrementResult.messageLimit });
-
-        // Get current status for error response
-        limitStatus = await checkMessageLimit(sessionId);
 
         return new Response(JSON.stringify({
           error: 'MESSAGE_LIMIT_REACHED',
@@ -305,9 +259,6 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
-
-      // Update limitStatus for later use in response
-      limitStatus = await checkMessageLimit(sessionId);
 
     } else if (isAdmin) {
       // Admin: Skip increment, set limitStatus to look unlimited so UI doesn't warn
@@ -326,15 +277,8 @@ export async function POST(request: NextRequest) {
 
     if (!finalCoachingContext) {
       try {
-        // Try to get current BMad session data (including sub_persona_state)
-        const { data: bmadSession } = await supabase
-          .from('bmad_sessions')
-          .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state')
-          .eq('workspace_id', workspaceId)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        // Reuse the bmad session fetched earlier (avoids duplicate DB query)
+        const bmadSession = cachedBmadSession;
 
         if (bmadSession) {
           // Map to BmadSessionData interface
@@ -348,22 +292,23 @@ export async function POST(request: NextRequest) {
           };
         }
 
-        // Pass board state to coaching context if present
-        if (bmadSession?.board_state) {
-          if (!finalCoachingContext) {
-            finalCoachingContext = {};
-          }
-          finalCoachingContext.boardState = bmadSession.board_state as {
-            activeSpeaker: BoardMemberId;
-            taylorOptedIn: boolean;
-          };
-        }
-
         finalCoachingContext = await WorkspaceContextBuilder.buildCoachingContext(
           workspaceId,
           user.id,
           bmadSessionForUpdate || undefined
         );
+
+        // Apply board state and session mode AFTER buildCoachingContext
+        // (buildCoachingContext rebuilds the object, so these must come after)
+        if (bmadSession?.board_state) {
+          finalCoachingContext.boardState = bmadSession.board_state as {
+            activeSpeaker: BoardMemberId;
+            taylorOptedIn: boolean;
+          };
+        }
+        if (bmadSession?.session_mode) {
+          (finalCoachingContext as any).sessionMode = bmadSession.session_mode;
+        }
 
         // Phase 2: Enrich with dynamic context from database
         if (bmadSessionForUpdate?.id) {
@@ -393,12 +338,18 @@ export async function POST(request: NextRequest) {
       // Include recent messages for user state detection
       finalCoachingContext.recentMessages = managedHistory.slice(-10);
 
-      // Update state (detects user emotional state and may shift mode)
-      updatedSubPersonaState = WorkspaceContextBuilder.updateSubPersonaState(
-        finalCoachingContext,
-        message,
-        managedHistory
-      );
+      // Only auto-shift tone if user hasn't explicitly set it via UI
+      if (finalCoachingContext.subPersonaState.userOverride) {
+        updatedSubPersonaState = finalCoachingContext.subPersonaState;
+        updatedSubPersonaState.exchangeCount = (updatedSubPersonaState.exchangeCount || 0) + 1;
+      } else {
+        // Update state (detects user emotional state and may shift mode)
+        updatedSubPersonaState = WorkspaceContextBuilder.updateSubPersonaState(
+          finalCoachingContext,
+          message,
+          managedHistory
+        );
+      }
 
     }
 
@@ -421,6 +372,9 @@ export async function POST(request: NextRequest) {
               userControlEnabled: updatedSubPersonaState.userControlEnabled,
             } : undefined,
             useTools: !!useTools,
+            // Session mode + ID for client sync
+            sessionMode: finalCoachingContext?.sessionMode || 'assessment',
+            bmadSessionId: bmadSessionForUpdate?.id || sessionId || null,
           }));
 
           let fullContent = '';

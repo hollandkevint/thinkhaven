@@ -57,6 +57,7 @@ export default function NewSessionPage() {
           user_id: user.id,
           workspace_id: workspaceId,
           pathway: pathway.id,
+          title: pathway.title,
           current_phase: pathway.phase,
           current_template: 'general',
           current_step: 'chat',
