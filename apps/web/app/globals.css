@@ -149,12 +149,9 @@
   --chat-assistant-fg: #2C2416;
   --chat-system-bg: #E0BC6A;
 
-  /* Canvas Interface */
-  --canvas-bg: #FAF7F2;
-  --canvas-grid: rgba(44, 36, 22, 0.06);
-  --canvas-selection: #C4785C;
-
-  /* Board of Directors - Per-member accent colors */
+  /* Board of Directors - Per-member accent colors
+     Note: Board members use inline style={{ color: member.color }} from
+     board-members.ts, not these CSS vars. Kept for potential future use. */
   --board-mary: #C4785C;
   --board-victoria: #D4A84B;
   --board-casey: #4A6741;
@@ -252,50 +249,12 @@
 
 /* Component Styles */
 @layer components {
-  /* Buttons */
-  .btn-primary {
-    @apply px-6 py-3 font-medium transition-all;
-    font-family: var(--font-display);
-    background: var(--terracotta);
-    color: var(--cream);
-    border-radius: var(--radius);
-    letter-spacing: 0.02em;
-  }
-
-  .btn-primary:hover {
-    background: var(--terracotta-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-  }
-
-  .btn-secondary {
-    @apply px-6 py-3 font-medium transition-all;
-    font-family: var(--font-display);
-    background: transparent;
-    color: var(--ink);
-    border: 1.5px solid var(--ink);
-    border-radius: var(--radius);
-    letter-spacing: 0.02em;
-  }
-
-  .btn-secondary:hover {
-    background: var(--ink);
-    color: var(--cream);
-  }
-
   /* Cards */
   .card {
     background: var(--parchment);
     border: 1px solid rgba(44, 36, 22, 0.1);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow);
-  }
-
-  .card-elevated {
-    background: var(--cream);
-    border: 1px solid rgba(44, 36, 22, 0.08);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
   }
 
   /* Dual-Pane Layout */
@@ -375,68 +334,6 @@
     border-radius: var(--radius-full);
   }
 
-  .mode-badge-inquisitive {
-    background: rgba(212, 168, 75, 0.15);
-    color: var(--mode-inquisitive);
-  }
-
-  .mode-badge-advocate {
-    background: rgba(139, 77, 59, 0.15);
-    color: var(--mode-advocate);
-  }
-
-  .mode-badge-encouraging {
-    background: rgba(201, 169, 166, 0.25);
-    color: #8A6B68;
-  }
-
-  .mode-badge-realistic {
-    background: rgba(107, 123, 140, 0.15);
-    color: var(--mode-realistic);
-  }
-
-  /* Viability Score */
-  .viability-high {
-    color: var(--forest);
-  }
-
-  .viability-medium {
-    color: var(--mustard);
-  }
-
-  .viability-low {
-    color: var(--rust);
-  }
-
-  /* Canvas Interface */
-  .canvas-container {
-    @apply flex-1 rounded-lg border;
-    background: var(--canvas-bg);
-    border-color: var(--canvas-grid);
-    border-radius: var(--radius-md);
-  }
-
-  /* Strategic Framework Boxes */
-  .strategic-framework {
-    @apply p-6 mb-6;
-    background: var(--parchment);
-    border: 1px solid rgba(44, 36, 22, 0.12);
-    border-radius: var(--radius-md);
-  }
-
-  .insight-highlight {
-    @apply pl-4 py-2 my-4;
-    border-left: 3px solid var(--terracotta);
-    background: rgba(196, 120, 92, 0.05);
-  }
-
-  .action-item {
-    @apply flex items-start gap-3 p-3 rounded-lg transition-colors;
-  }
-
-  .action-item:hover {
-    background: rgba(196, 120, 92, 0.08);
-  }
 
   /* Form Elements */
   .input {
