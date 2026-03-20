@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client'
 import { getBoardMember } from '@/lib/ai/board-members'
 import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
 import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager'
+import type { LeanCanvas } from '@/lib/canvas/lean-canvas-schema'
 
 /**
  * Session data loaded from bmad_sessions.
@@ -21,6 +22,7 @@ export interface SessionData {
   message_limit: number
   sub_persona_state: Record<string, unknown> | null
   session_mode: string | null
+  lean_canvas: LeanCanvas | null
 }
 
 const VALID_ROLES = ['user', 'assistant', 'system'] as const
@@ -281,6 +283,14 @@ export function useStreamingChat(
                 }
                 if (data.additionalData?.boardState) {
                   setBoardState(data.additionalData.boardState as BoardState)
+                }
+                if (data.additionalData?.leanCanvas) {
+                  setSession(prev => {
+                    if (!prev) return prev
+                    const updated = { ...prev, lean_canvas: data.additionalData.leanCanvas as LeanCanvas }
+                    sessionRef.current = updated
+                    return updated
+                  })
                 }
                 await finalizeAssistantMessage(assistantContent, assistantMessageId)
               } else if (data.type === 'error') {

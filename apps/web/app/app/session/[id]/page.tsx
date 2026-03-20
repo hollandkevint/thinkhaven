@@ -21,6 +21,8 @@ import { ErrorState } from '@/app/components/ui/ErrorState'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
+import LeanCanvas from '@/app/components/canvas/LeanCanvas'
+import { isNonEmptyCanvas } from '@/lib/canvas/lean-canvas-schema'
 
 export default function SessionPage() {
   const params = useParams()
@@ -46,12 +48,22 @@ export default function SessionPage() {
   } = useStreamingChat(fetchedSession, user?.id)
   const isOnline = useOnlineStatus()
 
+  const canvasAutoOpenedRef = useRef(false)
+
   // Auto-open board pane when Board of Directors activates
   useEffect(() => {
     if (boardState && !userDismissedBoard) {
       setIsCanvasOpen(true)
     }
   }, [boardState, userDismissedBoard])
+
+  // Auto-open canvas pane when lean canvas has content (fires once)
+  useEffect(() => {
+    if (session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) && !canvasAutoOpenedRef.current) {
+      canvasAutoOpenedRef.current = true
+      setIsCanvasOpen(true)
+    }
+  }, [session?.lean_canvas])
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -64,7 +76,7 @@ export default function SessionPage() {
       setError('')
       const { data, error: fetchError } = await supabase
         .from('bmad_sessions')
-        .select('id, user_id, chat_context, title, pathway, current_phase, message_count, message_limit, sub_persona_state, session_mode, updated_at')
+        .select('id, user_id, chat_context, title, pathway, current_phase, message_count, message_limit, sub_persona_state, session_mode, lean_canvas, updated_at')
         .eq('id', params.id)
         .eq('user_id', user.id)
         .single()
@@ -82,6 +94,7 @@ export default function SessionPage() {
         message_limit: data.message_limit,
         sub_persona_state: data.sub_persona_state as any,
         session_mode: data.session_mode,
+        lean_canvas: (data.lean_canvas as Record<string, string>) || null,
       }
 
       setFetchedSession(sessionData)
@@ -394,17 +407,41 @@ export default function SessionPage() {
         </div>
       </div>
 
-      {/* Right Pane - Board Overview (only when board is active) */}
-      {boardState && (
-        <PaneErrorBoundary paneName="board">
-          <BoardOverview
-            boardState={boardState}
-            onClose={() => {
-              setIsCanvasOpen(false)
-              setUserDismissedBoard(true)
-            }}
-          />
-        </PaneErrorBoundary>
+      {/* Right Pane - Lean Canvas and/or Board Overview */}
+      {isCanvasOpen && (session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) || boardState) && (
+        <div className="w-[380px] flex-shrink-0 border-l border-divider bg-cream overflow-y-auto">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-divider">
+            <span className="font-display text-xs font-semibold uppercase tracking-wider text-ink-light">
+              {boardState ? 'Board & Canvas' : 'Lean Canvas'}
+            </span>
+            <button
+              onClick={() => {
+                setIsCanvasOpen(false)
+                setUserDismissedBoard(true)
+              }}
+              className="text-ink-light hover:text-ink transition-colors"
+              aria-label="Close panel"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          {session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) && (
+            <LeanCanvas canvas={session.lean_canvas} />
+          )}
+          {boardState && (
+            <PaneErrorBoundary paneName="board">
+              <BoardOverview
+                boardState={boardState}
+                onClose={() => {
+                  setIsCanvasOpen(false)
+                  setUserDismissedBoard(true)
+                }}
+              />
+            </PaneErrorBoundary>
+          )}
+        </div>
       )}
     </div>
     </ArtifactProvider>

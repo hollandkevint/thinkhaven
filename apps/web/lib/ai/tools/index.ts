@@ -117,6 +117,18 @@ export interface UpdateContextInput {
   category?: 'market' | 'product' | 'competition' | 'risk' | 'opportunity' | 'general';
 }
 
+export interface UpdateLeanCanvasInput {
+  updates: Record<string, string>;
+}
+
+export interface UpdateLeanCanvasResult extends ToolResult {
+  data?: {
+    updated_boxes: string[];
+    current_canvas: Record<string, string>;
+    empty_boxes: string[];
+  };
+}
+
 // Phase 5: Discovery Tool Types
 export interface DiscoverPathwaysResult extends ToolResult {
   data?: {
@@ -343,6 +355,35 @@ export const MARY_TOOLS: Tool[] = [
     },
   },
   {
+    name: 'update_lean_canvas',
+    description: `Update one or more boxes on the Lean Canvas in a SINGLE call. Batch all updates into one call. Only update boxes where you have NEW evidence from the conversation. Each value should be 1-3 sentences, max 500 characters.
+
+Examples:
+- After discussing the problem: {"updates": {"problem": "SMBs waste 10+ hrs/week on manual invoicing", "customer_segments": "Small business owners with 1-10 employees"}}
+- After discussing the solution: {"updates": {"solution": "AI-powered invoice generation from email threads", "unique_value_proposition": "Zero data entry invoicing"}}`,
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        updates: {
+          type: 'object',
+          description: 'Key-value pairs where key is the canvas box name and value is the content',
+          properties: {
+            problem: { type: 'string', description: 'Top 1-3 problems the business solves' },
+            customer_segments: { type: 'string', description: 'Target customers who feel the problem most acutely' },
+            unique_value_proposition: { type: 'string', description: 'Single clear message that states why you are different and worth buying' },
+            solution: { type: 'string', description: 'Top 3 features or capabilities' },
+            channels: { type: 'string', description: 'Path to customers (inbound, outbound, viral, etc.)' },
+            revenue_streams: { type: 'string', description: 'Revenue model and pricing' },
+            cost_structure: { type: 'string', description: 'Customer acquisition costs, distribution costs, hosting, people' },
+            key_metrics: { type: 'string', description: 'Key activities you measure (acquisition, activation, retention, revenue, referral)' },
+            unfair_advantage: { type: 'string', description: 'Something that cannot be easily copied or bought' },
+          },
+        },
+      },
+      required: ['updates'],
+    },
+  },
+  {
     name: 'update_session_context',
     description: 'Record an important insight or decision from the conversation. Use this to build up context that will inform future interactions and document generation.',
     input_schema: {
@@ -379,6 +420,7 @@ export const TOOL_NAMES = {
   SWITCH_SPEAKER: 'switch_speaker',
   RECOMMEND_ACTION: 'recommend_action',
   GENERATE_DOCUMENT: 'generate_document',
+  UPDATE_LEAN_CANVAS: 'update_lean_canvas',
   UPDATE_SESSION_CONTEXT: 'update_session_context',
 } as const;
 
