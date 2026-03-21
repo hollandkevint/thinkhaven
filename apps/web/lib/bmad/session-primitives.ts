@@ -268,6 +268,7 @@ export const PHASE_ORDER: Record<string, string[]> = {
   'new-idea': ['discovery', 'ideation', 'validation', 'planning'],
   'business-model': ['analysis', 'revenue', 'customer', 'validation', 'planning'],
   'strategic-optimization': ['assessment', 'analysis', 'strategy', 'implementation'],
+  'explore': ['discovery'],
 };
 
 /**

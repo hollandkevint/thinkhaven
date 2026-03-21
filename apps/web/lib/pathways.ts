@@ -71,6 +71,19 @@ export const PATHWAYS: PathwayDefinition[] = [
     messageLimit: 20,
     activatesBoard: false,
   },
+  {
+    id: 'explore',
+    title: 'Explore',
+    description:
+      'Open-ended exploration. Share your idea and Mary will challenge it through structured loops.',
+    duration: '10\u201320 min',
+    icon: 'Compass',
+    bgColor: 'bg-cream',
+    accentColor: 'text-terracotta',
+    phase: 'discovery',
+    messageLimit: 20,
+    activatesBoard: false,
+  },
 ];
 
 export function getPathway(id: string): PathwayDefinition | undefined {

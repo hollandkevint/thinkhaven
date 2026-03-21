@@ -12,6 +12,7 @@ import {
   type MessageLimitStatus,
 } from '@/lib/bmad/message-limit-manager';
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
+import { TOOL_NAMES } from '@/lib/ai/tools/index';
 import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
 import type { BoardMemberId } from '@/lib/ai/board-types';
 
@@ -271,8 +272,8 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // Build or use provided coaching context
-    let finalCoachingContext: CoachingContext | undefined = coachingContext;
+    // Always rebuild coaching context server-side (never trust client-supplied context)
+    let finalCoachingContext: CoachingContext | undefined = undefined;
     let bmadSessionForUpdate: BmadSessionData | null = null;
 
     if (!finalCoachingContext) {
@@ -293,7 +294,7 @@ export async function POST(request: NextRequest) {
         }
 
         finalCoachingContext = await WorkspaceContextBuilder.buildCoachingContext(
-          workspaceId,
+          user.id,
           user.id,
           bmadSessionForUpdate || undefined
         );
@@ -484,7 +485,8 @@ export async function POST(request: NextRequest) {
               const { error: updateError } = await supabase
                 .from('bmad_sessions')
                 .update({ sub_persona_state: updatedSubPersonaState })
-                .eq('id', bmadSessionForUpdate.id);
+                .eq('id', bmadSessionForUpdate.id)
+                .eq('user_id', user.id);
 
               if (updateError) {
                 console.error('[Chat Stream] Failed to persist sub-persona state:', updateError);
@@ -494,11 +496,35 @@ export async function POST(request: NextRequest) {
             }
           }
 
+          // Build additionalData for complete event
+          const additionalData: Record<string, unknown> = {};
+          if (toolsExecuted.length > 0) {
+            additionalData.toolsExecuted = toolsExecuted;
+            additionalData.agenticRounds = agenticRounds;
+          }
+
+          // Attach lean canvas state if update_lean_canvas tool ran
+          if (toolsExecuted.some(t => t.name === TOOL_NAMES.UPDATE_LEAN_CANVAS && t.success)) {
+            try {
+              const { data: canvasRow } = await supabase
+                .from('bmad_sessions')
+                .select('lean_canvas')
+                .eq('id', sessionId)
+                .eq('user_id', user.id)
+                .single();
+              if (canvasRow?.lean_canvas) {
+                additionalData.leanCanvas = canvasRow.lean_canvas;
+              }
+            } catch (canvasErr) {
+              console.warn('[Chat Stream] Failed to fetch canvas state:', canvasErr);
+            }
+          }
+
           // Send completion signal with usage data, limit status, and tool info
           controller.enqueue(encoder.encodeComplete(
             undefined, // Usage tracking happens inside agentic loop
             limitStatus,
-            toolsExecuted.length > 0 ? { toolsExecuted, agenticRounds } : undefined
+            Object.keys(additionalData).length > 0 ? additionalData : undefined
           ));
           controller.enqueue(encoder.encodeDone());
           controller.close();

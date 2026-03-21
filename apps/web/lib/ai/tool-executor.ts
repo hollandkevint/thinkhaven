@@ -14,6 +14,7 @@ import {
   type RecommendActionInput,
   type GenerateDocumentInput,
   type UpdateContextInput,
+  type UpdateLeanCanvasInput,
   type DiscoverPhaseActionsInput,
   type DiscoverDocumentTypesInput,
 } from './tools/index';
@@ -28,6 +29,7 @@ import {
 } from './tools/session-tools';
 
 import { generateDocument } from './tools/document-tools';
+import { updateLeanCanvas } from './tools/lean-canvas-tool';
 
 import {
   discoverPathways,
@@ -139,6 +141,13 @@ export class ToolExecutor {
             this.context.sessionId,
             this.context.userId,
             toolCall.input as GenerateDocumentInput
+          );
+          break;
+
+        case TOOL_NAMES.UPDATE_LEAN_CANVAS:
+          result = await updateLeanCanvas(
+            this.context.sessionId,
+            toolCall.input as UpdateLeanCanvasInput
           );
           break;
 

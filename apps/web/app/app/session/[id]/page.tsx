@@ -21,6 +21,8 @@ import { ErrorState } from '@/app/components/ui/ErrorState'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
+import LeanCanvas from '@/app/components/canvas/LeanCanvas'
+import { isNonEmptyCanvas, type LeanCanvas as LeanCanvasType } from '@/lib/canvas/lean-canvas-schema'
 
 export default function SessionPage() {
   const params = useParams()
@@ -46,12 +48,22 @@ export default function SessionPage() {
   } = useStreamingChat(fetchedSession, user?.id)
   const isOnline = useOnlineStatus()
 
+  const canvasAutoOpenedRef = useRef(false)
+
   // Auto-open board pane when Board of Directors activates
   useEffect(() => {
     if (boardState && !userDismissedBoard) {
       setIsCanvasOpen(true)
     }
   }, [boardState, userDismissedBoard])
+
+  // Auto-open canvas pane when lean canvas has content (fires once)
+  useEffect(() => {
+    if (session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) && !canvasAutoOpenedRef.current) {
+      canvasAutoOpenedRef.current = true
+      setIsCanvasOpen(true)
+    }
+  }, [session?.lean_canvas])
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -64,7 +76,7 @@ export default function SessionPage() {
       setError('')
       const { data, error: fetchError } = await supabase
         .from('bmad_sessions')
-        .select('id, user_id, chat_context, title, pathway, current_phase, message_count, message_limit, sub_persona_state, session_mode, updated_at')
+        .select('id, user_id, chat_context, title, pathway, current_phase, message_count, message_limit, sub_persona_state, session_mode, lean_canvas, updated_at')
         .eq('id', params.id)
         .eq('user_id', user.id)
         .single()
@@ -82,6 +94,7 @@ export default function SessionPage() {
         message_limit: data.message_limit,
         sub_persona_state: data.sub_persona_state as any,
         session_mode: data.session_mode,
+        lean_canvas: (data.lean_canvas as LeanCanvasType) || null,
       }
 
       setFetchedSession(sessionData)
@@ -230,39 +243,15 @@ export default function SessionPage() {
             <div className="max-w-4xl mx-auto space-y-6">
               {session.chat_context.length === 0 && (
                 <div className="bg-parchment p-6 rounded-lg border border-ink/8 mb-4">
-                  <div className="flex items-start gap-3 mb-4">
+                  <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-cream font-semibold font-display">M</span>
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-ink text-lg mb-2 font-display">Welcome to your Strategic Session!</p>
-                      <p className="text-ink-light mb-4">
-                        I&apos;m Mary, your AI strategic advisor. I&apos;m here to help you think through ideas, validate concepts,
-                        and develop actionable plans.
+                      <p className="font-semibold text-ink text-lg mb-2 font-display">Hey, I&apos;m Mary.</p>
+                      <p className="text-ink-light">
+                        What idea or decision are you working on? I&apos;ll help you pressure-test it.
                       </p>
-                      <p className="font-medium text-ink mb-3">Try asking me about:</p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {[
-                          { emoji: '💡', text: 'Validate a new product idea', prompt: 'I have a new product idea I want to validate' },
-                          { emoji: '📊', text: 'Analyze competitive landscape', prompt: 'I need help analyzing my competitive landscape' },
-                          { emoji: '🎯', text: 'Refine business model', prompt: "I'm stuck on my business model and need guidance" },
-                          { emoji: '⚡', text: 'Prioritize features', prompt: 'Help me prioritize my product features' },
-                        ].map((item) => (
-                          <button
-                            key={item.prompt}
-                            onClick={() => {
-                              setMessageInput(item.prompt)
-                              setTimeout(() => {
-                                textareaRef.current?.focus()
-                                textareaRef.current?.select()
-                              }, 100)
-                            }}
-                            className="text-left px-4 py-3 bg-cream hover:bg-parchment border border-ink/8 rounded-lg text-sm text-ink-light hover:text-ink transition-colors"
-                          >
-                            {item.emoji} {item.text}
-                          </button>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -418,17 +407,41 @@ export default function SessionPage() {
         </div>
       </div>
 
-      {/* Right Pane - Board Overview (only when board is active) */}
-      {boardState && (
-        <PaneErrorBoundary paneName="board">
-          <BoardOverview
-            boardState={boardState}
-            onClose={() => {
-              setIsCanvasOpen(false)
-              setUserDismissedBoard(true)
-            }}
-          />
-        </PaneErrorBoundary>
+      {/* Right Pane - Lean Canvas and/or Board Overview */}
+      {isCanvasOpen && (session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) || boardState) && (
+        <div className="w-[380px] flex-shrink-0 border-l border-divider bg-cream overflow-y-auto">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-divider">
+            <span className="font-display text-xs font-semibold uppercase tracking-wider text-ink-light">
+              {boardState ? 'Board & Canvas' : 'Lean Canvas'}
+            </span>
+            <button
+              onClick={() => {
+                setIsCanvasOpen(false)
+                setUserDismissedBoard(true)
+              }}
+              className="text-ink-light hover:text-ink transition-colors"
+              aria-label="Close panel"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          {session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) && (
+            <LeanCanvas canvas={session.lean_canvas} />
+          )}
+          {boardState && (
+            <PaneErrorBoundary paneName="board">
+              <BoardOverview
+                boardState={boardState}
+                onClose={() => {
+                  setIsCanvasOpen(false)
+                  setUserDismissedBoard(true)
+                }}
+              />
+            </PaneErrorBoundary>
+          )}
+        </div>
       )}
     </div>
     </ArtifactProvider>

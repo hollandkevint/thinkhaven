@@ -58,6 +58,12 @@ export const PATHWAY_WEIGHTS: Record<string, PathwayWeights> = {
     encouraging: 20,
     realistic: 30,
   },
+  'explore': {
+    inquisitive: 40,
+    devil_advocate: 20,
+    encouraging: 25,
+    realistic: 15,
+  },
 };
 
 /**
@@ -216,6 +222,11 @@ export const VALUE_ARTICULATION_PROMPTS = {
       'Where are users getting stuck that they shouldn\'t be?',
       'What value are you leaving on the table?',
     ],
+    'explore': [
+      'What is the fundamental problem this solves?',
+      'Who feels this pain most acutely, and how do you know?',
+      'What would have to be true for this to be a great business?',
+    ],
   },
 } as const;
 
@@ -373,6 +384,11 @@ export class MaryPersona {
       sections.push(this.generateAntiSycophancySection());
     }
 
+    // Add challenge loop for 'explore' pathway
+    if (context?.currentBmadSession?.pathway === 'explore' && context?.subPersonaState) {
+      sections.push(this.generateChallengeLoopSection(context.subPersonaState.exchangeCount));
+    }
+
     // Add Board of Directors prompt when board mode is active
     if (context?.boardState) {
       sections.push(generateBoardSystemPrompt(context.boardState));
@@ -414,6 +430,47 @@ You are NOT a yes-person. Your value comes from genuine strategic thinking, not 
 - Earn trust through candor, not flattery
 
 Remember: Users chose ThinkHaven BECAUSE they want genuine feedback. Sycophancy is a betrayal of that trust.`;
+  }
+
+  /** Challenge loop phase boundaries */
+  private static readonly CHALLENGE_PHASE = {
+    ELICIT: 0,
+    CHALLENGE: 1,
+    SYNTHESIZE: 2,
+    DEEP_EXPLORATION_START: 3,
+  } as const;
+
+  /**
+   * Generate phase-specific challenge loop instructions based on exchange count.
+   * Only current phase instructions are injected (not all phases at once).
+   */
+  private generateChallengeLoopSection(exchangeCount: number): string {
+    const { ELICIT, CHALLENGE, SYNTHESIZE } = MaryPersona.CHALLENGE_PHASE;
+
+    if (exchangeCount === ELICIT) {
+      return `CHALLENGE LOOP — CURRENT PHASE: ELICIT
+Use First Principles Thinking. Ask exactly ONE question about the fundamental problem this solves and who feels the pain most acutely.
+Do NOT ask multiple questions. Do NOT call any tools yet.
+Keep your response to 2-3 sentences plus one question.`;
+    }
+    if (exchangeCount === CHALLENGE) {
+      return `CHALLENGE LOOP — CURRENT PHASE: CHALLENGE
+Use Assumption Reversal. Identify the user's riskiest assumption and challenge it directly.
+Ask exactly ONE follow-up question after your challenge.
+Keep your response focused — no more than 3-4 sentences plus one question.`;
+    }
+    if (exchangeCount === SYNTHESIZE) {
+      return `CHALLENGE LOOP — CURRENT PHASE: SYNTHESIZE
+Summarize what you've heard in 2-3 sentences.
+Then suggest bringing in the Board of Directors for investor, co-founder, and operator perspectives.
+Say something like: "Want me to bring in the Board of Directors? They'll pressure-test this from investor, operator, and co-founder angles."`;
+    }
+    // exchangeCount >= 3: deep exploration
+    return `CHALLENGE LOOP — CURRENT PHASE: DEEP EXPLORATION
+Continue challenging and refining the user's thinking. Ask ONE question per turn.
+Use Provocation Technique on the weakest area of their thinking.
+If the user accepted the Board of Directors, use switch_speaker to activate Victoria (investor perspective).
+If they declined, continue solo. Re-suggest the board around message 15 if the conversation has gone deep enough.`;
   }
 
   private adaptPersonaToContext(context?: CoachingContext): CoachingPersonaConfig {
@@ -1117,6 +1174,7 @@ IMPORTANT: These questions should emerge naturally from the conversation. Don't 
       'business-model-problem': PathwayType.BUSINESS_MODEL_PROBLEM,
       'feature-refinement': PathwayType.FEATURE_REFINEMENT,
       'strategic-optimization': PathwayType.STRATEGIC_OPTIMIZATION,
+      'explore': PathwayType.EXPLORE,
     };
 
     const pathwayType = pathwayTypeMap[pathway];
