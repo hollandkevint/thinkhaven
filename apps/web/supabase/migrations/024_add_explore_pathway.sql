@@ -2,16 +2,14 @@
 -- Rollback: DROP FUNCTION merge_lean_canvas; ALTER TABLE bmad_sessions DROP COLUMN lean_canvas;
 --   then restore old CHECK constraint from migration 020.
 
--- 1. Atomic constraint update
-BEGIN;
-  ALTER TABLE bmad_sessions DROP CONSTRAINT IF EXISTS bmad_sessions_pathway_check;
-  ALTER TABLE bmad_sessions ADD CONSTRAINT bmad_sessions_pathway_check
-    CHECK (pathway IN (
-      'new-idea', 'business-model', 'strategic-optimization',
-      'quick-decision', 'deep-analysis', 'board-of-directors', 'strategy-sprint',
-      'explore'
-    ));
-COMMIT;
+-- 1. Update constraint (migration runner wraps in transaction)
+ALTER TABLE bmad_sessions DROP CONSTRAINT IF EXISTS bmad_sessions_pathway_check;
+ALTER TABLE bmad_sessions ADD CONSTRAINT bmad_sessions_pathway_check
+  CHECK (pathway IN (
+    'new-idea', 'business-model', 'strategic-optimization',
+    'quick-decision', 'deep-analysis', 'board-of-directors', 'strategy-sprint',
+    'explore'
+  ));
 
 -- 2. Add lean_canvas JSONB column
 ALTER TABLE bmad_sessions

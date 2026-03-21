@@ -29,16 +29,3 @@ export function isNonEmptyCanvas(canvas: LeanCanvas | null | undefined): canvas 
   return Object.values(canvas).some(v => typeof v === 'string' && v.trim().length > 0);
 }
 
-export function getFilledBoxes(canvas: LeanCanvas): LeanCanvasField[] {
-  return LEAN_CANVAS_FIELDS.filter(f => {
-    const val = canvas[f];
-    return val != null && val.trim().length > 0;
-  });
-}
-
-export function getEmptyBoxes(canvas: LeanCanvas): LeanCanvasField[] {
-  return LEAN_CANVAS_FIELDS.filter(f => {
-    const val = canvas[f];
-    return val == null || val.trim().length === 0;
-  });
-}

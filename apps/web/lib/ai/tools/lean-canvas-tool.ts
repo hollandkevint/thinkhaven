@@ -25,7 +25,7 @@ function validateLeanCanvasUpdates(raw: Record<string, unknown>): Partial<LeanCa
   const validated: Partial<LeanCanvas> = {};
   for (const key of LEAN_CANVAS_FIELDS) {
     if (key in raw && typeof raw[key] === 'string') {
-      validated[key] = (raw[key] as string).slice(0, 500);
+      validated[key] = [...(raw[key] as string)].slice(0, 500).join('');
     }
   }
   return validated;

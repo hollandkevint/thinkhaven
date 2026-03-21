@@ -7,21 +7,16 @@ interface LeanCanvasProps {
   canvas: LeanCanvasType;
 }
 
-const CANVAS_LAYOUT: Array<{
-  field: LeanCanvasField;
-  label: string;
-  row: number;
-  col: number;
-}> = [
-  { field: 'problem', label: 'Problem', row: 1, col: 1 },
-  { field: 'unique_value_proposition', label: 'Unique Value Prop', row: 1, col: 2 },
-  { field: 'customer_segments', label: 'Customer Segments', row: 1, col: 3 },
-  { field: 'solution', label: 'Solution', row: 2, col: 1 },
-  { field: 'unfair_advantage', label: 'Unfair Advantage', row: 2, col: 2 },
-  { field: 'channels', label: 'Channels', row: 2, col: 3 },
-  { field: 'cost_structure', label: 'Cost Structure', row: 3, col: 1 },
-  { field: 'key_metrics', label: 'Key Metrics', row: 3, col: 2 },
-  { field: 'revenue_streams', label: 'Revenue Streams', row: 3, col: 3 },
+const CANVAS_LAYOUT: Array<{ field: LeanCanvasField; label: string }> = [
+  { field: 'problem', label: 'Problem' },
+  { field: 'unique_value_proposition', label: 'Unique Value Prop' },
+  { field: 'customer_segments', label: 'Customer Segments' },
+  { field: 'solution', label: 'Solution' },
+  { field: 'unfair_advantage', label: 'Unfair Advantage' },
+  { field: 'channels', label: 'Channels' },
+  { field: 'cost_structure', label: 'Cost Structure' },
+  { field: 'key_metrics', label: 'Key Metrics' },
+  { field: 'revenue_streams', label: 'Revenue Streams' },
 ];
 
 function CanvasBox({ label, content }: { label: string; content?: string }) {

@@ -22,7 +22,7 @@ import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
-import { isNonEmptyCanvas } from '@/lib/canvas/lean-canvas-schema'
+import { isNonEmptyCanvas, type LeanCanvas as LeanCanvasType } from '@/lib/canvas/lean-canvas-schema'
 
 export default function SessionPage() {
   const params = useParams()
@@ -94,7 +94,7 @@ export default function SessionPage() {
         message_limit: data.message_limit,
         sub_persona_state: data.sub_persona_state as any,
         session_mode: data.session_mode,
-        lean_canvas: (data.lean_canvas as Record<string, string>) || null,
+        lean_canvas: (data.lean_canvas as LeanCanvasType) || null,
       }
 
       setFetchedSession(sessionData)

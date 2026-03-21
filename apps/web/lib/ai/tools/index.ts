@@ -117,17 +117,9 @@ export interface UpdateContextInput {
   category?: 'market' | 'product' | 'competition' | 'risk' | 'opportunity' | 'general';
 }
 
-export interface UpdateLeanCanvasInput {
-  updates: Record<string, string>;
-}
-
-export interface UpdateLeanCanvasResult extends ToolResult {
-  data?: {
-    updated_boxes: string[];
-    current_canvas: Record<string, string>;
-    empty_boxes: string[];
-  };
-}
+// UpdateLeanCanvasInput and UpdateLeanCanvasResult are defined in
+// ./lean-canvas-tool.ts and re-exported here for tool-executor imports.
+export type { UpdateLeanCanvasInput, UpdateLeanCanvasResult } from './lean-canvas-tool';
 
 // Phase 5: Discovery Tool Types
 export interface DiscoverPathwaysResult extends ToolResult {
@@ -367,6 +359,7 @@ Examples:
         updates: {
           type: 'object',
           description: 'Key-value pairs where key is the canvas box name and value is the content',
+          additionalProperties: false,
           properties: {
             problem: { type: 'string', description: 'Top 1-3 problems the business solves' },
             customer_segments: { type: 'string', description: 'Target customers who feel the problem most acutely' },
