@@ -20,9 +20,8 @@ SET chat_context = COALESCE(
   '[]'::jsonb
 )
 FROM latest_sessions ls
-JOIN user_workspace uw ON uw.user_id = bs.user_id
-WHERE bs.id = ls.id
-  AND bs.user_id = ls.user_id;
+JOIN user_workspace uw ON uw.user_id = ls.user_id
+WHERE bs.id = ls.id;
 
 -- 2. Set titles using exact pathway names (INITCAP produces "Board Of Directors")
 UPDATE bmad_sessions
