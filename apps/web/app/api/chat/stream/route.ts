@@ -171,7 +171,7 @@ async function executeAgenticLoop(
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, sessionId, conversationHistory, coachingContext, useTools } = await request.json();
+    const { message, sessionId, conversationHistory, useTools } = await request.json();
 
     if (!message || !sessionId) {
       return new Response(JSON.stringify({ error: 'Missing required fields (message, sessionId)' }), {
@@ -563,8 +563,8 @@ export async function POST(request: NextRequest) {
     });
     return new Response(JSON.stringify({
       error: 'Internal Server Error',
-      details: error instanceof Error ? error.message : 'Unknown error',
-      hint: 'Check server logs for more details. Try refreshing the page.'
+      details: process.env.NODE_ENV !== 'production' ? (error instanceof Error ? error.message : 'Unknown error') : undefined,
+      hint: 'Please try again. If the issue persists, refresh the page.'
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
