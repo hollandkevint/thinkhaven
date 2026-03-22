@@ -11,15 +11,62 @@ import { maryPersona, SubPersonaSessionState, CoachingContext } from '@/lib/ai/m
  * - No database persistence
  * - Limited conversation history (client manages via localStorage)
  * - Basic Mary persona without workspace context
+ * - IP-based rate limit: 15 requests per hour per IP
  */
+
+// Simple in-memory rate limiter for guest endpoint
+// Note: resets on serverless cold start, but still limits burst abuse
+const GUEST_RATE_LIMIT = 15; // messages per window
+const GUEST_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const guestRateLimits = new Map<string, { count: number; resetAt: number }>();
+
+function checkGuestRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = guestRateLimits.get(ip);
+
+  if (!entry || now >= entry.resetAt) {
+    guestRateLimits.set(ip, { count: 1, resetAt: now + GUEST_RATE_WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= GUEST_RATE_LIMIT) {
+    return false;
+  }
+
+  entry.count++;
+  return true;
+}
+
+// Periodic cleanup to prevent memory growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of guestRateLimits) {
+    if (now >= entry.resetAt) guestRateLimits.delete(ip);
+  }
+}, 5 * 60 * 1000); // Every 5 minutes
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit by IP
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
+
+    if (!checkGuestRateLimit(ip)) {
+      return new Response(JSON.stringify({
+        error: 'Rate limit exceeded',
+        message: 'Too many guest messages. Sign up for unlimited access.',
+      }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const { message, conversationHistory, subPersonaState: clientSubPersonaState } = await request.json();
 
     // Validate request
-    if (!message) {
-      return new Response(JSON.stringify({ error: 'Message is required' }), {
+    if (!message || typeof message !== 'string' || message.length > 4000) {
+      return new Response(JSON.stringify({ error: 'Invalid message' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -160,7 +207,7 @@ export async function POST(request: NextRequest) {
 
     return new Response(JSON.stringify({
       error: 'Internal Server Error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: process.env.NODE_ENV !== 'production' ? (error instanceof Error ? error.message : 'Unknown error') : undefined,
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

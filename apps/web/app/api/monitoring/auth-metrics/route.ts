@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { authMetricsCollector } from '@/lib/monitoring/auth-metrics'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { isAdminEmail } from '@/lib/auth/admin'
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,6 +31,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
+      )
+    }
+
+    if (!isAdminEmail(user.email)) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
       )
     }
 
