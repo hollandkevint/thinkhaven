@@ -27,7 +27,7 @@ function PostHogPageView() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (pathname && posthog.__loaded) {
+    if (pathname && posthog.config?.token) {
       let url = window.origin + pathname
       const params = searchParams.toString()
       if (params) {

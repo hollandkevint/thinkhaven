@@ -7,7 +7,7 @@ type TrackedEvent =
 
 export function track(input: TrackedEvent): void {
   if (typeof window === 'undefined') return
-  if (!posthog.__loaded) return
 
+  // posthog.capture() no-ops before init, so the guard is just for clarity
   posthog.capture(input.event, input.properties)
 }

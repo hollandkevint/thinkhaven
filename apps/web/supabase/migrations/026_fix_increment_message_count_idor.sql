@@ -2,7 +2,9 @@
 -- The function previously accepted only session_id with no ownership check.
 -- Any authenticated user could increment another user's message count.
 
-CREATE OR REPLACE FUNCTION increment_message_count(p_session_id TEXT, p_user_id UUID DEFAULT auth.uid())
+-- Uses auth.uid() directly, not a caller-supplied parameter,
+-- since SECURITY DEFINER bypasses RLS.
+CREATE OR REPLACE FUNCTION increment_message_count(p_session_id TEXT)
 RETURNS TABLE(
   new_count INTEGER,
   limit_reached BOOLEAN,
@@ -24,7 +26,7 @@ BEGIN
       ELSE limit_reached_at
     END
   WHERE id = p_session_id
-    AND user_id = p_user_id
+    AND user_id = auth.uid()
   RETURNING message_count, bmad_sessions.message_limit, (message_count >= bmad_sessions.message_limit)
   INTO v_count, v_limit, v_reached;
 

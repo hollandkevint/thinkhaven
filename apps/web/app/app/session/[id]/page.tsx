@@ -239,7 +239,7 @@ export default function SessionPage() {
 
         {/* Chat Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-8">
+          <div className="flex-1 overflow-y-auto p-8" data-ph-mask>
             <div className="max-w-4xl mx-auto space-y-6">
               {session.chat_context.length === 0 && (
                 <div className="bg-parchment p-6 rounded-lg border border-ink/8 mb-4">

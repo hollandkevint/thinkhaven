@@ -77,16 +77,14 @@ function LoginPageContent() {
     setResetLoading(true)
     setError('')
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback`,
       })
-      if (resetError) {
-        setError(resetError.message)
-      } else {
-        setResetSent(true)
-      }
+      // Always show success to prevent email enumeration
+      setResetSent(true)
     } catch {
-      setError('Failed to send reset email. Try again.')
+      // Still show success to prevent enumeration
+      setResetSent(true)
     } finally {
       setResetLoading(false)
     }

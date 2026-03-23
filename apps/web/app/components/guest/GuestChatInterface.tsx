@@ -8,6 +8,7 @@ import MessageInput from '../chat/MessageInput'
 import TypingIndicator from '../chat/TypingIndicator'
 import ChatErrorDisplay from '../chat/ChatErrorDisplay'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { track } from '@/lib/analytics/events'
 
 interface Message {
@@ -377,9 +378,9 @@ export default function GuestChatInterface() {
                 Sign up to continue
               </button>
             </p>
-            <a href="/login" className="text-sm text-slate-blue hover:text-ink">
+            <Link href="/login" className="text-sm text-slate-blue hover:text-ink">
               Already have an account?
-            </a>
+            </Link>
           </div>
         </div>
       )}

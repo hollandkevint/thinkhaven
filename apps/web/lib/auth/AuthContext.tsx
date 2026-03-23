@@ -42,12 +42,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null)
       setLoading(false)
       
-      // PostHog identity management
-      if (event === 'SIGNED_IN' && session?.user && posthog.__loaded) {
+      // PostHog identity management (capture/identify no-op before init)
+      if (event === 'SIGNED_IN' && session?.user) {
         posthog.identify(session.user.id, {
           auth_provider: session.user.app_metadata?.provider || 'email',
         })
-      } else if (event === 'SIGNED_OUT' && posthog.__loaded) {
+      } else if (event === 'SIGNED_OUT') {
         posthog.reset()
       }
 
