@@ -1,9 +1,12 @@
 ---
 title: ThinkHaven Feature Spec — March 2026
 created: 2026-03-14
-status: draft
+status: partially-superseded
+superseded_by: docs/plans/2026-03-22-feat-multi-sprint-product-roadmap-plan.md
 tags: [thinkhaven, product-spec, features]
 ---
+
+> **PARTIALLY SUPERSEDED 2026-03-22.** Mode Indicator shipped in session UX overhaul (PR #14). Trial Gate and Executive Tier deferred to post-Sprint 3 in the multi-sprint roadmap.
 
 # ThinkHaven Feature Spec — March 2026
 

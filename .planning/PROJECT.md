@@ -1,5 +1,7 @@
 # ThinkHaven Beta Launch
 
+> **ARCHIVED 2026-03-22.** Beta launch goal achieved: auth works, access gating works, error/loading states exist. Active roadmap is `docs/plans/2026-03-22-feat-multi-sprint-product-roadmap-plan.md` (focus: conversion funnel, session quality, monetization).
+
 ## What This Is
 
 Beta-ready version of ThinkHaven for 100 users to gather feedback on whether Mary (AI business analyst) actually helps, willingness to pay, and what's missing. Focus is stability and controlled access, not new features.
