@@ -1,8 +1,30 @@
 'use client'
 
 import ReactMarkdown from 'react-markdown'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { tomorrow } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript'
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript'
+import python from 'react-syntax-highlighter/dist/esm/languages/prism/python'
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash'
+import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
+import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql'
+import css from 'react-syntax-highlighter/dist/esm/languages/prism/css'
+import markdown from 'react-syntax-highlighter/dist/esm/languages/prism/markdown'
+
+// Register only the languages ThinkHaven users will encounter
+SyntaxHighlighter.registerLanguage('javascript', javascript)
+SyntaxHighlighter.registerLanguage('js', javascript)
+SyntaxHighlighter.registerLanguage('typescript', typescript)
+SyntaxHighlighter.registerLanguage('ts', typescript)
+SyntaxHighlighter.registerLanguage('python', python)
+SyntaxHighlighter.registerLanguage('bash', bash)
+SyntaxHighlighter.registerLanguage('shell', bash)
+SyntaxHighlighter.registerLanguage('json', json)
+SyntaxHighlighter.registerLanguage('sql', sql)
+SyntaxHighlighter.registerLanguage('css', css)
+SyntaxHighlighter.registerLanguage('markdown', markdown)
+SyntaxHighlighter.registerLanguage('md', markdown)
 
 interface MarkdownRendererProps {
   content: string
@@ -17,7 +39,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
         code: ({ node, inline, className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || '')
           const language = match ? match[1] : 'text'
-          
+
           return !inline ? (
             <div className="relative group">
               {/* Copy button */}
@@ -32,14 +54,14 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </button>
-              
+
               {/* Language label */}
               {language !== 'text' && (
                 <div className="absolute top-2 left-2 bg-ink/80 text-cream px-2 py-1 rounded text-xs font-mono">
                   {language}
                 </div>
               )}
-              
+
               <SyntaxHighlighter
                 style={tomorrow}
                 language={language}
@@ -181,11 +203,10 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
         hr: ({ ...props }) => (
           <hr className="my-6 border-t border-divider" {...props} />
         ),
-        // Custom components for strategic content
         img: ({ src, alt, ...props }) => (
           <div className="my-4">
-            <img 
-              src={src} 
+            <img
+              src={src}
               alt={alt}
               className="rounded-lg border border-divider shadow-sm max-w-full h-auto"
               {...props}

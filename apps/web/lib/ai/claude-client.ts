@@ -3,6 +3,9 @@ import type { Tool, ContentBlock, ToolUseBlock, TextBlock } from '@anthropic-ai/
 import { maryPersona, type CoachingContext } from './mary-persona';
 import { MARY_TOOLS } from './tools/index';
 
+const DEFAULT_MODEL = 'claude-sonnet-4-20250514';
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+
 // Initialize Anthropic client (lazy initialization to avoid build-time errors)
 let anthropic: Anthropic | null = null;
 
@@ -110,12 +113,12 @@ export class ClaudeClient {
       const client = getAnthropicClient();
 
       console.log('[Claude Client] Calling Anthropic API...', {
-        model: 'claude-sonnet-4-20250514',
+        model: ANTHROPIC_MODEL,
         messageCount: messages.length
       });
 
       const stream = await client.messages.create({
-        model: 'claude-sonnet-4-20250514', // Claude Sonnet 4 - upgraded per API docs
+        model: ANTHROPIC_MODEL, // Claude Sonnet 4 - upgraded per API docs
         max_tokens: 4096,
         temperature: 0.7,
         system: maryPersona.generateSystemPrompt(coachingContext),
@@ -179,7 +182,7 @@ export class ClaudeClient {
                 cost_estimate_usd: 0
               };
               usage.total_tokens = usage.input_tokens + usage.output_tokens;
-              // Rough cost estimate for Claude 3.5 Sonnet (input: $3/1M tokens, output: $15/1M tokens)
+              // Rough cost estimate for Sonnet (input: $3/1M, output: $15/1M). Adjust if using Haiku via ANTHROPIC_MODEL.
               usage.cost_estimate_usd = (usage.input_tokens * 0.000003) + (usage.output_tokens * 0.000015);
             }
           }
@@ -220,7 +223,7 @@ export class ClaudeClient {
     try {
       const client = getAnthropicClient();
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514', // Claude Sonnet 4 - upgraded per API docs
+        model: ANTHROPIC_MODEL, // Claude Sonnet 4 - upgraded per API docs
         max_tokens: 10,
         messages: [{ role: 'user', content: 'test' }],
       });
@@ -267,7 +270,7 @@ export class ClaudeClient {
       const tools = options?.tools || MARY_TOOLS;
 
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: ANTHROPIC_MODEL,
         max_tokens: options?.maxTokens || 4096,
         temperature: 0.7,
         system: maryPersona.generateSystemPrompt(coachingContext),
@@ -359,7 +362,7 @@ export class ClaudeClient {
       ];
 
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: ANTHROPIC_MODEL,
         max_tokens: options?.maxTokens || 4096,
         temperature: 0.7,
         system: maryPersona.generateSystemPrompt(coachingContext),

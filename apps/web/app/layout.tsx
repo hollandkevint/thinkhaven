@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Jost, Libre_Baskerville, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from '../lib/auth/AuthContext';
-import { WorkspaceProvider } from '../lib/workspace/WorkspaceContext';
 import Navigation from './components/ui/navigation';
 
 // Wes Anderson-inspired typography
@@ -45,9 +44,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Navigation />
-          <WorkspaceProvider>
-            {children}
-          </WorkspaceProvider>
+          {children}
         </AuthProvider>
       </body>
     </html>

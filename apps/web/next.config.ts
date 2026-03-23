@@ -1,8 +1,15 @@
 import type { NextConfig } from "next";
 import createMDX from '@next/mdx';
+import bundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+  experimental: {
+    optimizePackageImports: [
+      'react-syntax-highlighter',
+      '@radix-ui/react-dropdown-menu',
+    ],
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -46,4 +53,8 @@ const withMDX = createMDX({
   extension: /\.mdx?$/,
 });
 
-export default withMDX(nextConfig);
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+export default withBundleAnalyzer(withMDX(nextConfig));
