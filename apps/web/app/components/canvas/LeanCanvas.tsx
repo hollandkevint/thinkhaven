@@ -2,9 +2,12 @@
 
 import React from 'react';
 import type { LeanCanvas as LeanCanvasType, LeanCanvasField } from '@/lib/canvas/lean-canvas-schema';
+import { isNonEmptyCanvas } from '@/lib/canvas/lean-canvas-schema';
+import { downloadCanvasMarkdown } from '@/lib/export/canvas-export-md';
 
 interface LeanCanvasProps {
   canvas: LeanCanvasType;
+  title?: string;
 }
 
 const CANVAS_LAYOUT: Array<{ field: LeanCanvasField; label: string }> = [
@@ -42,10 +45,23 @@ function CanvasBox({ label, content }: { label: string; content?: string }) {
   );
 }
 
-function LeanCanvasInner({ canvas }: LeanCanvasProps) {
+function LeanCanvasInner({ canvas, title }: LeanCanvasProps) {
   return (
     <div className="p-4">
-      <h3 className="font-display text-sm font-semibold text-ink mb-3">Lean Canvas</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-display text-sm font-semibold text-ink">Lean Canvas</h3>
+        {isNonEmptyCanvas(canvas) && (
+          <button
+            onClick={() => downloadCanvasMarkdown(canvas, title)}
+            className="text-xs text-terracotta hover:text-terracotta-hover font-medium flex items-center gap-1"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export
+          </button>
+        )}
+      </div>
       <div className="grid grid-cols-3 gap-2">
         {CANVAS_LAYOUT.map(({ field, label }) => (
           <CanvasBox key={field} label={label} content={canvas[field]} />
@@ -56,6 +72,7 @@ function LeanCanvasInner({ canvas }: LeanCanvasProps) {
 }
 
 export default React.memo(LeanCanvasInner, (prev, next) => {
+  if (prev.title !== next.title) return false;
   for (const { field } of CANVAS_LAYOUT) {
     if (prev.canvas[field] !== next.canvas[field]) return false;
   }

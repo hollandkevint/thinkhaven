@@ -50,6 +50,8 @@ interface UseStreamingChatReturn {
   sendingMessage: boolean
   limitStatus: MessageLimitStatus | null
   boardState: BoardState | null
+  streamError: string | null
+  dismissError: () => void
   handleSendMessage: (e: React.FormEvent) => Promise<void>
 }
 
@@ -60,6 +62,7 @@ export function useStreamingChat(
   const [session, setSession] = useState<SessionData | null>(initialSession)
   const [messageInput, setMessageInput] = useState('')
   const [sendingMessage, setSendingMessage] = useState(false)
+  const [streamError, setStreamError] = useState<string | null>(null)
   const [limitStatus, setLimitStatus] = useState<MessageLimitStatus | null>(null)
   const [boardState, setBoardState] = useState<BoardState | null>(() => {
     const sps = initialSession?.sub_persona_state
@@ -323,20 +326,21 @@ export function useStreamingChat(
     const userMessage = messageInput
     setSendingMessage(true)
     setMessageInput('')
+    setStreamError(null)
 
     try {
       await addChatMessage({ role: 'user', content: userMessage })
       await streamClaudeResponse(userMessage)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
-      await addChatMessage({
-        role: 'system',
-        content: `Error: ${errorMessage}\n\nTry refreshing the page or check your connection.`
-      })
+      // Show ephemeral error (local-only, NOT persisted to Supabase)
+      setStreamError(`Error: ${errorMessage}. Try again or refresh the page.`)
     } finally {
       setSendingMessage(false)
     }
   }, [messageInput, sendingMessage, addChatMessage, streamClaudeResponse])
+
+  const dismissError = useCallback(() => setStreamError(null), [])
 
   return {
     session,
@@ -345,6 +349,8 @@ export function useStreamingChat(
     sendingMessage,
     limitStatus,
     boardState,
+    streamError,
+    dismissError,
     handleSendMessage,
   }
 }

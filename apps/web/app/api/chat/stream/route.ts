@@ -472,12 +472,19 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          // Note: Conversation storage is handled by the workspace page
-          // which updates user_workspace.workspace_state.chat_context
-          // No additional database storage needed here
-
-          // Message count was already incremented atomically BEFORE processing
-          // to prevent race conditions (see lines 109-144)
+          // Auto-title session on first message (fire-and-forget)
+          if (cachedBmadSession.message_count === 0) {
+            const autoTitle = message.split(/\s+/).slice(0, 6).join(' ')
+            supabase
+              .from('bmad_sessions')
+              .update({ title: autoTitle })
+              .eq('id', sessionId)
+              .eq('user_id', user.id)
+              .then(({ error: titleErr }) => {
+                if (titleErr) console.warn('[Chat Stream] Auto-title failed:', titleErr.message)
+              })
+              .catch(() => {}) // Best-effort, never block the stream
+          }
 
           // Persist updated sub-persona state to database
           if (updatedSubPersonaState && bmadSessionForUpdate?.id) {
