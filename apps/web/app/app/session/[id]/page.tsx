@@ -34,6 +34,8 @@ export default function SessionPage() {
   const [userDismissedBoard, setUserDismissedBoard] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatScrollRef = useRef<HTMLDivElement>(null)
+  const [showScrollButton, setShowScrollButton] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
 
@@ -44,6 +46,8 @@ export default function SessionPage() {
     sendingMessage,
     limitStatus,
     boardState,
+    streamError,
+    dismissError,
     handleSendMessage,
   } = useStreamingChat(fetchedSession, user?.id)
   const isOnline = useOnlineStatus()
@@ -239,7 +243,16 @@ export default function SessionPage() {
 
         {/* Chat Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-8" data-ph-mask>
+          <div
+            ref={chatScrollRef}
+            className="flex-1 overflow-y-auto p-8 relative"
+            data-ph-mask
+            onScroll={(e) => {
+              const el = e.currentTarget
+              const shouldShow = el.scrollHeight - el.scrollTop - el.clientHeight > 200
+              setShowScrollButton(prev => prev === shouldShow ? prev : shouldShow)
+            }}
+          >
             <div className="max-w-4xl mx-auto space-y-6">
               {session.chat_context.length === 0 && (
                 <div className="bg-parchment p-6 rounded-lg border border-ink/8 mb-4">
@@ -360,6 +373,17 @@ export default function SessionPage() {
 
               <div ref={messagesEndRef} />
             </div>
+            {showScrollButton && (
+              <button
+                onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                className="sticky bottom-4 left-1/2 -translate-x-1/2 z-10 bg-ink/80 text-cream px-3 py-1.5 rounded-full text-xs font-medium shadow-lg hover:bg-ink transition-colors flex items-center gap-1"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+                Scroll to bottom
+              </button>
+            )}
           </div>
 
           <MessageLimitWarning
@@ -371,6 +395,17 @@ export default function SessionPage() {
             }}
             onNewSession={() => { window.location.href = '/app' }}
           />
+
+          {streamError && (
+            <div className="mx-4 mb-2 px-4 py-2 bg-rust/10 border border-rust/20 rounded-lg flex items-center justify-between">
+              <p className="text-sm text-rust">{streamError}</p>
+              <button onClick={dismissError} className="text-rust/60 hover:text-rust ml-2 flex-shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
 
           <form onSubmit={handleSendMessage} className="mt-4">
             <div className="flex gap-2 items-end">
@@ -428,7 +463,7 @@ export default function SessionPage() {
             </button>
           </div>
           {session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) && (
-            <LeanCanvas canvas={session.lean_canvas} />
+            <LeanCanvas canvas={session.lean_canvas} title={session.title || undefined} />
           )}
           {boardState && (
             <PaneErrorBoundary paneName="board">
