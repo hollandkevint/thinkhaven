@@ -8,6 +8,8 @@ import MessageInput from '../chat/MessageInput'
 import TypingIndicator from '../chat/TypingIndicator'
 import ChatErrorDisplay from '../chat/ChatErrorDisplay'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { track } from '@/lib/analytics/events'
 
 interface Message {
   id: string
@@ -41,6 +43,7 @@ export default function GuestChatInterface() {
 
   // Load existing guest session on mount
   useEffect(() => {
+    track({ event: 'session_started', properties: { source: 'guest' } })
     const session = GuestSessionStore.getOrCreateSession()
 
     if (session.messages.length > 0) {
@@ -74,6 +77,7 @@ export default function GuestChatInterface() {
 
     // Check if limit reached
     if (GuestSessionStore.hasReachedLimit()) {
+      track({ event: 'guest_limit_hit', properties: { message_count: 10 - remainingMessages } })
       setShowSignupModal(true)
       return
     }
@@ -328,7 +332,7 @@ export default function GuestChatInterface() {
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6" data-ph-mask>
         {messages.map((message) => (
           <StreamingMessage
             key={message.id}
@@ -360,6 +364,26 @@ export default function GuestChatInterface() {
 
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Persistent signup banner when limit reached and modal closed */}
+      {GuestSessionStore.hasReachedLimit() && !showSignupModal && (
+        <div className="flex-shrink-0 px-6 py-3 bg-terracotta/10 border-t border-terracotta/20">
+          <div className="flex items-center justify-between max-w-4xl mx-auto">
+            <p className="text-sm text-ink">
+              You've used all 10 free messages.{' '}
+              <button
+                onClick={() => setShowSignupModal(true)}
+                className="font-semibold text-terracotta hover:text-terracotta-hover underline"
+              >
+                Sign up to continue
+              </button>
+            </p>
+            <Link href="/login" className="text-sm text-slate-blue hover:text-ink">
+              Already have an account?
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Message Input */}
       <div className="flex-shrink-0 px-6 py-4 bg-cream border-t border-divider">

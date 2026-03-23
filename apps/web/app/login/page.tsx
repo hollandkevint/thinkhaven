@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useAuth } from '../../lib/auth/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { supabase } from '../../lib/supabase/client'
 
 function LoginPageContent() {
   const { signInWithEmail, signInWithGoogle } = useAuth()
@@ -14,6 +15,8 @@ function LoginPageContent() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
+  const [resetSent, setResetSent] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
 
   // Handle error messages from OAuth callback
   useEffect(() => {
@@ -63,6 +66,27 @@ function LoginPageContent() {
       setError('Google sign-in failed. Please try again.')
     } finally {
       setGoogleLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Enter your email address first, then click "Forgot password".')
+      return
+    }
+    setResetLoading(true)
+    setError('')
+    try {
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      })
+      // Always show success to prevent email enumeration
+      setResetSent(true)
+    } catch {
+      // Still show success to prevent enumeration
+      setResetSent(true)
+    } finally {
+      setResetLoading(false)
     }
   }
 
@@ -147,10 +171,27 @@ function LoginPageContent() {
                 className="w-full h-11 px-4 border border-border rounded-lg focus:outline-none focus:ring-2 ring-primary transition-all"
                 placeholder="••••••••"
               />
-              <p className="text-xs mt-1 text-muted-foreground">
-                At least 8 characters
-              </p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-xs text-muted-foreground">
+                  At least 8 characters
+                </p>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={resetLoading}
+                  className="text-xs text-terracotta hover:text-terracotta-hover font-medium"
+                >
+                  {resetLoading ? 'Sending...' : 'Forgot password?'}
+                </button>
+              </div>
             </div>
+
+            {/* Reset Success */}
+            {resetSent && (
+              <div className="p-3 rounded-lg text-sm bg-forest/5 border border-forest text-forest">
+                Check your email for a password reset link.
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (

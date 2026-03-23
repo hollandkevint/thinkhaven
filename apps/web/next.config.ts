@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       'react-syntax-highlighter',
       '@radix-ui/react-dropdown-menu',
+      'posthog-js',
     ],
   },
   eslint: {
@@ -15,6 +16,18 @@ const nextConfig: NextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/ingest/static/:path*',
+        destination: 'https://us-assets.i.posthog.com/static/:path*',
+      },
+      {
+        source: '/ingest/:path*',
+        destination: 'https://us.i.posthog.com/:path*',
+      },
+    ];
   },
   async redirects() {
     return [
