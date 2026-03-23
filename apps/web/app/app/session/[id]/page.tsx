@@ -249,8 +249,8 @@ export default function SessionPage() {
             data-ph-mask
             onScroll={(e) => {
               const el = e.currentTarget
-              const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
-              setShowScrollButton(distanceFromBottom > 200)
+              const shouldShow = el.scrollHeight - el.scrollTop - el.clientHeight > 200
+              setShowScrollButton(prev => prev === shouldShow ? prev : shouldShow)
             }}
           >
             <div className="max-w-4xl mx-auto space-y-6">

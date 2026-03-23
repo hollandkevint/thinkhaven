@@ -474,7 +474,7 @@ export async function POST(request: NextRequest) {
 
           // Auto-title session on first message (fire-and-forget)
           if (cachedBmadSession.message_count === 0) {
-            const autoTitle = message.split(/\s+/).slice(0, 6).join(' ')
+            const autoTitle = message.split(/\s+/).slice(0, 6).join(' ').slice(0, 100)
             supabase
               .from('bmad_sessions')
               .update({ title: autoTitle })
