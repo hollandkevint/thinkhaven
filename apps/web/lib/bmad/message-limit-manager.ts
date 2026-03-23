@@ -44,7 +44,9 @@ export interface IncrementResult {
  * Use server-only env var (no NEXT_PUBLIC prefix) to prevent client manipulation
  */
 export function isMessageLimitEnabled(): boolean {
-  return process.env.LAUNCH_MODE === 'true';
+  // MESSAGE_LIMIT_ENABLED controls per-session message caps (default: true)
+  // CREDIT_SYSTEM_ENABLED controls credit deduction (separate flag in credit-manager.ts)
+  return process.env.MESSAGE_LIMIT_ENABLED !== 'false';
 }
 
 /**
