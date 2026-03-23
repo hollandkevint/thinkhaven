@@ -8,6 +8,7 @@ import MessageInput from '../chat/MessageInput'
 import TypingIndicator from '../chat/TypingIndicator'
 import ChatErrorDisplay from '../chat/ChatErrorDisplay'
 import { useRouter } from 'next/navigation'
+import { track } from '@/lib/analytics/events'
 
 interface Message {
   id: string
@@ -41,6 +42,7 @@ export default function GuestChatInterface() {
 
   // Load existing guest session on mount
   useEffect(() => {
+    track({ event: 'session_started', properties: { source: 'guest' } })
     const session = GuestSessionStore.getOrCreateSession()
 
     if (session.messages.length > 0) {
@@ -74,6 +76,7 @@ export default function GuestChatInterface() {
 
     // Check if limit reached
     if (GuestSessionStore.hasReachedLimit()) {
+      track({ event: 'guest_limit_hit', properties: { message_count: 10 - remainingMessages } })
       setShowSignupModal(true)
       return
     }
@@ -328,7 +331,7 @@ export default function GuestChatInterface() {
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6" data-ph-mask>
         {messages.map((message) => (
           <StreamingMessage
             key={message.id}

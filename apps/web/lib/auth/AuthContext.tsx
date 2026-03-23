@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User, AuthError } from '@supabase/supabase-js'
 import { supabase } from '../supabase/client'
 import { authLogger } from '../monitoring/auth-logger'
+import posthog from 'posthog-js'
 
 interface AuthContextType {
   user: User | null
@@ -41,6 +42,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null)
       setLoading(false)
       
+      // PostHog identity management
+      if (event === 'SIGNED_IN' && session?.user && posthog.__loaded) {
+        posthog.identify(session.user.id, {
+          auth_provider: session.user.app_metadata?.provider || 'email',
+        })
+      } else if (event === 'SIGNED_OUT' && posthog.__loaded) {
+        posthog.reset()
+      }
+
       // Handle authentication events with structured logging
       if (event === 'SIGNED_IN' && session) {
         const authMethod = session.user.app_metadata?.provider === 'google' ? 'oauth_google' : 'email_password'
