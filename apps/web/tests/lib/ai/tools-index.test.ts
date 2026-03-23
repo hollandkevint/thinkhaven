@@ -15,8 +15,8 @@ import {
 
 describe('Tool Registry', () => {
   describe('MARY_TOOLS', () => {
-    it('should define all 9 tools (6 core + 3 discovery)', () => {
-      expect(MARY_TOOLS).toHaveLength(9);
+    it('should define all 8 tools', () => {
+      expect(MARY_TOOLS).toHaveLength(8);
     });
 
     it('should have valid tool structure', () => {
@@ -40,11 +40,6 @@ describe('Tool Registry', () => {
 
   describe('TOOL_NAMES', () => {
     it('should define all tool name constants', () => {
-      // Phase 5: Discovery Tools
-      expect(TOOL_NAMES.DISCOVER_PATHWAYS).toBe('discover_pathways');
-      expect(TOOL_NAMES.DISCOVER_PHASE_ACTIONS).toBe('discover_phase_actions');
-      expect(TOOL_NAMES.DISCOVER_DOCUMENT_TYPES).toBe('discover_document_types');
-      // Phase 3: Core Session Tools
       expect(TOOL_NAMES.READ_SESSION_STATE).toBe('read_session_state');
       expect(TOOL_NAMES.COMPLETE_PHASE).toBe('complete_phase');
       expect(TOOL_NAMES.SWITCH_PERSONA_MODE).toBe('switch_persona_mode');
@@ -79,12 +74,7 @@ describe('Tool Registry', () => {
   describe('getAllToolNames', () => {
     it('should return all tool names', () => {
       const names = getAllToolNames();
-      expect(names).toHaveLength(9);
-      // Phase 5: Discovery Tools
-      expect(names).toContain('discover_pathways');
-      expect(names).toContain('discover_phase_actions');
-      expect(names).toContain('discover_document_types');
-      // Phase 3: Core Session Tools
+      expect(names).toHaveLength(8);
       expect(names).toContain('read_session_state');
       expect(names).toContain('complete_phase');
       expect(names).toContain('switch_persona_mode');
@@ -98,64 +88,13 @@ describe('Tool Registry', () => {
     it('should return descriptions for all tools', () => {
       const descriptions = getToolDescriptions();
       const keys = Object.keys(descriptions);
-      expect(keys).toHaveLength(9);
+      expect(keys).toHaveLength(8);
 
       for (const name of getAllToolNames()) {
         expect(descriptions[name]).toBeDefined();
         expect(typeof descriptions[name]).toBe('string');
         expect(descriptions[name].length).toBeGreaterThan(10);
       }
-    });
-  });
-});
-
-describe('Phase 5: Discovery Tool Schemas', () => {
-  describe('discover_pathways', () => {
-    it('should have no required inputs', () => {
-      const tool = getToolByName('discover_pathways');
-      expect(tool?.input_schema.required).toEqual([]);
-    });
-  });
-
-  describe('discover_phase_actions', () => {
-    it('should have optional phase_id and action_type', () => {
-      const tool = getToolByName('discover_phase_actions');
-      expect(tool?.input_schema.required).toEqual([]);
-      const props = tool?.input_schema.properties as Record<string, unknown>;
-      expect(props.phase_id).toBeDefined();
-      expect(props.action_type).toBeDefined();
-    });
-
-    it('should have valid action_type enum', () => {
-      const tool = getToolByName('discover_phase_actions');
-      const props = tool?.input_schema.properties as Record<string, { enum?: string[] }>;
-      expect(props.action_type?.enum).toEqual([
-        'analysis',
-        'generation',
-        'transition',
-        'capture',
-      ]);
-    });
-  });
-
-  describe('discover_document_types', () => {
-    it('should have optional category and phase_id', () => {
-      const tool = getToolByName('discover_document_types');
-      expect(tool?.input_schema.required).toEqual([]);
-      const props = tool?.input_schema.properties as Record<string, unknown>;
-      expect(props.category).toBeDefined();
-      expect(props.phase_id).toBeDefined();
-    });
-
-    it('should have valid category enum', () => {
-      const tool = getToolByName('discover_document_types');
-      const props = tool?.input_schema.properties as Record<string, { enum?: string[] }>;
-      expect(props.category?.enum).toEqual([
-        'canvas',
-        'brief',
-        'summary',
-        'analysis',
-      ]);
     });
   });
 });

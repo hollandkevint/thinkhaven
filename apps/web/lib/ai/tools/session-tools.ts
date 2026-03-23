@@ -16,7 +16,7 @@ import {
   recordInsight,
   getSessionInsights,
   PHASE_ORDER,
-} from '@/lib/bmad/session-primitives';
+} from '@/lib/session/session-primitives';
 import { resolveSpeakerKey } from '../board-members';
 import type {
   CompletePhaseInput,

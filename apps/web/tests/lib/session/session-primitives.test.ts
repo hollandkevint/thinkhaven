@@ -10,7 +10,7 @@ import {
   getPhaseOrder,
   getNextPhase,
   calculateProgress,
-} from '@/lib/bmad/session-primitives';
+} from '@/lib/session/session-primitives';
 
 // Mock Supabase - we test the pure functions here, not the DB operations
 vi.mock('@/lib/supabase/server', () => ({
@@ -216,7 +216,7 @@ describe('Session Lifecycle Primitives', () => {
     it('should export SessionRecord type with required fields', async () => {
       // Import types to verify they compile correctly
       const { createSessionRecord, loadSessionState, persistSessionState } =
-        await import('@/lib/bmad/session-primitives');
+        await import('@/lib/session/session-primitives');
 
       expect(typeof createSessionRecord).toBe('function');
       expect(typeof loadSessionState).toBe('function');
@@ -225,7 +225,7 @@ describe('Session Lifecycle Primitives', () => {
 
     it('should export phase management functions', async () => {
       const { completePhase, readPhaseState } =
-        await import('@/lib/bmad/session-primitives');
+        await import('@/lib/session/session-primitives');
 
       expect(typeof completePhase).toBe('function');
       expect(typeof readPhaseState).toBe('function');
@@ -233,7 +233,7 @@ describe('Session Lifecycle Primitives', () => {
 
     it('should export insight management functions', async () => {
       const { recordInsight, getSessionInsights } =
-        await import('@/lib/bmad/session-primitives');
+        await import('@/lib/session/session-primitives');
 
       expect(typeof recordInsight).toBe('function');
       expect(typeof getSessionInsights).toBe('function');
@@ -241,7 +241,7 @@ describe('Session Lifecycle Primitives', () => {
 
     it('should export session query functions', async () => {
       const { getActiveSessions, sessionBelongsToUser } =
-        await import('@/lib/bmad/session-primitives');
+        await import('@/lib/session/session-primitives');
 
       expect(typeof getActiveSessions).toBe('function');
       expect(typeof sessionBelongsToUser).toBe('function');

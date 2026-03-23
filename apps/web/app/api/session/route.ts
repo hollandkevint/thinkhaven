@@ -1,8 +1,20 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { PathwayType } from '@/lib/bmad/types';
-import { getPathway } from '@/lib/pathways';
 import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
+
+interface PathwayConfig {
+  id: string;
+  phase: string;
+  messageLimit: number;
+}
+
+const PATHWAYS: Record<string, PathwayConfig> = {
+  explore: { id: 'explore', phase: 'discovery', messageLimit: 20 },
+  'quick-decision': { id: 'quick-decision', phase: 'discovery', messageLimit: 10 },
+  'deep-analysis': { id: 'deep-analysis', phase: 'discovery', messageLimit: 30 },
+  'board-of-directors': { id: 'board-of-directors', phase: 'discovery', messageLimit: 40 },
+  'strategy-sprint': { id: 'strategy-sprint', phase: 'discovery', messageLimit: 20 },
+};
 
 /**
  * POST /api/session - Create a new session.
@@ -31,8 +43,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const pathwayId = body.pathway || 'explore';
 
-    // Validate pathway exists
-    const pathway = getPathway(pathwayId);
+    const pathway = PATHWAYS[pathwayId];
     if (!pathway) {
       return new Response(JSON.stringify({ error: 'Invalid pathway' }), {
         status: 400,

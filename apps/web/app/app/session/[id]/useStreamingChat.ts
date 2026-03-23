@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { getBoardMember } from '@/lib/ai/board-members'
 import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
-import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager'
+import type { MessageLimitStatus } from '@/lib/session/message-limit-manager'
 import type { LeanCanvas } from '@/lib/canvas/lean-canvas-schema'
 
 /**

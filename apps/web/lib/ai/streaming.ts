@@ -1,5 +1,5 @@
 import { CoachingContext } from './mary-persona';
-import type { MessageLimitStatus } from '@/lib/bmad/message-limit-manager';
+import type { MessageLimitStatus } from '@/lib/session/message-limit-manager';
 import type { BoardMemberId } from './board-types';
 
 export interface StreamChunk {

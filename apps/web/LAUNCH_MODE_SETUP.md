@@ -136,7 +136,7 @@ If your chat interface doesn't already use the warning components, add them:
 ```tsx
 // In your chat/workspace component
 import { MessageLimitWarning, MessageCounterBadge } from '@/app/components/chat/MessageLimitWarning';
-import { checkMessageLimit } from '@/lib/bmad/message-limit-manager';
+import { checkMessageLimit } from '@/lib/session/message-limit-manager';
 
 // Fetch limit status after each message
 const [limitStatus, setLimitStatus] = useState(null);

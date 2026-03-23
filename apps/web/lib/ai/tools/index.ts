@@ -121,117 +121,11 @@ export interface UpdateContextInput {
 // ./lean-canvas-tool.ts and re-exported here for tool-executor imports.
 export type { UpdateLeanCanvasInput, UpdateLeanCanvasResult } from './lean-canvas-tool';
 
-// Phase 5: Discovery Tool Types
-export interface DiscoverPathwaysResult extends ToolResult {
-  data?: {
-    pathways: Array<{
-      id: string;
-      name: string;
-      description: string;
-      targetUser: string;
-      phases: string[];
-    }>;
-    totalCount: number;
-  };
-}
-
-export interface DiscoverPhaseActionsResult extends ToolResult {
-  data?: {
-    actions: Array<{
-      id: string;
-      name: string;
-      description: string;
-      type: string;
-      producesOutput: boolean;
-      outputType?: string;
-    }>;
-    totalCount: number;
-  };
-}
-
-export interface DiscoverDocumentTypesResult extends ToolResult {
-  data?: {
-    documentTypes: Array<{
-      id: string;
-      name: string;
-      description: string;
-      category: string;
-      requiredContext: string[];
-      generatorAvailable: boolean;
-    }>;
-    totalCount: number;
-  };
-}
-
-export interface DiscoverPhaseActionsInput {
-  phase_id?: string;
-  action_type?: 'analysis' | 'generation' | 'transition' | 'capture';
-}
-
-export interface DiscoverDocumentTypesInput {
-  category?: 'canvas' | 'brief' | 'summary' | 'analysis';
-  phase_id?: string;
-}
-
 // =============================================================================
 // Tool Definitions (Anthropic API format)
 // =============================================================================
 
 export const MARY_TOOLS: Tool[] = [
-  // ==========================================================================
-  // Phase 5: Discovery Tools
-  // ==========================================================================
-  {
-    name: 'discover_pathways',
-    description: 'Discover all available strategic pathways and their configurations. Use this to understand what journeys are available for users, especially when helping them choose an approach or when you need to understand the system capabilities.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {},
-      required: [],
-    },
-  },
-  {
-    name: 'discover_phase_actions',
-    description: 'Discover what actions are available in a specific phase. Use this to understand what you can do at any point in the session, or to explore capabilities across different phases.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        phase_id: {
-          type: 'string',
-          description: 'The phase to get actions for (e.g., "discovery", "ideation", "validation"). If not provided, returns universal actions.',
-        },
-        action_type: {
-          type: 'string',
-          enum: ['analysis', 'generation', 'transition', 'capture'],
-          description: 'Filter actions by type',
-        },
-      },
-      required: [],
-    },
-  },
-  {
-    name: 'discover_document_types',
-    description: 'Discover what document types are available for generation. Use this to understand what deliverables you can create and what context is needed for each.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        category: {
-          type: 'string',
-          enum: ['canvas', 'brief', 'summary', 'analysis'],
-          description: 'Filter by document category',
-        },
-        phase_id: {
-          type: 'string',
-          description: 'Filter by phase where documents are typically generated',
-        },
-      },
-      required: [],
-    },
-  },
-
-  // ==========================================================================
-  // Core Session Tools (Phase 3)
-  // ==========================================================================
   {
     name: 'read_session_state',
     description: 'Read the current session state including phase, progress, mode, and recent insights. Use this to understand where the user is in their journey before making decisions.',
@@ -402,11 +296,6 @@ Examples:
 // =============================================================================
 
 export const TOOL_NAMES = {
-  // Phase 5: Discovery Tools
-  DISCOVER_PATHWAYS: 'discover_pathways',
-  DISCOVER_PHASE_ACTIONS: 'discover_phase_actions',
-  DISCOVER_DOCUMENT_TYPES: 'discover_document_types',
-  // Phase 3: Core Session Tools
   READ_SESSION_STATE: 'read_session_state',
   COMPLETE_PHASE: 'complete_phase',
   SWITCH_PERSONA_MODE: 'switch_persona_mode',

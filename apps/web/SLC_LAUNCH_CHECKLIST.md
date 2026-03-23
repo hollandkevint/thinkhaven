@@ -303,7 +303,7 @@ When you're ready to add Stripe (after collecting 100 sessions of feedback):
 
 **Key Files:**
 - Launch mode bypass: [lib/monetization/credit-manager.ts](lib/monetization/credit-manager.ts)
-- Message limits: [lib/bmad/message-limit-manager.ts](lib/bmad/message-limit-manager.ts)
+- Message limits: [lib/session/message-limit-manager.ts](lib/session/message-limit-manager.ts)
 - API integration: [app/api/chat/stream/route.ts](app/api/chat/stream/route.ts)
 - Migration: [supabase/migrations/008_add_message_limits.sql](supabase/migrations/008_add_message_limits.sql)
 - UI components: [app/components/chat/MessageLimitWarning.tsx](app/components/chat/MessageLimitWarning.tsx)
