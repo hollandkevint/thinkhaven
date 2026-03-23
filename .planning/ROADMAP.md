@@ -1,5 +1,7 @@
 # Roadmap: ThinkHaven Beta Launch
 
+> **ARCHIVED 2026-03-22.** This milestone is 3/4 phases complete. Phase 4 (Analytics) was never started and is superseded by the multi-sprint product roadmap at `docs/plans/2026-03-22-feat-multi-sprint-product-roadmap-plan.md` (Sprint 1a: PostHog integration). Auth, access control, and error/loading states shipped. The GSD workflow for this milestone is complete.
+
 ## Overview
 
 Fix authentication issues, implement waitlist-based access control, add error/loading states, and set up basic analytics. The goal is 100 users can reliably sign up via waitlist, get approved, and use Mary without auth issues. No new features — this is a fix-and-polish milestone.

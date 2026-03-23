@@ -1,11 +1,13 @@
 # Project State
 
+> **ARCHIVED 2026-03-22.** Beta Launch milestone complete (3/4 phases). Active roadmap is now `docs/plans/2026-03-22-feat-multi-sprint-product-roadmap-plan.md`.
+
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-01-29)
 
 **Core value:** 100 users can reliably sign up via waitlist, get approved, and use Mary without auth issues
-**Current focus:** Phase 2 - Beta Access Control
+**Current focus:** ~~Phase 2 - Beta Access Control~~ Milestone archived
 
 ## Current Position
 

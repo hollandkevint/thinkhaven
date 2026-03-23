@@ -2,7 +2,11 @@
 title: "ThinkHaven Next Phase: Design System Foundation → UX Fixes → Feature Gaps"
 type: feat
 date: 2026-03-16
+status: superseded
+superseded_by: docs/plans/2026-03-22-feat-multi-sprint-product-roadmap-plan.md
 ---
+
+> **SUPERSEDED 2026-03-22.** Phase 0 blockers and Phase 1 design system partially shipped. Phases 2-5 are superseded by the multi-sprint product roadmap.
 
 # ThinkHaven Next Phase Plan
 
