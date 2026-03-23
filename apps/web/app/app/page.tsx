@@ -137,20 +137,24 @@ export default function AppDashboardPage() {
   // Check for guest session migration on mount
   useEffect(() => {
     if (!user) return
+    let ignore = false
 
     if (SessionMigration.hasGuestSession()) {
       SessionMigration.migrateToUserWorkspace(user.id).then(result => {
+        if (ignore) return
         if (result.success && result.sessionId) {
           router.push(`/app/session/${result.sessionId}`)
         } else {
           fetchSessions()
         }
       }).catch(() => {
-        fetchSessions()
+        if (!ignore) fetchSessions()
       })
     } else {
       fetchSessions()
     }
+
+    return () => { ignore = true }
   }, [user, fetchSessions, router]);
 
   const handleRetry = () => {

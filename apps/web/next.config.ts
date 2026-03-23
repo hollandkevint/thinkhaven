@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       'react-syntax-highlighter',
       '@radix-ui/react-dropdown-menu',
+      'posthog-js',
     ],
   },
   eslint: {
