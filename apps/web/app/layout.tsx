@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Jost, Libre_Baskerville, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from '../lib/auth/AuthContext';
+import { PostHogProvider } from './providers';
 import Navigation from './components/ui/navigation';
 
 // Wes Anderson-inspired typography
@@ -42,10 +43,12 @@ export default function RootLayout({
       <body
         className={`${jost.variable} ${libreBaskerville.variable} ${jetbrainsMono.variable} font-body antialiased bg-cream text-ink`}
       >
-        <AuthProvider>
-          <Navigation />
-          {children}
-        </AuthProvider>
+        <PostHogProvider>
+          <AuthProvider>
+            <Navigation />
+            {children}
+          </AuthProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
