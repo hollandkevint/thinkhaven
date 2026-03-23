@@ -24,6 +24,7 @@ import {
 import Link from 'next/link';
 import { ErrorState } from '@/app/components/ui/ErrorState';
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
+import { SessionMigration } from '@/lib/guest/session-migration';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -133,11 +134,24 @@ export default function AppDashboardPage() {
     }
   }, [user?.id]);
 
+  // Check for guest session migration on mount
   useEffect(() => {
-    if (user) {
-      fetchSessions();
+    if (!user) return
+
+    if (SessionMigration.hasGuestSession()) {
+      SessionMigration.migrateToUserWorkspace(user.id).then(result => {
+        if (result.success && result.sessionId) {
+          router.push(`/app/session/${result.sessionId}`)
+        } else {
+          fetchSessions()
+        }
+      }).catch(() => {
+        fetchSessions()
+      })
+    } else {
+      fetchSessions()
     }
-  }, [user, fetchSessions]);
+  }, [user, fetchSessions, router]);
 
   const handleRetry = () => {
     setIsRetrying(true);
