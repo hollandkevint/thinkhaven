@@ -364,6 +364,26 @@ export default function GuestChatInterface() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Persistent signup banner when limit reached and modal closed */}
+      {GuestSessionStore.hasReachedLimit() && !showSignupModal && (
+        <div className="flex-shrink-0 px-6 py-3 bg-terracotta/10 border-t border-terracotta/20">
+          <div className="flex items-center justify-between max-w-4xl mx-auto">
+            <p className="text-sm text-ink">
+              You've used all 10 free messages.{' '}
+              <button
+                onClick={() => setShowSignupModal(true)}
+                className="font-semibold text-terracotta hover:text-terracotta-hover underline"
+              >
+                Sign up to continue
+              </button>
+            </p>
+            <a href="/login" className="text-sm text-slate-blue hover:text-ink">
+              Already have an account?
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Message Input */}
       <div className="flex-shrink-0 px-6 py-4 bg-cream border-t border-divider">
         <MessageInput

@@ -113,8 +113,14 @@ export default function SignupPromptModal({
               </button>
             </div>
 
-            {/* Fine print */}
-            <p className="text-xs text-slate-blue text-center mt-4">
+            {/* Sign in link + fine print */}
+            <p className="text-sm text-center mt-4">
+              <span className="text-slate-blue">Already have an account? </span>
+              <a href="/login" className="font-semibold text-terracotta hover:text-terracotta-hover">
+                Sign in
+              </a>
+            </p>
+            <p className="text-xs text-slate-blue text-center mt-2">
               Free to sign up. No credit card required.
             </p>
           </>

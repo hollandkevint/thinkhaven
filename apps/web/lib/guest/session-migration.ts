@@ -9,6 +9,7 @@ import { GuestSessionStore, GuestMessage } from './session-store'
 
 export interface MigrationResult {
   success: boolean
+  sessionId?: string
   workspaceId?: string
   migratedMessages?: number
   error?: string
@@ -30,13 +31,27 @@ export class SessionMigration {
         }
       }
 
-      // Create a bmad_sessions row with the guest messages as ChatMessage[]
-      const chatMessages = guestData.messages.map(msg => ({
+      // Validate and sanitize guest messages before migration
+      const ALLOWED_ROLES = new Set(['user', 'assistant'])
+      const MAX_CONTENT_LENGTH = 4000
+      const MAX_MESSAGES = 10
+
+      const validMessages = guestData.messages
+        .filter(msg => ALLOWED_ROLES.has(msg.role))
+        .slice(0, MAX_MESSAGES)
+
+      const chatMessages = validMessages.map(msg => ({
         id: msg.id || crypto.randomUUID(),
-        role: msg.role,
-        content: msg.content,
+        role: msg.role as 'user' | 'assistant',
+        content: typeof msg.content === 'string' ? msg.content.slice(0, MAX_CONTENT_LENGTH) : '',
         timestamp: msg.timestamp || new Date().toISOString(),
       }))
+
+      // Derive title from first user message (first 6 words)
+      const firstUserMsg = chatMessages.find(m => m.role === 'user')
+      const autoTitle = firstUserMsg
+        ? firstUserMsg.content.split(/\s+/).slice(0, 6).join(' ')
+        : 'Guest Session'
 
       const { data: newSession, error: createError } = await supabase
         .from('bmad_sessions')
@@ -44,7 +59,7 @@ export class SessionMigration {
           user_id: userId,
           workspace_id: userId,
           pathway: 'quick-decision',
-          title: 'Guest Session',
+          title: autoTitle,
           current_phase: 'discovery',
           current_template: 'general',
           current_step: 'chat',
@@ -59,7 +74,7 @@ export class SessionMigration {
         .select('id')
         .single()
 
-      if (createError) {
+      if (createError || !newSession) {
         console.error('Failed to migrate session:', createError)
         return {
           success: false,
@@ -72,8 +87,9 @@ export class SessionMigration {
 
       return {
         success: true,
+        sessionId: newSession.id,
         workspaceId: userId,
-        migratedMessages: guestData.messages.length
+        migratedMessages: chatMessages.length
       }
     } catch (error) {
       console.error('Migration error:', error)
