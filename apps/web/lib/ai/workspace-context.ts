@@ -1,5 +1,4 @@
 import { CoachingContext, maryPersona, SubPersonaSessionState } from './mary-persona';
-import { PathwayType } from '../bmad/types';
 
 export interface WorkspaceData {
   id: string;
@@ -13,7 +12,7 @@ export interface WorkspaceData {
 
 export interface BmadSessionData {
   id: string;
-  pathway: `${PathwayType}`;
+  pathway: string;
   current_phase: string;
   progress: number;
   context: Record<string, unknown>;

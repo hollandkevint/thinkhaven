@@ -1,7 +1,81 @@
-import { PathwayType } from '../bmad/types';
-import { PATHWAY_COGNITIVE_MODES, CognitiveMode } from '../bmad/pathway-router';
 import { generateBoardSystemPrompt } from './board-members';
 import type { BoardState } from './board-types';
+
+interface CognitiveMode {
+  name: string;
+  description: string;
+  frameworks: string[];
+  keyQuestions: string[];
+}
+
+const PATHWAY_COGNITIVE_MODES: Record<string, CognitiveMode> = {
+  'new-idea': {
+    name: 'Thinking about Value',
+    description: 'Focus on understanding what value you create and for whom',
+    frameworks: ['Jobs-to-be-Done', 'Value Proposition Canvas', 'Customer Development'],
+    keyQuestions: [
+      'What job is the customer trying to get done?',
+      'What pains are they experiencing with current solutions?',
+      'What gains would make their life meaningfully better?',
+      'Why would someone switch from their current solution to yours?',
+    ],
+  },
+  'business-model': {
+    name: 'Thinking through Constraints',
+    description: 'Systematically test assumptions that could make or break your model',
+    frameworks: ['Assumption Testing', 'Lean Validation', 'Risk Assessment'],
+    keyQuestions: [
+      'What must be true for this business model to work?',
+      'Which assumptions carry the highest risk if wrong?',
+      'How could you test this assumption with minimal investment?',
+      'What would kill this business model fastest?',
+    ],
+  },
+  'business-model-problem': {
+    name: 'Thinking through Constraints',
+    description: 'Identify and address the constraints blocking your revenue model',
+    frameworks: ['Constraint Analysis', 'Root Cause Analysis', 'Business Model Canvas'],
+    keyQuestions: [
+      'What is the real constraint preventing growth?',
+      'Is this a demand problem, pricing problem, or delivery problem?',
+      'What evidence do you have for the root cause?',
+      'If this constraint disappeared, what would change?',
+    ],
+  },
+  'feature-refinement': {
+    name: 'Thinking with People',
+    description: 'Co-design with users to ensure features solve real problems',
+    frameworks: ['Co-Design', 'User Story Mapping', 'Design Thinking'],
+    keyQuestions: [
+      'How did you learn that users want this feature?',
+      'What does success look like from the user\'s perspective?',
+      'What would users give up to have this feature?',
+      'How will you know if the feature is working?',
+    ],
+  },
+  'strategic-optimization': {
+    name: 'Thinking about Systems',
+    description: 'Understand the interconnections and optimize the whole system',
+    frameworks: ['Systems Thinking', 'Impact Mapping', 'Feedback Loops'],
+    keyQuestions: [
+      'How does this change affect other parts of the system?',
+      'What second-order effects might occur?',
+      'Where are the leverage points for maximum impact?',
+      'What feedback loops exist that could amplify or dampen this change?',
+    ],
+  },
+  'explore': {
+    name: 'First Principles Exploration',
+    description: 'Challenge assumptions and pressure-test ideas through structured loops',
+    frameworks: ['First Principles', 'Assumption Reversal', 'Provocation Technique'],
+    keyQuestions: [
+      'What is the fundamental problem this solves?',
+      'Who feels this pain most acutely?',
+      'What is the riskiest assumption you are making?',
+      'What would have to be true for this to work?',
+    ],
+  },
+};
 
 // =============================================================================
 // Sub-Persona System Types (FR-AC6 through FR-AC14)
@@ -1167,20 +1241,7 @@ IMPORTANT: These questions should emerge naturally from the conversation. Don't 
    * Maps pathway types to cognitive frameworks
    */
   private getCognitiveModeForPathway(pathway: string): CognitiveMode | null {
-    // Map pathway string to PathwayType enum
-    const pathwayTypeMap: Record<string, PathwayType> = {
-      'new-idea': PathwayType.NEW_IDEA,
-      'business-model': PathwayType.BUSINESS_MODEL,
-      'business-model-problem': PathwayType.BUSINESS_MODEL_PROBLEM,
-      'feature-refinement': PathwayType.FEATURE_REFINEMENT,
-      'strategic-optimization': PathwayType.STRATEGIC_OPTIMIZATION,
-      'explore': PathwayType.EXPLORE,
-    };
-
-    const pathwayType = pathwayTypeMap[pathway];
-    if (!pathwayType) return null;
-
-    return PATHWAY_COGNITIVE_MODES[pathwayType] || null;
+    return PATHWAY_COGNITIVE_MODES[pathway] || null;
   }
 
   /**

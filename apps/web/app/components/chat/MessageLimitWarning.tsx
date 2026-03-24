@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertTriangle, Download, RefreshCw } from 'lucide-react';
-import { MessageLimitStatus } from '@/lib/bmad/message-limit-manager';
+import { MessageLimitStatus } from '@/lib/session/message-limit-manager';
 
 interface MessageLimitWarningProps {
   limitStatus: MessageLimitStatus | null;

@@ -9,8 +9,20 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
-import { PathwayType, BmadMethodError } from './types';
 import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
+
+export type PathwayType = 'new-idea' | 'business-model' | 'business-model-problem' | 'feature-refinement' | 'strategic-optimization' | 'explore';
+
+export class BmadMethodError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public context?: Record<string, unknown>
+  ) {
+    super(message);
+    this.name = 'BmadMethodError';
+  }
+}
 
 // =============================================================================
 // Types

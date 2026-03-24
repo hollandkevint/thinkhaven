@@ -10,7 +10,7 @@ import {
   incrementMessageCount,
   getLimitReachedMessage,
   type MessageLimitStatus,
-} from '@/lib/bmad/message-limit-manager';
+} from '@/lib/session/message-limit-manager';
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
 import { TOOL_NAMES } from '@/lib/ai/tools/index';
 import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
