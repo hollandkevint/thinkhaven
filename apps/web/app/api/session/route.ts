@@ -2,11 +2,13 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { PathwayType } from '@/lib/bmad/types';
 import { getPathway } from '@/lib/pathways';
-import { deductCredit } from '@/lib/monetization/credit-manager';
+import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
 
 /**
  * POST /api/session - Create a new session.
- * Server-side to enforce credit checks and deduction (per-session model).
+ * Pattern: check credits -> create session -> deduct credit.
+ * If session creation fails, no credit is lost.
+ * If deduction fails after creation, session is rolled back (deleted).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -38,20 +40,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Deduct 1 credit for session creation (per-session model)
-    // When CREDIT_SYSTEM_ENABLED !== 'true', this is a no-op that returns success
-    const creditResult = await deductCredit(user.id, undefined, user.email || undefined);
-    if (!creditResult.success) {
+    // Pre-check credits (fast, non-locking)
+    const canProceed = await hasCredits(user.id, 1, user.email || undefined);
+    if (!canProceed) {
       return new Response(JSON.stringify({
         error: 'NO_CREDITS',
         message: 'You\'ve used all your session credits.',
-        balance: creditResult.balance,
       }), {
         status: 402,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
+    // Create session first, then deduct credit.
+    // If creation fails, no credit is lost.
     const { data: session, error: createError } = await supabase
       .from('bmad_sessions')
       .insert({
@@ -76,6 +78,21 @@ export async function POST(request: NextRequest) {
       console.error('[Session API] Creation failed:', createError.message);
       return new Response(JSON.stringify({ error: 'Failed to create session' }), {
         status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Deduct credit after successful session creation (per-session model)
+    // Atomic: deduct_credit_transaction uses SELECT...FOR UPDATE
+    const creditResult = await deductCredit(user.id, session.id, user.email || undefined);
+    if (!creditResult.success) {
+      // Rollback: delete the session since credit deduction failed
+      await supabase.from('bmad_sessions').delete().eq('id', session.id).eq('user_id', user.id);
+      return new Response(JSON.stringify({
+        error: 'NO_CREDITS',
+        message: 'You\'ve used all your session credits.',
+      }), {
+        status: 402,
         headers: { 'Content-Type': 'application/json' },
       });
     }

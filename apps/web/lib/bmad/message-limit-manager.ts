@@ -40,12 +40,10 @@ export interface IncrementResult {
 // ============================================================================
 
 /**
- * Check if message limits are enabled (LAUNCH_MODE)
- * Use server-only env var (no NEXT_PUBLIC prefix) to prevent client manipulation
+ * Check if per-session message limits are enabled.
+ * Defaults to true (MESSAGE_LIMIT_ENABLED !== 'false').
  */
 export function isMessageLimitEnabled(): boolean {
-  // MESSAGE_LIMIT_ENABLED controls per-session message caps (default: true)
-  // CREDIT_SYSTEM_ENABLED controls credit deduction (separate flag in credit-manager.ts)
   return process.env.MESSAGE_LIMIT_ENABLED !== 'false';
 }
 
