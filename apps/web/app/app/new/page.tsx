@@ -38,6 +38,10 @@ export default function NewSessionPage() {
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
+        if (data.error === 'NO_CREDITS') {
+          router.push('/pricing');
+          return;
+        }
         throw new Error(data.error || `Failed to create session (${response.status})`);
       }
 

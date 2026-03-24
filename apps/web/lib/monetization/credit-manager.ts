@@ -79,13 +79,11 @@ export async function getCreditBalance(userId: string): Promise<CreditBalance | 
 /**
  * Check if user has sufficient credits
  *
- * Note: In LAUNCH_MODE, credit checks are bypassed to allow unlimited sessions
- * during the initial testing period (target: 100 sessions with message limits).
+ * When CREDIT_SYSTEM_ENABLED !== 'true', credit checks are bypassed.
  */
 export async function hasCredits(userId: string, required: number = 1, userEmail?: string): Promise<boolean> {
-  // Bypass credit checks in launch mode (for initial testing period)
-  // Use server-only env var (no NEXT_PUBLIC prefix) to prevent client manipulation
-  const isLaunchMode = process.env.LAUNCH_MODE === 'true';
+  // Skip credit checks when credit system is not enabled
+  const creditsDisabled = process.env.CREDIT_SYSTEM_ENABLED !== 'true';
 
   // Admin bypass — use provided email to avoid extra getUser() round-trip
   const email = userEmail ?? (await (async () => {
@@ -99,8 +97,7 @@ export async function hasCredits(userId: string, required: number = 1, userEmail
     return true;
   }
 
-  if (isLaunchMode) {
-    console.log('[LAUNCH_MODE] Bypassing credit check for user:', userId);
+  if (creditsDisabled) {
     return true;
   }
 
@@ -116,8 +113,7 @@ export async function hasCredits(userId: string, required: number = 1, userEmail
  * Atomically deduct 1 credit from user's balance
  * Uses database-level locking to prevent race conditions
  *
- * Note: In LAUNCH_MODE, credit deductions are bypassed to allow unlimited sessions
- * during the initial testing period.
+ * When CREDIT_SYSTEM_ENABLED !== 'true', credit deductions are bypassed.
  *
  * @param userId - User ID
  * @param sessionId - Optional BMad session ID for tracking
@@ -128,9 +124,8 @@ export async function deductCredit(
   sessionId?: string,
   userEmail?: string
 ): Promise<DeductCreditResult> {
-  // Bypass credit deduction in launch mode (for initial testing period)
-  // Use server-only env var (no NEXT_PUBLIC prefix) to prevent client manipulation
-  const isLaunchMode = process.env.LAUNCH_MODE === 'true';
+  // Skip credit deduction when credit system is not enabled
+  const creditsDisabled = process.env.CREDIT_SYSTEM_ENABLED !== 'true';
 
   // Admin bypass — use provided email to avoid extra getUser() round-trip
   const email = userEmail ?? (await (async () => {
@@ -148,12 +143,11 @@ export async function deductCredit(
     };
   }
 
-  if (isLaunchMode) {
-    console.log('[LAUNCH_MODE] Bypassing credit deduction for user:', userId, 'session:', sessionId);
+  if (creditsDisabled) {
     return {
       success: true,
-      balance: 999, // Arbitrary high number for launch mode
-      message: 'Launch mode: credit deduction bypassed',
+      balance: 999,
+      message: 'Credit system not enabled',
     };
   }
 

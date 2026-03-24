@@ -40,11 +40,11 @@ export interface IncrementResult {
 // ============================================================================
 
 /**
- * Check if message limits are enabled (LAUNCH_MODE)
- * Use server-only env var (no NEXT_PUBLIC prefix) to prevent client manipulation
+ * Check if per-session message limits are enabled.
+ * Defaults to true (MESSAGE_LIMIT_ENABLED !== 'false').
  */
 export function isMessageLimitEnabled(): boolean {
-  return process.env.LAUNCH_MODE === 'true';
+  return process.env.MESSAGE_LIMIT_ENABLED !== 'false';
 }
 
 /**
