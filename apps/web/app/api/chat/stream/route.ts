@@ -13,7 +13,8 @@ import {
 } from '@/lib/session/message-limit-manager';
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
 import { TOOL_NAMES } from '@/lib/ai/tools/index';
-import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
+import type Anthropic from '@anthropic-ai/sdk';
+type ContentBlock = Anthropic.Messages.ContentBlock;
 import type { BoardMemberId } from '@/lib/ai/board-types';
 
 /** A segment of text attributed to a specific speaker */

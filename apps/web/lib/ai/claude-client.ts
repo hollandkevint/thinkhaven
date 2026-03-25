@@ -1,5 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { Tool, ContentBlock, ToolUseBlock, TextBlock } from '@anthropic-ai/sdk/resources/messages';
+
+type Tool = Anthropic.Messages.Tool;
+type ContentBlock = Anthropic.Messages.ContentBlock;
+type ToolUseBlock = Anthropic.Messages.ToolUseBlock;
+type TextBlock = Anthropic.Messages.TextBlock;
 import { maryPersona, type CoachingContext } from './mary-persona';
 import { MARY_TOOLS } from './tools/index';
 
