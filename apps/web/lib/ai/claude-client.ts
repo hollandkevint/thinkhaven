@@ -74,6 +74,7 @@ export interface MessageWithToolUse {
   id: string;
   textContent: string;
   toolUses: ToolUseResult[];
+  rawContent: ContentBlock[];
   stopReason: 'end_turn' | 'tool_use' | 'max_tokens' | 'stop_sequence';
   usage?: TokenUsage;
 }
@@ -316,6 +317,7 @@ export class ClaudeClient {
         id: crypto.randomUUID(),
         textContent,
         toolUses,
+        rawContent: response.content,
         stopReason: response.stop_reason as MessageWithToolUse['stopReason'],
         usage,
       };
@@ -407,12 +409,12 @@ export class ClaudeClient {
         id: crypto.randomUUID(),
         textContent,
         toolUses,
+        rawContent: response.content,
         stopReason: response.stop_reason as MessageWithToolUse['stopReason'],
         usage,
       };
     } catch (error) {
       console.error('Claude API Error (tool continuation):', error);
-      // Log the messages that caused the error for debugging
       console.error('[Claude Client] Failed messages structure:', JSON.stringify(
         messages.map((m: any) => ({ role: m.role, contentType: Array.isArray(m.content) ? 'array' : typeof m.content, contentLength: Array.isArray(m.content) ? m.content.length : String(m.content).length }))
       ));

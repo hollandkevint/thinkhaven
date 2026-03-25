@@ -113,23 +113,9 @@ async function executeAgenticLoop(
     const toolResultsForClaude = ToolExecutor.formatResultsForClaude(results);
 
     // Add assistant's response (with tool use) to conversation
-    // We need to reconstruct the content blocks
-    const assistantContent: ContentBlock[] = [];
-    if (response.textContent) {
-      assistantContent.push({
-        type: 'text',
-        text: response.textContent
-      } as ContentBlock);
-    }
-    response.toolUses.forEach(tu => {
-      assistantContent.push({
-        type: 'tool_use',
-        id: tu.id,
-        name: tu.name,
-        input: tu.input
-      } as ContentBlock);
-    });
-    conversation.push({ role: 'assistant', content: assistantContent });
+    // Use raw content blocks from the API response (not reconstructed)
+    // to avoid ContentBlock vs ContentBlockParam type mismatches
+    conversation.push({ role: 'assistant', content: response.rawContent });
 
     // Continue the conversation with tool results
     response = await claudeClient.continueWithToolResults(
