@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
+import { RateLimiter } from '@/lib/security/rate-limiter';
 
 interface PathwayConfig {
   id: string;
@@ -37,6 +38,24 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Rate limit: 10 session creations per minute per user
+    const { allowed: rateLimitAllowed, remainingRequests, resetTime } = RateLimiter.checkRateLimit(user.id, 'session-create');
+    if (!rateLimitAllowed) {
+      return new Response(JSON.stringify({
+        error: 'Rate limit exceeded',
+        message: 'Too many session creation requests. Please try again later.',
+        retryAfter: Math.ceil((resetTime - Date.now()) / 1000),
+      }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(Math.ceil((resetTime - Date.now()) / 1000)),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': new Date(resetTime).toISOString(),
+        },
       });
     }
 

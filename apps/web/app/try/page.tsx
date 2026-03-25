@@ -24,7 +24,9 @@ export default function TryPage() {
             const result = await SessionMigration.migrateToUserWorkspace(user.id)
 
             if (result.success && result.migratedMessages && result.migratedMessages > 0) {
-              // TODO: Show toast notification for successful migration
+              // Store flag so the destination page can display a success message
+              sessionStorage.setItem('migration_success', String(result.migratedMessages))
+              console.log(`[Try] Successfully migrated ${result.migratedMessages} guest messages`)
             }
           } catch (error) {
             console.error('Migration failed:', error)

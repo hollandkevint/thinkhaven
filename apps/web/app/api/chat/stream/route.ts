@@ -13,6 +13,7 @@ import {
 } from '@/lib/session/message-limit-manager';
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
 import { TOOL_NAMES } from '@/lib/ai/tools/index';
+import { RateLimiter } from '@/lib/security/rate-limiter';
 import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
 import type { BoardMemberId } from '@/lib/ai/board-types';
 
@@ -192,6 +193,24 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'Unauthorized', details: authError?.message }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Rate limit: 30 requests per minute per user
+    const { allowed: rateLimitAllowed, remainingRequests, resetTime } = RateLimiter.checkRateLimit(user.id, 'default');
+    if (!rateLimitAllowed) {
+      return new Response(JSON.stringify({
+        error: 'Rate limit exceeded',
+        message: 'Too many requests. Please slow down and try again.',
+        retryAfter: Math.ceil((resetTime - Date.now()) / 1000),
+      }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(Math.ceil((resetTime - Date.now()) / 1000)),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': new Date(resetTime).toISOString(),
+        },
       });
     }
 

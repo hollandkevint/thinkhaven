@@ -26,6 +26,9 @@ export class RateLimiter {
     // Session management - higher limits for active users
     'session': { windowMs: 60 * 1000, maxRequests: 120 }, // 120 requests per minute
 
+    // Session creation - stricter limit
+    'session-create': { windowMs: 60 * 1000, maxRequests: 10 }, // 10 requests per minute
+
     // Default fallback
     'default': { windowMs: 60 * 1000, maxRequests: 30 } // 30 requests per minute
   };
