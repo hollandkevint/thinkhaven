@@ -41,23 +41,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Rate limit: 10 session creations per minute per user
-    const { allowed: rateLimitAllowed, remainingRequests, resetTime } = RateLimiter.checkRateLimit(user.id, 'session-create');
-    if (!rateLimitAllowed) {
-      return new Response(JSON.stringify({
-        error: 'Rate limit exceeded',
-        message: 'Too many session creation requests. Please try again later.',
-        retryAfter: Math.ceil((resetTime - Date.now()) / 1000),
-      }), {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': String(Math.ceil((resetTime - Date.now()) / 1000)),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': new Date(resetTime).toISOString(),
-        },
-      });
-    }
+    const { allowed, resetTime } = RateLimiter.checkRateLimit(user.id, 'session-create');
+    if (!allowed) return RateLimiter.createLimitResponse(resetTime);
 
     const body = await request.json().catch(() => ({}));
     const pathwayId = body.pathway || 'explore';

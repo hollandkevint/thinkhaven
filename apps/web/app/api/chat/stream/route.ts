@@ -196,26 +196,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Rate limit: 30 requests per minute per user
-    const { allowed: rateLimitAllowed, remainingRequests, resetTime } = RateLimiter.checkRateLimit(user.id, 'default');
-    if (!rateLimitAllowed) {
-      return new Response(JSON.stringify({
-        error: 'Rate limit exceeded',
-        message: 'Too many requests. Please slow down and try again.',
-        retryAfter: Math.ceil((resetTime - Date.now()) / 1000),
-      }), {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': String(Math.ceil((resetTime - Date.now()) / 1000)),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': new Date(resetTime).toISOString(),
-        },
-      });
-    }
-
     // ADMIN BYPASS CHECK: unlimited messages (check BEFORE any message limit logic)
     const isAdmin = isAdminEmail(user.email);
+
+    if (!isAdmin) {
+      const { allowed, resetTime } = RateLimiter.checkRateLimit(user.id, 'default');
+      if (!allowed) return RateLimiter.createLimitResponse(resetTime);
+    }
 
     // Validate session ownership
     let limitStatus: MessageLimitStatus | null = null;
