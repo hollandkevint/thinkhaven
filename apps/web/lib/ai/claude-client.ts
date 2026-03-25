@@ -412,6 +412,10 @@ export class ClaudeClient {
       };
     } catch (error) {
       console.error('Claude API Error (tool continuation):', error);
+      // Log the messages that caused the error for debugging
+      console.error('[Claude Client] Failed messages structure:', JSON.stringify(
+        messages.map((m: any) => ({ role: m.role, contentType: Array.isArray(m.content) ? 'array' : typeof m.content, contentLength: Array.isArray(m.content) ? m.content.length : String(m.content).length }))
+      ));
       throw new ClaudeApiError(`Failed to continue with tool results: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
