@@ -80,7 +80,7 @@ export default function SessionPage() {
       setError('')
       const { data, error: fetchError } = await supabase
         .from('bmad_sessions')
-        .select('id, user_id, chat_context, title, pathway, current_phase, message_count, message_limit, sub_persona_state, session_mode, lean_canvas, updated_at')
+        .select('id, user_id, chat_context, title, pathway, current_phase, message_count, message_limit, sub_persona_state, lean_canvas, updated_at')
         .eq('id', params.id)
         .eq('user_id', user.id)
         .single()
@@ -97,7 +97,6 @@ export default function SessionPage() {
         message_count: data.message_count,
         message_limit: data.message_limit,
         sub_persona_state: data.sub_persona_state as any,
-        session_mode: data.session_mode,
         lean_canvas: (data.lean_canvas as LeanCanvasType) || null,
       }
 

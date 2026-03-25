@@ -117,7 +117,7 @@ export default function AppDashboardPage() {
       // Select specific columns - exclude chat_context to avoid loading full JSONB blobs
       const { data, error: fetchError } = await supabase
         .from('bmad_sessions')
-        .select('id, user_id, pathway, title, current_phase, session_mode, message_count, message_limit, status, created_at, updated_at')
+        .select('id, user_id, pathway, title, current_phase, message_count, message_limit, status, created_at, updated_at')
         .eq('user_id', user?.id)
         .order('updated_at', { ascending: false })
         .limit(50);

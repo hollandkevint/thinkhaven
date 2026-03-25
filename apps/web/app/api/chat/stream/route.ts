@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
 
     const { data: bmadSession, error: sessionError } = await supabase
       .from('bmad_sessions')
-      .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state, session_mode, message_count, message_limit')
+      .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state, message_count, message_limit')
       .eq('id', sessionId)
       .eq('user_id', user.id)
       .single();
@@ -307,10 +307,6 @@ export async function POST(request: NextRequest) {
             taylorOptedIn: boolean;
           };
         }
-        if (bmadSession?.session_mode) {
-          (finalCoachingContext as any).sessionMode = bmadSession.session_mode;
-        }
-
         // Phase 2: Enrich with dynamic context from database
         if (bmadSessionForUpdate?.id) {
           const dynamicContextMarkdown = await ContextBuilder.getFormattedContext(

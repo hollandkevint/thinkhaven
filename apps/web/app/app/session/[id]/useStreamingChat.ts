@@ -21,7 +21,6 @@ export interface SessionData {
   message_count: number
   message_limit: number
   sub_persona_state: Record<string, unknown> | null
-  session_mode: string | null
   lean_canvas: LeanCanvas | null
 }
 
