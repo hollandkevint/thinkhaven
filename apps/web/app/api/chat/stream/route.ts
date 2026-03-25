@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
 
     const { data: bmadSession, error: sessionError } = await supabase
       .from('bmad_sessions')
-      .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state, message_count, message_limit')
+      .select('id, pathway, current_phase, overall_completion, sub_persona_state, message_count, message_limit')
       .eq('id', sessionId)
       .eq('user_id', user.id)
       .single();
@@ -301,12 +301,8 @@ export async function POST(request: NextRequest) {
 
         // Apply board state and session mode AFTER buildCoachingContext
         // (buildCoachingContext rebuilds the object, so these must come after)
-        if (bmadSession?.board_state) {
-          finalCoachingContext.boardState = bmadSession.board_state as {
-            activeSpeaker: BoardMemberId;
-            taylorOptedIn: boolean;
-          };
-        }
+        // Board state is managed via sub_persona_state and tool calls
+        // (board_state column may not exist in all environments)
         // Phase 2: Enrich with dynamic context from database
         if (bmadSessionForUpdate?.id) {
           const dynamicContextMarkdown = await ContextBuilder.getFormattedContext(
