@@ -288,6 +288,42 @@ Subtle, purposeful animations that feel organic.
 
 ---
 
+## Screens & Components (.pen file)
+
+The visual design source of truth is `docs/design/design-system.pen`. It contains all reusable components and screen mockups.
+
+### Screens
+
+| Screen | Description |
+|--------|-------------|
+| Landing Page | NavBar + Hero + Features (4 modes) + CTA section |
+| Chat Interface | Sidebar (sessions list) + chat pane |
+| Dashboard & Session Launcher | NavBar + sidebar + session cards + launcher |
+| Trial Gate Paywall | Centered modal over NavBar, message limit warning |
+| Chat Session + Lean Canvas | Split pane: chat left, 9-box canvas right |
+| Pricing Page | NavBar + two-tier pricing cards (Free vs Pro) + FAQ |
+| Guest Signup Modal | Overlay modal for guest conversion at message limit |
+| Canvas Export + Session Title | Chat+canvas with export button and auto-title header |
+
+### Reusable Components
+
+| Component | Description |
+|-----------|-------------|
+| Button/Primary | Terracotta fill, cream text, 8px radius |
+| Button/Secondary | Transparent, ink border 1.5px |
+| Button/Ghost | Terracotta text only |
+| Card | Parchment bg, subtle border + shadow, 12px radius |
+| ModeBadge | Pill badge (9999px radius) for AI mode indicator |
+| Input | Label + field with subtle border |
+| ViabilityScore | Score/10 with forest green accent |
+| NavBar | Logo + nav links + CTA button |
+| ChatBubble/User | Terracotta bg, cream text, asymmetric radius |
+| ChatBubble/Assistant | Parchment bg, ink text, subtle border |
+| SessionTimer | Timer clock + phase progress indicators |
+| Credit Balance | Session count + upgrade CTA (3 states) |
+
+---
+
 ## Implementation Notes
 
 ### Google Fonts Import
