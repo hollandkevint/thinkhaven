@@ -175,6 +175,9 @@ export default function AppDashboardPage() {
   const handleDeleteSession = async (sessionId: string) => {
     if (!confirm('Are you sure you want to delete this session?')) return;
 
+    // Optimistic removal so UI updates immediately
+    setSessions(prev => prev.filter(s => s.id !== sessionId));
+
     try {
       const { error } = await supabase
         .from('bmad_sessions')
@@ -183,11 +186,10 @@ export default function AppDashboardPage() {
         .eq('user_id', user?.id);  // IDOR protection
 
       if (error) throw error;
-
-      // Refresh sessions
-      fetchSessions();
     } catch (error) {
       console.error('Error deleting session:', error);
+      // Revert on failure
+      fetchSessions();
     }
   };
 
@@ -405,7 +407,7 @@ export default function AppDashboardPage() {
                             <MoreVertical className="w-4 h-4 text-muted-foreground" />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenuItem
                             onSelect={() => handleSessionClick(session.id)}
                           >
