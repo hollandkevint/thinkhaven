@@ -399,6 +399,7 @@ export default function AppDashboardPage() {
                         <DropdownMenuTrigger asChild>
                           <button
                             onClick={(e) => e.stopPropagation()}
+                            onPointerDown={(e) => e.stopPropagation()}
                             className="p-1.5 hover:bg-accent rounded transition-colors relative z-10"
                           >
                             <MoreVertical className="w-4 h-4 text-muted-foreground" />
@@ -406,18 +407,12 @@ export default function AppDashboardPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSessionClick(session.id);
-                            }}
+                            onSelect={() => handleSessionClick(session.id)}
                           >
                             Open
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteSession(session.id);
-                            }}
+                            onSelect={() => handleDeleteSession(session.id)}
                             className="text-destructive"
                           >
                             Delete
