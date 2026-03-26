@@ -441,7 +441,7 @@ export default function SessionPage() {
 
       {/* Right Pane - Lean Canvas and/or Board Overview */}
       {isCanvasOpen && (session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) || boardState) && (
-        <div className="w-[380px] flex-shrink-0 border-l border-divider bg-cream overflow-y-auto">
+        <div className="canvas-pane border-l border-divider !bg-cream overflow-y-auto">
           <div className="flex items-center justify-between px-4 py-3 border-b border-divider">
             <span className="font-display text-xs font-semibold uppercase tracking-wider text-ink-light">
               {boardState ? 'Board & Canvas' : 'Lean Canvas'}

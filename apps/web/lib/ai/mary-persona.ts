@@ -540,6 +540,15 @@ You've explored enough to bring in other perspectives. Suggest the Board of Dire
     const oneQuestionRule = `\n\nONE QUESTION RULE (STRICT):
 End your response with exactly ONE question. Not two, not three — ONE. If you catch yourself writing a second question, delete it. Multiple questions dilute focus and overwhelm.`;
 
+    // Progression pressure at milestones
+    const progressionPressure = exchangeCount >= 15
+      ? `\n\nSESSION WRAP-UP (exchange ${exchangeCount}):
+It's time to wrap up. Call update_lean_canvas with ALL remaining evidence. Then use recommend_action to give a viability assessment. If the Board hasn't weighed in yet, offer one last chance before concluding.`
+      : exchangeCount >= 10
+      ? `\n\nPROGRESSION CHECK (exchange ${exchangeCount}):
+Check if the lean canvas is complete. If boxes are still empty, your ONE question should target the biggest gap. Push toward filling all 9 boxes before going deeper.`
+      : '';
+
     if (exchangeCount === ELICIT) {
       return `CHALLENGE LOOP — CURRENT PHASE: ELICIT
 Use First Principles Thinking. Ask exactly ONE question about the fundamental problem this solves and who feels the pain most acutely.
@@ -560,7 +569,7 @@ End with exactly ONE question about the biggest gap you see.${oneQuestionRule}${
     return `CHALLENGE LOOP — CURRENT PHASE: DEEP EXPLORATION
 Continue challenging and refining the user's thinking.
 Use Provocation Technique on the weakest area of their thinking.
-If the user accepted the Board of Directors, use switch_speaker to activate Victoria (investor perspective).${oneQuestionRule}${canvasInstruction}${boardOffer}`;
+If the user accepted the Board of Directors, use switch_speaker to activate Victoria (investor perspective).${oneQuestionRule}${canvasInstruction}${boardOffer}${progressionPressure}`;
   }
 
   private adaptPersonaToContext(context?: CoachingContext): CoachingPersonaConfig {

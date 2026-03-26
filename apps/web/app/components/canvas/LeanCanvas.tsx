@@ -27,7 +27,7 @@ function CanvasBox({ label, content }: { label: string; content?: string }) {
 
   return (
     <div
-      className={`p-3 rounded-lg min-h-[60px] max-h-[140px] flex flex-col gap-1 ${
+      className={`p-3 rounded-lg min-h-[60px] flex flex-col gap-1 ${
         filled
           ? 'border border-ink/12 border-l-2 border-l-terracotta bg-cream'
           : 'border border-dashed border-ink/20 bg-parchment/50'
