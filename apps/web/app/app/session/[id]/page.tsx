@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
 import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
+import TypingIndicator from '@/app/components/chat/TypingIndicator'
 import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
 import HandoffAnnotation from '@/app/components/board/HandoffAnnotation'
@@ -287,11 +288,11 @@ export default function SessionPage() {
                     {message.role === 'user' ? (
                       <div className="flex justify-end">
                         <div className="flex items-start gap-3 max-w-[70%]">
-                          <div className="px-5 py-4 rounded-xl bg-terracotta/10">
-                            <p className="text-foreground">{message.content}</p>
+                          <div className="px-5 py-4 rounded-t-xl rounded-bl-xl rounded-br bg-terracotta">
+                            <p className="text-cream">{message.content}</p>
                           </div>
                           <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-primary-foreground">
-                            {user?.email?.[0]?.toUpperCase() || 'U'}
+                            {user?.user_metadata?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                           </div>
                         </div>
                       </div>
@@ -303,37 +304,43 @@ export default function SessionPage() {
                     ) : message.role === 'assistant' ? (
                       <div className="flex justify-start">
                         <div className="flex items-start gap-3 max-w-[70%]">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-terracotta text-cream">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-terracotta text-cream font-display font-semibold text-sm">
                             M
                           </div>
-                          <div className="px-5 py-4 rounded-xl bg-muted">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              className="prose prose-sm max-w-none"
-                              components={{
-                                code({ className, children, ...props }: any) {
-                                  const isInline = !className
-                                  return isInline ? (
-                                    <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
-                                      {children}
-                                    </code>
-                                  ) : (
-                                    <pre className="p-4 rounded-lg overflow-x-auto bg-parchment">
-                                      <code className="font-mono">{children}</code>
-                                    </pre>
-                                  )
-                                },
-                                h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 text-ink">{children}</h1>,
-                                h2: ({ children }) => <h2 className="text-xl font-bold mb-3 text-ink">{children}</h2>,
-                                h3: ({ children }) => <h3 className="text-lg font-semibold mb-2 text-ink">{children}</h3>,
-                                p: ({ children }) => <p className="mb-4 leading-relaxed text-ink">{children}</p>,
-                                ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
-                                ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
-                                li: ({ children }) => <li className="text-ink">{children}</li>,
-                              }}
-                            >
-                              {message.content}
-                            </ReactMarkdown>
+                          <div>
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="font-display text-sm font-semibold text-terracotta">Mary</span>
+                              <span className="text-xs text-slate-blue">Facilitator</span>
+                            </div>
+                            <div className="px-5 py-4 rounded-t-xl rounded-br-xl rounded-bl bg-parchment border border-ink/8">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                className="prose prose-sm max-w-none"
+                                components={{
+                                  code({ className, children, ...props }: any) {
+                                    const isInline = !className
+                                    return isInline ? (
+                                      <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
+                                        {children}
+                                      </code>
+                                    ) : (
+                                      <pre className="p-4 rounded-lg overflow-x-auto bg-cream">
+                                        <code className="font-mono">{children}</code>
+                                      </pre>
+                                    )
+                                  },
+                                  h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 text-ink">{children}</h1>,
+                                  h2: ({ children }) => <h2 className="text-xl font-bold mb-3 text-ink">{children}</h2>,
+                                  h3: ({ children }) => <h3 className="text-lg font-semibold mb-2 text-ink">{children}</h3>,
+                                  p: ({ children }) => <p className="mb-4 leading-relaxed text-ink">{children}</p>,
+                                  ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
+                                  ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
+                                  li: ({ children }) => <li className="text-ink">{children}</li>,
+                                }}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -358,16 +365,7 @@ export default function SessionPage() {
               })}
 
               {sendingMessage && (
-                <div className="flex justify-start mb-6 opacity-50">
-                  <div className="flex items-start gap-3 max-w-[70%]">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-terracotta text-cream">
-                      M
-                    </div>
-                    <div className="px-5 py-4 rounded-xl bg-muted">
-                      <span className="loading-shimmer h-4 w-32 inline-block rounded"></span>
-                    </div>
-                  </div>
-                </div>
+                <TypingIndicator isTyping userName="Mary" />
               )}
 
               <div ref={messagesEndRef} />
