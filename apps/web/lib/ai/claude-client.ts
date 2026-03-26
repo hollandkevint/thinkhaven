@@ -1,5 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { Tool, ContentBlock, ToolUseBlock, TextBlock } from '@anthropic-ai/sdk/resources/messages';
+
+type Tool = Anthropic.Messages.Tool;
+type ContentBlock = Anthropic.Messages.ContentBlock;
+type ToolUseBlock = Anthropic.Messages.ToolUseBlock;
+type TextBlock = Anthropic.Messages.TextBlock;
 import { maryPersona, type CoachingContext } from './mary-persona';
 import { MARY_TOOLS } from './tools/index';
 
@@ -11,37 +15,14 @@ let anthropic: Anthropic | null = null;
 
 function getAnthropicClient(): Anthropic {
   if (!anthropic) {
-    // Get and sanitize API key (remove whitespace/newlines)
-    const rawApiKey = process.env.ANTHROPIC_API_KEY;
-    const apiKey = rawApiKey?.trim();
+    const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
 
-    console.log('[Claude Client] DEBUG: Getting Anthropic client', {
-      hasRawKey: !!rawApiKey,
-      rawKeyLength: rawApiKey?.length || 0,
-      hasApiKey: !!apiKey,
-      apiKeyLength: apiKey?.length || 0,
-      apiKeyPrefix: apiKey?.substring(0, 15) || 'undefined',
-      nodeEnv: process.env.NODE_ENV,
-      timestamp: new Date().toISOString()
-    });
-
-    // Validate API key at runtime (not module load time)
     if (!apiKey) {
-      console.error('[Claude Client] FATAL: ANTHROPIC_API_KEY environment variable is not set or empty after trim');
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
     }
 
-    console.log('[Claude Client] Initializing Anthropic client...');
-
-    try {
-      anthropic = new Anthropic({
-        apiKey: apiKey,
-      });
-      console.log('[Claude Client] Successfully initialized Anthropic client');
-    } catch (error) {
-      console.error('[Claude Client] Failed to initialize Anthropic client:', error);
-      throw error;
-    }
+    anthropic = new Anthropic({ apiKey });
+    console.log('[Claude Client] Initialized');
   }
   return anthropic;
 }
@@ -74,6 +55,7 @@ export interface MessageWithToolUse {
   id: string;
   textContent: string;
   toolUses: ToolUseResult[];
+  rawContent: ContentBlock[];
   stopReason: 'end_turn' | 'tool_use' | 'max_tokens' | 'stop_sequence';
   usage?: TokenUsage;
 }
@@ -91,14 +73,6 @@ export class ClaudeClient {
     coachingContext?: CoachingContext
   ): Promise<StreamingResponse> {
     try {
-      console.log('[Claude Client] sendMessage called', {
-        messageLength: message.length,
-        historyLength: conversationHistory.length,
-        hasCoachingContext: !!coachingContext,
-        timestamp: new Date().toISOString()
-      });
-
-      // Filter conversation history to only include role and content
       const cleanHistory = conversationHistory.map(msg => ({
         role: msg.role,
         content: msg.content
@@ -109,13 +83,7 @@ export class ClaudeClient {
         { role: 'user' as const, content: message }
       ];
 
-      console.log('[Claude Client] Getting Anthropic client...');
       const client = getAnthropicClient();
-
-      console.log('[Claude Client] Calling Anthropic API...', {
-        model: ANTHROPIC_MODEL,
-        messageCount: messages.length
-      });
 
       const stream = await client.messages.create({
         model: ANTHROPIC_MODEL, // Claude Sonnet 4 - upgraded per API docs
@@ -125,8 +93,6 @@ export class ClaudeClient {
         messages: messages,
         stream: true,
       });
-
-      console.log('[Claude Client] Successfully created Anthropic stream');
 
       const { content, usage } = await this.processStreamWithUsage(stream);
       
@@ -196,29 +162,6 @@ export class ClaudeClient {
     };
   }
 
-  private async *processStream(stream: AsyncIterable<unknown>): AsyncIterable<string> {
-    try {
-      for await (const chunk of stream) {
-        if (
-          typeof chunk === 'object' && 
-          chunk !== null && 
-          'type' in chunk &&
-          chunk.type === 'content_block_delta' && 
-          'delta' in chunk &&
-          typeof chunk.delta === 'object' &&
-          chunk.delta !== null &&
-          'text' in chunk.delta &&
-          typeof chunk.delta.text === 'string'
-        ) {
-          yield chunk.delta.text;
-        }
-      }
-    } catch (error) {
-      console.error('Stream processing error:', error);
-      throw new ClaudeApiError(`Stream processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
   async testConnection(): Promise<boolean> {
     try {
       const client = getAnthropicClient();
@@ -248,14 +191,6 @@ export class ClaudeClient {
     }
   ): Promise<MessageWithToolUse> {
     try {
-      console.log('[Claude Client] sendMessageWithTools called', {
-        messageLength: message.length,
-        historyLength: conversationHistory.length,
-        hasCoachingContext: !!coachingContext,
-        toolCount: options?.tools?.length || MARY_TOOLS.length,
-        timestamp: new Date().toISOString()
-      });
-
       const cleanHistory = conversationHistory.map(msg => ({
         role: msg.role,
         content: msg.content
@@ -276,11 +211,6 @@ export class ClaudeClient {
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages,
         tools: tools,
-      });
-
-      console.log('[Claude Client] Response received', {
-        stopReason: response.stop_reason,
-        contentBlocks: response.content.length,
       });
 
       // Extract text and tool use blocks
@@ -316,6 +246,7 @@ export class ClaudeClient {
         id: crypto.randomUUID(),
         textContent,
         toolUses,
+        rawContent: response.content,
         stopReason: response.stop_reason as MessageWithToolUse['stopReason'],
         usage,
       };
@@ -334,11 +265,6 @@ export class ClaudeClient {
       role: 'user' | 'assistant';
       content: string | ContentBlock[];
     }>,
-    toolResults: Array<{
-      type: 'tool_result';
-      tool_use_id: string;
-      content: string;
-    }>,
     coachingContext?: CoachingContext,
     options?: {
       tools?: Tool[];
@@ -346,20 +272,11 @@ export class ClaudeClient {
     }
   ): Promise<MessageWithToolUse> {
     try {
-      console.log('[Claude Client] continueWithToolResults called', {
-        historyLength: conversationHistory.length,
-        toolResultCount: toolResults.length,
-        timestamp: new Date().toISOString()
-      });
-
       const client = getAnthropicClient();
       const tools = options?.tools || MARY_TOOLS;
 
-      // Build messages array with tool results
-      const messages = [
-        ...conversationHistory,
-        { role: 'user' as const, content: toolResults }
-      ];
+      // Conversation already includes tool results as the last user message
+      const messages = [...conversationHistory];
 
       const response = await client.messages.create({
         model: ANTHROPIC_MODEL,
@@ -368,11 +285,6 @@ export class ClaudeClient {
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages as Anthropic.MessageParam[],
         tools: tools,
-      });
-
-      console.log('[Claude Client] Tool continuation response received', {
-        stopReason: response.stop_reason,
-        contentBlocks: response.content.length,
       });
 
       // Extract text and tool use blocks
@@ -407,6 +319,7 @@ export class ClaudeClient {
         id: crypto.randomUUID(),
         textContent,
         toolUses,
+        rawContent: response.content,
         stopReason: response.stop_reason as MessageWithToolUse['stopReason'],
         usage,
       };

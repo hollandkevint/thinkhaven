@@ -7,7 +7,8 @@
  * replacing heuristic-based phase completion with explicit agent decisions.
  */
 
-import type { Tool } from '@anthropic-ai/sdk/resources/messages';
+import type Anthropic from '@anthropic-ai/sdk';
+type Tool = Anthropic.Messages.Tool;
 
 // =============================================================================
 // Tool Result Types

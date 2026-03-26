@@ -14,7 +14,8 @@ import {
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
 import { TOOL_NAMES } from '@/lib/ai/tools/index';
 import { RateLimiter } from '@/lib/security/rate-limiter';
-import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
+import type Anthropic from '@anthropic-ai/sdk';
+type ContentBlock = Anthropic.Messages.ContentBlock;
 import type { BoardMemberId } from '@/lib/ai/board-types';
 
 /** A segment of text attributed to a specific speaker */
@@ -114,28 +115,17 @@ async function executeAgenticLoop(
     const toolResultsForClaude = ToolExecutor.formatResultsForClaude(results);
 
     // Add assistant's response (with tool use) to conversation
-    // We need to reconstruct the content blocks
-    const assistantContent: ContentBlock[] = [];
-    if (response.textContent) {
-      assistantContent.push({
-        type: 'text',
-        text: response.textContent
-      } as ContentBlock);
-    }
-    response.toolUses.forEach(tu => {
-      assistantContent.push({
-        type: 'tool_use',
-        id: tu.id,
-        name: tu.name,
-        input: tu.input
-      } as ContentBlock);
-    });
-    conversation.push({ role: 'assistant', content: assistantContent });
+    // Use raw content blocks from the API response (not reconstructed)
+    // to avoid ContentBlock vs ContentBlockParam type mismatches
+    conversation.push({ role: 'assistant', content: response.rawContent });
 
-    // Continue the conversation with tool results
+    // Add tool results as user message to maintain valid conversation structure
+    // Without this, round 2+ fails: tool_use blocks without matching tool_result
+    conversation.push({ role: 'user', content: toolResultsForClaude as any });
+
+    // Continue the conversation with tool results (already in conversation)
     response = await claudeClient.continueWithToolResults(
       conversation,
-      toolResultsForClaude,
       coachingContext
     );
 
@@ -209,7 +199,7 @@ export async function POST(request: NextRequest) {
 
     const { data: bmadSession, error: sessionError } = await supabase
       .from('bmad_sessions')
-      .select('id, pathway, current_phase, overall_completion, sub_persona_state, board_state, session_mode, message_count, message_limit')
+      .select('id, pathway, current_phase, overall_completion, sub_persona_state, message_count, message_limit')
       .eq('id', sessionId)
       .eq('user_id', user.id)
       .single();
@@ -307,16 +297,8 @@ export async function POST(request: NextRequest) {
 
         // Apply board state and session mode AFTER buildCoachingContext
         // (buildCoachingContext rebuilds the object, so these must come after)
-        if (bmadSession?.board_state) {
-          finalCoachingContext.boardState = bmadSession.board_state as {
-            activeSpeaker: BoardMemberId;
-            taylorOptedIn: boolean;
-          };
-        }
-        if (bmadSession?.session_mode) {
-          (finalCoachingContext as any).sessionMode = bmadSession.session_mode;
-        }
-
+        // Board state is managed via sub_persona_state and tool calls
+        // (board_state column may not exist in all environments)
         // Phase 2: Enrich with dynamic context from database
         if (bmadSessionForUpdate?.id) {
           const dynamicContextMarkdown = await ContextBuilder.getFormattedContext(
@@ -333,7 +315,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare conversation context management
-    const historyWithContext = conversationHistory || [];
+    // Filter to only user/assistant text messages (strip system messages
+    // and any messages with tool_use/tool_result content from previous rounds)
+    const historyWithContext = (conversationHistory || []).filter(
+      (msg: ConversationMessage) =>
+        (msg.role === 'user' || msg.role === 'assistant') &&
+        typeof msg.content === 'string'
+    );
     const managedHistory = ConversationContextManager.pruneConversationHistory(
       historyWithContext,
       6000 // Leave room for response
@@ -413,24 +401,19 @@ export async function POST(request: NextRequest) {
                   ));
                 }
 
-                // Stream the segment content word-by-word with speaker tag
-                const words = segment.content.split(' ');
-                for (let i = 0; i < words.length; i++) {
-                  controller.enqueue(encoder.encodeContent(
-                    words[i] + (i < words.length - 1 ? ' ' : ''),
-                    segment.speaker
-                  ));
-                  const delay = Math.max(10, Math.min(50, words[i].length * 5));
-                  await new Promise(resolve => setTimeout(resolve, delay));
+                // Stream the segment content in sentence-sized chunks
+                const sentences = segment.content.match(/[^.!?\n]+[.!?\n]?\s*/g) || [segment.content];
+                for (const sentence of sentences) {
+                  controller.enqueue(encoder.encodeContent(sentence, segment.speaker));
+                  await new Promise(resolve => setTimeout(resolve, 5));
                 }
               }
             } else {
-              // Fallback: stream as plain text (no segments)
-              const words = fullContent.split(' ');
-              for (let i = 0; i < words.length; i++) {
-                controller.enqueue(encoder.encodeContent(words[i] + (i < words.length - 1 ? ' ' : '')));
-                const delay = Math.max(10, Math.min(50, words[i].length * 5));
-                await new Promise(resolve => setTimeout(resolve, delay));
+              // Fallback: stream as plain text in sentence chunks
+              const sentences = fullContent.match(/[^.!?\n]+[.!?\n]?\s*/g) || [fullContent];
+              for (const sentence of sentences) {
+                controller.enqueue(encoder.encodeContent(sentence));
+                await new Promise(resolve => setTimeout(resolve, 5));
               }
             }
 
@@ -465,15 +448,11 @@ export async function POST(request: NextRequest) {
               // Fallback: Send full content at once
               fullContent = claudeResponse.content as string;
 
-              // Simulate streaming for better UX
-              const words = fullContent.split(' ');
-
-              for (let i = 0; i < words.length; i++) {
-                controller.enqueue(encoder.encodeContent(words[i] + (i < words.length - 1 ? ' ' : '')));
-
-                // Variable delay based on word length for natural feel
-                const delay = Math.max(20, Math.min(100, words[i].length * 10));
-                await new Promise(resolve => setTimeout(resolve, delay));
+              // Send full content in sentence chunks
+              const sentences = fullContent.match(/[^.!?\n]+[.!?\n]?\s*/g) || [fullContent];
+              for (const sentence of sentences) {
+                controller.enqueue(encoder.encodeContent(sentence));
+                await new Promise(resolve => setTimeout(resolve, 5));
               }
             }
           }

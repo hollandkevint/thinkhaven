@@ -481,6 +481,48 @@ Explicitly deferred beyond Sprint 3. Build only when data justifies:
 
 ---
 
+## Design Assets
+
+Design system source of truth: `docs/design/design-system.pen` (Pencil file)
+Design system documentation: `docs/design/design-system.md`
+CSS source of truth: `globals.css` + `tailwind.config.cjs`
+
+### Existing Screens in .pen File
+
+| Screen | Status | Notes |
+|--------|--------|-------|
+| Landing Page | Current | NavBar, Hero, Features, CTA sections |
+| Chat Interface | Current | Sidebar + chat pane |
+| Dashboard & Session Launcher | Current | Sidebar + session list + launcher |
+| Trial Gate Paywall | Current | Message limit overlay |
+| Chat Session + Lean Canvas | Current | Split pane: chat + canvas grid |
+| Pricing Page | Added 2026-03-24 | Free vs Pro tiers ($0/3 sessions vs $39/10 sessions) |
+| Guest Signup Modal | Added 2026-03-24 | Overlay modal for guest-to-auth conversion (Sprint 1b) |
+| Canvas Export + Session Title | Added 2026-03-24 | Updated chat+canvas with export button + auto-title (Sprint 2) |
+
+### Existing Components in .pen File
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Button/Primary | Current | Terracotta CTA |
+| Button/Secondary | Current | Ink outline |
+| Button/Ghost | Current | Terracotta text only |
+| Card | Current | Parchment with shadow |
+| ModeBadge | Current | Pill badge for AI mode |
+| Input | Current | Label + field |
+| ViabilityScore | Current | Score/10 display |
+| NavBar | Current | Logo + links + CTA |
+| ChatBubble/User | Current | Terracotta bubble |
+| ChatBubble/Assistant | Current | Parchment bubble |
+| SessionTimer | Current | Timer + phase indicators |
+| Credit Balance + Upgrade CTA | Added 2026-03-24 | 3 states: healthy, low, empty (Sprint 3c) |
+
+### Design Variables
+
+All color tokens, spacing, and radius values are registered in the .pen file and match `globals.css`. Key tokens: `$cream`, `$parchment`, `$terracotta`, `$ink`, `$forest`, `$mustard`, `$slate-blue`, `$rust`, `$border-subtle`.
+
+---
+
 ## References
 
 ### Codebase

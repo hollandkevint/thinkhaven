@@ -211,10 +211,10 @@ export async function switchSpeaker(
     // Resolve and validate the speaker key
     const newMember = resolveSpeakerKey(input.speaker_key);
 
-    // Get current board state
+    // Get current board state from sub_persona_state
     const { data: session, error: fetchError } = await supabase
       .from('bmad_sessions')
-      .select('board_state')
+      .select('sub_persona_state')
       .eq('id', sessionId)
       .single();
 
@@ -225,15 +225,15 @@ export async function switchSpeaker(
       };
     }
 
-    const currentBoardState = (session.board_state as { activeSpeaker?: string }) || {};
-    const previousSpeaker = currentBoardState.activeSpeaker || 'mary';
+    const sps = (session.sub_persona_state as Record<string, unknown>) || {};
+    const previousSpeaker = (sps.activeSpeaker as string) || 'mary';
 
-    // Update board state
+    // Update board state within sub_persona_state
     const { error: updateError } = await supabase
       .from('bmad_sessions')
       .update({
-        board_state: {
-          ...currentBoardState,
+        sub_persona_state: {
+          ...sps,
           activeSpeaker: newMember.id,
         },
         updated_at: new Date().toISOString(),

@@ -514,6 +514,9 @@ Remember: Users chose ThinkHaven BECAUSE they want genuine feedback. Sycophancy 
     DEEP_EXPLORATION_START: 3,
   } as const;
 
+  /** Board offer thresholds — suggest board at these exchange counts */
+  private static readonly BOARD_OFFER_EXCHANGES = [5, 12, 20];
+
   /**
    * Generate phase-specific challenge loop instructions based on exchange count.
    * Only current phase instructions are injected (not all phases at once).
@@ -521,30 +524,52 @@ Remember: Users chose ThinkHaven BECAUSE they want genuine feedback. Sycophancy 
   private generateChallengeLoopSection(exchangeCount: number): string {
     const { ELICIT, CHALLENGE, SYNTHESIZE } = MaryPersona.CHALLENGE_PHASE;
 
+    // Lean canvas instruction appended to every phase after ELICIT
+    const canvasInstruction = exchangeCount >= CHALLENGE
+      ? `\n\nLEAN CANVAS UPDATES (CRITICAL):
+After EVERY exchange where the user reveals business model data, call update_lean_canvas with ALL boxes you have evidence for. Do NOT wait until a "canvas phase" — fill boxes incrementally as data emerges. Check which boxes are still empty and ask about them when natural. The 9 boxes are: problem, customer_segments, unique_value_proposition, solution, channels, revenue_streams, cost_structure, key_metrics, unfair_advantage.`
+      : '';
+
+    // Board offer at specific exchange counts
+    const shouldOfferBoard = MaryPersona.BOARD_OFFER_EXCHANGES.includes(exchangeCount);
+    const boardOffer = shouldOfferBoard
+      ? `\n\nBOARD OF DIRECTORS OFFER:
+You've explored enough to bring in other perspectives. Suggest the Board of Directors: "Want me to bring in the Board? Victoria (investor), Casey (co-founder), and Omar (operator) can pressure-test this from their angles." If the user accepts, use switch_speaker to activate victoria first.`
+      : '';
+
+    const oneQuestionRule = `\n\nONE QUESTION RULE (STRICT):
+End your response with exactly ONE question. Not two, not three — ONE. If you catch yourself writing a second question, delete it. Multiple questions dilute focus and overwhelm.`;
+
+    // Progression pressure at milestones
+    const progressionPressure = exchangeCount >= 15
+      ? `\n\nSESSION WRAP-UP (exchange ${exchangeCount}):
+It's time to wrap up. Call update_lean_canvas with ALL remaining evidence. Then use recommend_action to give a viability assessment. If the Board hasn't weighed in yet, offer one last chance before concluding.`
+      : exchangeCount >= 10
+      ? `\n\nPROGRESSION CHECK (exchange ${exchangeCount}):
+Check if the lean canvas is complete. If boxes are still empty, your ONE question should target the biggest gap. Push toward filling all 9 boxes before going deeper.`
+      : '';
+
     if (exchangeCount === ELICIT) {
       return `CHALLENGE LOOP — CURRENT PHASE: ELICIT
 Use First Principles Thinking. Ask exactly ONE question about the fundamental problem this solves and who feels the pain most acutely.
 Do NOT ask multiple questions. Do NOT call any tools yet.
-Keep your response to 2-3 sentences plus one question.`;
+Keep your response to 2-3 sentences plus one question.${oneQuestionRule}`;
     }
     if (exchangeCount === CHALLENGE) {
       return `CHALLENGE LOOP — CURRENT PHASE: CHALLENGE
 Use Assumption Reversal. Identify the user's riskiest assumption and challenge it directly.
-Ask exactly ONE follow-up question after your challenge.
-Keep your response focused — no more than 3-4 sentences plus one question.`;
+Keep your response focused — no more than 3-4 sentences plus one question.${oneQuestionRule}${canvasInstruction}`;
     }
     if (exchangeCount === SYNTHESIZE) {
       return `CHALLENGE LOOP — CURRENT PHASE: SYNTHESIZE
-Summarize what you've heard in 2-3 sentences.
-Then suggest bringing in the Board of Directors for investor, co-founder, and operator perspectives.
-Say something like: "Want me to bring in the Board of Directors? They'll pressure-test this from investor, operator, and co-founder angles."`;
+Summarize what you've heard in 2-3 sentences, then continue exploring.
+End with exactly ONE question about the biggest gap you see.${oneQuestionRule}${canvasInstruction}${boardOffer}`;
     }
     // exchangeCount >= 3: deep exploration
     return `CHALLENGE LOOP — CURRENT PHASE: DEEP EXPLORATION
-Continue challenging and refining the user's thinking. Ask ONE question per turn.
+Continue challenging and refining the user's thinking.
 Use Provocation Technique on the weakest area of their thinking.
-If the user accepted the Board of Directors, use switch_speaker to activate Victoria (investor perspective).
-If they declined, continue solo. Re-suggest the board around message 15 if the conversation has gone deep enough.`;
+If the user accepted the Board of Directors, use switch_speaker to activate Victoria (investor perspective).${oneQuestionRule}${canvasInstruction}${boardOffer}${progressionPressure}`;
   }
 
   private adaptPersonaToContext(context?: CoachingContext): CoachingPersonaConfig {

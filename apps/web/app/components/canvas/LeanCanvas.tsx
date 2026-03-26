@@ -27,17 +27,17 @@ function CanvasBox({ label, content }: { label: string; content?: string }) {
 
   return (
     <div
-      className={`p-3 rounded-lg min-h-[80px] flex flex-col gap-1 ${
+      className={`p-3 rounded-lg min-h-[60px] flex flex-col gap-1 ${
         filled
           ? 'border border-ink/12 border-l-2 border-l-terracotta bg-cream'
           : 'border border-dashed border-ink/20 bg-parchment/50'
       }`}
     >
-      <span className="text-[11px] font-display font-medium uppercase tracking-wider text-ink-light/70">
+      <span className="text-[11px] font-display font-medium uppercase tracking-wider text-ink-light/70 flex-shrink-0">
         {label}
       </span>
       {filled ? (
-        <p className="text-xs text-ink leading-relaxed">{content}</p>
+        <p className="text-xs text-ink leading-relaxed overflow-y-auto">{content}</p>
       ) : (
         <p className="text-xs text-ink-light/40 italic">Pending...</p>
       )}

@@ -117,7 +117,7 @@ export default function AppDashboardPage() {
       // Select specific columns - exclude chat_context to avoid loading full JSONB blobs
       const { data, error: fetchError } = await supabase
         .from('bmad_sessions')
-        .select('id, user_id, pathway, title, current_phase, session_mode, message_count, message_limit, status, created_at, updated_at')
+        .select('id, user_id, pathway, title, current_phase, message_count, message_limit, status, created_at, updated_at')
         .eq('user_id', user?.id)
         .order('updated_at', { ascending: false })
         .limit(50);
@@ -175,6 +175,9 @@ export default function AppDashboardPage() {
   const handleDeleteSession = async (sessionId: string) => {
     if (!confirm('Are you sure you want to delete this session?')) return;
 
+    // Optimistic removal so UI updates immediately
+    setSessions(prev => prev.filter(s => s.id !== sessionId));
+
     try {
       const { error } = await supabase
         .from('bmad_sessions')
@@ -183,11 +186,10 @@ export default function AppDashboardPage() {
         .eq('user_id', user?.id);  // IDOR protection
 
       if (error) throw error;
-
-      // Refresh sessions
-      fetchSessions();
     } catch (error) {
       console.error('Error deleting session:', error);
+      // Revert on failure
+      fetchSessions();
     }
   };
 
@@ -396,26 +398,23 @@ export default function AppDashboardPage() {
                         </h3>
                       </div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-1 hover:bg-accent rounded transition-colors"
-                        >
-                          <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            className="p-1.5 hover:bg-accent rounded transition-colors relative z-10"
+                          >
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                          </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSessionClick(session.id);
-                            }}
+                            onSelect={() => handleSessionClick(session.id)}
                           >
                             Open
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteSession(session.id);
-                            }}
+                            onSelect={() => handleDeleteSession(session.id)}
                             className="text-destructive"
                           >
                             Delete
