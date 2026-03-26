@@ -398,7 +398,7 @@ export default function AppDashboardPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
-                            onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+                            onClick={(e) => e.stopPropagation()}
                             className="p-1.5 hover:bg-accent rounded transition-colors relative z-10"
                           >
                             <MoreVertical className="w-4 h-4 text-muted-foreground" />
