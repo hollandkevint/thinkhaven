@@ -118,10 +118,13 @@ async function executeAgenticLoop(
     // to avoid ContentBlock vs ContentBlockParam type mismatches
     conversation.push({ role: 'assistant', content: response.rawContent });
 
-    // Continue the conversation with tool results
+    // Add tool results as user message to maintain valid conversation structure
+    // Without this, round 2+ fails: tool_use blocks without matching tool_result
+    conversation.push({ role: 'user', content: toolResultsForClaude as any });
+
+    // Continue the conversation with tool results (already in conversation)
     response = await claudeClient.continueWithToolResults(
       conversation,
-      toolResultsForClaude,
       coachingContext
     );
 

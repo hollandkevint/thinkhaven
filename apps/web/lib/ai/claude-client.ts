@@ -340,11 +340,6 @@ export class ClaudeClient {
       role: 'user' | 'assistant';
       content: string | ContentBlock[];
     }>,
-    toolResults: Array<{
-      type: 'tool_result';
-      tool_use_id: string;
-      content: string;
-    }>,
     coachingContext?: CoachingContext,
     options?: {
       tools?: Tool[];
@@ -354,18 +349,14 @@ export class ClaudeClient {
     try {
       console.log('[Claude Client] continueWithToolResults called', {
         historyLength: conversationHistory.length,
-        toolResultCount: toolResults.length,
         timestamp: new Date().toISOString()
       });
 
       const client = getAnthropicClient();
       const tools = options?.tools || MARY_TOOLS;
 
-      // Build messages array with tool results
-      const messages = [
-        ...conversationHistory,
-        { role: 'user' as const, content: toolResults }
-      ];
+      // Conversation already includes tool results as the last user message
+      const messages = [...conversationHistory];
 
       const response = await client.messages.create({
         model: ANTHROPIC_MODEL,
