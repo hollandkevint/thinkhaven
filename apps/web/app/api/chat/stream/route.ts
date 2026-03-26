@@ -306,7 +306,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare conversation context management
-    const historyWithContext = conversationHistory || [];
+    // Filter to only user/assistant text messages (strip system messages
+    // and any messages with tool_use/tool_result content from previous rounds)
+    const historyWithContext = (conversationHistory || []).filter(
+      (msg: ConversationMessage) =>
+        (msg.role === 'user' || msg.role === 'assistant') &&
+        typeof msg.content === 'string'
+    );
     const managedHistory = ConversationContextManager.pruneConversationHistory(
       historyWithContext,
       6000 // Leave room for response
