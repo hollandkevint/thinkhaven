@@ -26,6 +26,9 @@ export class RateLimiter {
     // Session management - higher limits for active users
     'session': { windowMs: 60 * 1000, maxRequests: 120 }, // 120 requests per minute
 
+    // Session creation - stricter limit
+    'session-create': { windowMs: 60 * 1000, maxRequests: 10 }, // 10 requests per minute
+
     // Default fallback
     'default': { windowMs: 60 * 1000, maxRequests: 30 } // 30 requests per minute
   };
@@ -136,6 +139,26 @@ export class RateLimiter {
   static resetRateLimit(identifier: string, type: keyof typeof RateLimiter.configs): void {
     const key = `${type}:${identifier}`;
     this.requests.delete(key);
+  }
+
+  /**
+   * Create a 429 Response for rate-limited requests
+   */
+  static createLimitResponse(resetTime: number): Response {
+    const retryAfter = String(Math.ceil((resetTime - Date.now()) / 1000));
+    return new Response(JSON.stringify({
+      error: 'Rate limit exceeded',
+      message: 'Too many requests. Please try again later.',
+      retryAfter: Number(retryAfter),
+    }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': retryAfter,
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': new Date(resetTime).toISOString(),
+      },
+    });
   }
 }
 

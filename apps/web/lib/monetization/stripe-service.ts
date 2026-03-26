@@ -44,8 +44,15 @@ if (!STRIPE_WEBHOOK_SECRET && process.env.NODE_ENV === 'production') {
   console.warn('WARNING: STRIPE_WEBHOOK_SECRET is not set in production');
 }
 
-// Application URL for redirects
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'http://localhost:3000';
+// Application URL for redirects (lazy to avoid build-time errors)
+function getAppUrl(): string {
+  const url = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL;
+  if (url) return url;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('NEXT_PUBLIC_APP_URL (or APP_URL) must be set in production');
+  }
+  return 'http://localhost:3000';
+}
 
 // ============================================================================
 // CREDIT PACKAGES CONFIGURATION
@@ -139,8 +146,8 @@ export async function createCheckoutSession(
         quantity: 1,
       },
     ],
-    success_url: `${APP_URL}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${APP_URL}/pricing?cancelled=true`,
+    success_url: `${getAppUrl()}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${getAppUrl()}/pricing?cancelled=true`,
     customer_email: customerEmail,
     client_reference_id: userId,
     metadata: {
@@ -191,8 +198,8 @@ export async function createIdeaValidationCheckout(
     mode: 'payment',
     payment_method_types: ['card'],
     line_items: lineItems,
-    success_url: `${APP_URL}/validate/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${APP_URL}/?cancelled=true`,
+    success_url: `${getAppUrl()}/validate/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${getAppUrl()}/?cancelled=true`,
     customer_email: customerEmail,
     client_reference_id: userId,
     metadata: {

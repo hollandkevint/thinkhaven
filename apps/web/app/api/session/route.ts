@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
+import { RateLimiter } from '@/lib/security/rate-limiter';
 
 interface PathwayConfig {
   id: string;
@@ -39,6 +40,9 @@ export async function POST(request: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    const { allowed, resetTime } = RateLimiter.checkRateLimit(user.id, 'session-create');
+    if (!allowed) return RateLimiter.createLimitResponse(resetTime);
 
     const body = await request.json().catch(() => ({}));
     const pathwayId = body.pathway || 'explore';

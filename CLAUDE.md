@@ -55,7 +55,7 @@ See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_
 
 ## Common Pitfalls
 
-1. **Middleware disabled** (`middleware.ts.disabled`) - Edge Runtime incompatibility. Auth via API routes only.
+1. **Middleware active** (`middleware.ts`) - Validates JWTs via `supabase.auth.getUser()` and refreshes tokens. Runs in Edge Runtime; avoid Node-only APIs in middleware context.
 2. **Credit deduction** - ALWAYS use `deduct_credit_transaction()` for atomicity, never manual UPDATE
 3. **File-system routing** - Every route needs a `page.tsx` file
 4. **Migration order** - Sequential (001 → 011), never skip

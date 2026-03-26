@@ -13,6 +13,7 @@ import {
 } from '@/lib/session/message-limit-manager';
 import { ToolExecutor, type ToolCall } from '@/lib/ai/tool-executor';
 import { TOOL_NAMES } from '@/lib/ai/tools/index';
+import { RateLimiter } from '@/lib/security/rate-limiter';
 import type Anthropic from '@anthropic-ai/sdk';
 type ContentBlock = Anthropic.Messages.ContentBlock;
 import type { BoardMemberId } from '@/lib/ai/board-types';
@@ -187,6 +188,11 @@ export async function POST(request: NextRequest) {
 
     // ADMIN BYPASS CHECK: unlimited messages (check BEFORE any message limit logic)
     const isAdmin = isAdminEmail(user.email);
+
+    if (!isAdmin) {
+      const { allowed, resetTime } = RateLimiter.checkRateLimit(user.id, 'default');
+      if (!allowed) return RateLimiter.createLimitResponse(resetTime);
+    }
 
     // Validate session ownership
     let limitStatus: MessageLimitStatus | null = null;
