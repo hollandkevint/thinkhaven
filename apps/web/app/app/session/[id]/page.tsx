@@ -13,6 +13,29 @@ import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
 import TypingIndicator from '@/app/components/chat/TypingIndicator'
 import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
+
+// Static ReactMarkdown components — extracted to avoid recreating on every render
+const MARKDOWN_COMPONENTS = {
+  code({ className, children, ...props }: any) {
+    const isInline = !className
+    return isInline ? (
+      <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
+        {children}
+      </code>
+    ) : (
+      <pre className="p-4 rounded-lg overflow-x-auto bg-cream">
+        <code className="font-mono">{children}</code>
+      </pre>
+    )
+  },
+  h1: ({ children }: any) => <h1 className="text-2xl font-bold mb-4 text-ink">{children}</h1>,
+  h2: ({ children }: any) => <h2 className="text-xl font-bold mb-3 text-ink">{children}</h2>,
+  h3: ({ children }: any) => <h3 className="text-lg font-semibold mb-2 text-ink">{children}</h3>,
+  p: ({ children }: any) => <p className="mb-4 leading-relaxed text-ink">{children}</p>,
+  ul: ({ children }: any) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
+  ol: ({ children }: any) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
+  li: ({ children }: any) => <li className="text-ink">{children}</li>,
+}
 import HandoffAnnotation from '@/app/components/board/HandoffAnnotation'
 import BoardOverview from '@/app/components/board/BoardOverview'
 import ExportPanel from '@/app/components/workspace/ExportPanel'
@@ -316,27 +339,7 @@ export default function SessionPage() {
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
                                 className="prose prose-sm max-w-none"
-                                components={{
-                                  code({ className, children, ...props }: any) {
-                                    const isInline = !className
-                                    return isInline ? (
-                                      <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
-                                        {children}
-                                      </code>
-                                    ) : (
-                                      <pre className="p-4 rounded-lg overflow-x-auto bg-cream">
-                                        <code className="font-mono">{children}</code>
-                                      </pre>
-                                    )
-                                  },
-                                  h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 text-ink">{children}</h1>,
-                                  h2: ({ children }) => <h2 className="text-xl font-bold mb-3 text-ink">{children}</h2>,
-                                  h3: ({ children }) => <h3 className="text-lg font-semibold mb-2 text-ink">{children}</h3>,
-                                  p: ({ children }) => <p className="mb-4 leading-relaxed text-ink">{children}</p>,
-                                  ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
-                                  ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
-                                  li: ({ children }) => <li className="text-ink">{children}</li>,
-                                }}
+                                components={MARKDOWN_COMPONENTS}
                               >
                                 {message.content}
                               </ReactMarkdown>

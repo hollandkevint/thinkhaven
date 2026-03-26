@@ -395,24 +395,19 @@ export async function POST(request: NextRequest) {
                   ));
                 }
 
-                // Stream the segment content word-by-word with speaker tag
-                const words = segment.content.split(' ');
-                for (let i = 0; i < words.length; i++) {
-                  controller.enqueue(encoder.encodeContent(
-                    words[i] + (i < words.length - 1 ? ' ' : ''),
-                    segment.speaker
-                  ));
-                  const delay = Math.max(10, Math.min(50, words[i].length * 5));
-                  await new Promise(resolve => setTimeout(resolve, delay));
+                // Stream the segment content in sentence-sized chunks
+                const sentences = segment.content.match(/[^.!?\n]+[.!?\n]?\s*/g) || [segment.content];
+                for (const sentence of sentences) {
+                  controller.enqueue(encoder.encodeContent(sentence, segment.speaker));
+                  await new Promise(resolve => setTimeout(resolve, 5));
                 }
               }
             } else {
-              // Fallback: stream as plain text (no segments)
-              const words = fullContent.split(' ');
-              for (let i = 0; i < words.length; i++) {
-                controller.enqueue(encoder.encodeContent(words[i] + (i < words.length - 1 ? ' ' : '')));
-                const delay = Math.max(10, Math.min(50, words[i].length * 5));
-                await new Promise(resolve => setTimeout(resolve, delay));
+              // Fallback: stream as plain text in sentence chunks
+              const sentences = fullContent.match(/[^.!?\n]+[.!?\n]?\s*/g) || [fullContent];
+              for (const sentence of sentences) {
+                controller.enqueue(encoder.encodeContent(sentence));
+                await new Promise(resolve => setTimeout(resolve, 5));
               }
             }
 
@@ -447,15 +442,11 @@ export async function POST(request: NextRequest) {
               // Fallback: Send full content at once
               fullContent = claudeResponse.content as string;
 
-              // Simulate streaming for better UX
-              const words = fullContent.split(' ');
-
-              for (let i = 0; i < words.length; i++) {
-                controller.enqueue(encoder.encodeContent(words[i] + (i < words.length - 1 ? ' ' : '')));
-
-                // Variable delay based on word length for natural feel
-                const delay = Math.max(20, Math.min(100, words[i].length * 10));
-                await new Promise(resolve => setTimeout(resolve, delay));
+              // Send full content in sentence chunks
+              const sentences = fullContent.match(/[^.!?\n]+[.!?\n]?\s*/g) || [fullContent];
+              for (const sentence of sentences) {
+                controller.enqueue(encoder.encodeContent(sentence));
+                await new Promise(resolve => setTimeout(resolve, 5));
               }
             }
           }
