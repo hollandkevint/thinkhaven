@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowLeft, HelpCircle } from 'lucide-react'
+import { ArrowLeft, HelpCircle, Users, PanelRightOpen, PanelRightClose } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
@@ -64,7 +64,7 @@ export default function SessionPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
-  const [userDismissedBoard, setUserDismissedBoard] = useState(false)
+  const [boardPanelOpen, setBoardPanelOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatScrollRef = useRef<HTMLDivElement>(null)
@@ -102,12 +102,15 @@ export default function SessionPage() {
     }
   }, [limitStatus?.limitReached, session?.id])
 
-  // Auto-open board pane when Board of Directors activates
+  // Auto-open board pane when Board of Directors activates (first time only)
+  const boardAutoOpenedRef = useRef(false)
   useEffect(() => {
-    if (boardState && !userDismissedBoard) {
+    if (boardState && !boardAutoOpenedRef.current) {
+      boardAutoOpenedRef.current = true
       setIsCanvasOpen(true)
+      setBoardPanelOpen(true)
     }
-  }, [boardState, userDismissedBoard])
+  }, [boardState])
 
   // Auto-open canvas pane when lean canvas has content (fires once)
   useEffect(() => {
@@ -266,6 +269,26 @@ export default function SessionPage() {
             </h1>
           </div>
           <div className="flex items-center gap-2 text-xs">
+            <button
+              onClick={() => {
+                const newOpen = !boardPanelOpen
+                setBoardPanelOpen(newOpen)
+                setIsCanvasOpen(newOpen || (session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas)) ? true : false)
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-display font-medium transition-colors ${
+                boardPanelOpen
+                  ? 'bg-terracotta text-cream'
+                  : 'bg-parchment text-ink border border-ink/8 hover:border-ink/15'
+              }`}
+              title={boardPanelOpen ? 'Hide board panel' : 'Show board panel'}
+            >
+              <Users className="w-3.5 h-3.5" />
+              Board
+              {boardPanelOpen
+                ? <PanelRightClose className="w-3 h-3" />
+                : <PanelRightOpen className="w-3 h-3" />
+              }
+            </button>
             <ExportPanel
               messages={session.chat_context}
               workspaceName={session.title || 'Strategic Session'}
@@ -478,16 +501,16 @@ export default function SessionPage() {
       </div>
 
       {/* Right Pane - Lean Canvas and/or Board Overview */}
-      {isCanvasOpen && (session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) || boardState) && (
+      {isCanvasOpen && (
         <div className="canvas-pane border-l border-divider !bg-cream overflow-y-auto">
           <div className="flex items-center justify-between px-4 py-3 border-b border-divider">
             <span className="font-display text-xs font-semibold uppercase tracking-wider text-ink-light">
-              {boardState ? 'Board & Canvas' : 'Lean Canvas'}
+              {boardPanelOpen && boardState ? 'Board & Canvas' : boardPanelOpen ? 'Board' : 'Lean Canvas'}
             </span>
             <button
               onClick={() => {
                 setIsCanvasOpen(false)
-                setUserDismissedBoard(true)
+                setBoardPanelOpen(false)
               }}
               className="text-ink-light hover:text-ink transition-colors"
               aria-label="Close panel"
@@ -500,13 +523,15 @@ export default function SessionPage() {
           {session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) && (
             <LeanCanvas canvas={session.lean_canvas} title={session.title || undefined} />
           )}
-          {boardState && (
+          {boardPanelOpen && boardState && (
             <PaneErrorBoundary paneName="board">
               <BoardOverview
                 boardState={boardState}
                 onClose={() => {
-                  setIsCanvasOpen(false)
-                  setUserDismissedBoard(true)
+                  setBoardPanelOpen(false)
+                  if (!(session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas))) {
+                    setIsCanvasOpen(false)
+                  }
                 }}
               />
             </PaneErrorBoundary>
