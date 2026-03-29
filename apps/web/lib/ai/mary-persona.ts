@@ -515,7 +515,7 @@ Remember: Users chose ThinkHaven BECAUSE they want genuine feedback. Sycophancy 
   } as const;
 
   /** Board offer thresholds — suggest board at these exchange counts */
-  private static readonly BOARD_OFFER_EXCHANGES = [5, 12, 20];
+  private static readonly BOARD_OFFER_EXCHANGES = [3, 8, 15];
 
   /**
    * Generate phase-specific challenge loop instructions based on exchange count.
