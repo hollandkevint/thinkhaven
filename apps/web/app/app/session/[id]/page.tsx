@@ -15,6 +15,7 @@ import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
 
 import MermaidBlock from '@/app/components/chat/MermaidBlock'
+import { VoiceInput } from '@/app/components/chat/VoiceInput'
 
 // Static ReactMarkdown components — extracted to avoid recreating on every render
 const MARKDOWN_COMPONENTS = {
@@ -460,10 +461,14 @@ export default function SessionPage() {
                 rows={1}
                 className="flex-1 px-4 py-3 border border-border rounded-lg focus:border-primary focus:outline-none disabled:opacity-50 resize-none min-h-[50px] max-h-[200px]"
               />
+              <VoiceInput
+                onTranscript={(text) => setMessageInput(prev => prev ? `${prev} ${text}` : text)}
+                disabled={sendingMessage}
+              />
               <button
                 type="submit"
                 disabled={!messageInput.trim() || sendingMessage}
-                className="px-4 py-3 bg-primary text-cream font-medium rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity self-end"
+                className="px-4 py-3 bg-terracotta text-cream font-medium rounded-lg hover:bg-terracotta-hover disabled:opacity-50 transition-colors self-end"
               >
                 {sendingMessage ? 'Sending...' : 'Send'}
               </button>
