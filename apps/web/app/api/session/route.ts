@@ -7,14 +7,19 @@ interface PathwayConfig {
   id: string;
   phase: string;
   messageLimit: number;
+  defaultTitle: string;
 }
 
 const PATHWAYS: Record<string, PathwayConfig> = {
-  explore: { id: 'explore', phase: 'discovery', messageLimit: 20 },
-  'quick-decision': { id: 'quick-decision', phase: 'discovery', messageLimit: 10 },
-  'deep-analysis': { id: 'deep-analysis', phase: 'discovery', messageLimit: 30 },
-  'board-of-directors': { id: 'board-of-directors', phase: 'discovery', messageLimit: 40 },
-  'strategy-sprint': { id: 'strategy-sprint', phase: 'discovery', messageLimit: 20 },
+  'decision': { id: 'decision', phase: 'discovery', messageLimit: 15, defaultTitle: 'New Decision' },
+  'product-idea': { id: 'product-idea', phase: 'discovery', messageLimit: 20, defaultTitle: 'New Product Idea' },
+  'strategy-review': { id: 'strategy-review', phase: 'discovery', messageLimit: 25, defaultTitle: 'Strategy Review' },
+  'explore': { id: 'explore', phase: 'discovery', messageLimit: 20, defaultTitle: 'New Session' },
+  // Legacy pathways (existing sessions still reference these)
+  'quick-decision': { id: 'quick-decision', phase: 'discovery', messageLimit: 10, defaultTitle: 'Quick Decision' },
+  'deep-analysis': { id: 'deep-analysis', phase: 'discovery', messageLimit: 30, defaultTitle: 'Deep Analysis' },
+  'board-of-directors': { id: 'board-of-directors', phase: 'discovery', messageLimit: 40, defaultTitle: 'Board Session' },
+  'strategy-sprint': { id: 'strategy-sprint', phase: 'discovery', messageLimit: 20, defaultTitle: 'Strategy Sprint' },
 };
 
 /**
@@ -75,7 +80,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         workspace_id: user.id,
         pathway: pathway.id,
-        title: 'New Session',
+        title: pathway.defaultTitle,
         current_phase: pathway.phase,
         current_template: 'general',
         current_step: 'chat',

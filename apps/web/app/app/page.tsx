@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase/client';
@@ -20,11 +20,15 @@ import {
   Sparkles,
   Folder,
   Home,
+  X,
+  Pencil,
 } from 'lucide-react';
 import Link from 'next/link';
+import * as Dialog from '@radix-ui/react-dialog';
 import { ErrorState } from '@/app/components/ui/ErrorState';
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
 import { SessionMigration } from '@/lib/guest/session-migration';
+import { PATHWAY_LABELS } from '@/lib/session/session-primitives';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -37,8 +41,11 @@ interface BmadSession {
   id: string;
   user_id: string;
   pathway: string;
-  current_step: string;
-  session_data: Record<string, unknown>;
+  title: string | null;
+  current_phase: string;
+  message_count: number;
+  message_limit: number;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -110,6 +117,8 @@ export default function AppDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [renamingSession, setRenamingSession] = useState<{ id: string; title: string } | null>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -193,6 +202,27 @@ export default function AppDashboardPage() {
     }
   };
 
+  const handleRenameSession = async (sessionId: string, newTitle: string) => {
+    const trimmed = newTitle.trim();
+    if (!trimmed) return;
+
+    setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, title: trimmed } : s));
+    setRenamingSession(null);
+
+    try {
+      const { error } = await supabase
+        .from('bmad_sessions')
+        .update({ title: trimmed })
+        .eq('id', sessionId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error renaming session:', error);
+      fetchSessions();
+    }
+  };
+
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -209,8 +239,8 @@ export default function AppDashboardPage() {
     return session.title || 'Untitled Session';
   };
 
-  const getSessionDescription = (session: BmadSession) => {
-    return session.pathway?.replace(/-/g, ' ') || '';
+  const getPathwayLabel = (pathway: string) => {
+    return PATHWAY_LABELS[pathway] || pathway.replace(/-/g, ' ');
   };
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'User';
@@ -252,7 +282,7 @@ export default function AppDashboardPage() {
       <aside className="fixed left-0 top-0 h-full w-60 border-r border-border flex flex-col bg-card">
         {/* Logo */}
         <div className="px-4 py-6">
-          <a href="/" className="text-xl font-bold text-foreground">ThinkHaven</a>
+          <Link href="/" className="text-xl font-bold text-foreground">ThinkHaven</Link>
         </div>
 
         {/* New Session Button */}
@@ -414,6 +444,12 @@ export default function AppDashboardPage() {
                             Open
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            onSelect={() => setRenamingSession({ id: session.id, title: getSessionTitle(session) })}
+                          >
+                            <Pencil className="w-3.5 h-3.5 mr-2" />
+                            Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             onSelect={() => handleDeleteSession(session.id)}
                             className="text-destructive"
                           >
@@ -423,13 +459,9 @@ export default function AppDashboardPage() {
                       </DropdownMenu>
                     </div>
 
-                    <p className="text-sm mb-4 line-clamp-3 text-muted-foreground">
-                      {getSessionDescription(session)}
-                    </p>
-
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="capitalize">{(session.pathway || 'session').replace(/-/g, ' ')}</span>
-                      <span>{formatTimestamp(session.updated_at)}</span>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto pt-4">
+                      <span>{getPathwayLabel(session.pathway || 'explore')}</span>
+                      <span>{session.message_count || 0} msgs · {formatTimestamp(session.updated_at)}</span>
                     </div>
                   </Card>
                 ))}
@@ -438,6 +470,49 @@ export default function AppDashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Rename Dialog */}
+      <Dialog.Root open={!!renamingSession} onOpenChange={(open) => { if (!open) setRenamingSession(null) }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream rounded-lg shadow-xl max-w-sm w-full mx-4 z-50 p-6 focus:outline-none">
+            <Dialog.Title className="font-display text-lg font-semibold text-ink mb-4">
+              Rename Session
+            </Dialog.Title>
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              if (renamingSession) {
+                handleRenameSession(renamingSession.id, renameInputRef.current?.value || '')
+              }
+            }}>
+              <input
+                ref={renameInputRef}
+                type="text"
+                defaultValue={renamingSession?.title || ''}
+                autoFocus
+                className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm focus:ring-2 focus:ring-terracotta focus:border-transparent bg-parchment"
+                placeholder="Session title"
+                maxLength={100}
+              />
+              <div className="flex justify-end gap-2 mt-4">
+                <Dialog.Close asChild>
+                  <button type="button" className="px-4 py-2 text-sm text-muted-foreground hover:text-ink transition-colors">
+                    Cancel
+                  </button>
+                </Dialog.Close>
+                <button type="submit" className="px-4 py-2 text-sm font-medium bg-terracotta text-cream rounded-lg hover:bg-terracotta-hover transition-colors">
+                  Save
+                </button>
+              </div>
+            </form>
+            <Dialog.Close asChild>
+              <button className="absolute top-4 right-4 text-ink/40 hover:text-ink transition-colors" aria-label="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
