@@ -117,13 +117,13 @@ export default function Navigation({ className = '' }: NavigationProps) {
             <Button
               variant="outline"
               onClick={() => router.push('/try')}
-              className="border-terracotta text-terracotta hover:bg-terracotta hover:text-white font-medium"
+              className="border-terracotta text-terracotta hover:bg-terracotta hover:text-cream font-medium"
             >
               Try Free
             </Button>
             <Button
               onClick={handleSignup}
-              className="bg-terracotta hover:bg-terracotta-hover text-white font-medium"
+              className="bg-terracotta hover:bg-terracotta-hover text-cream font-medium"
             >
               Sign Up
             </Button>

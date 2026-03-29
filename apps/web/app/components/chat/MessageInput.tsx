@@ -303,7 +303,7 @@ export default function MessageInput({
             disabled={!value.trim() || disabled}
             className={`p-2 rounded-lg transition-colors ${
               value.trim() && !disabled
-                ? 'text-white bg-primary hover:bg-primary-hover shadow-sm' 
+                ? 'text-cream bg-terracotta hover:bg-terracotta-hover shadow-sm'
                 : 'text-slate-blue/60 bg-parchment cursor-not-allowed'
             }`}
             title="Send message (Enter)"

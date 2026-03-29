@@ -307,28 +307,26 @@ export default function GuestChatInterface() {
 
       {/* Save Progress Banner */}
       {showSavePrompt && (
-        <div className="flex-shrink-0 px-6 py-3" style={{ backgroundColor: 'var(--parchment)', borderBottom: '1px solid var(--divider)' }}>
+        <div className="flex-shrink-0 px-6 py-3 bg-parchment border-b border-divider">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--forest)' }}>
+              <svg className="w-5 h-5 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <p className="text-sm" style={{ color: 'var(--ink)' }}>
+              <p className="text-sm text-ink">
                 <strong>Great conversation!</strong> Sign up to save your progress and continue later.
               </p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSignupClick}
-                className="px-3 py-1 text-sm font-medium rounded transition-colors"
-                style={{ backgroundColor: 'var(--terracotta)', color: 'var(--cream)' }}
+                className="px-3 py-1 text-sm font-medium rounded transition-colors bg-terracotta text-cream"
               >
                 Save now
               </button>
               <button
                 onClick={() => setShowSavePrompt(false)}
-                className="text-sm"
-                style={{ color: 'var(--slate-blue)' }}
+                className="text-sm text-slate-blue"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

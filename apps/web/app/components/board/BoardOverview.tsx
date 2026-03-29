@@ -12,9 +12,9 @@ interface BoardOverviewProps {
 }
 
 const PHASES = [
-  { id: 'discovery', label: 'Discovery', color: '#C4785C' },
-  { id: 'analysis', label: 'Analysis', color: '#D4A84B' },
-  { id: 'synthesis', label: 'Synthesis', color: '#A3B18A' },
+  { id: 'discovery', label: 'Discovery', color: 'var(--terracotta)' },
+  { id: 'analysis', label: 'Analysis', color: 'var(--mustard)' },
+  { id: 'synthesis', label: 'Synthesis', color: 'var(--sage)' },
 ];
 
 export default function BoardOverview({
@@ -117,7 +117,7 @@ export default function BoardOverview({
                 i <= activePhaseIndex ? 'font-semibold' : 'font-normal'
               }`}
               style={{
-                color: i <= activePhaseIndex ? phase.color : '#B5B3B0',
+                color: i <= activePhaseIndex ? phase.color : 'var(--slate-blue)',
               }}
             >
               {phase.label}

@@ -80,7 +80,7 @@ export class PaneErrorBoundary extends Component<Props, State> {
             <div className="flex gap-2">
               <button 
                 onClick={this.handleRetry}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                className="px-4 py-2 bg-terracotta text-cream rounded-lg hover:bg-terracotta-hover transition-colors"
               >
                 Retry
               </button>

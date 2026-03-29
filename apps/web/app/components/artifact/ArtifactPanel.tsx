@@ -93,7 +93,7 @@ export function ArtifactPanel() {
 
       {/* Panel */}
       <div
-        className="fixed right-0 top-0 h-full w-[450px] bg-cream shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-out"
+        className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-cream shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-out"
         style={{ transform: isPanelOpen ? 'translateX(0)' : 'translateX(100%)' }}
         role="dialog"
         aria-modal="true"

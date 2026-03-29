@@ -69,7 +69,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                 className="rounded-lg !bg-ink !p-4 !m-0 text-sm"
                 showLineNumbers={String(children).split('\n').length > 5}
                 lineNumberStyle={{
-                  color: '#6B7280',
+                  color: 'var(--slate-blue)',
                   paddingRight: '1em',
                   minWidth: '2.5em'
                 }}
