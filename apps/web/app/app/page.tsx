@@ -37,8 +37,11 @@ interface BmadSession {
   id: string;
   user_id: string;
   pathway: string;
-  current_step: string;
-  session_data: Record<string, unknown>;
+  title: string | null;
+  current_phase: string;
+  message_count: number;
+  message_limit: number;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -252,7 +255,7 @@ export default function AppDashboardPage() {
       <aside className="fixed left-0 top-0 h-full w-60 border-r border-border flex flex-col bg-card">
         {/* Logo */}
         <div className="px-4 py-6">
-          <a href="/" className="text-xl font-bold text-foreground">ThinkHaven</a>
+          <Link href="/" className="text-xl font-bold text-foreground">ThinkHaven</Link>
         </div>
 
         {/* New Session Button */}
