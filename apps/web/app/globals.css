@@ -523,3 +523,15 @@
     @apply h-1 w-full cursor-row-resize;
   }
 }
+
+/* Board member active speaker pulse */
+@keyframes board-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-board-pulse {
+    animation: none !important;
+  }
+}

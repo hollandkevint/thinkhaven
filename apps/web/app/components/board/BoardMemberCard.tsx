@@ -19,7 +19,7 @@ export default function BoardMemberCard({
   return (
     <div
       className={`relative overflow-hidden flex items-center gap-3 pl-4 pr-3 py-3 rounded-lg ${
-        isActive ? 'bg-parchment border-2' : 'bg-cream border border-ink/8'
+        isActive ? 'bg-parchment border-2 animate-board-pulse' : 'bg-cream border border-ink/8'
       } ${isTaylorDormant ? 'opacity-60' : ''}`}
       style={{
         transition: 'transform 200ms ease, opacity 200ms ease, border-color 200ms ease',
@@ -59,12 +59,10 @@ export default function BoardMemberCard({
         className={`flex-shrink-0 w-4 h-4 rounded-full border-2 ${
           isActive ? '' : 'border-ink/20'
         }`}
-        style={{ transition: 'border-color 150ms ease, background-color 150ms ease' }}
-        style={
-          isActive
-            ? { borderColor: member.color, backgroundColor: member.color }
-            : undefined
-        }
+        style={{
+          transition: 'border-color 150ms ease, background-color 150ms ease',
+          ...(isActive ? { borderColor: member.color, backgroundColor: member.color } : {}),
+        }}
       />
     </div>
   );

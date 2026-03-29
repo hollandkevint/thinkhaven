@@ -146,6 +146,7 @@ module.exports = {
       animation: {
         'fade-in': 'fadeIn 0.4s ease-out',
         'slide-in': 'slideIn 0.3s ease-out',
+        'board-pulse': 'board-pulse 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
