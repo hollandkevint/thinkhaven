@@ -14,10 +14,16 @@ import TypingIndicator from '@/app/components/chat/TypingIndicator'
 import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
 
+import MermaidBlock from '@/app/components/chat/MermaidBlock'
+
 // Static ReactMarkdown components — extracted to avoid recreating on every render
 const MARKDOWN_COMPONENTS = {
   code({ className, children, ...props }: any) {
     const isInline = !className
+    const match = /language-(\w+)/.exec(className || '')
+    if (!isInline && match?.[1] === 'mermaid') {
+      return <MermaidBlock code={String(children).replace(/\n$/, '')} />
+    }
     return isInline ? (
       <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
         {children}

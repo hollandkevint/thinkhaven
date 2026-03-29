@@ -4,11 +4,16 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { ChatMessage } from '@/lib/ai/board-types'
 import type { BoardMember } from '@/lib/ai/board-types'
+import MermaidBlock from '@/app/components/chat/MermaidBlock'
 
 // Static components — extracted to module level to avoid per-render allocation
 const SPEAKER_MARKDOWN_COMPONENTS = {
   code({ className, children }: any) {
     const isInline = !className
+    const match = /language-(\w+)/.exec(className || '')
+    if (!isInline && match?.[1] === 'mermaid') {
+      return <MermaidBlock code={String(children).replace(/\n$/, '')} />
+    }
     return isInline ? (
       <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
         {children}
