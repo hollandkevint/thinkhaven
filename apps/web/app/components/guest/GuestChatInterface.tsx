@@ -31,6 +31,7 @@ export default function GuestChatInterface() {
   const [showSavePrompt, setShowSavePrompt] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const savePromptTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = useCallback(() => {
@@ -40,6 +41,13 @@ export default function GuestChatInterface() {
   useEffect(() => {
     scrollToBottom()
   }, [messages, scrollToBottom])
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (savePromptTimeoutRef.current) clearTimeout(savePromptTimeoutRef.current)
+    }
+  }, [])
 
   // Load existing guest session on mount
   useEffect(() => {
@@ -172,8 +180,8 @@ export default function GuestChatInterface() {
                 // Show save prompt after each message (except if limit reached)
                 if (!GuestSessionStore.hasReachedLimit()) {
                   setShowSavePrompt(true)
-                  // Auto-hide after 5 seconds
-                  setTimeout(() => setShowSavePrompt(false), 5000)
+                  if (savePromptTimeoutRef.current) clearTimeout(savePromptTimeoutRef.current)
+                  savePromptTimeoutRef.current = setTimeout(() => setShowSavePrompt(false), 5000)
                 } else {
                   // Limit reached - show signup modal
                   setShowSignupModal(true)
@@ -299,28 +307,26 @@ export default function GuestChatInterface() {
 
       {/* Save Progress Banner */}
       {showSavePrompt && (
-        <div className="flex-shrink-0 px-6 py-3" style={{ backgroundColor: 'var(--parchment)', borderBottom: '1px solid var(--divider)' }}>
+        <div className="flex-shrink-0 px-6 py-3 bg-parchment border-b border-divider">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--forest)' }}>
+              <svg className="w-5 h-5 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <p className="text-sm" style={{ color: 'var(--ink)' }}>
+              <p className="text-sm text-ink">
                 <strong>Great conversation!</strong> Sign up to save your progress and continue later.
               </p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSignupClick}
-                className="px-3 py-1 text-sm font-medium rounded transition-colors"
-                style={{ backgroundColor: 'var(--terracotta)', color: 'var(--cream)' }}
+                className="px-3 py-1 text-sm font-medium rounded transition-colors bg-terracotta text-cream"
               >
                 Save now
               </button>
               <button
                 onClick={() => setShowSavePrompt(false)}
-                className="text-sm"
-                style={{ color: 'var(--slate-blue)' }}
+                className="text-sm text-slate-blue"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

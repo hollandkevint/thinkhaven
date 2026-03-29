@@ -10,6 +10,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { SubPersonaSessionState, CoachingContext } from './mary-persona';
+import { MARY_TOOLS } from './tools';
 
 // =============================================================================
 // Types
@@ -197,29 +198,24 @@ export class ContextBuilder {
    * This prepares for Phase 3 tool calling
    */
   static buildCapabilityContext(currentPhase?: string): CapabilityContext {
-    // Core tools available to Mary (prep for Phase 3)
-    const availableTools: ToolCapability[] = [
-      {
-        name: 'complete_phase',
-        description: 'Signal that the current phase is complete with a reason',
-        whenToUse: 'When the user has addressed all key aspects of the current phase',
-      },
-      {
-        name: 'switch_persona_mode',
-        description: 'Change coaching mode (inquisitive, devil_advocate, encouraging, realistic)',
-        whenToUse: 'When the user\'s emotional state suggests a different approach would be more effective',
-      },
-      {
-        name: 'recommend_action',
-        description: 'Provide a kill/pivot/proceed recommendation with viability score',
-        whenToUse: 'After thorough exploration when you have enough information to assess viability',
-      },
-      {
-        name: 'generate_document',
-        description: 'Create a structured output (Lean Canvas, PRD, Feature Brief)',
-        whenToUse: 'When the user has provided enough input for a deliverable',
-      },
-    ];
+    // Tool-specific usage guidance (supplements the tool descriptions passed to the API)
+    const toolGuidance: Record<string, string> = {
+      read_session_state: 'Before making decisions, to understand current phase, progress, and session context',
+      complete_phase: 'When the user has addressed all key aspects of the current phase',
+      switch_persona_mode: 'When the user\'s emotional state suggests a different coaching approach',
+      switch_speaker: 'When another board member\'s expertise is relevant to the current topic',
+      recommend_action: 'After thorough exploration when you have enough information to assess viability',
+      generate_document: 'When the user has provided enough input for a deliverable',
+      update_lean_canvas: 'When conversation reveals information that should populate canvas cells',
+      update_session_context: 'To persist insights, decisions, or progress markers for future reference',
+    }
+
+    // Generate capability list from MARY_TOOLS to prevent context drift
+    const availableTools: ToolCapability[] = MARY_TOOLS.map(tool => ({
+      name: tool.name,
+      description: tool.description ?? tool.name,
+      whenToUse: toolGuidance[tool.name] ?? 'When appropriate based on conversation context',
+    }));
 
     // Phase-specific actions
     const phaseActions: Record<string, string[]> = {

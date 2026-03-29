@@ -150,7 +150,7 @@ export default function AccountPage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-primary text-white font-medium rounded hover:bg-primary-hover disabled:opacity-50"
+              className="px-4 py-2 bg-terracotta text-cream font-medium rounded hover:bg-terracotta-hover disabled:opacity-50"
             >
               {loading ? 'Updating...' : 'Update Password'}
             </button>

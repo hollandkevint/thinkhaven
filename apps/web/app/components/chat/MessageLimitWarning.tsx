@@ -48,7 +48,7 @@ export function MessageLimitWarning({
               {onExport && (
                 <button
                   onClick={onExport}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-rust text-white rounded-md hover:bg-rust/90 transition-colors text-sm font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-rust text-cream rounded-md hover:bg-rust/90 transition-colors text-sm font-medium"
                 >
                   <Download className="h-4 w-4" />
                   Export Session

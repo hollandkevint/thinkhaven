@@ -25,6 +25,7 @@ export function ArtifactEditor({
   const [content, setContent] = useState(initialContent);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle');
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const resetTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Sync initial content when it changes externally
   useEffect(() => {
@@ -52,13 +53,13 @@ export function ArtifactEditor({
       setSaveStatus('saved');
 
       // Reset to idle after 2s
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
+      resetTimeoutRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
     }, 500);
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
     };
   }, [content, artifactId, updateArtifact, initialContent]);
 

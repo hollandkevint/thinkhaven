@@ -1,6 +1,7 @@
 'use client'
 
 import ReactMarkdown from 'react-markdown'
+import MermaidBlock from './MermaidBlock'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript'
@@ -40,6 +41,11 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           const match = /language-(\w+)/.exec(className || '')
           const language = match ? match[1] : 'text'
 
+          // Render Mermaid diagrams as SVG instead of syntax-highlighted code
+          if (!inline && language === 'mermaid') {
+            return <MermaidBlock code={String(children).replace(/\n$/, '')} />
+          }
+
           return !inline ? (
             <div className="relative group">
               {/* Copy button */}
@@ -69,7 +75,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                 className="rounded-lg !bg-ink !p-4 !m-0 text-sm"
                 showLineNumbers={String(children).split('\n').length > 5}
                 lineNumberStyle={{
-                  color: '#6B7280',
+                  color: 'var(--slate-blue)',
                   paddingRight: '1em',
                   minWidth: '2.5em'
                 }}

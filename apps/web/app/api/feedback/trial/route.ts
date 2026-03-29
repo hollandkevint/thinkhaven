@@ -20,6 +20,12 @@ export async function POST(request: NextRequest) {
   try {
     // Authenticate user
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
     const {
       data: { user },
       error: authError,
@@ -49,20 +55,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure user matches authenticated user
-    if (payload.userId !== user.id) {
-      return NextResponse.json(
-        {
-          error: 'Forbidden',
-          message: 'User ID mismatch',
-        },
-        { status: 403 }
-      );
-    }
-
-    // Store feedback in trial_feedback table
+    // Store feedback — always use authenticated user.id, never caller-supplied
     const { error: insertError } = await supabase.from('trial_feedback').insert({
-      user_id: payload.userId,
+      user_id: user.id,
       rating: payload.rating,
       would_pay: payload.wouldPay,
       feedback_text: payload.feedback,
@@ -71,22 +66,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (insertError) {
-      // If table doesn't exist yet, log to console for now
-      console.log('Trial Feedback Submission:', {
-        userId: payload.userId,
-        email: user.email,
-        rating: payload.rating,
-        wouldPay: payload.wouldPay,
-        feedback: payload.feedback,
-        timestamp: payload.timestamp,
-      });
-
-      // Return success even if table doesn't exist
-      // This allows MVP testing without the table
-      return NextResponse.json({
-        success: true,
-        message: 'Feedback recorded (console log)',
-      });
+      console.error('Trial feedback insert failed:', insertError.code);
+      return NextResponse.json(
+        { error: 'Internal Server Error' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -96,10 +80,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error in POST /api/feedback/trial:', error);
     return NextResponse.json(
-      {
-        error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }

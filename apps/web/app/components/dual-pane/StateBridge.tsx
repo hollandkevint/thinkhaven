@@ -19,23 +19,16 @@ export default function StateBridge({ workspaceId, className = '' }: StateBridge
   } = useDualPaneStore()
   
   const lastUpdateRef = useRef(sync.lastUpdate)
-  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  
-  // Debounced sync handler to prevent excessive operations
-  const debouncedSync = (callback: () => void) => {
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current)
-    }
-    
-    syncTimeoutRef.current = setTimeout(callback, 500) // 500ms debounce
-  }
+  const chatSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const canvasSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   // Monitor chat changes and suggest canvas elements
   useEffect(() => {
     if (!sync.isAutoSyncEnabled) return
     
     if (sync.lastUpdate > lastUpdateRef.current) {
-      debouncedSync(() => {
+      if (chatSyncTimeoutRef.current) clearTimeout(chatSyncTimeoutRef.current)
+      chatSyncTimeoutRef.current = setTimeout(() => {
         // Find new messages that might need canvas suggestions
         const recentMessages = chat.messages.filter(msg => 
           new Date(msg.timestamp).getTime() > lastUpdateRef.current &&
@@ -65,7 +58,8 @@ export default function StateBridge({ workspaceId, className = '' }: StateBridge
     )
     
     if (newElements.length > 0 && sync.isAutoSyncEnabled) {
-      debouncedSync(() => {
+      if (canvasSyncTimeoutRef.current) clearTimeout(canvasSyncTimeoutRef.current)
+      canvasSyncTimeoutRef.current = setTimeout(() => {
         newElements.forEach(element => {
           if (element.sourceMessage) {
             createContextBridge(element.sourceMessage, element.id, 'generated')
@@ -75,19 +69,18 @@ export default function StateBridge({ workspaceId, className = '' }: StateBridge
     }
   }, [canvas.elements, sync.contextBridges, sync.isAutoSyncEnabled, createContextBridge])
   
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current)
-      }
+      if (chatSyncTimeoutRef.current) clearTimeout(chatSyncTimeoutRef.current)
+      if (canvasSyncTimeoutRef.current) clearTimeout(canvasSyncTimeoutRef.current)
     }
   }, [])
   
   // Sync status indicator (for debugging/development)
   const getSyncStatus = () => {
     if (!sync.isAutoSyncEnabled) return 'disabled'
-    if (syncTimeoutRef.current) return 'syncing'
+    if (chatSyncTimeoutRef.current || canvasSyncTimeoutRef.current) return 'syncing'
     return 'active'
   }
   

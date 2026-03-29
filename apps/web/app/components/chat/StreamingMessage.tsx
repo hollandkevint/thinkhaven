@@ -255,13 +255,13 @@ export default function StreamingMessage({
         <div className={`
           rounded-2xl px-4 py-3 max-w-full break-words
           ${isUser 
-            ? 'bg-primary text-white rounded-br-md' 
+            ? 'bg-terracotta text-cream rounded-br-md'
             : 'bg-cream border border-divider rounded-bl-md'
           }
           ${isStreaming ? 'shadow-sm ring-2 ring-terracotta/20' : 'shadow-sm'}
         `}>
           {isUser ? (
-            <p className="text-white leading-relaxed">{content}</p>
+            <p className="text-cream leading-relaxed">{content}</p>
           ) : (
             <StreamingText
               content={content}

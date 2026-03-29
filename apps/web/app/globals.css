@@ -298,31 +298,6 @@
     background: var(--terracotta);
   }
 
-  /* Chat Messages */
-  .chat-message-user {
-    @apply p-4 mb-4;
-    background: var(--chat-user-bg);
-    color: var(--chat-user-fg);
-    border-radius: var(--radius-md) var(--radius-md) var(--radius-sm) var(--radius-md);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .chat-message-assistant {
-    @apply p-4 mb-4;
-    background: var(--chat-assistant-bg);
-    color: var(--chat-assistant-fg);
-    border: 1px solid rgba(44, 36, 22, 0.08);
-    border-radius: var(--radius-md) var(--radius-md) var(--radius-md) var(--radius-sm);
-  }
-
-  .chat-message-system {
-    @apply p-3 mb-3 text-sm;
-    background: var(--chat-system-bg);
-    color: var(--ink);
-    border-radius: var(--radius);
-    font-family: var(--font-display);
-  }
-
   /* Sub-Persona Mode Badge */
   .mode-badge {
     @apply inline-flex items-center px-3 py-1;
@@ -521,5 +496,17 @@
 
   .pane-divider {
     @apply h-1 w-full cursor-row-resize;
+  }
+}
+
+/* Board member active speaker pulse */
+@keyframes board-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-board-pulse {
+    animation: none !important;
   }
 }

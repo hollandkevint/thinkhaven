@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, HelpCircle } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
@@ -14,10 +14,17 @@ import TypingIndicator from '@/app/components/chat/TypingIndicator'
 import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
 
+import MermaidBlock from '@/app/components/chat/MermaidBlock'
+import { VoiceInput } from '@/app/components/chat/VoiceInput'
+
 // Static ReactMarkdown components — extracted to avoid recreating on every render
 const MARKDOWN_COMPONENTS = {
   code({ className, children, ...props }: any) {
     const isInline = !className
+    const match = /language-(\w+)/.exec(className || '')
+    if (!isInline && match?.[1] === 'mermaid') {
+      return <MermaidBlock code={String(children).replace(/\n$/, '')} />
+    }
     return isInline ? (
       <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
         {children}
@@ -43,6 +50,8 @@ import { ArtifactProvider } from '@/lib/artifact'
 import { ArtifactPanel, ArtifactKeyboardHandler } from '@/app/components/artifact'
 import { ErrorState } from '@/app/components/ui/ErrorState'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
+import { useFeedbackStore } from '@/lib/stores/feedbackStore'
+import { resetOnboarding } from '@/app/components/onboarding/OnboardingModal'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
@@ -77,6 +86,21 @@ export default function SessionPage() {
   const isOnline = useOnlineStatus()
 
   const canvasAutoOpenedRef = useRef(false)
+  const feedbackPromptedRef = useRef(false)
+  const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Auto-prompt feedback modal when message limit is reached (1s delay)
+  useEffect(() => {
+    if (limitStatus?.limitReached && !feedbackPromptedRef.current && session?.id) {
+      feedbackPromptedRef.current = true
+      feedbackTimeoutRef.current = setTimeout(() => {
+        useFeedbackStore.getState().open(session.id)
+      }, 1000)
+    }
+    return () => {
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current)
+    }
+  }, [limitStatus?.limitReached, session?.id])
 
   // Auto-open board pane when Board of Directors activates
   useEffect(() => {
@@ -247,7 +271,14 @@ export default function SessionPage() {
               workspaceName={session.title || 'Strategic Session'}
               workspaceId={session.id}
             />
-            <FeedbackButton variant="header" />
+            <button
+              onClick={() => { resetOnboarding(); window.location.reload() }}
+              className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+              title="What is ThinkHaven?"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+            <FeedbackButton variant="header" sessionId={session?.id} />
             <span className="text-muted-foreground">{user.email}</span>
             <Link
               href="/app/account"
@@ -430,10 +461,14 @@ export default function SessionPage() {
                 rows={1}
                 className="flex-1 px-4 py-3 border border-border rounded-lg focus:border-primary focus:outline-none disabled:opacity-50 resize-none min-h-[50px] max-h-[200px]"
               />
+              <VoiceInput
+                onTranscript={(text) => setMessageInput(prev => prev ? `${prev} ${text}` : text)}
+                disabled={sendingMessage}
+              />
               <button
                 type="submit"
                 disabled={!messageInput.trim() || sendingMessage}
-                className="px-4 py-3 bg-primary text-cream font-medium rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity self-end"
+                className="px-4 py-3 bg-terracotta text-cream font-medium rounded-lg hover:bg-terracotta-hover disabled:opacity-50 transition-colors self-end"
               >
                 {sendingMessage ? 'Sending...' : 'Send'}
               </button>
