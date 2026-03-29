@@ -7,7 +7,7 @@
  * Helps validate product-market fit before monetization
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -22,6 +22,13 @@ export function FeedbackForm({ userId, onSubmitted }: FeedbackFormProps) {
   const [wouldPay, setWouldPay] = useState<boolean | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const successTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +58,7 @@ export function FeedbackForm({ userId, onSubmitted }: FeedbackFormProps) {
       }
 
       setSubmitted(true);
-      setTimeout(() => {
+      successTimeoutRef.current = setTimeout(() => {
         onSubmitted();
       }, 2000);
     } catch (error) {

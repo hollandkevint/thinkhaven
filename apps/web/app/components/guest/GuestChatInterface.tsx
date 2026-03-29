@@ -31,6 +31,7 @@ export default function GuestChatInterface() {
   const [showSavePrompt, setShowSavePrompt] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const savePromptTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = useCallback(() => {
@@ -40,6 +41,13 @@ export default function GuestChatInterface() {
   useEffect(() => {
     scrollToBottom()
   }, [messages, scrollToBottom])
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (savePromptTimeoutRef.current) clearTimeout(savePromptTimeoutRef.current)
+    }
+  }, [])
 
   // Load existing guest session on mount
   useEffect(() => {
@@ -172,8 +180,8 @@ export default function GuestChatInterface() {
                 // Show save prompt after each message (except if limit reached)
                 if (!GuestSessionStore.hasReachedLimit()) {
                   setShowSavePrompt(true)
-                  // Auto-hide after 5 seconds
-                  setTimeout(() => setShowSavePrompt(false), 5000)
+                  if (savePromptTimeoutRef.current) clearTimeout(savePromptTimeoutRef.current)
+                  savePromptTimeoutRef.current = setTimeout(() => setShowSavePrompt(false), 5000)
                 } else {
                   // Limit reached - show signup modal
                   setShowSignupModal(true)
