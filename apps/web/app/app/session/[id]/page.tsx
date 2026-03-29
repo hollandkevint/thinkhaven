@@ -273,7 +273,7 @@ export default function SessionPage() {
               onClick={() => {
                 const newOpen = !boardPanelOpen
                 setBoardPanelOpen(newOpen)
-                setIsCanvasOpen(newOpen || (session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas)) ? true : false)
+                setIsCanvasOpen(newOpen || !!(session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas)))
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-display font-medium transition-colors ${
                 boardPanelOpen
@@ -522,6 +522,14 @@ export default function SessionPage() {
           </div>
           {session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) && (
             <LeanCanvas canvas={session.lean_canvas} title={session.title || undefined} />
+          )}
+          {boardPanelOpen && !boardState && (
+            <div className="px-6 py-8 text-center">
+              <Users className="w-8 h-8 text-ink/20 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground font-body">
+                The board hasn't joined yet. Continue your conversation and Mary will invite them when the time is right.
+              </p>
+            </div>
           )}
           {boardPanelOpen && boardState && (
             <PaneErrorBoundary paneName="board">
