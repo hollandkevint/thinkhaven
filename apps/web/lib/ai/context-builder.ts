@@ -198,11 +198,23 @@ export class ContextBuilder {
    * This prepares for Phase 3 tool calling
    */
   static buildCapabilityContext(currentPhase?: string): CapabilityContext {
-    // Generate capability list dynamically from MARY_TOOLS to prevent context drift
+    // Tool-specific usage guidance (supplements the tool descriptions passed to the API)
+    const toolGuidance: Record<string, string> = {
+      read_session_state: 'Before making decisions, to understand current phase, progress, and session context',
+      complete_phase: 'When the user has addressed all key aspects of the current phase',
+      switch_persona_mode: 'When the user\'s emotional state suggests a different coaching approach',
+      switch_speaker: 'When another board member\'s expertise is relevant to the current topic',
+      recommend_action: 'After thorough exploration when you have enough information to assess viability',
+      generate_document: 'When the user has provided enough input for a deliverable',
+      update_lean_canvas: 'When conversation reveals information that should populate canvas cells',
+      update_session_context: 'To persist insights, decisions, or progress markers for future reference',
+    }
+
+    // Generate capability list from MARY_TOOLS to prevent context drift
     const availableTools: ToolCapability[] = MARY_TOOLS.map(tool => ({
       name: tool.name,
       description: tool.description ?? tool.name,
-      whenToUse: `When ${(tool.description ?? '').toLowerCase().startsWith('read') ? 'you need context' : 'appropriate based on conversation state'}`,
+      whenToUse: toolGuidance[tool.name] ?? 'When appropriate based on conversation context',
     }));
 
     // Phase-specific actions

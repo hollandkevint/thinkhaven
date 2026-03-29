@@ -1,17 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { X, Users, Target, Lightbulb } from 'lucide-react'
 
 const STORAGE_KEY = 'thinkhaven_onboarding_completed'
 
 export function OnboardingModal() {
-  // Lazy-init from localStorage — no useEffect flash
-  const [show, setShow] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !localStorage.getItem(STORAGE_KEY)
-  })
+  // Initialize false to match SSR, then check localStorage after hydration
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      setShow(true)
+    }
+  }, [])
 
   const handleDismiss = () => {
     localStorage.setItem(STORAGE_KEY, 'true')

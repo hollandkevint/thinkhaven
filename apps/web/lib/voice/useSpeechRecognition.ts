@@ -21,6 +21,7 @@ export function useSpeechRecognition({
   const [isListening, setIsListening] = useState(false)
   const [isSupported, setIsSupported] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const isListeningRef = useRef(false)
   const onTranscriptRef = useRef(onTranscript)
 
   // Keep callback ref current without re-creating recognition
@@ -52,14 +53,15 @@ export function useSpeechRecognition({
     }
 
     recognition.onerror = (event) => {
-      // "aborted" fires on manual stop, not a real error
       if (event.error !== 'aborted') {
         console.error('[SpeechRecognition] Error:', event.error)
       }
+      isListeningRef.current = false
       setIsListening(false)
     }
 
     recognition.onend = () => {
+      isListeningRef.current = false
       setIsListening(false)
     }
 
@@ -72,20 +74,21 @@ export function useSpeechRecognition({
   }, [lang])
 
   const start = useCallback(() => {
-    if (!recognitionRef.current || isListening) return
+    if (!recognitionRef.current || isListeningRef.current) return
     try {
       recognitionRef.current.start()
+      isListeningRef.current = true
       setIsListening(true)
     } catch {
-      // InvalidStateError if already running
+      isListeningRef.current = false
       setIsListening(false)
     }
-  }, [isListening])
+  }, [])
 
   const stop = useCallback(() => {
-    if (!recognitionRef.current || !isListening) return
+    if (!recognitionRef.current || !isListeningRef.current) return
     recognitionRef.current.stop()
-  }, [isListening])
+  }, [])
 
   return { isListening, isSupported, start, stop }
 }
