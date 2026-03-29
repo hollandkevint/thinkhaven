@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, HelpCircle } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
@@ -44,6 +44,7 @@ import { ArtifactPanel, ArtifactKeyboardHandler } from '@/app/components/artifac
 import { ErrorState } from '@/app/components/ui/ErrorState'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 import { useFeedbackStore } from '@/lib/stores/feedbackStore'
+import { resetOnboarding } from '@/app/components/onboarding/OnboardingModal'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
@@ -263,6 +264,13 @@ export default function SessionPage() {
               workspaceName={session.title || 'Strategic Session'}
               workspaceId={session.id}
             />
+            <button
+              onClick={() => { resetOnboarding(); window.location.reload() }}
+              className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+              title="What is ThinkHaven?"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
             <FeedbackButton variant="header" sessionId={session?.id} />
             <span className="text-muted-foreground">{user.email}</span>
             <Link
