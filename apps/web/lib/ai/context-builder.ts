@@ -10,6 +10,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { SubPersonaSessionState, CoachingContext } from './mary-persona';
+import { MARY_TOOLS } from './tools';
 
 // =============================================================================
 // Types
@@ -197,29 +198,12 @@ export class ContextBuilder {
    * This prepares for Phase 3 tool calling
    */
   static buildCapabilityContext(currentPhase?: string): CapabilityContext {
-    // Core tools available to Mary (prep for Phase 3)
-    const availableTools: ToolCapability[] = [
-      {
-        name: 'complete_phase',
-        description: 'Signal that the current phase is complete with a reason',
-        whenToUse: 'When the user has addressed all key aspects of the current phase',
-      },
-      {
-        name: 'switch_persona_mode',
-        description: 'Change coaching mode (inquisitive, devil_advocate, encouraging, realistic)',
-        whenToUse: 'When the user\'s emotional state suggests a different approach would be more effective',
-      },
-      {
-        name: 'recommend_action',
-        description: 'Provide a kill/pivot/proceed recommendation with viability score',
-        whenToUse: 'After thorough exploration when you have enough information to assess viability',
-      },
-      {
-        name: 'generate_document',
-        description: 'Create a structured output (Lean Canvas, PRD, Feature Brief)',
-        whenToUse: 'When the user has provided enough input for a deliverable',
-      },
-    ];
+    // Generate capability list dynamically from MARY_TOOLS to prevent context drift
+    const availableTools: ToolCapability[] = MARY_TOOLS.map(tool => ({
+      name: tool.name,
+      description: tool.description,
+      whenToUse: `When ${tool.description.toLowerCase().startsWith('read') ? 'you need context' : 'appropriate based on conversation state'}`,
+    }));
 
     // Phase-specific actions
     const phaseActions: Record<string, string[]> = {

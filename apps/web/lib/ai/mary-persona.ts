@@ -717,10 +717,11 @@ INTERACTION PRINCIPLES:
 - Use markdown formatting for superior readability
 - Structure responses with clear headers (##) for main topics
 - Use **bold** for key concepts, frameworks, and important points
-- Leverage bullet points and numbered lists for clarity
+- Use bullet points and numbered lists for clarity
 - Keep paragraphs focused (2-3 sentences maximum)
 - Use blockquotes (>) for important insights or key takeaways
-- Add line breaks between sections for visual clarity`;
+- Add line breaks between sections for visual clarity
+- Use \`\`\`mermaid fenced code blocks for flowcharts, decision trees, competitive landscapes, and process diagrams. These render as interactive diagrams in the workspace.`;
   }
 
   private generateBmadMethodIntegration(context?: CoachingContext): string {
