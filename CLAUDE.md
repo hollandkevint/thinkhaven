@@ -78,6 +78,10 @@ See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_
 21. **Lazy module-level init for env vars** - Never use IIFEs or top-level `const x = fn()` that reads env vars at import time. Vercel builds don't have runtime env vars, causing build crashes. Use lazy getter functions instead (see `getAppUrl()` in `stripe-service.ts`).
 22. **Branded error pages exist** - `app/error.tsx` (runtime errors) and `app/not-found.tsx` (404s) are in place. Use them as patterns for sub-route-group error handling. Both use the design system (cream/terracotta/ink).
 23. **In-memory rate limiter is per-instance** - `RateLimiter` uses a static Map, so state isn't shared across Vercel serverless instances. Acceptable for beta; needs Redis/database-backed solution at scale.
+24. **Client components cannot import server-only modules** - `'use client'` files cannot transitively import modules that use `next/headers` or other server-only APIs. `session-primitives.ts` imports `supabase/server.ts`, so client components must not import from it. Shared types/constants go in a separate client-safe file (e.g., `pathway-labels.ts`). This broke a Vercel build.
+25. **Heavy libraries must be dynamically imported** - Mermaid (~250KB gzip), Excalidraw (~500KB), and similar large packages must use `next/dynamic` with `ssr: false`. Never import at module scope in components rendered on every page. Gate behind user action or lazy-load on first use.
+26. **Sanitize dangerouslySetInnerHTML from third-party libs** - Any `dangerouslySetInnerHTML` with output from mermaid, markdown renderers, or similar must be sanitized with DOMPurify. Mermaid's `securityLevel: 'strict'` has had bypasses (CVE-2023-20052). Defense in depth.
+27. **Radix Dialog for all new modals** - Hand-rolled modals lack focus trap, Escape handling, and aria-modal. `@radix-ui/react-dialog` is installed. Use it for all new modals. Existing hand-rolled modals (SignupPromptModal, ExportDialog, BranchDialog) are tracked for migration.
 
 ## Production Deployment
 
