@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../supabase/client'
 
@@ -49,7 +49,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null)
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const workspaceStateRef = useRef<WorkspaceState | null>(null)
 
   const createInitialWorkspace = useCallback(async () => {
     const initialState: WorkspaceState = {
@@ -108,6 +109,20 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, createInitialWorkspace])
 
+  // Keep ref in sync with state (avoids stale closures in debounced save)
+  useEffect(() => {
+    workspaceStateRef.current = workspaceState
+  }, [workspaceState])
+
+  // Cleanup: flush pending save on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current)
+      }
+    }
+  }, [])
+
   // Load workspace state when user is authenticated
   useEffect(() => {
     if (authLoading) return
@@ -121,13 +136,14 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }, [user, authLoading, loadWorkspace])
 
   const saveWorkspace = useCallback(async () => {
-    if (!user || !workspaceState) return
+    const currentState = workspaceStateRef.current
+    if (!user || !currentState) return
 
     try {
       const { error } = await supabase
         .from('user_workspace')
-        .update({ 
-          workspace_state: workspaceState,
+        .update({
+          workspace_state: currentState,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
@@ -139,20 +155,18 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       console.error('Error saving workspace:', err)
       setError('Failed to save workspace')
     }
-  }, [user, workspaceState])
+  }, [user])
 
   // Debounced auto-save function
   const debouncedSave = useCallback(() => {
-    if (autoSaveTimeout) {
-      clearTimeout(autoSaveTimeout)
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current)
     }
 
-    const timeout = setTimeout(() => {
+    autoSaveTimeoutRef.current = setTimeout(() => {
       saveWorkspace()
-    }, 2000) // Auto-save 2 seconds after last change
-
-    setAutoSaveTimeout(timeout)
-  }, [autoSaveTimeout, saveWorkspace])
+    }, 2000)
+  }, [saveWorkspace])
 
   const updateWorkspace = async (updates: Partial<WorkspaceState>) => {
     if (!workspaceState) return

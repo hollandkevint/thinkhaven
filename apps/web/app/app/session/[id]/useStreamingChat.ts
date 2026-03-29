@@ -69,6 +69,14 @@ export function useStreamingChat(
     return null
   })
   const sessionRef = useRef<SessionData | null>(initialSession)
+  const abortControllerRef = useRef<AbortController | null>(null)
+
+  // Abort any in-flight stream on unmount
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort()
+    }
+  }, [])
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -195,6 +203,11 @@ export function useStreamingChat(
     const current = sessionRef.current
     if (!current) return
 
+    // Abort any previous in-flight stream
+    abortControllerRef.current?.abort()
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
     try {
       const response = await fetch('/api/chat/stream', {
         method: 'POST',
@@ -205,6 +218,7 @@ export function useStreamingChat(
           conversationHistory: current.chat_context?.slice(-10) || [],
           useTools: true,
         }),
+        signal: controller.signal,
       })
 
       if (!response.ok) {
@@ -313,6 +327,8 @@ export function useStreamingChat(
         }
       }
     } catch (error) {
+      // Don't log or re-throw abort errors (user navigated away)
+      if (error instanceof DOMException && error.name === 'AbortError') return
       console.error('[Session] Streaming error:', error instanceof Error ? error.message : 'Unknown')
       throw error
     }
