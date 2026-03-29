@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import mermaid from 'mermaid'
+import DOMPurify from 'dompurify'
 
 // Initialize mermaid with ThinkHaven theme colors
 mermaid.initialize({
@@ -39,7 +40,11 @@ export default function MermaidBlock({ code }: MermaidBlockProps) {
       try {
         const { svg: renderedSvg } = await mermaid.render(id, code)
         if (!cancelled) {
-          setSvg(renderedSvg)
+          // Sanitize SVG to prevent XSS (mermaid securityLevel:'strict' has had bypasses)
+          const sanitized = DOMPurify.sanitize(renderedSvg, {
+            USE_PROFILES: { svg: true, svgFilters: true },
+          })
+          setSvg(sanitized)
           setError(null)
         }
       } catch (err) {

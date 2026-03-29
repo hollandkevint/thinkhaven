@@ -67,11 +67,10 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('Trial feedback insert failed:', insertError.code);
-
-      return NextResponse.json({
-        success: true,
-        message: 'Feedback recorded',
-      });
+      return NextResponse.json(
+        { error: 'Internal Server Error' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({

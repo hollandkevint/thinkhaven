@@ -30,8 +30,9 @@ export async function POST(request: NextRequest) {
     const parsed = FeedbackSchema.safeParse(body)
 
     if (!parsed.success) {
+      console.warn('Feedback validation failed:', parsed.error.issues)
       return NextResponse.json(
-        { error: 'Invalid feedback data', details: parsed.error.issues },
+        { error: 'Invalid feedback data' },
         { status: 400 }
       )
     }
