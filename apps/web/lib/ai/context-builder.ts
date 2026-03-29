@@ -201,8 +201,8 @@ export class ContextBuilder {
     // Generate capability list dynamically from MARY_TOOLS to prevent context drift
     const availableTools: ToolCapability[] = MARY_TOOLS.map(tool => ({
       name: tool.name,
-      description: tool.description,
-      whenToUse: `When ${tool.description.toLowerCase().startsWith('read') ? 'you need context' : 'appropriate based on conversation state'}`,
+      description: tool.description ?? tool.name,
+      whenToUse: `When ${(tool.description ?? '').toLowerCase().startsWith('read') ? 'you need context' : 'appropriate based on conversation state'}`,
     }));
 
     // Phase-specific actions

@@ -43,6 +43,7 @@ import { ArtifactProvider } from '@/lib/artifact'
 import { ArtifactPanel, ArtifactKeyboardHandler } from '@/app/components/artifact'
 import { ErrorState } from '@/app/components/ui/ErrorState'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
+import { useFeedbackStore } from '@/lib/stores/feedbackStore'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
@@ -77,6 +78,21 @@ export default function SessionPage() {
   const isOnline = useOnlineStatus()
 
   const canvasAutoOpenedRef = useRef(false)
+  const feedbackPromptedRef = useRef(false)
+  const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Auto-prompt feedback modal when message limit is reached (1s delay)
+  useEffect(() => {
+    if (limitStatus?.limitReached && !feedbackPromptedRef.current && session?.id) {
+      feedbackPromptedRef.current = true
+      feedbackTimeoutRef.current = setTimeout(() => {
+        useFeedbackStore.getState().open(session.id)
+      }, 1000)
+    }
+    return () => {
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current)
+    }
+  }, [limitStatus?.limitReached, session?.id])
 
   // Auto-open board pane when Board of Directors activates
   useEffect(() => {
@@ -247,7 +263,7 @@ export default function SessionPage() {
               workspaceName={session.title || 'Strategic Session'}
               workspaceId={session.id}
             />
-            <FeedbackButton variant="header" />
+            <FeedbackButton variant="header" sessionId={session?.id} />
             <span className="text-muted-foreground">{user.email}</span>
             <Link
               href="/app/account"
