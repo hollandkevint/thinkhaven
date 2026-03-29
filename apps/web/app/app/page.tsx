@@ -28,7 +28,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { ErrorState } from '@/app/components/ui/ErrorState';
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton';
 import { SessionMigration } from '@/lib/guest/session-migration';
-import { PATHWAY_LABELS } from '@/lib/session/session-primitives';
+import { PATHWAY_LABELS } from '@/lib/session/pathway-labels';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
