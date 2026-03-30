@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowLeft, HelpCircle, Users, PanelRightOpen, PanelRightClose } from 'lucide-react'
+import { Users } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
@@ -45,13 +45,11 @@ const MARKDOWN_COMPONENTS = {
 }
 import HandoffAnnotation from '@/app/components/board/HandoffAnnotation'
 import BoardOverview from '@/app/components/board/BoardOverview'
-import ExportPanel from '@/app/components/workspace/ExportPanel'
 import { ArtifactProvider } from '@/lib/artifact'
 import { ArtifactPanel, ArtifactKeyboardHandler } from '@/app/components/artifact'
 import { ErrorState } from '@/app/components/ui/ErrorState'
-import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 import { useFeedbackStore } from '@/lib/stores/feedbackStore'
-import { resetOnboarding } from '@/app/components/onboarding/OnboardingModal'
+import { SessionHeader } from '@/app/components/workspace/SessionHeader'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
@@ -180,12 +178,20 @@ export default function SessionPage() {
     return (
       <div className="dual-pane-container canvas-closed">
         <div className="chat-pane">
-          <header className="h-14 mb-4 flex justify-between items-center px-4 border-b border-border">
+          <header className="h-14 flex items-center justify-between px-4 border-b border-border gap-4">
             <div className="flex items-center gap-2">
               <div className="h-5 w-5 bg-parchment rounded animate-pulse" />
-              <div className="h-6 w-48 bg-parchment rounded animate-pulse" />
+              <div className="h-5 w-40 bg-parchment rounded animate-pulse" />
             </div>
-            <div className="h-8 w-8 bg-parchment/50 rounded animate-pulse" />
+            <div className="hidden md:flex items-center gap-2">
+              <div className="h-6 w-20 bg-parchment rounded-full animate-pulse" />
+              <div className="h-6 w-20 bg-parchment/50 rounded-full animate-pulse" />
+              <div className="h-6 w-20 bg-parchment/50 rounded-full animate-pulse" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="h-7 w-16 bg-parchment rounded-md animate-pulse" />
+              <div className="h-7 w-7 bg-parchment/50 rounded-md animate-pulse" />
+            </div>
           </header>
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto p-8">
@@ -259,64 +265,20 @@ export default function SessionPage() {
 
       {/* Main Content Pane */}
       <div className="chat-pane">
-        <header className="h-14 mb-4 flex justify-between items-center px-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Link href="/app" className="text-primary hover:opacity-80 transition-opacity">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <h1 className="text-xl font-bold font-display text-foreground truncate max-w-[300px]">
-              {session.title || 'Strategic Session'}
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <button
-              onClick={() => {
-                const newOpen = !boardPanelOpen
-                setBoardPanelOpen(newOpen)
-                setIsCanvasOpen(newOpen || !!(session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas)))
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-display font-medium transition-colors ${
-                boardPanelOpen
-                  ? 'bg-terracotta text-cream'
-                  : 'bg-parchment text-ink border border-ink/8 hover:border-ink/15'
-              }`}
-              title={boardPanelOpen ? 'Hide board panel' : 'Show board panel'}
-            >
-              <Users className="w-3.5 h-3.5" />
-              Board
-              {boardPanelOpen
-                ? <PanelRightClose className="w-3 h-3" />
-                : <PanelRightOpen className="w-3 h-3" />
-              }
-            </button>
-            <ExportPanel
-              messages={session.chat_context}
-              workspaceName={session.title || 'Strategic Session'}
-              workspaceId={session.id}
-            />
-            <button
-              onClick={() => { resetOnboarding(); window.location.reload() }}
-              className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-              title="What is ThinkHaven?"
-            >
-              <HelpCircle className="w-4 h-4" />
-            </button>
-            <FeedbackButton variant="header" sessionId={session?.id} />
-            <span className="text-muted-foreground">{user.email}</span>
-            <Link
-              href="/app/account"
-              className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Account
-            </Link>
-            <button
-              className="px-2 py-1 text-xs text-rust hover:opacity-80 transition-opacity"
-              onClick={signOut}
-            >
-              Sign Out
-            </button>
-          </div>
-        </header>
+        <SessionHeader
+          title={session.title || 'Strategic Session'}
+          sessionId={session.id}
+          messageCount={session.message_count || 0}
+          chatContext={session.chat_context}
+          boardPanelOpen={boardPanelOpen}
+          onToggleBoard={() => {
+            const newOpen = !boardPanelOpen
+            setBoardPanelOpen(newOpen)
+            setIsCanvasOpen(newOpen || !!(session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas)))
+          }}
+          userEmail={user.email || ''}
+          onSignOut={signOut}
+        />
 
         {/* Chat Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
