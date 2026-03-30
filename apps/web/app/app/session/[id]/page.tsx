@@ -499,7 +499,7 @@ export default function SessionPage() {
             <div className="px-6 py-8 text-center">
               <Users className="w-8 h-8 text-ink/20 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground font-body">
-                The board hasn't joined yet. Continue your conversation and Mary will invite them when the time is right.
+                The board hasn&apos;t joined yet. Continue your conversation and Mary will invite them when the time is right.
               </p>
             </div>
           )}

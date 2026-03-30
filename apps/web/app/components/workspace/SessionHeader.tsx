@@ -4,9 +4,7 @@ import Link from 'next/link'
 import {
   ArrowLeft,
   ChevronRight,
-  Download,
   HelpCircle,
-  MessageSquare,
   MoreVertical,
   PanelRightClose,
   PanelRightOpen,
