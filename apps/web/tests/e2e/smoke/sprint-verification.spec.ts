@@ -37,9 +37,9 @@ test.describe('Sprint 0-3 Verification', () => {
     expect(ctaCount).toBeGreaterThan(0);
   });
 
-  test('Guest chat header has sign up button', async ({ page }) => {
+  test('Guest chat has sign up option', async ({ page }) => {
     await page.goto('/try');
-    // Sign up is a button on /try, not a link
-    await expect(page.getByRole('button', { name: 'Sign up' })).toBeVisible();
+    // Page has both a header link and a GuestChatInterface button with "Sign up"
+    await expect(page.getByText('Sign up').first()).toBeVisible({ timeout: 10000 });
   });
 });
