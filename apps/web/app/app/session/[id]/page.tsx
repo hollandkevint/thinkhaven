@@ -294,17 +294,27 @@ export default function SessionPage() {
           >
             <div className="max-w-4xl mx-auto space-y-6">
               {session.chat_context.length === 0 && (
-                <div className="bg-parchment p-6 rounded-lg border border-ink/8 mb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-cream font-semibold font-display">M</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-ink text-lg mb-2 font-display">Hey, I&apos;m Mary.</p>
-                      <p className="text-ink-light">
-                        What idea or decision are you working on? I&apos;ll help you pressure-test it.
-                      </p>
-                    </div>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <h2 className="font-display text-2xl font-semibold text-ink mb-2">
+                    What are you working on?
+                  </h2>
+                  <p className="text-muted-foreground font-body max-w-md mb-8">
+                    Describe your idea, decision, or challenge. Your board of advisors will help you think it through.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full">
+                    {[
+                      'I want to validate a new product idea',
+                      "I'm deciding between two strategic directions",
+                      'Help me stress-test my business model',
+                    ].map((prompt) => (
+                      <button
+                        key={prompt}
+                        onClick={() => setMessageInput(prompt)}
+                        className="text-left p-4 rounded-xl border border-ink/8 bg-parchment hover:shadow-md hover:border-ink/15 transition-all text-sm text-ink font-body leading-relaxed"
+                      >
+                        {prompt}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
