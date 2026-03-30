@@ -2,7 +2,7 @@
  * Feedback API
  *
  * POST /api/feedback
- * Collects in-app feedback with Likert ratings.
+ * Collects in-app feedback with type categorization (praise/bug/feature_request).
  * Validates via Zod, IDOR-checks session ownership, inserts to feedback table.
  */
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { decision_usefulness, return_likelihood, free_text, session_id, source } = parsed.data
+    const { feedback_type, free_text, session_id, source } = parsed.data
 
     // IDOR check: verify user owns the referenced session
     if (session_id) {
@@ -57,9 +57,8 @@ export async function POST(request: NextRequest) {
     const { error: insertError } = await supabase.from('feedback').insert({
       user_id: user.id,
       session_id: session_id ?? null,
-      decision_usefulness,
-      return_likelihood,
-      free_text: free_text ?? null,
+      feedback_type,
+      free_text,
       source,
     })
 
