@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -125,9 +126,9 @@ export function CreditGuard({ userId, onCreditsUpdated, expanded = false }: Cred
               <Button
                 className="w-full bg-terracotta hover:bg-terracotta-hover text-cream font-display text-sm"
                 size="sm"
-                disabled
+                asChild
               >
-                Purchase Credits (Coming Soon)
+                <Link href="/pricing">Purchase Credits</Link>
               </Button>
             </div>
           </PopoverContent>
@@ -177,12 +178,12 @@ export function CreditGuard({ userId, onCreditsUpdated, expanded = false }: Cred
           <CardFooter className="flex flex-col gap-3 pt-2">
             <Button
               className="w-full bg-terracotta hover:bg-terracotta-hover text-cream font-display"
-              disabled
+              asChild
             >
-              Purchase Credits (Coming Soon)
+              <Link href="/pricing">Purchase Credits</Link>
             </Button>
             <p className="text-xs text-center text-slate-blue">
-              We're finalizing pricing. Share your feedback below!
+              See pricing options and continue your strategic work.
             </p>
           </CardFooter>
         </Card>
