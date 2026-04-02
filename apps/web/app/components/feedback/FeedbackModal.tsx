@@ -5,11 +5,14 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { useFeedbackStore } from '@/lib/stores/feedbackStore'
 import { FEEDBACK_TYPES, FEEDBACK_TYPE_LABELS, type FeedbackType } from '@/lib/feedback/feedback-schema'
+import { track } from '@/lib/analytics/events'
 
 export function FeedbackModal() {
   const { isOpen, sessionId, close } = useFeedbackStore()
   const [feedbackType, setFeedbackType] = useState<FeedbackType | null>(null)
   const [freeText, setFreeText] = useState('')
+  const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null)
+  const [disappearAlternative, setDisappearAlternative] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const successTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -25,6 +28,8 @@ export function FeedbackModal() {
     if (isOpen) {
       setFeedbackType(null)
       setFreeText('')
+      setWouldRecommend(null)
+      setDisappearAlternative('')
       setSubmitted(false)
     }
   }, [isOpen])
@@ -43,6 +48,8 @@ export function FeedbackModal() {
           free_text: freeText.trim(),
           session_id: sessionId ?? undefined,
           source: 'manual',
+          would_recommend: wouldRecommend ?? undefined,
+          disappear_alternative: disappearAlternative.trim() || undefined,
         }),
       })
 
@@ -51,11 +58,20 @@ export function FeedbackModal() {
         throw new Error(data?.error || 'Failed to submit')
       }
 
+      track({
+        event: 'feedback_submitted',
+        properties: {
+          feedback_type: feedbackType,
+          ...(wouldRecommend !== null && { would_recommend: wouldRecommend }),
+        },
+      })
+
       setSubmitted(true)
       successTimeoutRef.current = setTimeout(() => close(), 2000)
     } catch (error) {
       console.error('Feedback submit failed:', error)
       alert('Failed to submit feedback. Please try again.')
+      throw error
     } finally {
       setSubmitting(false)
     }
@@ -103,7 +119,7 @@ export function FeedbackModal() {
               </div>
 
               {/* Free text */}
-              <div className="mb-6">
+              <div className="mb-5">
                 <label htmlFor="feedback-text" className="block text-sm font-medium text-ink mb-2">
                   Tell us more
                 </label>
@@ -120,6 +136,47 @@ export function FeedbackModal() {
                   className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm focus:ring-2 focus:ring-terracotta focus:border-transparent bg-parchment resize-none"
                   rows={4}
                   maxLength={2000}
+                />
+              </div>
+
+              {/* Would recommend */}
+              <div className="mb-5">
+                <p className="text-sm font-medium text-ink mb-2">
+                  Would you recommend ThinkHaven to a colleague?
+                </p>
+                <div className="flex gap-2">
+                  {([true, false] as const).map((val) => (
+                    <button
+                      key={String(val)}
+                      type="button"
+                      onClick={() => setWouldRecommend(val)}
+                      className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors ${
+                        wouldRecommend === val
+                          ? val
+                            ? 'border-forest bg-forest/10 text-forest'
+                            : 'border-rust bg-rust/10 text-rust'
+                          : 'border-ink/10 hover:border-ink/20 text-ink'
+                      }`}
+                    >
+                      {val ? 'Yes' : 'No'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Disappear alternative */}
+              <div className="mb-6">
+                <label htmlFor="disappear-alternative" className="block text-sm font-medium text-ink mb-2">
+                  If ThinkHaven disappeared tomorrow, what would you do instead?
+                </label>
+                <input
+                  id="disappear-alternative"
+                  type="text"
+                  value={disappearAlternative}
+                  onChange={(e) => setDisappearAlternative(e.target.value)}
+                  placeholder="e.g. go back to spreadsheets, ask a friend, nothing..."
+                  className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm focus:ring-2 focus:ring-terracotta focus:border-transparent bg-parchment"
+                  maxLength={500}
                 />
               </div>
 

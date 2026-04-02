@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { feedback_type, free_text, session_id, source } = parsed.data
+    const { feedback_type, free_text, session_id, source, would_recommend, disappear_alternative } = parsed.data
 
     // IDOR check: verify user owns the referenced session
     if (session_id) {
@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
       feedback_type,
       free_text,
       source,
+      would_recommend: would_recommend ?? null,
+      disappear_alternative: disappear_alternative ?? null,
     })
 
     if (insertError) {

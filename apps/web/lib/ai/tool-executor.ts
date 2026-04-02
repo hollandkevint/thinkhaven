@@ -57,6 +57,8 @@ export interface ToolExecutionResult {
 
 export class ToolExecutor {
   private context: ToolExecutionContext;
+  /** Set to true on the first successful switch_speaker call (board activation). */
+  public boardActivated = false;
 
   constructor(context: ToolExecutionContext) {
     this.context = context;
@@ -101,6 +103,9 @@ export class ToolExecutor {
             this.context.sessionId,
             toolCall.input as SwitchSpeakerInput
           );
+          if (result.success && !this.boardActivated) {
+            this.boardActivated = true;
+          }
           break;
 
         case TOOL_NAMES.RECOMMEND_ACTION:

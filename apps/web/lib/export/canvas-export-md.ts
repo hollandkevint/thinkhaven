@@ -1,4 +1,6 @@
 import type { LeanCanvas, LeanCanvasField } from '@/lib/canvas/lean-canvas-schema'
+import { track } from '@/lib/analytics/events'
+import { LEAN_CANVAS_FIELDS } from '@/lib/canvas/lean-canvas-schema'
 
 const CANVAS_LABELS: Record<LeanCanvasField, string> = {
   problem: 'Problem',
@@ -44,6 +46,9 @@ export function downloadCanvasMarkdown(canvas: LeanCanvas, title?: string) {
   const blob = new Blob([markdown], { type: 'text/markdown' })
   const url = URL.createObjectURL(blob)
   const filename = `${(title || 'lean-canvas').toLowerCase().replace(/\s+/g, '-')}.md`
+
+  const filledBoxes = LEAN_CANVAS_FIELDS.filter(f => canvas[f]?.trim()).length
+  track({ event: 'canvas_exported', properties: { format: 'markdown', filled_boxes: filledBoxes } })
 
   const a = document.createElement('a')
   a.href = url

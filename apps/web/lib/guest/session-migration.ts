@@ -67,7 +67,7 @@ export class SessionMigration {
           next_steps: [],
           status: 'active',
           overall_completion: 0,
-          message_count: chatMessages.length,
+          message_count: chatMessages.filter(m => m.role === 'user').length,
           message_limit: 10,
           chat_context: chatMessages,
         })
