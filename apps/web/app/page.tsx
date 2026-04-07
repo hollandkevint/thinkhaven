@@ -33,12 +33,12 @@ export default function Home() {
           <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
             {/* Left Column: Copy */}
             <div className="text-center lg:text-left mb-12 lg:mb-0">
-              {/* Alpha Badge */}
+              {/* Beta Badge */}
               <span
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-forest/10 text-forest text-xs font-display font-medium tracking-wider uppercase mb-6 animate-fadeIn"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse" />
-                Alpha
+                Beta
               </span>
 
               <h1
@@ -187,7 +187,7 @@ export default function Home() {
       {/* Social Proof Bar */}
       <div className="relative z-10 py-6">
         <p className="text-center text-sm font-display text-ink-light tracking-wide">
-          <strong className="text-ink">Product leaders and founders</strong> are pressure-testing their strategies in Alpha
+          <strong className="text-ink">Product leaders and founders</strong> are pressure-testing their strategies in Beta
         </p>
       </div>
 
