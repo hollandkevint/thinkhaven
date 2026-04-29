@@ -43,6 +43,7 @@ async function executeAgenticLoop(
   toolsExecuted: Array<{ name: string; success: boolean }>;
   rounds: number;
   segments: SpeakerSegment[];
+  boardActivated: boolean;
 }> {
   const toolExecutor = new ToolExecutor({ sessionId, userId });
   const toolsExecuted: Array<{ name: string; success: boolean }> = [];
@@ -157,6 +158,7 @@ async function executeAgenticLoop(
     toolsExecuted,
     rounds,
     segments,
+    boardActivated: toolExecutor.boardActivated,
   };
 }
 
@@ -375,6 +377,7 @@ export async function POST(request: NextRequest) {
           let fullContent = '';
           let toolsExecuted: Array<{ name: string; success: boolean }> = [];
           let agenticRounds = 0;
+          let boardActivated = false;
 
           // Branch: Agentic loop with tools OR standard streaming
           if (useTools && bmadSessionForUpdate?.id) {
@@ -389,6 +392,7 @@ export async function POST(request: NextRequest) {
             fullContent = agenticResult.finalText;
             toolsExecuted = agenticResult.toolsExecuted;
             agenticRounds = agenticResult.rounds;
+            boardActivated = agenticResult.boardActivated;
 
             // Stream segments with speaker attribution
             if (agenticResult.segments.length > 0) {
@@ -493,6 +497,9 @@ export async function POST(request: NextRequest) {
           if (toolsExecuted.length > 0) {
             additionalData.toolsExecuted = toolsExecuted;
             additionalData.agenticRounds = agenticRounds;
+          }
+          if (boardActivated) {
+            additionalData.boardActivated = true;
           }
 
           // Attach lean canvas state if update_lean_canvas tool ran

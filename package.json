@@ -22,5 +22,8 @@
     "ai-assistant"
   ],
   "author": "Kevin Kellogg",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@testing-library/user-event": "^14.6.1"
+  }
 }

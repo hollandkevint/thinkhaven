@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { SessionMigration } from '@/lib/guest/session-migration'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -9,21 +9,38 @@ import {
   buildSignupPath,
   getStoredBetaInviteContext,
 } from '@/lib/beta/invite-destinations'
+import { track } from '@/lib/analytics/events'
+
+export type SignupPromptTrigger = 'guest_limit' | 'board_tease' | 'manual'
 
 interface SignupPromptModalProps {
   isOpen: boolean
   onClose: () => void
   sessionSummary?: string
+  trigger?: SignupPromptTrigger
 }
 
 export default function SignupPromptModal({
   isOpen,
   onClose,
-  sessionSummary
+  sessionSummary,
+  trigger = 'guest_limit'
 }: SignupPromptModalProps) {
   const router = useRouter()
   const [showSummary, setShowSummary] = useState(false)
   const inviteContext = getStoredBetaInviteContext()
+  const hasTrackedRef = useRef(false)
+
+  // Fire PostHog event when modal opens
+  useEffect(() => {
+    if (isOpen && !hasTrackedRef.current) {
+      track({ event: 'signup_prompt_shown', properties: { trigger } })
+      hasTrackedRef.current = true
+    }
+    if (!isOpen) {
+      hasTrackedRef.current = false
+    }
+  }, [isOpen, trigger])
 
   if (!isOpen) return null
 
@@ -66,7 +83,7 @@ export default function SignupPromptModal({
                 Ready for more?
               </h2>
               <p className="text-slate-blue">
-                You've reached your 10 free messages. Sign up to continue your conversation with Mary and unlock unlimited strategic insights.
+                You've reached your 10 free messages. Sign up to continue with 5 free sessions and your full Board of Directors.
               </p>
             </div>
 
@@ -87,8 +104,8 @@ export default function SignupPromptModal({
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 <div>
-                  <p className="font-medium text-ink">Unlimited conversations</p>
-                  <p className="text-sm text-ink-light">No more message limits</p>
+                  <p className="font-medium text-ink">5 free sessions with your full Board</p>
+                  <p className="text-sm text-ink-light">Victoria, Casey, Omar, and more</p>
                 </div>
               </div>
 

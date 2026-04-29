@@ -79,7 +79,7 @@ export default function Home() {
                 className="text-sm text-slate-blue animate-fadeIn"
                 style={{ animationDelay: '300ms' }}
               >
-                No account needed. No credit card. 5 messages to see if it&apos;s for you.
+                No account needed. No credit card. 10 messages to see if it&apos;s for you.
               </p>
             </div>
 

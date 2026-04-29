@@ -10,6 +10,7 @@ import ChatErrorDisplay from '../chat/ChatErrorDisplay'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { track } from '@/lib/analytics/events'
+import posthog from 'posthog-js'
 
 interface Message {
   id: string
@@ -29,6 +30,8 @@ export default function GuestChatInterface() {
   const [remainingMessages, setRemainingMessages] = useState(10)
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [showSavePrompt, setShowSavePrompt] = useState(false)
+  // Sub-persona state round-tripped to API for exchange counting / board offer
+  const [subPersonaState, setSubPersonaState] = useState<Record<string, unknown> | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const savePromptTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -131,7 +134,8 @@ export default function GuestChatInterface() {
           conversationHistory: messages.map(msg => ({
             role: msg.role,
             content: msg.content
-          }))
+          })),
+          subPersonaState
         })
       })
 
@@ -209,6 +213,25 @@ export default function GuestChatInterface() {
                       )
                     }
                     break
+
+                  case 'complete': {
+                    // Extract updated subPersonaState from the completion payload
+                    const returnedState = parsed.additionalData?.subPersonaState
+                    if (returnedState) {
+                      setSubPersonaState(returnedState as Record<string, unknown>)
+
+                      // Fire board_offered event at board offer thresholds
+                      const BOARD_OFFER_EXCHANGES = [3, 8, 15]
+                      const exchangeCount = (returnedState as { exchangeCount?: number }).exchangeCount
+                      if (typeof exchangeCount === 'number' && BOARD_OFFER_EXCHANGES.includes(exchangeCount)) {
+                        posthog.capture('board_offered', {
+                          exchange_count: exchangeCount,
+                          source: 'guest',
+                        })
+                      }
+                    }
+                    break
+                  }
 
                   case 'error':
                     throw new Error(parsed.error || 'Unknown streaming error')

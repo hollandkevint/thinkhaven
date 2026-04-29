@@ -14,6 +14,8 @@ export const FeedbackSchema = z.object({
   free_text: z.string().min(1).max(2000),
   session_id: z.string().uuid().optional(),
   source: z.enum(['manual', 'auto_limit']),
+  would_recommend: z.boolean().optional(),
+  disappear_alternative: z.string().max(500).optional(),
 })
 
 export type FeedbackPayload = z.infer<typeof FeedbackSchema>
