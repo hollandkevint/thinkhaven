@@ -8,6 +8,7 @@ interface AuthMetricsData {
   window: string
   detailed: boolean
   metrics: AuthMetricsCollection | DetailedAuthMetrics
+  beta_funnel?: Record<string, number> | null
   alerts: Array<{ level: 'warning' | 'critical'; message: string; value: number }>
   metadata: {
     retention_policy: string
@@ -186,6 +187,9 @@ export default function AuthMetricsDashboard() {
   const currentMetrics = isCollection
     ? (metricsData.metrics as AuthMetricsCollection)[selectedWindow]
     : metricsData.metrics as DetailedAuthMetrics
+  const detailedMetrics = detailed && !isCollection
+    ? (currentMetrics as DetailedAuthMetrics)
+    : null
 
   const getStatusForRate = (rate: number) => {
     if (rate < 90) return 'error'
@@ -263,6 +267,15 @@ export default function AuthMetricsDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {metricsData.beta_funnel && (
+          <div className="bg-cream border rounded-lg p-6 lg:col-span-2">
+            <DistributionChart
+              data={metricsData.beta_funnel}
+              title="Beta Funnel Events"
+            />
+          </div>
+        )}
+
         <div className="bg-cream border rounded-lg p-6">
           <DistributionChart
             data={currentMetrics.method_distribution}
@@ -277,18 +290,18 @@ export default function AuthMetricsDashboard() {
           />
         </div>
 
-        {detailed && 'device_distribution' in currentMetrics && (
+        {detailedMetrics && (
           <>
             <div className="bg-cream border rounded-lg p-6">
               <DistributionChart
-                data={currentMetrics.device_distribution || {}}
+                data={detailedMetrics.device_distribution || {}}
                 title="Device Types"
               />
             </div>
 
             <div className="bg-cream border rounded-lg p-6">
               <DistributionChart
-                data={currentMetrics.browser_distribution || {}}
+                data={detailedMetrics.browser_distribution || {}}
                 title="Browser Distribution"
               />
             </div>

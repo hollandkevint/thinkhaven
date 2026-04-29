@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase/client';
 
 export function WaitlistForm() {
   const [email, setEmail] = useState('');
@@ -16,24 +15,31 @@ export function WaitlistForm() {
     setStatus('loading');
     setMessage('');
 
-    const { error } = await supabase
-      .from('beta_access')
-      .insert({ email: email.trim().toLowerCase(), source: 'landing_page' });
+    try {
+      const response = await fetch('/api/beta/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          source: 'landing_page',
+        }),
+      });
 
-    if (error) {
-      // Unique constraint violation = already on list
-      if (error.code === '23505') {
-        setStatus('success');
-        setMessage("You're already on the list! We'll email you soon.");
-      } else {
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
         setStatus('error');
-        setMessage('Something went wrong. Please try again.');
-        console.error('Waitlist signup error:', error);
+        setMessage(data?.error || 'Something went wrong. Please try again.');
+        return;
       }
-    } else {
+
       setStatus('success');
-      setMessage("You're on the list! We'll email you when your spot opens up.");
+      setMessage(data?.message || "You're on the list! We'll email you when your spot opens up.");
       setEmail('');
+    } catch (error) {
+      setStatus('error');
+      setMessage('Something went wrong. Please try again.');
+      console.error('Waitlist signup error:', error);
     }
   };
 

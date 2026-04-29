@@ -6,10 +6,14 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, betaApproved, error } = await checkBetaAccess();
+  const { user, betaApproved, status } = await checkBetaAccess();
+
+  if (status === 'unavailable') {
+    throw new Error('Authentication service unavailable');
+  }
 
   // Not authenticated
-  if (!user || error) {
+  if (!user || status === 'unauthenticated') {
     redirect('/login?redirect=' + encodeURIComponent('/app'));
   }
 

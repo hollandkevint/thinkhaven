@@ -5,11 +5,20 @@ import { useAuth } from '../../lib/auth/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase/client'
+import {
+  buildAuthCallbackUrl,
+  buildPostAuthDestination,
+  buildSignupPath,
+  readBetaInviteContext,
+  readSafeRedirectPath,
+} from '@/lib/beta/invite-destinations'
 
 function LoginPageContent() {
   const { signInWithEmail, signInWithGoogle } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const inviteContext = readBetaInviteContext(searchParams)
+  const redirectPath = readSafeRedirectPath(searchParams)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -45,7 +54,7 @@ function LoginPageContent() {
           setError(`Login failed: ${error.message}`)
         }
       } else {
-        router.push('/app')
+        router.push(buildPostAuthDestination(inviteContext, redirectPath || '/app'))
       }
     } catch (err) {
       console.error('Login error:', err)
@@ -60,7 +69,11 @@ function LoginPageContent() {
     setError('')
 
     try {
-      await signInWithGoogle()
+      await signInWithGoogle(buildAuthCallbackUrl(
+        window.location.origin,
+        inviteContext,
+        redirectPath || '/app'
+      ))
     } catch (err) {
       console.error('Google sign-in error:', err)
       setError('Google sign-in failed. Please try again.')
@@ -216,7 +229,7 @@ function LoginPageContent() {
           <div className="text-center text-sm">
             <span className="text-muted-foreground">Don&apos;t have an account? </span>
             <Link
-              href="/signup"
+              href={buildSignupPath(inviteContext)}
               className="font-semibold hover:underline text-primary"
             >
               Sign up

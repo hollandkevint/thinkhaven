@@ -20,7 +20,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, '.'),
-      '~': resolve(__dirname, '.')
+      '~': resolve(__dirname, '.'),
+      'next/dist/compiled/server-only': resolve(__dirname, 'tests/stubs/server-only.ts')
     }
   },
   esbuild: {

@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createClient } from '@/lib/supabase/server'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 // Mock Supabase client
 const mockSupabaseClient = {
@@ -330,6 +332,40 @@ describe('RLS Policy Validation', () => {
       expect(result.data[0]).toHaveProperty('dual_pane_state')
       expect(result.data[0].dual_pane_state).toHaveProperty('chat_width', 45)
       expect(result.data[0].dual_pane_state).toHaveProperty('canvas_width', 55)
+    })
+  })
+
+  describe('beta operations migration policy coverage', () => {
+    const betaOperationsMigration = readFileSync(
+      join(process.cwd(), 'supabase/migrations/030_beta_operations.sql'),
+      'utf8'
+    )
+
+    it('allows the Supabase auth hook role to read beta access state under RLS', () => {
+      expect(betaOperationsMigration).toContain('TO supabase_auth_admin')
+      expect(betaOperationsMigration).toContain('Auth hook can read beta access')
+      expect(betaOperationsMigration).toContain('GRANT SELECT ON public.beta_access TO supabase_auth_admin')
+      expect(betaOperationsMigration).toContain('approved_at IS NOT NULL AND revoked_at IS NULL')
+    })
+
+    it('removes the legacy public beta_access insert policy', () => {
+      expect(betaOperationsMigration).toContain(
+        'DROP POLICY IF EXISTS "Anyone can join waitlist" ON public.beta_access'
+      )
+      expect(betaOperationsMigration).toContain(
+        'browser clients cannot set'
+      )
+    })
+
+    it('keeps durable beta events behind server-side operations', () => {
+      const betaEventsSection = betaOperationsMigration.split('CREATE TABLE IF NOT EXISTS public.beta_auth_events')[1]
+
+      expect(betaOperationsMigration).toContain('CREATE TABLE IF NOT EXISTS public.beta_auth_events')
+      expect(betaOperationsMigration).toContain('ALTER TABLE public.beta_auth_events ENABLE ROW LEVEL SECURITY')
+      expect(betaEventsSection).not.toContain('CREATE POLICY')
+      expect(betaEventsSection).not.toContain('TO anon')
+      expect(betaEventsSection).not.toContain('TO authenticated')
+      expect(betaEventsSection).toContain('No anon/authenticated table policies')
     })
   })
 })

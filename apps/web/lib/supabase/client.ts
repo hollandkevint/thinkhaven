@@ -105,6 +105,94 @@ export type Database = {
           updated_at?: string
         }
       }
+      beta_access: {
+        Row: {
+          id: string
+          user_id: string | null
+          email: string
+          created_at: string
+          approved_at: string | null
+          approved_by: string | null
+          source: string
+          revoked_at: string | null
+          revoked_by: string | null
+          last_invited_at: string | null
+          invite_copied_at: string | null
+          invite_count: number
+          last_gate_at: string | null
+          last_gate_status: string | null
+          first_access_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          email: string
+          created_at?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          source?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          last_invited_at?: string | null
+          invite_copied_at?: string | null
+          invite_count?: number
+          last_gate_at?: string | null
+          last_gate_status?: string | null
+          first_access_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          email?: string
+          created_at?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          source?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          last_invited_at?: string | null
+          invite_copied_at?: string | null
+          invite_count?: number
+          last_gate_at?: string | null
+          last_gate_status?: string | null
+          first_access_at?: string | null
+        }
+      }
+      beta_auth_events: {
+        Row: {
+          id: string
+          event_type: string
+          actor_user_id: string | null
+          target_user_id: string | null
+          beta_access_id: string | null
+          target_email_hash: string | null
+          request_path: string | null
+          metadata: Record<string, unknown>
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_type: string
+          actor_user_id?: string | null
+          target_user_id?: string | null
+          beta_access_id?: string | null
+          target_email_hash?: string | null
+          request_path?: string | null
+          metadata?: Record<string, unknown>
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_type?: string
+          actor_user_id?: string | null
+          target_user_id?: string | null
+          beta_access_id?: string | null
+          target_email_hash?: string | null
+          request_path?: string | null
+          metadata?: Record<string, unknown>
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

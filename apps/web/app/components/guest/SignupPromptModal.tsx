@@ -4,6 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 import { SessionMigration } from '@/lib/guest/session-migration'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import {
+  buildLoginPath,
+  buildSignupPath,
+  getStoredBetaInviteContext,
+} from '@/lib/beta/invite-destinations'
 import { track } from '@/lib/analytics/events'
 
 export type SignupPromptTrigger = 'guest_limit' | 'board_tease' | 'manual'
@@ -23,6 +28,7 @@ export default function SignupPromptModal({
 }: SignupPromptModalProps) {
   const router = useRouter()
   const [showSummary, setShowSummary] = useState(false)
+  const inviteContext = getStoredBetaInviteContext()
   const hasTrackedRef = useRef(false)
 
   // Fire PostHog event when modal opens
@@ -41,7 +47,7 @@ export default function SignupPromptModal({
   const handleSignup = () => {
     // Redirect to signup page
     // Session will be migrated after successful authentication
-    router.push('/signup?from=guest')
+    router.push(buildSignupPath(inviteContext))
   }
 
   const handleViewSummary = () => {
@@ -134,7 +140,7 @@ export default function SignupPromptModal({
             {/* Sign in link + fine print */}
             <p className="text-sm text-center mt-4">
               <span className="text-slate-blue">Already have an account? </span>
-              <Link href="/login" className="font-semibold text-terracotta hover:text-terracotta-hover">
+              <Link href={buildLoginPath(inviteContext)} className="font-semibold text-terracotta hover:text-terracotta-hover">
                 Sign in
               </Link>
             </p>
