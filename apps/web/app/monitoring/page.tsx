@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import AuthMetricsDashboard from '@/app/components/monitoring/AuthMetricsDashboard'
+import { isAdminEmail } from '@/lib/auth/admin'
 
 export default async function MonitoringPage() {
   const cookieStore = await cookies()
@@ -29,6 +30,8 @@ export default async function MonitoringPage() {
     redirect('/login')
   }
 
+  const isAdmin = isAdminEmail(user.email)
+
   return (
     <div className="min-h-screen bg-cream">
       <header className="bg-parchment shadow-sm border-b">
@@ -53,6 +56,14 @@ export default async function MonitoringPage() {
               >
                 Monitoring
               </a>
+              {isAdmin && (
+                <a
+                  href="/admin/beta"
+                  className="text-slate-blue hover:text-ink px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Beta access
+                </a>
+              )}
             </nav>
           </div>
         </div>

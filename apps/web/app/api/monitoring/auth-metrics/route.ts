@@ -3,6 +3,7 @@ import { authMetricsCollector } from '@/lib/monitoring/auth-metrics'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { isAdminEmail } from '@/lib/auth/admin'
+import { getBetaEventCounts } from '@/lib/monitoring/beta-event-logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,17 +45,18 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url)
     const window = url.searchParams.get('window') || '1h'
     const detailed = url.searchParams.get('detailed') === 'true'
+    let windowMs = 60 * 60 * 1000
+    if (window === '24h') windowMs = 24 * 60 * 60 * 1000
+    if (window === '7d') windowMs = 7 * 24 * 60 * 60 * 1000
 
     let metrics
     if (detailed) {
-      let windowMs = 60 * 60 * 1000 // 1 hour default
-      if (window === '24h') windowMs = 24 * 60 * 60 * 1000
-      if (window === '7d') windowMs = 7 * 24 * 60 * 60 * 1000
-
       metrics = authMetricsCollector.calculateDetailedMetrics(windowMs)
     } else {
       metrics = authMetricsCollector.getAllMetrics()
     }
+
+    const betaFunnel = await getBetaEventCounts(windowMs)
 
     // Add alert checking for current metrics
     const alerts = authMetricsCollector.checkAlerts(
@@ -66,6 +68,7 @@ export async function GET(request: NextRequest) {
       window: window,
       detailed: detailed,
       metrics: metrics,
+      beta_funnel: betaFunnel,
       alerts: alerts,
       metadata: {
         retention_policy: '7 days',

@@ -1,10 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useAuth } from '../../lib/auth/AuthContext'
-import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase/client'
 import Link from 'next/link'
+import {
+  buildAuthCallbackUrl,
+  buildLoginPath,
+  readBetaInviteContext,
+} from '@/lib/beta/invite-destinations'
 
 // Password strength calculation
 const calculatePasswordStrength = (password: string): { level: 'weak' | 'medium' | 'strong', score: number } => {
@@ -20,9 +25,10 @@ const calculatePasswordStrength = (password: string): { level: 'weak' | 'medium'
   return { level: 'strong', score: strength };
 };
 
-export default function SignUpPage() {
+function SignUpPageContent() {
   const { signInWithGoogle } = useAuth()
-  const router = useRouter()
+  const searchParams = useSearchParams()
+  const inviteContext = readBetaInviteContext(searchParams)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -57,7 +63,7 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/app`,
+          emailRedirectTo: buildAuthCallbackUrl(window.location.origin, inviteContext),
         }
       })
 
@@ -70,7 +76,7 @@ export default function SignUpPage() {
       } else {
         setMessage('Check your email for a confirmation link!')
       }
-    } catch (_err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -82,7 +88,7 @@ export default function SignUpPage() {
     setError('')
 
     try {
-      await signInWithGoogle()
+      await signInWithGoogle(buildAuthCallbackUrl(window.location.origin, inviteContext))
     } catch (err) {
       console.error('Google sign-up error:', err)
       setError('Google sign-up failed. Please try again.')
@@ -254,7 +260,7 @@ export default function SignUpPage() {
           <div className="text-center text-sm">
             <span className="text-muted-foreground">Already have an account? </span>
             <Link
-              href="/login"
+              href={buildLoginPath(inviteContext)}
               className="font-semibold hover:underline text-primary"
             >
               Log in
@@ -263,5 +269,20 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-cream">
+        <div className="text-center">
+          <div className="h-8 w-48 bg-ink/10 animate-pulse rounded mb-4 mx-auto"></div>
+          <p className="text-muted-foreground">Loading signup...</p>
+        </div>
+      </div>
+    }>
+      <SignUpPageContent />
+    </Suspense>
   )
 }
