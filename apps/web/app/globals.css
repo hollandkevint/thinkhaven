@@ -471,6 +471,15 @@
   animation: slideIn 0.3s ease-out;
 }
 
+@keyframes betaPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-beta-pulse {
+  animation: betaPulse 4s ease-in-out infinite;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -27,7 +27,7 @@ const victoria = getBoardMember('victoria')
 export default function Home() {
   return (
     <div className="min-h-screen bg-cream overflow-hidden">
-      {/* Hero Section — Two-column layout */}
+      {/* Hero Section: two-column layout */}
       <div className="relative z-10">
         <div className="container mx-auto px-4 pt-16 pb-12 lg:pt-20 lg:pb-16">
           <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
@@ -37,26 +37,24 @@ export default function Home() {
               <span
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-forest/10 text-forest text-xs font-display font-medium tracking-wider uppercase mb-6 animate-fadeIn"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-forest animate-beta-pulse" />
                 Beta
               </span>
 
               <h1
                 className="text-4xl md:text-5xl lg:text-6xl font-medium font-display text-ink mb-6 leading-[1.1] tracking-tight animate-fadeIn"
               >
-                AI-powered strategic advisors that
-                {' '}
-                <span className="text-rust italic">challenge your thinking</span>
-                {' '}&mdash; not validate it.
+                Six advisors that{' '}
+                <span className="font-semibold">challenge your thinking, not validate it.</span>
               </h1>
 
               <p
                 className="text-lg md:text-xl text-ink-light font-body mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fadeIn"
                 style={{ animationDelay: '100ms' }}
               >
-                ThinkHaven gives product leaders a personal board of directors:
-                six AI advisors with distinct worldviews who pressure-test your
-                strategy, surface blind spots, and help you make better decisions.
+                A personal board with distinct worldviews. They pressure-test your
+                strategy, surface blind spots, and sharpen your decision before you
+                have to defend it.
               </p>
 
               <div
@@ -117,8 +115,7 @@ export default function Home() {
                         <span className="font-medium text-ink">{mary.name}</span> &middot; {mary.role}
                       </p>
                       <div
-                        className="bg-cream rounded-lg rounded-tl-sm p-3 text-sm font-body text-ink border border-ink/6"
-                        style={{ borderLeftColor: mary.color, borderLeftWidth: '3px' }}
+                        className="bg-cream rounded-lg rounded-tl-sm p-3 text-sm font-body text-ink border border-ink/10"
                       >
                         That&apos;s a significant shift. Let me bring in Victoria, because this is really about whether the economics work.
                       </div>
@@ -138,8 +135,7 @@ export default function Home() {
                         <span className="font-medium text-ink">{victoria.name}</span> &middot; {victoria.role}
                       </p>
                       <div
-                        className="bg-cream rounded-lg rounded-tl-sm p-3 text-sm font-body text-ink border border-ink/6"
-                        style={{ borderLeftColor: victoria.color, borderLeftWidth: '3px' }}
+                        className="bg-cream rounded-lg rounded-tl-sm p-3 text-sm font-body text-ink border border-ink/10"
                       >
                         Walk me through your unit economics. What&apos;s your current CAC for enterprise vs. what you project for mid-market?
                       </div>
@@ -187,7 +183,7 @@ export default function Home() {
       {/* Social Proof Bar */}
       <div className="relative z-10 py-6">
         <p className="text-center text-sm font-display text-ink-light tracking-wide">
-          <strong className="text-ink">Product leaders and founders</strong> are pressure-testing their strategies in Beta
+          Currently in beta with product leaders and founders pressure-testing real strategic decisions.
         </p>
       </div>
 
@@ -196,9 +192,8 @@ export default function Home() {
         <div className="container mx-auto px-4 py-20">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="inline-block text-3xl md:text-4xl font-medium font-display text-ink relative">
+              <h2 className="text-3xl md:text-4xl font-medium font-display text-ink">
                 How It Works
-                <div className="absolute -bottom-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-terracotta/40 to-transparent" />
               </h2>
             </div>
 
@@ -251,9 +246,8 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-4">
-              <h2 className="inline-block text-3xl md:text-4xl font-medium font-display text-ink relative">
+              <h2 className="text-3xl md:text-4xl font-medium font-display text-ink">
                 Your Personal Board of Directors
-                <div className="absolute -bottom-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-terracotta/40 to-transparent" />
               </h2>
             </div>
             <p className="text-center text-ink-light font-body max-w-2xl mx-auto mb-12 text-lg leading-relaxed">
@@ -302,44 +296,41 @@ export default function Home() {
       {/* What You Walk Away With */}
       <div className="relative z-10 bg-parchment border-y border-ink/8">
         <div className="container mx-auto px-4 py-20">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="inline-block text-3xl md:text-4xl font-medium font-display text-ink relative">
+          <div className="max-w-3xl mx-auto">
+            <div className="mb-12">
+              <h2 className="text-3xl md:text-4xl font-medium font-display text-ink">
                 What You Walk Away With
-                <div className="absolute -bottom-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-terracotta/40 to-transparent" />
               </h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-x-12 gap-y-10">
+            <ul className="space-y-10">
               {[
                 {
-                  title: 'Blind spots surfaced',
-                  description: 'Six perspectives find gaps your thinking can\u2019t. The investor sees what the operator misses. The coach sees what the investor ignores.',
+                  title: 'Blind spots surfaced.',
+                  description: 'Six perspectives find gaps your thinking can\u2019t. The investor sees what the operator misses; the coach sees what the investor ignores.',
                 },
                 {
-                  title: 'Kill-or-go decisions, faster',
+                  title: 'A faster go-or-kill call.',
                   description: 'Accelerates the decision you\u2019re avoiding. Not more data, just sharper questions from people who aren\u2019t afraid to ask them.',
                 },
                 {
-                  title: 'Challenged thinking, not validated thinking',
+                  title: 'Challenged thinking, not validated thinking.',
                   description: 'Names tensions, pokes weak spots, surfaces the thing nobody in the room wants to say. That\u2019s the value.',
                 },
                 {
-                  title: 'A session artifact worth sharing',
-                  description: 'Scorecard and reasoning you can hand to a co-founder, advisor, or investor. Not a chatbot transcript.',
+                  title: 'An artifact you can share.',
+                  description: 'A scorecard and reasoning your co-founder, advisor, or board can read in under five minutes. Not a chatbot transcript.',
                 },
               ].map((outcome, index) => (
-                <div key={index} className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-terracotta/10 flex items-center justify-center mt-0.5">
-                    <span className="text-terracotta font-display font-bold text-sm">{index + 1}</span>
-                  </div>
+                <li key={index} className="flex items-start gap-5">
+                  <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-terracotta mt-3" aria-hidden="true" />
                   <div>
-                    <h3 className="font-display font-medium text-ink mb-1">{outcome.title}</h3>
-                    <p className="text-ink-light font-body text-sm leading-relaxed">{outcome.description}</p>
+                    <h3 className="font-display font-medium text-ink text-lg mb-2">{outcome.title}</h3>
+                    <p className="text-ink-light font-body leading-relaxed">{outcome.description}</p>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
       </div>
@@ -387,8 +378,8 @@ export default function Home() {
               Stop building the wrong thing.
             </h2>
             <p className="text-cream/80 font-body text-lg leading-relaxed max-w-2xl mx-auto mb-10">
-              Your next strategic decision deserves more than a yes-man chatbot.
-              Get challenged by six advisors who aren&apos;t afraid to say what nobody else will.
+              The next decision you have to defend deserves more than a yes-man chatbot.
+              Get pressure-tested by six advisors who aren&apos;t afraid to disagree with you, or each other.
             </p>
 
             <div className="mb-10">
@@ -422,7 +413,7 @@ export default function Home() {
               <div className="md:col-span-1">
                 <h3 className="text-2xl font-medium font-display mb-3 text-cream">ThinkHaven</h3>
                 <p className="text-cream/60 font-body mb-6 max-w-sm">
-                  AI-powered strategic advisors for product leaders.
+                  A personal board of advisors for product leaders.
                 </p>
                 <div className="space-y-2">
                   <a href="mailto:kevin@kevintholland.com" className="text-sm text-cream/60 hover:text-cream flex items-center gap-2 transition-colors">
