@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-29T00:00:00Z",
+  "title": "Design System: ThinkHaven",
+  "extensions": {
+    "colorMeta": {
+      "cream":            { "role": "neutral",   "displayName": "Cream",            "canonical": "#FAF7F2", "tonalRamp": ["#1F1B12", "#3A3324", "#5A4F38", "#857851", "#B5A480", "#D4C7A8", "#E8DEC9", "#FAF7F2"] },
+      "parchment":        { "role": "neutral",   "displayName": "Parchment",        "canonical": "#F5F0E6", "tonalRamp": ["#1E1A12", "#393222", "#594D34", "#83734D", "#B19F76", "#D2C2A0", "#E5DBC4", "#F5F0E6"] },
+      "ink":              { "role": "neutral",   "displayName": "Ink",              "canonical": "#2C2416", "tonalRamp": ["#16110A", "#221B10", "#2C2416", "#403423", "#695742", "#9D8868", "#C7B594", "#EFE6D2"] },
+      "ink-light":        { "role": "neutral",   "displayName": "Ink Light",        "canonical": "#4A3D2E", "tonalRamp": ["#1F1A12", "#2D2620", "#4A3D2E", "#6B5A47", "#8E7A65", "#B19D86", "#D3C2AC", "#EEE3CD"] },
+      "terracotta":       { "role": "primary",   "displayName": "Terracotta",       "canonical": "#C4785C", "tonalRamp": ["#3A1F12", "#5C3120", "#824632", "#A65D45", "#C4785C", "#D69C84", "#E5BFA9", "#F4DECE"] },
+      "terracotta-hover": { "role": "primary",   "displayName": "Terracotta Hover", "canonical": "#B56A4E", "tonalRamp": ["#371C0F", "#56291B", "#7B3D2C", "#9A523F", "#B56A4E", "#CE9077", "#DFB59C", "#F0D8C5"] },
+      "terracotta-light": { "role": "primary",   "displayName": "Terracotta Light", "canonical": "#D4917A", "tonalRamp": ["#412115", "#623422", "#874B36", "#AC664B", "#D4917A", "#E1B09E", "#ECCBBE", "#F7E5DC"] },
+      "forest":           { "role": "secondary", "displayName": "Forest",           "canonical": "#4A6741", "tonalRamp": ["#13190F", "#222D1B", "#34452A", "#475D38", "#4A6741", "#7C9A72", "#AAC2A0", "#D7E2CD"] },
+      "forest-light":     { "role": "secondary", "displayName": "Forest Light",     "canonical": "#5C7A53", "tonalRamp": ["#171D14", "#26301F", "#384830", "#4C6240", "#5C7A53", "#86A37C", "#B0C4A6", "#DCE7D5"] },
+      "mustard":          { "role": "tertiary",  "displayName": "Mustard",          "canonical": "#D4A84B", "tonalRamp": ["#3A2D0E", "#5A461A", "#80622A", "#A6803A", "#D4A84B", "#DFBE76", "#EAD3A5", "#F6EBD3"] },
+      "dusty-rose":       { "role": "tertiary",  "displayName": "Dusty Rose",       "canonical": "#C9A9A6", "tonalRamp": ["#382827", "#56403E", "#7A5C5A", "#9F7E7B", "#C9A9A6", "#D8BEBC", "#E5D2D0", "#F4E7E6"] },
+      "slate-blue":       { "role": "tertiary",  "displayName": "Slate Blue",       "canonical": "#6B7B8C", "tonalRamp": ["#1B2026", "#2C3540", "#43505E", "#586879", "#6B7B8C", "#94A1AE", "#B7C0CA", "#DAE0E5"] },
+      "rust":             { "role": "tertiary",  "displayName": "Rust",             "canonical": "#8B4D3B", "tonalRamp": ["#2A1610", "#42221A", "#5D3024", "#763E2F", "#8B4D3B", "#AC7464", "#C8A294", "#E6D2C8"] },
+      "sage":             { "role": "tertiary",  "displayName": "Sage",             "canonical": "#A3B18A", "tonalRamp": ["#262C1A", "#3D4527", "#586237", "#778149", "#A3B18A", "#BCC7A8", "#D2DAC4", "#EBEFE2"] },
+      "pathway-warm":     { "role": "neutral",   "displayName": "Pathway Warm",     "canonical": "#F3EBE2", "tonalRamp": ["#1E1810", "#37301F", "#564B33", "#80714D", "#AE9C7A", "#D0C2A4", "#E4D9C2", "#F3EBE2"] },
+      "pathway-teal":     { "role": "neutral",   "displayName": "Pathway Teal",     "canonical": "#C3DED8", "tonalRamp": ["#162523", "#243B37", "#36544F", "#4D7770", "#6FA098", "#9EC4BC", "#B5D4CD", "#C3DED8"] },
+      "pathway-slate":    { "role": "neutral",   "displayName": "Pathway Slate",    "canonical": "#C4CFDE", "tonalRamp": ["#161D26", "#24303D", "#36465B", "#4E6483", "#7691B5", "#A4B7D0", "#B7C6D8", "#C4CFDE"] },
+      "pathway-sage":     { "role": "neutral",   "displayName": "Pathway Sage",     "canonical": "#D5DCBA", "tonalRamp": ["#1E2110", "#363B1F", "#525935", "#7A834C", "#AAB47A", "#C5CD9F", "#CFD7AD", "#D5DCBA"] }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "Hero headlines, top-level dashboard titles. One per screen at most." },
+      "headline": { "displayName": "Headline", "purpose": "Primary page titles (h1)." },
+      "title":    { "displayName": "Title",    "purpose": "Section headers (h2/h3)." },
+      "body":     { "displayName": "Body",     "purpose": "Long-form artifact prose. Cap line length at 65-75ch." },
+      "label":    { "displayName": "Label",    "purpose": "Mode badges, captions, button text. UPPERCASE with positive tracking." }
+    },
+    "shadows": [
+      { "name": "shadow-sm",    "value": "0 1px 2px rgba(44, 36, 22, 0.05)",  "purpose": "Hairline lift. Subtle controls." },
+      { "name": "shadow",       "value": "0 2px 8px rgba(44, 36, 22, 0.08)",  "purpose": "Default card shadow. Quiet, warm." },
+      { "name": "shadow-md",    "value": "0 4px 16px rgba(44, 36, 22, 0.10)", "purpose": "Lifted state on hover. Popovers at rest." },
+      { "name": "shadow-lg",    "value": "0 8px 32px rgba(44, 36, 22, 0.12)", "purpose": "Modals, dialogs, dropdowns when open." },
+      { "name": "shadow-inner", "value": "inset 0 2px 4px rgba(44, 36, 22, 0.04)", "purpose": "Inset states. Use sparingly." }
+    ],
+    "motion": [
+      { "name": "transition-fast", "value": "150ms ease-out", "purpose": "Color and small-property changes. Buttons, links." },
+      { "name": "transition-base", "value": "250ms ease-out", "purpose": "Default state transitions. Cards, panels." },
+      { "name": "transition-slow", "value": "400ms ease-out", "purpose": "Layout-scale transitions. Pane collapse, drawer." },
+      { "name": "fade-in",         "value": "0.4s ease-out",  "purpose": "Initial mount fade. translateY(8px) -> 0." },
+      { "name": "slide-in",        "value": "0.3s ease-out",  "purpose": "Lateral entrance. translateX(-8px) -> 0." }
+    ],
+    "breakpoints": [
+      { "name": "mobile",  "value": "767px",  "purpose": "Single-column dual-pane stack." },
+      { "name": "tablet",  "value": "1024px", "purpose": "Reduced container width." },
+      { "name": "desktop", "value": "1200px", "purpose": "Landing container max width." },
+      { "name": "app",     "value": "1400px", "purpose": "App container max width." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Terracotta CTA for primary actions. Uppercase label, soft ink-tinted shadow.",
+      "html": "<button class=\"ds-btn-primary\">Start a session</button>",
+      "css": ".ds-btn-primary { background: #C4785C; color: #FAF7F2; font-family: 'Jost', 'Futura PT', 'Century Gothic', sans-serif; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 12px 24px; min-height: 44px; border: none; border-radius: 8px; box-shadow: 0 1px 2px rgba(44, 36, 22, 0.05); cursor: pointer; transition: background 200ms ease-out, transform 200ms ease-out; } .ds-btn-primary:hover { background: #B56A4E; } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(196, 120, 92, 0.5); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Parchment-on-cream button for secondary actions. Same shape as primary, quieter color.",
+      "html": "<button class=\"ds-btn-secondary\">Continue later</button>",
+      "css": ".ds-btn-secondary { background: #F5F0E6; color: #2C2416; font-family: 'Jost', 'Futura PT', 'Century Gothic', sans-serif; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 12px 24px; min-height: 44px; border: 1px solid rgba(44, 36, 22, 0.10); border-radius: 8px; cursor: pointer; transition: background 200ms ease-out, transform 200ms ease-out; } .ds-btn-secondary:hover { background: #EDE5D6; } .ds-btn-secondary:active { transform: scale(0.98); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(196, 120, 92, 0.5); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Parchment surface with quiet ink-tinted border and shadow. Default container for grouped content.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\">Pre-meeting stress test</h3><p class=\"ds-card-body\">Take this thing you're leaning toward and find where it breaks before the room does.</p></article>",
+      "css": ".ds-card { background: #F5F0E6; color: #2C2416; border: 1px solid rgba(44, 36, 22, 0.10); border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(44, 36, 22, 0.08); transition: box-shadow 250ms ease-out; } .ds-card:hover { box-shadow: 0 4px 16px rgba(44, 36, 22, 0.10); } .ds-card-title { font-family: 'Jost', sans-serif; font-weight: 500; font-size: 1.375rem; line-height: 1.3; color: #2C2416; margin: 0 0 12px 0; } .ds-card-body { font-family: 'Libre Baskerville', Georgia, serif; font-weight: 400; font-size: 1rem; line-height: 1.65; color: #2C2416; margin: 0; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Cream-well input with 1.5px ink-tinted border. Terracotta focus ring at 15% opacity.",
+      "html": "<label class=\"ds-input-label\">Session prompt<input class=\"ds-input\" placeholder=\"What are you trying to decide?\" /></label>",
+      "css": ".ds-input-label { display: block; font-family: 'Jost', sans-serif; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: #2C2416; margin-bottom: 8px; } .ds-input { display: block; width: 100%; background: #FAF7F2; color: #2C2416; font-family: 'Libre Baskerville', Georgia, serif; font-size: 1rem; line-height: 1.5; padding: 12px 16px; min-height: 44px; border: 1.5px solid rgba(44, 36, 22, 0.15); border-radius: 8px; transition: border-color 150ms ease-out, box-shadow 150ms ease-out; } .ds-input::placeholder { color: #6B7B8C; } .ds-input:focus { outline: none; border-color: #C4785C; box-shadow: 0 0 0 3px rgba(196, 120, 92, 0.15); }"
+    },
+    {
+      "name": "Mode Badge",
+      "kind": "chip",
+      "refersTo": "mode-badge",
+      "description": "Persona-state pill. Uppercase Jost label, parchment fill, persona color text. Accompanies the mode name word.",
+      "html": "<span class=\"ds-mode-badge ds-mode-inquisitive\">Inquisitive</span>",
+      "css": ".ds-mode-badge { display: inline-flex; align-items: center; font-family: 'Jost', sans-serif; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 12px; border-radius: 9999px; background: #F5F0E6; } .ds-mode-inquisitive { color: #D4A84B; } .ds-mode-advocate { color: #8B4D3B; } .ds-mode-encouraging { color: #C9A9A6; } .ds-mode-realistic { color: #6B7B8C; }"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Parchment top nav with ink links and terracotta active state. No underline, no pill, color carries the active state.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"/\">ThinkHaven</a><div class=\"ds-nav-links\"><a class=\"ds-nav-link ds-nav-link-active\" href=\"/app\">Sessions</a><a class=\"ds-nav-link\" href=\"/app/new\">New</a><a class=\"ds-nav-link\" href=\"/app/account\">Account</a></div></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #F5F0E6; border-bottom: 1px solid rgba(44, 36, 22, 0.10); } .ds-nav-brand { font-family: 'Jost', sans-serif; font-weight: 500; font-size: 1.375rem; color: #2C2416; text-decoration: none; letter-spacing: -0.01em; } .ds-nav-links { display: flex; gap: 24px; } .ds-nav-link { font-family: 'Jost', sans-serif; font-weight: 500; font-size: 0.875rem; color: #2C2416; text-decoration: none; transition: color 150ms ease-out; } .ds-nav-link:hover { color: #C4785C; } .ds-nav-link-active { color: #C4785C; }"
+    },
+    {
+      "name": "Pathway Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Entry-point card on /app/new. Pale tinted background per pathway, ink heading, body in serif. The system's only place where pale teal/slate/sage tones appear as fills.",
+      "html": "<button class=\"ds-pathway-card ds-pathway-warm\"><span class=\"ds-pathway-label\">New idea</span><h3 class=\"ds-pathway-title\">Should I build this?</h3><p class=\"ds-pathway-body\">Validate a position before committing time. End with an artifact, a decision, and the load-bearing assumptions named.</p></button>",
+      "css": ".ds-pathway-card { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; width: 100%; max-width: 420px; padding: 24px; border: 1px solid rgba(44, 36, 22, 0.10); border-radius: 12px; text-align: left; cursor: pointer; transition: box-shadow 250ms ease-out, transform 250ms ease-out; } .ds-pathway-warm { background: #F3EBE2; } .ds-pathway-teal { background: #C3DED8; } .ds-pathway-slate { background: #C4CFDE; } .ds-pathway-sage { background: #D5DCBA; } .ds-pathway-card:hover { box-shadow: 0 4px 16px rgba(44, 36, 22, 0.10); transform: translateY(-1px); } .ds-pathway-label { font-family: 'Jost', sans-serif; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: #4A3D2E; } .ds-pathway-title { font-family: 'Jost', sans-serif; font-weight: 500; font-size: 1.375rem; line-height: 1.3; color: #2C2416; margin: 0; } .ds-pathway-body { font-family: 'Libre Baskerville', Georgia, serif; font-weight: 400; font-size: 1rem; line-height: 1.65; color: #2C2416; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Studied Hand",
+    "overview": "ThinkHaven looks like a thoughtful expert's working surface. Warm but never decorative. Vintage-modern fusion that signals 'this was designed by someone who has thought about it for a long time, and stopped.' The user is an executive or product leader who already has a position. The interface should feel like a senior strategist's notebook, not a SaaS landing page or a chatbot wrapper. The palette is organic and earthen: cream and parchment for surfaces, terracotta for one strong accent, forest for the second, ink as the only text color. Typography pairs Jost (Futura-style geometric sans) with Libre Baskerville (a workhorse serif), so headings and prose read as different voices. The system rejects three things explicitly: generic B2B SaaS, corporate consulting deliverables, and crypto/AI-bro hype.",
+    "keyCharacteristics": [
+      "Cream over white. Always tinted, never pure.",
+      "One accent doing the heavy lifting (terracotta), one supporting (forest), restrained color elsewhere.",
+      "Serif body and geometric-sans headings, not the same font for both.",
+      "Soft, warm, ink-tinted shadows. No hard drop shadows, no neon glow.",
+      "Light theme only. Dark mode is not a default and is not implemented.",
+      "Symmetry without sterility. Generous whitespace. Body line length capped at 65-75ch."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule",          "body": "Terracotta is the only accent that earns saturation. It carries CTAs, focus rings, key links, and the Mary persona. Forest and the persona-mode colors are used in narrower roles. No two strong accents on the same screen unless one is identity (board member or persona) and the other is action.", "section": "colors" },
+      { "name": "The No-Pure-Black, No-Pure-White Rule", "body": "Pure #000 and #fff are forbidden in any component, background, text, or border. Cream is the only 'white.' Ink is the only 'black.'", "section": "colors" },
+      { "name": "The Modes-Win-Over-Identity Rule",     "body": "Persona mode color (Inquisitive / Devil's Advocate / Encouraging / Realistic) overrides board-member identity color when both are present. The mode badge wears the mode color; the avatar and member accents stay in identity color.", "section": "colors" },
+      { "name": "The Two-Voice Rule",            "body": "Heading typography (Jost) and body typography (Libre Baskerville) are different voices on purpose. Never set body copy in Jost; never set headings in Baskerville. The contrast is the brand.", "section": "typography" },
+      { "name": "The Tracking Rule",             "body": "Body and heading letter-spacing stays at 0 (or small negative tracking for display sizes). Positive tracking is reserved for all-caps labels and captions only. Wide tracking on title-case copy is forbidden.", "section": "typography" },
+      { "name": "The Line-Length Rule",          "body": "Long-form artifact body content is capped at 65-75ch. Below this, serif body becomes claustrophobic; above this, eye-tracking breaks down between lines.", "section": "typography" },
+      { "name": "The Warm-Shadow Rule",          "body": "Every shadow is keyed to the ink color. rgba(0, 0, 0, X) is forbidden in shadow definitions. Cool/gray shadows immediately register as off-brand.", "section": "elevation" },
+      { "name": "The Flat-At-Rest Rule",         "body": "Cards rest with a low shadow or no shadow at all. Hover and active states may lift to shadow-md. Reserve shadow-lg for floating UI (dialogs, dropdowns, popovers) only.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do lead every screen with cream (#FAF7F2) as the page background. Pure white is forbidden.",
+      "Do use ink (#2C2416) for all body text, ink-light (#4A3D2E) for secondary text on cream/parchment, and slate-blue (#6B7B8C) for muted UI text only.",
+      "Do pair Jost (display, geometric sans) with Libre Baskerville (body, serif). The two-voice contrast is the brand.",
+      "Do cap long-form artifact body copy at 65-75ch.",
+      "Do keep terracotta as the single strong accent. CTAs, focus rings, key links.",
+      "Do keep shadows ink-tinted (rgba(44, 36, 22, X)), warm and quiet.",
+      "Do use @radix-ui/react-dialog for every new modal (focus trap, escape, aria-modal).",
+      "Do respect prefers-reduced-motion: all transitions become instant, animations cease."
+    ],
+    "donts": [
+      "Don't use pure black (#000) or pure white (#fff) anywhere.",
+      "Don't use blue gradients, indigo accents, or the from-blue-50 to-indigo-100 Next.js starter palette.",
+      "Don't use navy + gold consulting-deck color schemes.",
+      "Don't use neon, animated gradients, glassmorphism, or any AI/crypto-bro visual cue.",
+      "Don't use side-stripe borders greater than 1px as a colored accent on cards, list items, or messages.",
+      "Don't use gradient text. Emphasis comes from weight and size.",
+      "Don't use glassmorphism, backdrop-blur, or frosted glass cards.",
+      "Don't apply animated background gradients or scroll-driven gradient sweeps.",
+      "Don't wrap everything in a container or a card.",
+      "Don't stack identical icon-card grids.",
+      "Don't treat dark mode as a default. Dark mode is not implemented.",
+      "Don't use bg-secondary for text or as a text-bearing background by mistake.",
+      "Don't import Mermaid, Excalidraw, or any heavy library at module scope.",
+      "Don't use bouncy or elastic motion curves.",
+      "Don't use modal as a first thought."
+    ]
+  }
+}
