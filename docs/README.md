@@ -9,6 +9,7 @@ This directory contains the project's documentation and knowledge base, serving 
 - **`architecture/`**: System design, diagrams, and codebase maps.
 - **`decisions/`**: Architecture Decision Records (ADRs).
 - **`explorations/`**: Deep dives, research notes, and problem analysis.
+- **`research/`**: External research references that inform the product thesis. See [research/README.md](./research/README.md).
 - **`solutions/`**: The Compound Knowledge Base - reusable solutions and patterns.
 - **`specs/`**: Technical specifications and implementation plans.
 - **`reports/`**: Bug reports, post-mortems, and analysis reports.
