@@ -20,7 +20,9 @@ import {
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 import { resetOnboarding } from '@/app/components/onboarding/OnboardingModal'
 import ExportPanel from '@/app/components/workspace/ExportPanel'
+import { ModeBadge } from '@/app/components/board/ModeBadge'
 import type { ChatMessage } from '@/lib/ai/board-types'
+import type { SubPersonaMode } from '@/lib/ai/mary-persona'
 
 type SessionPhase = 'discovery' | 'analysis' | 'synthesis'
 
@@ -45,6 +47,7 @@ interface SessionHeaderProps {
   onToggleBoard: () => void
   userEmail: string
   onSignOut: () => void
+  subPersonaMode?: SubPersonaMode | null
 }
 
 export function SessionHeader({
@@ -56,19 +59,21 @@ export function SessionHeader({
   onToggleBoard,
   userEmail,
   onSignOut,
+  subPersonaMode = null,
 }: SessionHeaderProps) {
   const activePhase = derivePhase(messageCount)
 
   return (
     <header className="h-14 flex items-center justify-between px-4 border-b border-border gap-4">
-      {/* Left: Back + Title */}
-      <div className="flex items-center gap-2 min-w-0 flex-shrink">
+      {/* Left: Back + Title + Active mode */}
+      <div className="flex items-center gap-3 min-w-0 flex-shrink">
         <Link href="/app" className="text-primary hover:opacity-80 transition-opacity flex-shrink-0">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-base font-semibold font-display text-foreground truncate">
           {title || 'Strategic Session'}
         </h1>
+        <ModeBadge mode={subPersonaMode} />
       </div>
 
       {/* Center: Phase Stepper */}

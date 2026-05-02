@@ -278,6 +278,7 @@ export default function SessionPage() {
           }}
           userEmail={user.email || ''}
           onSignOut={signOut}
+          subPersonaMode={session.sub_persona_state?.currentMode ?? null}
         />
 
         {/* Chat Content */}
@@ -301,11 +302,10 @@ export default function SessionPage() {
                   <p className="text-muted-foreground font-body max-w-md mb-8">
                     Describe your idea, decision, or challenge. Your board of advisors will help you think it through.
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
                     {[
                       'I want to validate a new product idea',
                       "I'm deciding between two strategic directions",
-                      'Help me stress-test my business model',
                     ].map((prompt) => (
                       <button
                         key={prompt}
@@ -376,8 +376,8 @@ export default function SessionPage() {
                     ) : (
                       <div className="flex justify-center">
                         <div className="px-5 py-4 rounded-xl bg-parchment max-w-[70%]">
-                          <p className="text-sm text-slate-blue">
-                            <strong>System:</strong> {message.content}
+                          <p className="text-sm italic text-slate-blue font-body leading-relaxed">
+                            {message.content}
                           </p>
                         </div>
                       </div>
@@ -451,7 +451,7 @@ export default function SessionPage() {
                     }
                   }
                 }}
-                placeholder="Type your strategic question... (Shift+Enter for new line)"
+                placeholder="What are you trying to decide? (Shift+Enter for new line)"
                 disabled={sendingMessage}
                 rows={1}
                 className="flex-1 px-4 py-3 border border-border rounded-lg focus:border-primary focus:outline-none disabled:opacity-50 resize-none min-h-[50px] max-h-[200px]"
