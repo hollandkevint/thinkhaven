@@ -85,20 +85,6 @@ export default function SessionPage() {
 
   const canvasAutoOpenedRef = useRef(false)
   const feedbackPromptedRef = useRef(false)
-  const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Auto-prompt feedback modal when message limit is reached (1s delay)
-  useEffect(() => {
-    if (limitStatus?.limitReached && !feedbackPromptedRef.current && session?.id) {
-      feedbackPromptedRef.current = true
-      feedbackTimeoutRef.current = setTimeout(() => {
-        useFeedbackStore.getState().open(session.id)
-      }, 1000)
-    }
-    return () => {
-      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current)
-    }
-  }, [limitStatus?.limitReached, session?.id])
 
   // Auto-open board pane when Board of Directors activates (first time only)
   const boardAutoOpenedRef = useRef(false)
@@ -418,6 +404,11 @@ export default function SessionPage() {
               // Click the header ExportPanel trigger button
               const exportBtn = document.querySelector('[title="Export chat conversation"]') as HTMLButtonElement
               if (exportBtn) exportBtn.click()
+              // Export is the user-driven done signal: invite feedback once per session.
+              if (session?.id && !feedbackPromptedRef.current) {
+                feedbackPromptedRef.current = true
+                useFeedbackStore.getState().open(session.id)
+              }
             }}
             onNewSession={() => { window.location.href = '/app' }}
           />
