@@ -35,8 +35,8 @@ const MARKDOWN_COMPONENTS = {
       </pre>
     )
   },
-  h1: ({ children }: any) => <h1 className="text-2xl font-bold mb-4 text-ink">{children}</h1>,
-  h2: ({ children }: any) => <h2 className="text-xl font-bold mb-3 text-ink">{children}</h2>,
+  h1: ({ children }: any) => <h1 className="font-display text-2xl font-medium mb-4 text-ink">{children}</h1>,
+  h2: ({ children }: any) => <h2 className="font-display text-xl font-medium mb-3 text-ink">{children}</h2>,
   h3: ({ children }: any) => <h3 className="text-lg font-semibold mb-2 text-ink">{children}</h3>,
   p: ({ children }: any) => <p className="mb-4 leading-relaxed text-ink">{children}</p>,
   ul: ({ children }: any) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
@@ -373,7 +373,7 @@ export default function SessionPage() {
                     {message.metadata?.strategic_tags && (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {message.metadata.strategic_tags.map((tag, i) => (
-                          <span key={i} className="text-xs px-2 py-1 rounded bg-ink/5 text-ink">{tag}</span>
+                          <span key={i} className="text-xs px-2 py-1 rounded bg-parchment border border-ink/10 text-ink-light font-display tracking-[0.04em]">{tag}</span>
                         ))}
                       </div>
                     )}
