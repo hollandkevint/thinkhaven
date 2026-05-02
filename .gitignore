@@ -75,3 +75,11 @@ WORK_SUMMARY.md
 
 # Separate artifact repos
 thinkhaven-artifacts/
+
+# Local secrets — never commit
+.mcp-config.json
+.mcp-config.*.json
+!.mcp-config.example.json
+
+# Agent worktrees (created by Claude Code, Cursor, ce-work-beta, etc.)
+.claude/worktrees/
