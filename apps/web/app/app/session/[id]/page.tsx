@@ -164,7 +164,7 @@ export default function SessionPage() {
     return (
       <div className="dual-pane-container canvas-closed">
         <div className="chat-pane">
-          <header className="h-14 flex items-center justify-between px-4 border-b border-border gap-4">
+          <header className="h-14 flex items-center justify-between px-4 border-b border-ink/10 gap-4">
             <div className="flex items-center gap-2">
               <div className="h-5 w-5 bg-parchment rounded animate-pulse" />
               <div className="h-5 w-40 bg-parchment rounded animate-pulse" />
@@ -196,7 +196,7 @@ export default function SessionPage() {
             </div>
             <div className="mt-4">
               <div className="flex gap-2 items-end">
-                <div className="flex-1 h-[50px] bg-parchment/20 border border-border rounded-lg animate-pulse" />
+                <div className="flex-1 h-[50px] bg-parchment/20 border border-ink/10 rounded-lg animate-pulse" />
                 <div className="h-[50px] w-16 bg-parchment rounded-lg animate-pulse" />
               </div>
             </div>
@@ -211,8 +211,8 @@ export default function SessionPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-primary mb-4">Access Required</h1>
-          <p className="text-muted-foreground mb-4">Please sign in to access this session.</p>
+          <h1 className="font-display text-2xl font-medium text-terracotta mb-4">Access Required</h1>
+          <p className="text-ink-light mb-4">Please sign in to access this session.</p>
           <Link href="/login" className="px-4 py-2 bg-primary text-cream rounded-lg hover:opacity-90">
             Sign In
           </Link>
@@ -223,7 +223,7 @@ export default function SessionPage() {
 
   if (error || !session) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-cream">
         <ErrorState
           error={error || 'Session not found'}
           onRetry={handleRetry}
@@ -234,7 +234,7 @@ export default function SessionPage() {
         />
         <Link
           href="/app"
-          className="mt-4 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mt-4 px-4 py-2 text-sm text-ink-light hover:text-ink transition-colors"
         >
           Back to Dashboard
         </Link>
@@ -285,7 +285,7 @@ export default function SessionPage() {
                   <h2 className="font-display text-2xl font-semibold text-ink mb-2">
                     What are you working on?
                   </h2>
-                  <p className="text-muted-foreground font-body max-w-md mb-8">
+                  <p className="text-ink-light font-body max-w-md mb-8">
                     Describe your idea, decision, or challenge. Your board of advisors will help you think it through.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
@@ -445,7 +445,7 @@ export default function SessionPage() {
                 placeholder="What are you trying to decide? (Shift+Enter for new line)"
                 disabled={sendingMessage}
                 rows={1}
-                className="flex-1 px-4 py-3 border border-border rounded-lg focus:border-primary focus:outline-none disabled:opacity-50 resize-none min-h-[50px] max-h-[200px]"
+                className="flex-1 px-4 py-3 border border-ink/15 rounded-lg focus:border-terracotta focus:outline-none disabled:opacity-50 resize-none min-h-[50px] max-h-[200px] bg-cream"
               />
               <VoiceInput
                 onTranscript={(text) => setMessageInput(prev => prev ? `${prev} ${text}` : text)}
@@ -489,7 +489,7 @@ export default function SessionPage() {
           {boardPanelOpen && !boardState && (
             <div className="px-6 py-8 text-center">
               <Users className="w-8 h-8 text-ink/20 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground font-body">
+              <p className="text-sm text-ink-light font-body">
                 The board hasn&apos;t joined yet. Continue your conversation and Mary will invite them when the time is right.
               </p>
             </div>

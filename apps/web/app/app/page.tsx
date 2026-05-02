@@ -51,27 +51,27 @@ interface BmadSession {
 
 function DashboardSkeleton() {
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-cream">
       {/* Sidebar skeleton */}
-      <aside className="fixed left-0 top-0 h-full w-60 border-r border-border bg-card">
+      <aside className="fixed left-0 top-0 h-full w-60 border-r border-ink/10 bg-parchment">
         <div className="px-4 py-6">
-          <div className="h-7 w-28 bg-muted rounded animate-pulse" />
+          <div className="h-7 w-28 bg-parchment rounded animate-pulse" />
         </div>
         <div className="px-4 mb-6">
-          <div className="h-10 w-full bg-muted rounded animate-pulse" />
+          <div className="h-10 w-full bg-parchment rounded animate-pulse" />
         </div>
         <div className="px-4">
-          <div className="h-4 w-24 bg-muted rounded animate-pulse mb-3" />
+          <div className="h-4 w-24 bg-parchment rounded animate-pulse mb-3" />
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-10 w-full bg-muted/50 rounded animate-pulse" />
+              <div key={i} className="h-10 w-full bg-parchment/50 rounded animate-pulse" />
             ))}
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 border-t border-border px-4 py-4 space-y-2">
-          <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
-          <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
-          <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
+        <div className="absolute bottom-0 left-0 right-0 border-t border-ink/10 px-4 py-4 space-y-2">
+          <div className="h-10 w-full bg-parchment/50 rounded animate-pulse" />
+          <div className="h-10 w-full bg-parchment/50 rounded animate-pulse" />
+          <div className="h-10 w-full bg-parchment/50 rounded animate-pulse" />
         </div>
       </aside>
       {/* Main content skeleton */}
@@ -80,23 +80,23 @@ function DashboardSkeleton() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <div className="h-9 w-64 bg-muted rounded animate-pulse mb-2" />
-                <div className="h-5 w-48 bg-muted/50 rounded animate-pulse" />
+                <div className="h-9 w-64 bg-parchment rounded animate-pulse mb-2" />
+                <div className="h-5 w-48 bg-parchment/50 rounded animate-pulse" />
               </div>
-              <div className="h-11 w-36 bg-muted rounded animate-pulse" />
+              <div className="h-11 w-36 bg-parchment rounded animate-pulse" />
             </div>
           </div>
-          <div className="h-7 w-32 bg-muted rounded animate-pulse mb-6" />
+          <div className="h-7 w-32 bg-parchment rounded animate-pulse mb-6" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 bg-card border border-border rounded-lg animate-pulse">
+              <div key={i} className="h-48 bg-parchment border border-ink/10 rounded-lg animate-pulse">
                 <div className="p-6">
-                  <div className="h-6 w-3/4 bg-muted rounded mb-4" />
-                  <div className="h-4 w-full bg-muted/50 rounded mb-2" />
-                  <div className="h-4 w-2/3 bg-muted/50 rounded mb-4" />
+                  <div className="h-6 w-3/4 bg-parchment rounded mb-4" />
+                  <div className="h-4 w-full bg-parchment/50 rounded mb-2" />
+                  <div className="h-4 w-2/3 bg-parchment/50 rounded mb-4" />
                   <div className="flex justify-between mt-8">
-                    <div className="h-4 w-20 bg-muted/30 rounded" />
-                    <div className="h-4 w-16 bg-muted/30 rounded" />
+                    <div className="h-4 w-20 bg-parchment/30 rounded" />
+                    <div className="h-4 w-16 bg-parchment/30 rounded" />
                   </div>
                 </div>
               </div>
@@ -255,11 +255,11 @@ export default function AppDashboardPage() {
 
   if (error) {
     return (
-      <div className="flex h-screen bg-background">
+      <div className="flex h-screen bg-cream">
         {/* Sidebar skeleton for context */}
-        <aside className="fixed left-0 top-0 h-full w-60 border-r border-border bg-card">
+        <aside className="fixed left-0 top-0 h-full w-60 border-r border-ink/10 bg-parchment">
           <div className="px-4 py-6">
-            <Link href="/" className="text-xl font-bold text-foreground">ThinkHaven</Link>
+            <Link href="/" className="text-xl font-bold text-ink">ThinkHaven</Link>
           </div>
         </aside>
         <main className="ml-60 flex-1 flex items-center justify-center">
@@ -277,12 +277,12 @@ export default function AppDashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-cream">
       {/* Fixed Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-60 border-r border-border flex flex-col bg-card">
+      <aside className="fixed left-0 top-0 h-full w-60 border-r border-ink/10 flex flex-col bg-parchment">
         {/* Logo */}
         <div className="px-4 py-6">
-          <Link href="/" className="text-xl font-bold text-foreground">ThinkHaven</Link>
+          <Link href="/" className="text-xl font-bold text-ink">ThinkHaven</Link>
         </div>
 
         {/* New Session Button (sidebar tertiary action; primary entry is the body CTA) */}
@@ -299,7 +299,7 @@ export default function AppDashboardPage() {
 
         {/* Session List */}
         <div className="flex-1 overflow-y-auto px-4">
-          <h2 className="font-display text-xs font-semibold uppercase tracking-[0.15em] mb-3 text-muted-foreground">
+          <h2 className="font-display text-xs font-semibold uppercase tracking-[0.15em] mb-3 text-ink-light">
             Recent
           </h2>
           <div className="space-y-1">
@@ -307,15 +307,15 @@ export default function AppDashboardPage() {
               <button
                 key={session.id}
                 onClick={() => handleSessionClick(session.id)}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-accent transition-colors group"
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-ink/5 transition-colors group"
               >
                 <div className="flex items-center gap-2">
-                  <Folder className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
-                  <span className="text-sm truncate text-foreground font-display">
+                  <Folder className="w-4 h-4 flex-shrink-0 text-ink-light" />
+                  <span className="text-sm truncate text-ink font-display">
                     {getSessionTitle(session)}
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground ml-6">
+                <span className="text-xs text-ink-light ml-6">
                   {formatTimestamp(session.updated_at)}
                 </span>
               </button>
@@ -324,17 +324,17 @@ export default function AppDashboardPage() {
         </div>
 
         {/* Settings and Account */}
-        <div className="border-t border-border px-4 py-4 space-y-2">
+        <div className="border-t border-ink/10 px-4 py-4 space-y-2">
           <button
             onClick={() => router.push('/')}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-foreground"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-ink/5 transition-colors text-ink"
           >
             <Home className="w-4 h-4" />
             <span className="text-sm">Home</span>
           </button>
           <button
             onClick={() => router.push('/app/account')}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-foreground"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-ink/5 transition-colors text-ink"
           >
             <Settings className="w-4 h-4" />
             <span className="text-sm">Settings</span>
@@ -342,7 +342,7 @@ export default function AppDashboardPage() {
           <FeedbackButton variant="sidebar" />
           <button
             onClick={() => signOut()}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors text-foreground"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-ink/5 transition-colors text-ink"
           >
             <LogOut className="w-4 h-4" />
             <span className="text-sm">Sign Out</span>
@@ -357,10 +357,10 @@ export default function AppDashboardPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-2 text-foreground font-display">
+                <h1 className="text-3xl font-bold mb-2 text-ink font-display">
                   {getGreeting()}, {firstName}
                 </h1>
-                <p className="text-muted-foreground font-body">
+                <p className="text-ink-light font-body">
                   What strategic challenge are you working on today?
                 </p>
               </div>
@@ -419,7 +419,7 @@ export default function AppDashboardPage() {
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold mb-2 line-clamp-2 text-foreground">
+                        <h3 className="text-lg font-semibold mb-2 line-clamp-2 text-ink">
                           {getSessionTitle(session)}
                         </h3>
                       </div>
@@ -428,9 +428,9 @@ export default function AppDashboardPage() {
                           <button
                             onClick={(e) => e.stopPropagation()}
                             onPointerDown={(e) => e.stopPropagation()}
-                            className="p-1.5 hover:bg-accent rounded transition-colors relative z-10"
+                            className="p-1.5 hover:bg-ink/5 rounded transition-colors relative z-10"
                           >
-                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                            <MoreVertical className="w-4 h-4 text-ink-light" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
@@ -455,7 +455,7 @@ export default function AppDashboardPage() {
                       </DropdownMenu>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto pt-4">
+                    <div className="flex items-center justify-between text-xs text-ink-light mt-auto pt-4">
                       <span>{getPathwayLabel(session.pathway || 'explore')}</span>
                       <span>{session.message_count || 0} msgs · {formatTimestamp(session.updated_at)}</span>
                     </div>
@@ -492,7 +492,7 @@ export default function AppDashboardPage() {
               />
               <div className="flex justify-end gap-2 mt-4">
                 <Dialog.Close asChild>
-                  <button type="button" className="px-4 py-2 text-sm text-muted-foreground hover:text-ink transition-colors">
+                  <button type="button" className="px-4 py-2 text-sm text-ink-light hover:text-ink transition-colors">
                     Cancel
                   </button>
                 </Dialog.Close>
