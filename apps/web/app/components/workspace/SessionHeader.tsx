@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -21,6 +22,7 @@ import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 import { resetOnboarding } from '@/app/components/onboarding/OnboardingModal'
 import ExportPanel from '@/app/components/workspace/ExportPanel'
 import { ModeBadge } from '@/app/components/board/ModeBadge'
+import { BoardExplainerSheet, BoardExplainerTrigger } from '@/app/components/board/BoardExplainerSheet'
 import type { ChatMessage } from '@/lib/ai/board-types'
 import type { SubPersonaMode } from '@/lib/ai/mary-persona'
 
@@ -62,18 +64,21 @@ export function SessionHeader({
   subPersonaMode = null,
 }: SessionHeaderProps) {
   const activePhase = derivePhase(messageCount)
+  const [explainerOpen, setExplainerOpen] = useState(false)
 
   return (
     <header className="h-14 flex items-center justify-between px-4 border-b border-border gap-4">
-      {/* Left: Back + Title + Active mode */}
+      {/* Left: Back + Title + Active mode + Board explainer */}
       <div className="flex items-center gap-3 min-w-0 flex-shrink">
-        <Link href="/app" className="text-primary hover:opacity-80 transition-opacity flex-shrink-0">
+        <Link href="/app" className="text-terracotta hover:opacity-80 transition-opacity flex-shrink-0">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-base font-semibold font-display text-foreground truncate">
+        <h1 className="text-base font-semibold font-display text-ink truncate">
           {title || 'Strategic Session'}
         </h1>
         <ModeBadge mode={subPersonaMode} />
+        <BoardExplainerTrigger onClick={() => setExplainerOpen(true)} />
+        <BoardExplainerSheet open={explainerOpen} onOpenChange={setExplainerOpen} />
       </div>
 
       {/* Center: Phase Stepper */}

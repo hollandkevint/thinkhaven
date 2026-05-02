@@ -50,6 +50,7 @@ import { ArtifactPanel, ArtifactKeyboardHandler } from '@/app/components/artifac
 import { ErrorState } from '@/app/components/ui/ErrorState'
 import { useFeedbackStore } from '@/lib/stores/feedbackStore'
 import { SessionHeader } from '@/app/components/workspace/SessionHeader'
+import { FirstSessionWelcome } from '@/app/components/session/FirstSessionWelcome'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
@@ -282,12 +283,13 @@ export default function SessionPage() {
             <div className="max-w-4xl mx-auto space-y-6">
               {session.chat_context.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <h2 className="font-display text-2xl font-semibold text-ink mb-2">
+                  <h2 className="font-display text-2xl font-medium text-ink mb-2">
                     What are you working on?
                   </h2>
                   <p className="text-ink-light font-body max-w-md mb-8">
                     Describe your idea, decision, or challenge. Your board of advisors will help you think it through.
                   </p>
+                  <FirstSessionWelcome />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
                     {[
                       'I want to validate a new product idea',
