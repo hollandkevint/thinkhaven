@@ -17,7 +17,6 @@ import {
   MoreVertical,
   LogOut,
   Settings,
-  Sparkles,
   Folder,
   Home,
   X,
@@ -118,6 +117,7 @@ export default function AppDashboardPage() {
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
   const [renamingSession, setRenamingSession] = useState<{ id: string; title: string } | null>(null);
+  const [confirmDeleteSession, setConfirmDeleteSession] = useState<{ id: string; title: string } | null>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
   const fetchSessions = useCallback(async () => {
@@ -182,7 +182,7 @@ export default function AppDashboardPage() {
   };
 
   const handleDeleteSession = async (sessionId: string) => {
-    if (!confirm('Are you sure you want to delete this session?')) return;
+    setConfirmDeleteSession(null);
 
     // Optimistic removal so UI updates immediately
     setSessions(prev => prev.filter(s => s.id !== sessionId));
@@ -285,14 +285,15 @@ export default function AppDashboardPage() {
           <Link href="/" className="text-xl font-bold text-foreground">ThinkHaven</Link>
         </div>
 
-        {/* New Session Button */}
+        {/* New Session Button (sidebar tertiary action; primary entry is the body CTA) */}
         <div className="px-4 mb-6">
           <Button
             onClick={handleNewSession}
-            className="w-full"
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-ink-light hover:text-ink"
           >
-            <PlusIcon className="w-4 h-4 mr-2" />
-            New Session
+            New session
           </Button>
         </div>
 
@@ -389,23 +390,18 @@ export default function AppDashboardPage() {
           {/* Session Grid or Empty State */}
           {sessions.length === 0 ? (
             /* Empty State */
-            <div className="flex flex-col items-center justify-center py-24">
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <Sparkles className="w-12 h-12 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2 text-foreground">
-                Start your first strategic session
+            <div className="flex flex-col items-start py-16 max-w-xl">
+              <h2 className="font-display text-2xl font-medium mb-3 text-ink">
+                Nothing yet. What are you trying to decide?
               </h2>
-              <p className="mb-8 text-center max-w-md text-muted-foreground">
-                Create a new session to begin your strategic thinking journey with AI-powered insights
+              <p className="font-body mb-8 text-ink-light leading-relaxed">
+                Open a new session and the board will pressure-test the decision you&rsquo;re about to make.
               </p>
               <Button
                 onClick={handleNewSession}
                 size="lg"
-                className="px-8 py-6 text-lg"
               >
-                <PlusIcon className="w-5 h-5 mr-2" />
-                New Session
+                Start a session
               </Button>
             </div>
           ) : (
@@ -450,7 +446,7 @@ export default function AppDashboardPage() {
                             Rename
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onSelect={() => handleDeleteSession(session.id)}
+                            onSelect={() => setConfirmDeleteSession({ id: session.id, title: getSessionTitle(session) })}
                             className="text-destructive"
                           >
                             Delete
@@ -474,7 +470,7 @@ export default function AppDashboardPage() {
       {/* Rename Dialog */}
       <Dialog.Root open={!!renamingSession} onOpenChange={(open) => { if (!open) setRenamingSession(null) }}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+          <Dialog.Overlay className="fixed inset-0 bg-ink/50 z-50" />
           <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream rounded-lg shadow-xl max-w-sm w-full mx-4 z-50 p-6 focus:outline-none">
             <Dialog.Title className="font-display text-lg font-semibold text-ink mb-4">
               Rename Session
@@ -505,6 +501,44 @@ export default function AppDashboardPage() {
                 </button>
               </div>
             </form>
+            <Dialog.Close asChild>
+              <button className="absolute top-4 right-4 text-ink/40 hover:text-ink transition-colors" aria-label="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog.Root open={!!confirmDeleteSession} onOpenChange={(open) => { if (!open) setConfirmDeleteSession(null) }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-ink/50 z-50" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream rounded-lg shadow-xl max-w-sm w-full mx-4 z-50 p-6 focus:outline-none">
+            <Dialog.Title className="font-display text-lg font-medium text-ink mb-2">
+              Delete this session?
+            </Dialog.Title>
+            <Dialog.Description className="font-body text-sm text-ink-light mb-6 leading-relaxed">
+              &ldquo;{confirmDeleteSession?.title}&rdquo; will be removed permanently. This can&rsquo;t be undone.
+            </Dialog.Description>
+            <div className="flex justify-end gap-2">
+              <Dialog.Close asChild>
+                <button type="button" className="px-4 py-2 text-sm text-ink-light hover:text-ink transition-colors">
+                  Cancel
+                </button>
+              </Dialog.Close>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmDeleteSession) {
+                    handleDeleteSession(confirmDeleteSession.id);
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium bg-rust text-cream rounded-lg hover:bg-rust/90 transition-colors"
+              >
+                Delete session
+              </button>
+            </div>
             <Dialog.Close asChild>
               <button className="absolute top-4 right-4 text-ink/40 hover:text-ink transition-colors" aria-label="Close">
                 <X className="w-4 h-4" />
