@@ -18,6 +18,11 @@ export interface BetaAccessResult {
   error: string | null;
 }
 
+export interface CheckBetaAccessOptions {
+  recordGate?: boolean;
+  requestPath?: string;
+}
+
 interface ValidatedAuthUser {
   id: string;
   email?: string;
@@ -75,7 +80,9 @@ function betaResult({
   };
 }
 
-export async function checkBetaAccess(): Promise<BetaAccessResult> {
+export async function checkBetaAccess(
+  options: CheckBetaAccessOptions = {}
+): Promise<BetaAccessResult> {
   const supabase = await createClient();
 
   if (!supabase) {
@@ -131,11 +138,14 @@ export async function checkBetaAccess(): Promise<BetaAccessResult> {
   const betaApproved = !revokedInDb && (approvedInDb || authUser.betaApprovedClaim);
   const status = betaApproved ? 'approved' : revokedInDb ? 'revoked' : 'pending';
 
-  await recordBetaGateEvaluation({
-    userId: authUser.id,
-    email: authUser.email,
-    status,
-  });
+  if (options.recordGate !== false) {
+    await recordBetaGateEvaluation({
+      userId: authUser.id,
+      email: authUser.email,
+      status,
+      requestPath: options.requestPath,
+    });
+  }
 
   return betaResult({
     user,

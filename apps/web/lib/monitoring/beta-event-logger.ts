@@ -26,6 +26,7 @@ export interface BetaGateEvaluationInput {
   userId: string;
   email?: string;
   status: BetaGateEventStatus;
+  requestPath?: string;
 }
 
 function hashEmail(email: string | null | undefined): string | null {
@@ -123,6 +124,10 @@ export async function recordBetaGateEvaluation(
       update.first_access_at = now;
     }
 
+    if (input.status === 'approved') {
+      update.last_access_at = now;
+    }
+
     if (record) {
       const { error: updateError } = await supabase
         .from('beta_access')
@@ -150,7 +155,7 @@ export async function recordBetaGateEvaluation(
       targetUserId: input.userId,
       betaAccessId: record?.id,
       targetEmail: record?.email || input.email,
-      requestPath: '/app',
+      requestPath: input.requestPath || '/app',
       metadata: { status: input.status },
     });
 
@@ -160,7 +165,7 @@ export async function recordBetaGateEvaluation(
         targetUserId: input.userId,
         betaAccessId: record.id,
         targetEmail: record.email || input.email,
-        requestPath: '/app',
+        requestPath: input.requestPath || '/app',
         metadata: { status: input.status },
       });
     }

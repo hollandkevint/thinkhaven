@@ -117,6 +117,7 @@ describe('beta event logger', () => {
       expect.objectContaining({
         last_gate_status: 'approved',
         first_access_at: expect.any(String),
+        last_access_at: expect.any(String),
       })
     );
     expect(updateEq).toHaveBeenCalledWith('id', 'beta-1');

@@ -19,6 +19,7 @@ const pendingRecord: BetaAccessSummary = {
   last_gate_at: null,
   last_gate_status: null,
   first_access_at: null,
+  last_access_at: null,
   status: 'pending',
   signedUp: false,
   invited: false,

@@ -1,4 +1,25 @@
+import { redirect } from 'next/navigation';
 import { BETA_INVITE_PARAM } from '@/lib/beta/invite-destinations';
+import { checkBetaAccess } from '@/lib/auth/beta-access';
+import { getUserBetaAccessStatus } from '@/lib/beta/beta-status';
+import { WaitlistForm } from '@/components/waitlist/WaitlistForm';
+import WaitlistStatusPanel, {
+  type WaitlistRecoveryStatus,
+} from '@/app/components/waitlist/WaitlistStatusPanel';
+
+export const dynamic = 'force-dynamic';
+
+function readSingleParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function readMigratedMessages(value: string | string[] | undefined): number | null {
+  const raw = readSingleParam(value);
+  if (!raw) return null;
+
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 10) : null;
+}
 
 export default async function WaitlistPage({
   searchParams,
@@ -7,34 +28,66 @@ export default async function WaitlistPage({
 }) {
   const params = searchParams ? await searchParams : {};
   const fromInvite = Boolean(params[BETA_INVITE_PARAM]);
+  const migratedMessages = readMigratedMessages(params.migrated);
+  const access = await checkBetaAccess({ recordGate: false });
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-cream">
-      <div className="max-w-md text-center p-8 bg-cream rounded-2xl shadow-sm border border-ink/8">
-        <div className="text-6xl mb-6">🎉</div>
-        <h1 className="text-3xl font-bold text-ink mb-4 font-display">
-          {fromInvite ? 'Your beta request is pending' : "You're on the waitlist!"}
-        </h1>
-        <p className="text-ink-light mb-6">
-          {fromInvite
-            ? 'Your invite brought you to the right place. An operator still needs to approve access before the full app opens.'
-            : 'Thanks for signing up for ThinkHaven beta. We are letting people in gradually to ensure everyone gets a great experience.'}
-        </p>
-        <p className="text-ink-light mb-6">
-          We will email you when your spot opens up. This usually takes 1-3 days.
-        </p>
-        <div className="border-t border-ink/8 pt-6 mt-6">
-          <p className="text-sm text-slate-blue">
-            Questions? Email{' '}
-            <a
-              href="mailto:kevin@kevintholland.com"
-              className="text-terracotta hover:underline"
-            >
-              kevin@kevintholland.com
-            </a>
-          </p>
+  if (access.betaApproved) {
+    redirect('/app');
+  }
+
+  if (access.status === 'unavailable') {
+    return (
+      <div className="min-h-screen bg-cream">
+        <WaitlistStatusPanel status="unavailable" fromInvite={fromInvite} />
+      </div>
+    );
+  }
+
+  if (!access.user || access.status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen bg-cream">
+        <WaitlistStatusPanel
+          status="guest"
+          fromInvite={fromInvite}
+          migratedMessages={migratedMessages}
+        />
+        <div className="mx-auto w-full max-w-xl px-6 pb-16">
+          <WaitlistForm source={fromInvite ? 'beta_invite' : 'waitlist_page'} />
         </div>
       </div>
+    );
+  }
+
+  const betaStatus = await getUserBetaAccessStatus(access.user);
+  const record = betaStatus.record;
+
+  if (betaStatus.status === 'approved') {
+    redirect('/app');
+  }
+
+  const status: WaitlistRecoveryStatus = betaStatus.unavailable
+    ? 'unavailable'
+    : betaStatus.status;
+
+  return (
+    <div className="min-h-screen bg-cream">
+      <WaitlistStatusPanel
+        status={status}
+        email={record?.email || access.user.email}
+        joinedAt={record?.created_at}
+        source={record?.source}
+        invitedAt={record?.invite_copied_at || record?.last_invited_at}
+        migratedMessages={migratedMessages}
+        fromInvite={fromInvite}
+      />
+      {status === 'missing' && (
+        <div className="mx-auto w-full max-w-xl px-6 pb-16">
+          <WaitlistForm
+            source={fromInvite ? 'beta_invite' : 'waitlist_page'}
+            initialEmail={access.user.email}
+          />
+        </div>
+      )}
     </div>
   );
 }

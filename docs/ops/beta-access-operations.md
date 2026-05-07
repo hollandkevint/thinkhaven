@@ -2,7 +2,7 @@
 
 ## Readiness
 
-Before sharing invites, open `/admin/beta` and check Supabase readiness.
+Before sharing invites, open `/app/admin/beta` and check Supabase readiness.
 
 - `pass`: invites and admin operations can proceed.
 - `warn`: review the warning before inviting. The custom access-token hook warning means the server guard table fallback still protects access, but Supabase Dashboard should be checked.
@@ -16,7 +16,7 @@ Required runtime configuration:
 
 ## Approve And Invite
 
-1. Open `/admin/beta`.
+1. Open `/app/admin/beta`.
 2. Find the pending beta row by email or source.
 3. Select `Approve`.
 4. Select `Invite` to copy the branded `/try?beta_invite=...` link.
@@ -38,6 +38,7 @@ Useful event sequence:
 
 - `invite_copied`
 - `invite_arrived`
+- `guest_migration_attempted`
 - `signup_from_invite`
 - `beta_gate_pending`
 - `beta_approved`

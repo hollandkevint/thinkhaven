@@ -1,18 +1,71 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import GuestChatInterface from '../components/guest/GuestChatInterface'
-import { SessionMigration } from '@/lib/guest/session-migration'
+import { SessionMigration, type MigrationResult } from '@/lib/guest/session-migration'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
 import {
+  BETA_INVITE_PARAM,
+  BETA_INVITE_SOURCE,
   buildLoginPath,
   buildSignupPath,
   readBetaInviteContext,
   storeBetaInviteContext,
 } from '@/lib/beta/invite-destinations'
+
+interface BetaAccessStatusResponse {
+  betaApproved: boolean
+  redirectTo: string
+}
+
+async function recordBetaEvent(payload: Record<string, unknown>) {
+  try {
+    await fetch('/api/beta/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+  } catch {
+    // Beta event telemetry should never block the guest conversion path.
+  }
+}
+
+async function readBetaAccessStatus(): Promise<BetaAccessStatusResponse | null> {
+  try {
+    const response = await fetch('/api/beta/access-status', { cache: 'no-store' })
+    if (!response.ok) return null
+    return (await response.json()) as BetaAccessStatusResponse
+  } catch {
+    return null
+  }
+}
+
+function buildWaitlistRedirect({
+  inviteId,
+  source,
+  migratedMessages,
+}: {
+  inviteId: string | null
+  source: string | null
+  migratedMessages: number
+}) {
+  const params = new URLSearchParams()
+
+  if (inviteId) {
+    params.set(BETA_INVITE_PARAM, inviteId)
+    params.set('source', source || BETA_INVITE_SOURCE)
+  }
+
+  if (migratedMessages > 0) {
+    params.set('migrated', String(migratedMessages))
+  }
+
+  const query = params.toString()
+  return query ? `/waitlist?${query}` : '/waitlist'
+}
 
 function TryPageContent() {
   const router = useRouter()
@@ -20,21 +73,49 @@ function TryPageContent() {
   const { user, loading } = useAuth()
   const [migrating, setMigrating] = useState(false)
   const inviteContext = readBetaInviteContext(searchParams)
+  const inviteId = inviteContext?.inviteId || null
+  const inviteSource = inviteContext?.source || null
+  const inviteFromGuest = inviteContext?.fromGuest === true
+  const inviteArrivalLoggedRef = useRef<string | null>(null)
 
   useEffect(() => {
-    storeBetaInviteContext(inviteContext)
-  }, [inviteContext])
+    const context = inviteId
+      ? {
+          inviteId,
+          source: inviteSource || BETA_INVITE_SOURCE,
+          fromGuest: inviteFromGuest,
+        }
+      : null
+
+    storeBetaInviteContext(context)
+
+    if (inviteId && inviteArrivalLoggedRef.current !== inviteId) {
+      inviteArrivalLoggedRef.current = inviteId
+      recordBetaEvent({
+        eventType: 'invite_arrived',
+        betaInviteId: inviteId,
+        source: inviteSource || BETA_INVITE_SOURCE,
+      })
+    }
+  }, [inviteFromGuest, inviteId, inviteSource])
 
   useEffect(() => {
     // If user is already authenticated, check for guest session migration
     if (user && !loading) {
       const migrateSession = async () => {
+        const hadGuestSession = SessionMigration.hasGuestSession()
+        let migrationResult: MigrationResult = {
+          success: true,
+          migratedMessages: 0,
+        }
+
         // Check if there's a guest session to migrate
-        if (SessionMigration.hasGuestSession()) {
+        if (hadGuestSession) {
           setMigrating(true)
 
           try {
             const result = await SessionMigration.migrateToUserWorkspace(user.id)
+            migrationResult = result
 
             if (result.success && result.migratedMessages && result.migratedMessages > 0) {
               sessionStorage.setItem('migration_success', String(result.migratedMessages))
@@ -42,18 +123,54 @@ function TryPageContent() {
             }
           } catch (error) {
             console.error('Migration failed:', error)
+            migrationResult = {
+              success: false,
+              migratedMessages: 0,
+              error: error instanceof Error ? error.message : 'Migration failed',
+            }
           } finally {
             setMigrating(false)
           }
         }
 
-        // Redirect authenticated users to app
+        if (hadGuestSession) {
+          await recordBetaEvent({
+            eventType: 'guest_migration_attempted',
+            betaInviteId: inviteId,
+            source: inviteSource || (inviteId ? BETA_INVITE_SOURCE : 'try'),
+            success: migrationResult.success,
+            migratedMessages: migrationResult.migratedMessages || 0,
+            sessionCreated: Boolean(migrationResult.sessionId),
+          })
+        }
+
+        const access = await readBetaAccessStatus()
+
+        if (access?.betaApproved) {
+          if (migrationResult.success && migrationResult.sessionId) {
+            router.push(`/app/session/${migrationResult.sessionId}`)
+          } else {
+            router.push(access.redirectTo || '/app')
+          }
+          return
+        }
+
+        if (access) {
+          router.push(buildWaitlistRedirect({
+            inviteId,
+            source: inviteSource,
+            migratedMessages: migrationResult.migratedMessages || 0,
+          }))
+          return
+        }
+
+        // Fall back to the protected app gate if the status endpoint is unavailable.
         router.push('/app')
       }
 
       migrateSession()
     }
-  }, [user, loading, router])
+  }, [inviteId, inviteSource, loading, router, user])
 
   // Show loading state while checking auth or migrating
   if (loading || migrating) {

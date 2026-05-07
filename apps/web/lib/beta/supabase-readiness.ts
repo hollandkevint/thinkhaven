@@ -71,7 +71,7 @@ export async function checkSupabaseReadiness(): Promise<SupabaseReadinessReport>
   if (adminClient) {
     const betaShape = await adminClient
       .from('beta_access')
-      .select('id, user_id, email, approved_at, revoked_at, invite_count, first_access_at')
+      .select('id, user_id, email, approved_at, revoked_at, invite_count, first_access_at, last_access_at')
       .limit(1);
 
     checks.push({

@@ -58,7 +58,7 @@ export default async function MonitoringPage() {
               </a>
               {isAdmin && (
                 <a
-                  href="/admin/beta"
+                  href="/app/admin/beta"
                   className="text-slate-blue hover:text-ink px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Beta access

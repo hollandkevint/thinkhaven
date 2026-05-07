@@ -10,6 +10,7 @@ describe('beta event helpers', () => {
     expect(isBetaEventType('waitlist_joined')).toBe(true);
     expect(isBetaEventType('beta_approved')).toBe(true);
     expect(isBetaEventType('first_app_access')).toBe(true);
+    expect(isBetaEventType('support_requested')).toBe(true);
     expect(isBetaEventType('raw_email_logged')).toBe(false);
   });
 
@@ -26,6 +27,7 @@ describe('beta event helpers', () => {
         source: 'try',
         inviteCount: 2,
         copied: true,
+        longValue: 'x'.repeat(600),
         empty: null,
         email: 'person@example.com',
         accessToken: 'secret',
@@ -36,6 +38,7 @@ describe('beta event helpers', () => {
       source: 'try',
       inviteCount: 2,
       copied: true,
+      longValue: 'x'.repeat(500),
       empty: null,
     });
   });

@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { checkBetaAccess } from '@/lib/auth/beta-access';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AppLayout({
   children,
 }: {

@@ -10,6 +10,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? '/ingest'
+const ONBOARDING_HIDDEN_ROUTES = ['/app', '/auth', '/login', '/signup', '/waitlist']
 
 if (typeof window !== 'undefined' && POSTHOG_KEY) {
   posthog.init(POSTHOG_KEY, {
@@ -42,9 +43,23 @@ function PostHogPageView() {
   return null
 }
 
+function GlobalModals() {
+  const pathname = usePathname()
+  const hideOnboarding = ONBOARDING_HIDDEN_ROUTES.some(route =>
+    pathname?.startsWith(route)
+  )
+
+  return (
+    <>
+      <FeedbackModal />
+      {!hideOnboarding && <OnboardingModal />}
+    </>
+  )
+}
+
 export function PostHogProvider({ children }: { children: ReactNode }) {
   if (!POSTHOG_KEY) {
-    return <>{children}<FeedbackModal /><OnboardingModal /></>
+    return <>{children}<GlobalModals /></>
   }
 
   return (
@@ -53,8 +68,7 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
         <PostHogPageView />
       </Suspense>
       {children}
-      <FeedbackModal />
-      <OnboardingModal />
+      <GlobalModals />
     </PHProvider>
   )
 }

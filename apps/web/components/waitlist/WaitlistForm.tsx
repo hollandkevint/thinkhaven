@@ -2,8 +2,16 @@
 
 import { useState } from 'react';
 
-export function WaitlistForm() {
-  const [email, setEmail] = useState('');
+interface WaitlistFormProps {
+  source?: string;
+  initialEmail?: string;
+}
+
+export function WaitlistForm({
+  source = 'landing_page',
+  initialEmail = '',
+}: WaitlistFormProps) {
+  const [email, setEmail] = useState(initialEmail);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
@@ -21,7 +29,7 @@ export function WaitlistForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
-          source: 'landing_page',
+          source,
         }),
       });
 

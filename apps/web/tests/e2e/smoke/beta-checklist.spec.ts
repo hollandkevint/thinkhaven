@@ -38,10 +38,23 @@ test.describe('Beta Checklist - Public Routes', () => {
   });
 
   test('Protected routes redirect to login', async ({ page }) => {
-    const response = await page.goto('/app');
+    await page.goto('/app');
     // Should redirect to login (URL should contain /login)
     await page.waitForURL(/\/login/, { timeout: 10000 });
     expect(page.url()).toContain('/login');
+  });
+
+  test('Beta admin route is protected under app namespace', async ({ page }) => {
+    await page.goto('/app/admin/beta');
+    await page.waitForURL(/\/login/, { timeout: 10000 });
+    expect(page.url()).toContain('/login');
+    expect(page.url()).toContain(encodeURIComponent('/app/admin/beta'));
+  });
+
+  test('Waitlist recovery page loads for signed-out visitors', async ({ page }) => {
+    await page.goto('/waitlist');
+    await expect(page.getByRole('heading', { name: /waitlist path/i })).toBeVisible();
+    await expect(page.locator('input[type="email"]').first()).toBeVisible();
   });
 
   test('Assessment page loads with quiz content', async ({ page }) => {

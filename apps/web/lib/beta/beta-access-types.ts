@@ -16,6 +16,7 @@ export interface BetaAccessRecord {
   last_gate_at: string | null;
   last_gate_status: string | null;
   first_access_at: string | null;
+  last_access_at: string | null;
 }
 
 export interface BetaAccessSummary extends BetaAccessRecord {

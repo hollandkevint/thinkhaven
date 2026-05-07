@@ -3,6 +3,7 @@ export const BETA_EVENT_TYPES = [
   'waitlist_duplicate',
   'beta_approved',
   'beta_revoked',
+  'beta_restored',
   'invite_copied',
   'invite_arrived',
   'signup_from_invite',
@@ -11,6 +12,8 @@ export const BETA_EVENT_TYPES = [
   'beta_gate_approved',
   'beta_gate_revoked',
   'first_app_access',
+  'support_requested',
+  'support_note',
 ] as const;
 
 export type BetaEventType = (typeof BETA_EVENT_TYPES)[number];
@@ -45,7 +48,7 @@ export function sanitizeBetaEventMetadata(
       typeof value === 'boolean' ||
       value === null
     ) {
-      safe[key] = value;
+      safe[key] = typeof value === 'string' ? value.slice(0, 500) : value;
     }
 
     return safe;

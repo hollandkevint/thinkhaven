@@ -54,6 +54,7 @@ const BETA_RECORD_COLUMNS = [
   'last_gate_at',
   'last_gate_status',
   'first_access_at',
+  'last_access_at',
 ].join(', ');
 
 export class BetaAdminUnavailableError extends Error {
@@ -166,6 +167,8 @@ export async function approveBetaAccessRecord(
   actor: BetaAdminActor
 ): Promise<BetaAccessSummary> {
   const now = new Date().toISOString();
+  const existing = await fetchBetaAccessRecord(id);
+  const wasRevoked = existing.revoked_at != null;
   const record = await updateBetaAccessRecord(id, {
     approved_at: now,
     approved_by: actor.email || actor.id,
@@ -174,12 +177,12 @@ export async function approveBetaAccessRecord(
   });
 
   await logBetaEvent({
-    eventType: 'beta_approved',
+    eventType: wasRevoked ? 'beta_restored' : 'beta_approved',
     actorUserId: actor.id,
     targetUserId: record.user_id,
     betaAccessId: record.id,
     targetEmail: record.email,
-    metadata: { status: 'approved' },
+    metadata: { status: wasRevoked ? 'restored' : 'approved' },
   });
 
   return summarizeRecord(record);

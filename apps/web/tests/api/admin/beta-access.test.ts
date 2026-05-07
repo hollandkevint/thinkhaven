@@ -87,6 +87,7 @@ function betaSummary(overrides: Partial<BetaAccessSummary>): BetaAccessSummary {
     last_gate_at: null,
     last_gate_status: null,
     first_access_at: null,
+    last_access_at: null,
     status: 'pending',
     signedUp: true,
     invited: false,

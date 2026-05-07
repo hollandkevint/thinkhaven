@@ -60,12 +60,12 @@ describe('beta invite destinations', () => {
   });
 
   it('preserves safe non-invite redirects after authentication', () => {
-    const params = new URLSearchParams('redirect=/admin/beta');
+    const params = new URLSearchParams('redirect=/app/admin/beta');
 
-    expect(readSafeRedirectPath(params)).toBe('/admin/beta');
-    expect(buildPostAuthDestination(null, '/admin/beta')).toBe('/admin/beta');
-    expect(buildAuthCallbackUrl('https://thinkhaven.co', null, '/admin/beta')).toBe(
-      'https://thinkhaven.co/auth/callback?next=%2Fadmin%2Fbeta'
+    expect(readSafeRedirectPath(params)).toBe('/app/admin/beta');
+    expect(buildPostAuthDestination(null, '/app/admin/beta')).toBe('/app/admin/beta');
+    expect(buildAuthCallbackUrl('https://thinkhaven.co', null, '/app/admin/beta')).toBe(
+      'https://thinkhaven.co/auth/callback?next=%2Fapp%2Fadmin%2Fbeta'
     );
   });
 
