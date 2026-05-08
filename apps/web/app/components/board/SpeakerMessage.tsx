@@ -1,14 +1,15 @@
 'use client'
 
 import ReactMarkdown from 'react-markdown'
+import type { Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { ChatMessage } from '@/lib/ai/board-types'
 import type { BoardMember } from '@/lib/ai/board-types'
 import MermaidBlock from '@/app/components/chat/MermaidBlock'
 
 // Static components — extracted to module level to avoid per-render allocation
-const SPEAKER_MARKDOWN_COMPONENTS = {
-  code({ className, children }: any) {
+const SPEAKER_MARKDOWN_COMPONENTS: Components = {
+  code({ className, children }) {
     const isInline = !className
     const match = /language-(\w+)/.exec(className || '')
     if (!isInline && match?.[1] === 'mermaid') {
@@ -24,17 +25,17 @@ const SPEAKER_MARKDOWN_COMPONENTS = {
       </pre>
     )
   },
-  p: ({ children }: any) => (
+  p: ({ children }) => (
     <p className="mb-3 leading-relaxed last:mb-0 text-ink">{children}</p>
   ),
-  ul: ({ children }: any) => (
+  ul: ({ children }) => (
     <ul className="list-disc pl-6 mb-3 space-y-1">{children}</ul>
   ),
-  ol: ({ children }: any) => (
+  ol: ({ children }) => (
     <ol className="list-decimal pl-6 mb-3 space-y-1">{children}</ol>
   ),
-  li: ({ children }: any) => <li className="text-ink">{children}</li>,
-  strong: ({ children }: any) => <strong className="font-semibold">{children}</strong>,
+  li: ({ children }) => <li className="text-ink">{children}</li>,
+  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
 }
 
 interface SpeakerMessageProps {
@@ -47,7 +48,6 @@ export default function SpeakerMessage({ message, boardMember }: SpeakerMessageP
     <div className="flex justify-start">
       <div
         className="board-speaker-message"
-        style={{ borderLeftColor: boardMember.color }}
       >
         <div
           className="board-speaker-avatar"
@@ -71,13 +71,14 @@ export default function SpeakerMessage({ message, boardMember }: SpeakerMessageP
             className="px-4 py-3 rounded-xl"
             style={{ backgroundColor: 'var(--surface, var(--parchment))' }}
           >
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              className="prose prose-sm max-w-none"
-              components={SPEAKER_MARKDOWN_COMPONENTS}
-            >
-              {message.content}
-            </ReactMarkdown>
+            <div className="prose prose-sm max-w-none">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={SPEAKER_MARKDOWN_COMPONENTS}
+              >
+                {message.content}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
       </div>

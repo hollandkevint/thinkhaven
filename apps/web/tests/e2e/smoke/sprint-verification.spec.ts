@@ -14,6 +14,8 @@ test.describe('Sprint 0-3 Verification', () => {
     await page.goto('/try');
     await expect(page.locator('textarea')).toBeVisible();
     await expect(page.getByText('Try before you sign up')).toBeVisible();
+    await expect(page.getByText(/10 free messages/i).first()).toBeVisible();
+    await expect(page.getByText('ThinkHaven is a decision design system')).toHaveCount(0);
   });
 
   test('Login page has forgot password link', async ({ page }) => {
@@ -21,6 +23,7 @@ test.describe('Sprint 0-3 Verification', () => {
     await expect(page.getByText('Forgot password?')).toBeVisible();
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.getByText('ThinkHaven is a decision design system')).toHaveCount(0);
   });
 
   test('Protected routes redirect to login', async ({ page }) => {
@@ -32,6 +35,8 @@ test.describe('Sprint 0-3 Verification', () => {
   test('Landing page loads and has CTA', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('h1').first()).toBeVisible();
+    await expect(page.getByText(/10 free messages/i)).toBeVisible();
+    await expect(page.getByText('ThinkHaven is a decision design system')).toHaveCount(0);
     // Landing page should have at least one actionable button or link
     const ctaCount = await page.locator('a[href="/signup"], a[href="/try"], button:has-text("Get Started"), button:has-text("Try")').count();
     expect(ctaCount).toBeGreaterThan(0);

@@ -76,6 +76,7 @@ function TryPageContent() {
   const inviteId = inviteContext?.inviteId || null
   const inviteSource = inviteContext?.source || null
   const inviteFromGuest = inviteContext?.fromGuest === true
+  const signupPath = inviteContext ? buildSignupPath(inviteContext) : '/signup?from=guest'
   const inviteArrivalLoggedRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -207,7 +208,7 @@ function TryPageContent() {
             Sign in
           </Link>
           <Link
-            href={buildSignupPath(inviteContext)}
+            href={signupPath}
             className="px-4 py-2 text-sm font-medium rounded-lg bg-terracotta text-cream"
           >
             Sign up
@@ -219,7 +220,7 @@ function TryPageContent() {
       <div className="flex-shrink-0 px-6 py-3 bg-terracotta text-cream">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm">
-            <strong>Try before you sign up!</strong> Get 10 free messages to experience ThinkHaven&apos;s AI-powered strategic thinking.
+            <strong>Try before you sign up.</strong> Get 10 free messages to pressure-test a real decision with ThinkHaven&apos;s board.
           </p>
         </div>
       </div>

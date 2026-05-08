@@ -332,8 +332,6 @@
   /* Board of Directors - Speaker Messages */
   .board-speaker-message {
     @apply flex items-start gap-3 max-w-[70%];
-    border-left: 3px solid var(--board-mary);
-    padding-left: var(--space-4);
   }
 
   .board-speaker-avatar {
@@ -469,6 +467,15 @@
 
 .animate-slideIn {
   animation: slideIn 0.3s ease-out;
+}
+
+@keyframes betaPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-beta-pulse {
+  animation: betaPulse 4s ease-in-out infinite;
 }
 
 /* Reduced motion */

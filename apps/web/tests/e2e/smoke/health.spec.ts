@@ -18,10 +18,17 @@ test.describe('Smoke Tests - Public Routes Render', () => {
 
       // Page should have visible content
       await expect(page.locator('body')).toBeVisible();
+      await expect(page.getByText('ThinkHaven is a decision design system')).toHaveCount(0);
 
       // Should have a page title
       const hasTitle = await page.title();
       expect(hasTitle.length).toBeGreaterThan(0);
     });
   }
+
+  test('guest trial route shows the canonical trial promise', async ({ page }) => {
+    await page.goto('/try');
+    await expect(page.getByText(/10 free messages/i).first()).toBeVisible();
+    await expect(page.getByText('ThinkHaven is a decision design system')).toHaveCount(0);
+  });
 });

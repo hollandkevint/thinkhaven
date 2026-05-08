@@ -147,7 +147,7 @@ export const SELECTORS = {
     messagesRemaining: 'text=/remaining/i',
 
     // Signup prompt
-    signupPromptModal: '[role="dialog"]:has-text("Sign Up"), [data-testid="signup-prompt"]',
+    signupPromptModal: '[role="dialog"]:has-text("Save the thread"), [data-testid="signup-prompt"]',
     signupButton: 'button:has-text("Sign Up"), a[href="/signup"]',
 
     // Save progress banner

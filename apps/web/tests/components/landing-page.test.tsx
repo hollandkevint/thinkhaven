@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react'
 
 // Mock Next.js navigation
 vi.mock('next/navigation', () => ({
@@ -7,7 +8,7 @@ vi.mock('next/navigation', () => ({
 
 // Mock next/link to render as a plain anchor
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: any) => (
+  default: ({ children, href, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string, children: ReactNode }) => (
     <a href={href} {...props}>{children}</a>
   )
 }))
@@ -23,7 +24,7 @@ vi.mock('@/lib/supabase/client', () => ({
 
 // Mock UI components
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, asChild, ...props }: any) => {
+  Button: ({ children, asChild, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean, children: ReactNode }) => {
     if (asChild) {
       // When asChild, render children directly (Radix Slot behavior)
       return <>{children}</>
@@ -48,8 +49,8 @@ describe('Landing Page', () => {
 
     it('should render board member names', () => {
       render(<Home />)
-      expect(screen.getByText('Mary')).toBeInTheDocument()
-      expect(screen.getByText('Victoria')).toBeInTheDocument()
+      expect(screen.getAllByText('Mary').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Victoria').length).toBeGreaterThan(0)
       expect(screen.getByText('Omar')).toBeInTheDocument()
     })
 
@@ -60,37 +61,38 @@ describe('Landing Page', () => {
 
     it('should render the board of directors section heading', () => {
       render(<Home />)
-      expect(screen.getByText('Your Personal Board of Directors')).toBeInTheDocument()
+      expect(screen.getByText('Six advisors, one decision under pressure.')).toBeInTheDocument()
     })
 
     it('should render the outcomes section heading', () => {
       render(<Home />)
-      expect(screen.getByText('What Actually Changes')).toBeInTheDocument()
+      expect(screen.getByText('Artifact. Decision. Confidence.')).toBeInTheDocument()
     })
   })
 
   describe('Navigation', () => {
     it('should link to /try from hero CTA', () => {
       render(<Home />)
-      const tryLink = screen.getByText('Try a Free Session')
+      const tryLink = screen.getAllByText('Try a Free Session')[0]
       expect(tryLink.closest('a')).toHaveAttribute('href', '/try')
     })
 
     it('should link to /assessment from hero', () => {
       render(<Home />)
-      const assessmentLink = screen.getByText('Take the 5-Minute Assessment')
+      const assessmentLink = screen.getByText('Strategy Assessment')
       expect(assessmentLink.closest('a')).toHaveAttribute('href', '/assessment')
     })
 
     it('should link to /try from final CTA', () => {
       render(<Home />)
-      const startLink = screen.getByText('Start a Free Session')
+      const startLink = screen.getAllByText('Try a Free Session')[1]
       expect(startLink.closest('a')).toHaveAttribute('href', '/try')
     })
 
     it('should have footer link to /try', () => {
       render(<Home />)
-      const tryLink = screen.getByText('Free Session')
+      const tryLinks = screen.getAllByText('Try a Free Session')
+      const tryLink = tryLinks[tryLinks.length - 1]
       expect(tryLink).toHaveAttribute('href', '/try')
     })
 
@@ -112,6 +114,12 @@ describe('Landing Page', () => {
       render(<Home />)
       const joinButtons = screen.getAllByText('Join Waitlist')
       expect(joinButtons.length).toBeGreaterThan(0)
+    })
+
+    it('does not show the removed global onboarding modal copy', () => {
+      render(<Home />)
+      expect(screen.queryByText('ThinkHaven is a decision design system')).not.toBeInTheDocument()
+      expect(screen.getByText(/10 free messages/)).toBeInTheDocument()
     })
   })
 })

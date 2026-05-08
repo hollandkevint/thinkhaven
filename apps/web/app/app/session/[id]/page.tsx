@@ -35,8 +35,8 @@ const MARKDOWN_COMPONENTS = {
       </pre>
     )
   },
-  h1: ({ children }: any) => <h1 className="text-2xl font-bold mb-4 text-ink">{children}</h1>,
-  h2: ({ children }: any) => <h2 className="text-xl font-bold mb-3 text-ink">{children}</h2>,
+  h1: ({ children }: any) => <h1 className="font-display text-2xl font-medium mb-4 text-ink">{children}</h1>,
+  h2: ({ children }: any) => <h2 className="font-display text-xl font-medium mb-3 text-ink">{children}</h2>,
   h3: ({ children }: any) => <h3 className="text-lg font-semibold mb-2 text-ink">{children}</h3>,
   p: ({ children }: any) => <p className="mb-4 leading-relaxed text-ink">{children}</p>,
   ul: ({ children }: any) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
@@ -50,6 +50,7 @@ import { ArtifactPanel, ArtifactKeyboardHandler } from '@/app/components/artifac
 import { ErrorState } from '@/app/components/ui/ErrorState'
 import { useFeedbackStore } from '@/lib/stores/feedbackStore'
 import { SessionHeader } from '@/app/components/workspace/SessionHeader'
+import { FirstSessionWelcome } from '@/app/components/session/FirstSessionWelcome'
 import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
@@ -85,20 +86,6 @@ export default function SessionPage() {
 
   const canvasAutoOpenedRef = useRef(false)
   const feedbackPromptedRef = useRef(false)
-  const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Auto-prompt feedback modal when message limit is reached (1s delay)
-  useEffect(() => {
-    if (limitStatus?.limitReached && !feedbackPromptedRef.current && session?.id) {
-      feedbackPromptedRef.current = true
-      feedbackTimeoutRef.current = setTimeout(() => {
-        useFeedbackStore.getState().open(session.id)
-      }, 1000)
-    }
-    return () => {
-      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current)
-    }
-  }, [limitStatus?.limitReached, session?.id])
 
   // Auto-open board pane when Board of Directors activates (first time only)
   const boardAutoOpenedRef = useRef(false)
@@ -178,7 +165,7 @@ export default function SessionPage() {
     return (
       <div className="dual-pane-container canvas-closed">
         <div className="chat-pane">
-          <header className="h-14 flex items-center justify-between px-4 border-b border-border gap-4">
+          <header className="h-14 flex items-center justify-between px-4 border-b border-ink/10 gap-4">
             <div className="flex items-center gap-2">
               <div className="h-5 w-5 bg-parchment rounded animate-pulse" />
               <div className="h-5 w-40 bg-parchment rounded animate-pulse" />
@@ -210,7 +197,7 @@ export default function SessionPage() {
             </div>
             <div className="mt-4">
               <div className="flex gap-2 items-end">
-                <div className="flex-1 h-[50px] bg-parchment/20 border border-border rounded-lg animate-pulse" />
+                <div className="flex-1 h-[50px] bg-parchment/20 border border-ink/10 rounded-lg animate-pulse" />
                 <div className="h-[50px] w-16 bg-parchment rounded-lg animate-pulse" />
               </div>
             </div>
@@ -225,8 +212,8 @@ export default function SessionPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-primary mb-4">Access Required</h1>
-          <p className="text-muted-foreground mb-4">Please sign in to access this session.</p>
+          <h1 className="font-display text-2xl font-medium text-terracotta mb-4">Access Required</h1>
+          <p className="text-ink-light mb-4">Please sign in to access this session.</p>
           <Link href="/login" className="px-4 py-2 bg-primary text-cream rounded-lg hover:opacity-90">
             Sign In
           </Link>
@@ -237,7 +224,7 @@ export default function SessionPage() {
 
   if (error || !session) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-cream">
         <ErrorState
           error={error || 'Session not found'}
           onRetry={handleRetry}
@@ -248,7 +235,7 @@ export default function SessionPage() {
         />
         <Link
           href="/app"
-          className="mt-4 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mt-4 px-4 py-2 text-sm text-ink-light hover:text-ink transition-colors"
         >
           Back to Dashboard
         </Link>
@@ -278,6 +265,7 @@ export default function SessionPage() {
           }}
           userEmail={user.email || ''}
           onSignOut={signOut}
+          subPersonaMode={session.sub_persona_state?.currentMode ?? null}
         />
 
         {/* Chat Content */}
@@ -295,17 +283,17 @@ export default function SessionPage() {
             <div className="max-w-4xl mx-auto space-y-6">
               {session.chat_context.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <h2 className="font-display text-2xl font-semibold text-ink mb-2">
+                  <h2 className="font-display text-2xl font-medium text-ink mb-2">
                     What are you working on?
                   </h2>
-                  <p className="text-muted-foreground font-body max-w-md mb-8">
+                  <p className="text-ink-light font-body max-w-md mb-8">
                     Describe your idea, decision, or challenge. Your board of advisors will help you think it through.
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full">
+                  <FirstSessionWelcome />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
                     {[
                       'I want to validate a new product idea',
                       "I'm deciding between two strategic directions",
-                      'Help me stress-test my business model',
                     ].map((prompt) => (
                       <button
                         key={prompt}
@@ -376,8 +364,8 @@ export default function SessionPage() {
                     ) : (
                       <div className="flex justify-center">
                         <div className="px-5 py-4 rounded-xl bg-parchment max-w-[70%]">
-                          <p className="text-sm text-slate-blue">
-                            <strong>System:</strong> {message.content}
+                          <p className="text-sm italic text-slate-blue font-body leading-relaxed">
+                            {message.content}
                           </p>
                         </div>
                       </div>
@@ -385,7 +373,7 @@ export default function SessionPage() {
                     {message.metadata?.strategic_tags && (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {message.metadata.strategic_tags.map((tag, i) => (
-                          <span key={i} className="text-xs px-2 py-1 rounded bg-ink/5 text-ink">{tag}</span>
+                          <span key={i} className="text-xs px-2 py-1 rounded bg-parchment border border-ink/10 text-ink-light font-display tracking-[0.04em]">{tag}</span>
                         ))}
                       </div>
                     )}
@@ -418,6 +406,11 @@ export default function SessionPage() {
               // Click the header ExportPanel trigger button
               const exportBtn = document.querySelector('[title="Export chat conversation"]') as HTMLButtonElement
               if (exportBtn) exportBtn.click()
+              // Export is the user-driven done signal: invite feedback once per session.
+              if (session?.id && !feedbackPromptedRef.current) {
+                feedbackPromptedRef.current = true
+                useFeedbackStore.getState().open(session.id)
+              }
             }}
             onNewSession={() => { window.location.href = '/app' }}
           />
@@ -451,10 +444,10 @@ export default function SessionPage() {
                     }
                   }
                 }}
-                placeholder="Type your strategic question... (Shift+Enter for new line)"
+                placeholder="What are you trying to decide? (Shift+Enter for new line)"
                 disabled={sendingMessage}
                 rows={1}
-                className="flex-1 px-4 py-3 border border-border rounded-lg focus:border-primary focus:outline-none disabled:opacity-50 resize-none min-h-[50px] max-h-[200px]"
+                className="flex-1 px-4 py-3 border border-ink/15 rounded-lg focus:border-terracotta focus:outline-none disabled:opacity-50 resize-none min-h-[50px] max-h-[200px] bg-cream"
               />
               <VoiceInput
                 onTranscript={(text) => setMessageInput(prev => prev ? `${prev} ${text}` : text)}
@@ -498,7 +491,7 @@ export default function SessionPage() {
           {boardPanelOpen && !boardState && (
             <div className="px-6 py-8 text-center">
               <Users className="w-8 h-8 text-ink/20 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground font-body">
+              <p className="text-sm text-ink-light font-body">
                 The board hasn&apos;t joined yet. Continue your conversation and Mary will invite them when the time is right.
               </p>
             </div>

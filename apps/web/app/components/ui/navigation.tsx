@@ -15,8 +15,8 @@ import Link from 'next/link'
 import { Menu, User, LogOut, LogIn, UserPlus, ChevronDown } from 'lucide-react'
 import { CreditGuard } from '../monetization/CreditGuard'
 
-const AlphaBadge = (
-  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-forest/10 text-forest text-[10px] font-display font-medium tracking-wider uppercase">Alpha</span>
+const BetaBadge = (
+  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-forest/10 text-forest text-[10px] font-display font-medium tracking-wider uppercase">Beta</span>
 )
 
 interface NavigationProps {
@@ -53,7 +53,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
       <nav className={`flex items-center justify-between p-4 bg-cream border-b border-parchment ${className}`}>
         <div className="font-bold text-xl text-ink font-display flex items-center gap-2">
           ThinkHaven
-          {AlphaBadge}
+          {BetaBadge}
         </div>
         <div className="w-8 h-8 bg-parchment rounded-full animate-pulse"></div>
       </nav>
@@ -68,7 +68,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
         className="font-bold text-xl text-ink font-display hover:text-terracotta transition-colors flex items-center gap-2"
       >
         ThinkHaven
-        {AlphaBadge}
+        {BetaBadge}
       </Link>
 
       {/* Desktop Navigation */}
@@ -78,7 +78,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
           onClick={() => router.push('/try')}
           className="text-ink-light hover:text-ink"
         >
-          Try Free
+          Try a Free Session
         </Button>
 
         {/* Credit Balance - only show for logged-in users */}
@@ -119,7 +119,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
               onClick={() => router.push('/try')}
               className="border-terracotta text-terracotta hover:bg-terracotta hover:text-cream font-medium"
             >
-              Try Free
+              Try a Free Session
             </Button>
             <Button
               onClick={handleSignup}
@@ -135,13 +135,13 @@ export default function Navigation({ className = '' }: NavigationProps) {
       <div className="md:hidden">
         <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" aria-label="Open menu">
               <Menu className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => router.push('/try')}>
-              Try Free
+              Try a Free Session
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             
@@ -163,7 +163,7 @@ export default function Navigation({ className = '' }: NavigationProps) {
                   Login
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/try')}>
-                  Try Free
+                  Try a Free Session
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignup}>
                   <UserPlus className="w-4 h-4 mr-2" />
