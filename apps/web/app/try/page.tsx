@@ -6,6 +6,7 @@ import { SessionMigration } from '@/lib/guest/session-migration'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { useRouter } from 'next/navigation'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
+import Link from 'next/link'
 
 export default function TryPage() {
   const router = useRouter()
@@ -65,23 +66,23 @@ export default function TryPage() {
     <div className="h-screen flex flex-col bg-cream">
       {/* Header */}
       <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-cream">
-        <a href="/" className="text-2xl font-bold font-display text-ink">
+        <Link href="/" className="text-2xl font-bold font-display text-ink">
           ThinkHaven
-        </a>
+        </Link>
         <nav className="flex items-center gap-4">
           <FeedbackButton variant="nav" />
-          <a href="/assessment" className="text-sm font-medium text-slate-blue">
+          <Link href="/assessment" className="text-sm font-medium text-slate-blue">
             Take Assessment
-          </a>
-          <a href="/login" className="text-sm font-medium text-ink">
+          </Link>
+          <Link href="/login" className="text-sm font-medium text-ink">
             Sign in
-          </a>
-          <a
+          </Link>
+          <Link
             href="/signup"
             className="px-4 py-2 text-sm font-medium rounded-lg bg-terracotta text-cream"
           >
             Sign up
-          </a>
+          </Link>
         </nav>
       </header>
 
@@ -89,7 +90,7 @@ export default function TryPage() {
       <div className="flex-shrink-0 px-6 py-3 bg-terracotta text-cream">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm">
-            <strong>Try before you sign up!</strong> Get 10 free messages to experience ThinkHaven's AI-powered strategic thinking.
+            <strong>Try before you sign up.</strong> Get 10 free messages to pressure-test a real decision with ThinkHaven&apos;s board.
           </p>
         </div>
       </div>

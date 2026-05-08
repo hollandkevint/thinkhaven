@@ -77,7 +77,7 @@ export default function Home() {
                 className="text-sm text-slate-blue animate-fadeIn"
                 style={{ animationDelay: '300ms' }}
               >
-                No account needed. No credit card. 5 messages to see if it&apos;s for you.
+                No account needed. No credit card. 10 free messages to see if it&apos;s for you.
               </p>
             </div>
 
@@ -187,55 +187,43 @@ export default function Home() {
         </p>
       </div>
 
-      {/* How It Works */}
+      {/* Product Sequence */}
       <div className="relative z-10 bg-parchment border-y border-ink/8">
         <div className="container mx-auto px-4 py-20">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
+            <div className="max-w-3xl mb-12">
               <h2 className="text-3xl md:text-4xl font-medium font-display text-ink">
-                How It Works
+                Artifact. Decision. Confidence.
               </h2>
+              <p className="text-ink-light font-body text-lg leading-relaxed mt-4">
+                ThinkHaven is a decision architecture platform. Chat is the input. The work product is a shareable artifact that makes the case for what to build, kill, pivot, defer, or defend.
+              </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-10 mb-12">
+            <div className="grid md:grid-cols-3 gap-8">
               {[
                 {
-                  step: 1,
-                  title: 'Describe your strategic challenge',
-                  description: 'Share what you\u2019re working on \u2014 a new product bet, a pivot decision, a go-to-market question. Whatever keeps you up at night.',
+                  label: 'Artifact',
+                  title: 'A written output, not a transcript.',
+                  description: 'The session is shaped around the brief, scorecard, canvas, or structured analysis you can hand to someone else.',
                 },
                 {
-                  step: 2,
-                  title: 'Your board pushes back',
-                  description: 'An exploration agent iterates with you \u2014 asking hard questions, pushing back on assumptions, and surfacing blind spots through six distinct advisor lenses.',
+                  label: 'Decision',
+                  title: 'A clear call with reasoning behind it.',
+                  description: 'The board pressures the choice until the weak points are visible and the next move is named plainly.',
                 },
                 {
-                  step: 3,
-                  title: 'Walk away with clarity',
-                  description: 'Get your blind spots surfaced, your assumptions tested, and a sharper sense of whether to go, kill, or pivot.',
+                  label: 'Confidence',
+                  title: 'Know where the case is strong and fragile.',
+                  description: 'You leave sharper, not validated. The point is to defend the decision with the risks still in view.',
                 },
               ].map((item) => (
-                <div key={item.step} className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-terracotta/10 flex items-center justify-center mx-auto mb-4">
-                    <span className="text-terracotta font-display font-bold text-lg">{item.step}</span>
-                  </div>
-                  <h3 className="font-display font-medium text-ink mb-2 text-lg">{item.title}</h3>
+                <div key={item.label} className="border-t border-ink/12 pt-5">
+                  <p className="text-xs font-display font-medium tracking-wider uppercase text-terracotta mb-3">{item.label}</p>
+                  <h3 className="font-display font-medium text-ink mb-3 text-lg">{item.title}</h3>
                   <p className="text-ink-light font-body text-sm leading-relaxed">{item.description}</p>
                 </div>
               ))}
-            </div>
-
-            <div className="text-center">
-              <Button
-                size="lg"
-                className="group px-8 py-5 text-lg font-medium font-display bg-terracotta hover:bg-terracotta-hover text-cream transition-all duration-200"
-                asChild
-              >
-                <Link href="/try">
-                  Try a Free Session
-                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -245,29 +233,21 @@ export default function Home() {
       <div className="relative z-10 py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-4">
+            <div className="max-w-3xl mb-10">
               <h2 className="text-3xl md:text-4xl font-medium font-display text-ink">
-                Your Personal Board of Directors
+                Six advisors, one decision under pressure.
               </h2>
+              <p className="text-ink-light font-body text-lg leading-relaxed mt-4">
+                Mary facilitates. Victoria, Casey, Elaine, Omar, and Taylor bring different lenses to the same strategic question. They are useful because they do not all agree.
+              </p>
             </div>
-            <p className="text-center text-ink-light font-body max-w-2xl mx-auto mb-12 text-lg leading-relaxed">
-              Six AI advisors with distinct worldviews. They disagree with each other. That&apos;s the point.
-            </p>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {boardMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="relative bg-parchment rounded-lg p-6 border border-ink/8 shadow-sm hover:shadow-md transition-shadow duration-300"
-                >
-                  <div
-                    className="absolute top-0 left-0 right-0 h-1 rounded-t-lg"
-                    style={{ backgroundColor: member.cssColor }}
-                  />
-
-                  <div className="flex items-center gap-3 mb-4">
+            <div className="grid lg:grid-cols-[1fr_1.2fr] gap-10 items-start">
+              <div className="space-y-3">
+                {boardMembers.map((member) => (
+                  <div key={member.id} className="flex items-center gap-3 py-2 border-b border-ink/8 last:border-b-0">
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-cream font-display font-bold text-sm"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-cream font-display font-bold text-xs"
                       style={{ backgroundColor: member.cssColor }}
                     >
                       {member.name[0]}
@@ -282,55 +262,33 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <p className="text-ink-light font-body text-sm leading-relaxed italic">
-                    &ldquo;{member.quote}&rdquo;
-                  </p>
+              <div className="bg-parchment rounded-lg border border-ink/10 p-6 md:p-8">
+                <p className="text-xs font-display font-medium tracking-wider uppercase text-terracotta mb-4">Example pressure</p>
+                <div className="space-y-5">
+                  {[mary, victoria].map((member) => (
+                    <div key={member.id} className="flex gap-3">
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-cream font-display font-bold text-xs flex-shrink-0"
+                        style={{ backgroundColor: member.color }}
+                      >
+                        {member.name[0]}
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-blue font-display mb-1">
+                          <span className="font-medium text-ink">{member.name}</span> &middot; {member.role}
+                        </p>
+                        <p className="text-ink-light font-body text-sm leading-relaxed italic">
+                          &ldquo;{LANDING_QUOTES[member.id]}&rdquo;
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* What You Walk Away With */}
-      <div className="relative z-10 bg-parchment border-y border-ink/8">
-        <div className="container mx-auto px-4 py-20">
-          <div className="max-w-3xl mx-auto">
-            <div className="mb-12">
-              <h2 className="text-3xl md:text-4xl font-medium font-display text-ink">
-                What You Walk Away With
-              </h2>
-            </div>
-
-            <ul className="space-y-10">
-              {[
-                {
-                  title: 'Blind spots surfaced.',
-                  description: 'Six perspectives find gaps your thinking can\u2019t. The investor sees what the operator misses; the coach sees what the investor ignores.',
-                },
-                {
-                  title: 'A faster go-or-kill call.',
-                  description: 'Accelerates the decision you\u2019re avoiding. Not more data, just sharper questions from people who aren\u2019t afraid to ask them.',
-                },
-                {
-                  title: 'Challenged thinking, not validated thinking.',
-                  description: 'Names tensions, pokes weak spots, surfaces the thing nobody in the room wants to say. That\u2019s the value.',
-                },
-                {
-                  title: 'An artifact you can share.',
-                  description: 'A scorecard and reasoning your co-founder, advisor, or board can read in under five minutes. Not a chatbot transcript.',
-                },
-              ].map((outcome, index) => (
-                <li key={index} className="flex items-start gap-5">
-                  <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-terracotta mt-3" aria-hidden="true" />
-                  <div>
-                    <h3 className="font-display font-medium text-ink text-lg mb-2">{outcome.title}</h3>
-                    <p className="text-ink-light font-body leading-relaxed">{outcome.description}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </div>
@@ -355,16 +313,6 @@ export default function Home() {
               <p className="text-ink-light font-body leading-relaxed max-w-2xl mx-auto italic mb-8">
                 ThinkHaven exists because I kept watching smart people build the wrong thing. Not because the idea was bad, but because nobody challenged it hard enough, early enough.
               </p>
-              <Button
-                size="lg"
-                className="group px-8 py-5 text-lg font-medium font-display bg-terracotta hover:bg-terracotta-hover text-cream transition-all duration-200"
-                asChild
-              >
-                <Link href="/try">
-                  Try a Free Session
-                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -389,7 +337,7 @@ export default function Home() {
                 asChild
               >
                 <Link href="/try">
-                  Start a Free Session
+                  Try a Free Session
                   <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
@@ -431,7 +379,7 @@ export default function Home() {
                 <ul className="space-y-3 text-sm">
                   <li>
                     <Link href="/try" className="text-cream/60 hover:text-cream transition-colors">
-                      Free Session
+                      Try a Free Session
                     </Link>
                   </li>
                   <li>

@@ -332,8 +332,6 @@
   /* Board of Directors - Speaker Messages */
   .board-speaker-message {
     @apply flex items-start gap-3 max-w-[70%];
-    border-left: 3px solid var(--board-mary);
-    padding-left: var(--space-4);
   }
 
   .board-speaker-avatar {

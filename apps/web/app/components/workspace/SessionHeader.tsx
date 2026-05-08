@@ -5,7 +5,6 @@ import Link from 'next/link'
 import {
   ArrowLeft,
   ChevronRight,
-  HelpCircle,
   MoreVertical,
   PanelRightClose,
   PanelRightOpen,
@@ -15,11 +14,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
-import { resetOnboarding } from '@/app/components/onboarding/OnboardingModal'
 import ExportPanel from '@/app/components/workspace/ExportPanel'
 import { ModeBadge } from '@/app/components/board/ModeBadge'
 import { BoardExplainerSheet, BoardExplainerTrigger } from '@/app/components/board/BoardExplainerSheet'
@@ -153,14 +150,6 @@ export function SessionHeader({
                 Account
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => { resetOnboarding(); window.location.reload() }}
-              className="flex items-center gap-2 text-sm"
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-              What is ThinkHaven?
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <span className="text-xs text-muted-foreground cursor-default">{userEmail}</span>
             </DropdownMenuItem>

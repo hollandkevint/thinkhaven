@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Try ThinkHaven - Free AI Business Strategy Session',
-  description: 'Chat with Mary, your AI business strategist. Try 10 free messages - no signup required.',
+  description: 'Pressure-test a real decision with Mary and the ThinkHaven board. Try 10 free messages, no signup required.',
 }
 
 export default function TryLayout({

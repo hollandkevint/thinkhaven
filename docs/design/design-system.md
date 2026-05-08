@@ -6,6 +6,12 @@
 
 ThinkHaven's visual language draws inspiration from Wes Anderson's distinctive aesthetic: **symmetry with soul, warmth with precision, whimsy with purpose**. The design feels like a thoughtfully curated vintage study - a place where serious strategic thinking happens in an environment that sparks creativity rather than sterile corporate efficiency.
 
+## Source of Truth
+
+The runtime source of truth is `apps/web/app/globals.css` for CSS variables/component primitives and `apps/web/tailwind.config.cjs` for Tailwind utility tokens. The visual reference source is `docs/design/design-system.pen` plus the screen mocks under `docs/design/pages/`. This document explains how to apply those sources; if generated design docs disagree with runtime tokens, trust the runtime files and update the docs.
+
+The April 2026 audit artifacts live at `docs/design/Design System Audit from Thinkhaven.md` and `docs/design/Design System Audit - Thinkhaven.html`. The core token/font drift called out there has been addressed in runtime code; the remaining guidance below captures the system-level gaps the audit identified.
+
 ### Core Principles
 
 1. **Organic Warmth** - Warm neutrals and muted earth tones create a welcoming, human environment
@@ -56,6 +62,15 @@ ThinkHaven's visual language draws inspiration from Wes Anderson's distinctive a
 | `--error` | var(--rust) | Errors, viability low, kill recommendations |
 | `--info` | var(--slate-blue) | Neutral information |
 
+### Color Ownership
+
+Use color to signal one primary axis at a time.
+
+- **Modes own semantic color.** Inquisitive, Devil's Advocate, Encouraging, and Realistic states use the mode tokens above wherever the user is meant to read behavioral state.
+- **Board members own identity accents.** Member colors are limited to avatar fills, speaker borders, and small identity accents. Do not use member colors as state or mode colors.
+- **When both appear together, mode wins.** A Victoria message in Inquisitive mode should use Victoria's identity accent for the avatar/border and the inquisitive token for the mode badge.
+- **Mary remains the brand anchor.** Mary/facilitator identity uses terracotta, which also remains the primary CTA color.
+
 ---
 
 ## Typography
@@ -96,7 +111,7 @@ ThinkHaven's visual language draws inspiration from Wes Anderson's distinctive a
 - **Headings:** Futura-style sans-serif creates confident, modern authority
 - **Body text:** Serif font improves readability for longer strategic content
 - **Generous line height:** 1.65 for body text ensures comfortable reading
-- **Letter spacing:** Slightly increased for headings (0.01em)
+- **Letter spacing:** Keep body and heading letter spacing at `0`; use small positive tracking only for all-caps labels and captions
 
 ---
 
@@ -240,7 +255,7 @@ Visual indicator for kill decision framework:
 
 ## Animation
 
-Subtle, purposeful animations that feel organic.
+Subtle, purposeful animations that feel deliberate and slightly mechanical.
 
 ```css
 --transition-fast: 150ms ease-out;
@@ -257,6 +272,58 @@ Subtle, purposeful animations that feel organic.
 2. **Natural easing** - Ease-out for entrances, ease-in-out for state changes
 3. **Purposeful delay** - Stagger related elements for visual hierarchy
 4. **Respect reduced motion** - Honor `prefers-reduced-motion`
+
+### Motion Vocabulary
+
+| Pattern | Timing | Usage |
+|---------|--------|-------|
+| `enter.fade-up` | 250ms, ease-out-expo, 8px translate | New chat messages, cards, small panels |
+| `enter.stagger` | 40ms step, max 6 items | Session cards and Lean Canvas cells on initial load |
+| `state.pulse` | 1.2s loop, 0.6 -> 1 opacity | "Mary is thinking" and pending viability indicators |
+| `page.crossfade` | 400ms, ease-in-out | Dashboard to workspace transitions; parchment overlay, no slide |
+| `hover.lift` | 150ms, ease-out, 2px rise | Clickable cards only |
+| `commit.canvas-cell` | 250ms, ease-out-expo | Canvas cell fills or upgrades from empty to committed |
+
+---
+
+## Layout Rhythm
+
+Use a 12-column grid for marketing and dashboard layouts, with constrained content widths rather than free-floating sections.
+
+| Context | Max Width | Rhythm |
+|---------|-----------|--------|
+| Landing | 1200px | 72px section spacing desktop, 48px tablet, 32px mobile |
+| App shell | 1400px | 40px dashboard/card rhythm, 24px panel rhythm |
+| Chat/canvas | Full app shell | Compact density: 16px message rhythm, 12px control gaps |
+| Modals | 480-720px | 24px internal padding, 16px stacked control rhythm |
+
+Breakpoints: 640px, 768px, 1024px, 1400px. The chat/canvas split collapses below 768px; navigation stacks or becomes a compact menu below 640px.
+
+---
+
+## States & Feedback
+
+Every reusable component should define default, hover, focus, disabled, and loading states before shipping. These are the baseline patterns:
+
+| Component | Required States |
+|-----------|-----------------|
+| Button | Default, hover, focus ring, disabled opacity/cursor, loading spinner with stable width |
+| Card | Default, hover lift for clickable cards, focus ring when keyboard reachable, loading skeleton, empty content |
+| Input | Default, focus, error with rust border/message, disabled, optional icon prefix |
+| Dialog | Open, close, loading submit, destructive confirmation, Escape/focus-trap behavior via Radix |
+| Canvas cell | Empty, in-progress, explored, committed, error/retry |
+
+### Empty, Loading, and Error Patterns
+
+- **Empty states:** Illustration slot or monogram mark, concise headline, one ghost/secondary CTA. Use parchment panels on cream pages.
+- **Loading states:** Parchment/cream shimmer, no blue or gray skeletons. Preserve final layout dimensions to prevent shift.
+- **Error states:** Rust left accent or border, short plain-language message, inline retry when recovery is possible.
+
+---
+
+## Iconography
+
+Use Lucide icons unless a custom product glyph is already established. Icons use 1.75-2px stroke, 16px inside compact controls, 20px in standard buttons, and 24px for panel headers. Icon color should inherit text color except destructive/error icons, which use rust.
 
 ---
 
@@ -326,20 +393,22 @@ The visual design source of truth is `docs/design/design-system.pen`. It contain
 
 ## Implementation Notes
 
-### Google Fonts Import
+### Font Loading
 
-```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-```
+Fonts are loaded through `next/font/google` in `apps/web/app/layout.tsx`, not a raw `<link>` tag. The exported variables are `--font-display`, `--font-body`, and `--font-mono`.
+
+### Dark Mode
+
+ThinkHaven is intentionally light-only for now. Runtime CSS sets `color-scheme: light`; do not add `prefers-color-scheme: dark` variants without a designed "midnight study" palette.
 
 ### Accessibility
 
 - All color combinations meet WCAG AA contrast (4.5:1 for body text)
 - Terracotta on cream: 4.8:1 contrast ratio
 - Ink on cream: 12.4:1 contrast ratio
-- Focus states are clearly visible
+- Focus states use a terracotta ring and must remain visible on cream, parchment, and white surfaces
+- Keyboard navigation is required for Lean Canvas cells, dialog controls, and any menu/listbox interactions
+- Honor `prefers-reduced-motion` for all named motion patterns
 
 ---
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { GuestSessionStore, GuestMessage } from '@/lib/guest/session-store'
+import { GuestSessionStore } from '@/lib/guest/session-store'
 import SignupPromptModal from './SignupPromptModal'
 import StreamingMessage from '../chat/StreamingMessage'
 import MessageInput from '../chat/MessageInput'
@@ -64,18 +64,18 @@ export default function GuestChatInterface() {
       }))
       setMessages(loadedMessages)
       setRemainingMessages(GuestSessionStore.getRemainingMessages())
-    } else {
-      // Show welcome message
-      const welcomeMessage: Message = {
-        id: 'welcome',
-        role: 'assistant',
-        content: `Hey there! I'm Mary, your AI business strategist. I'm here to help you think through business challenges, validate ideas, and develop strategic insights.
+      } else {
+        // Show welcome message
+        const welcomeMessage: Message = {
+          id: 'welcome',
+          role: 'assistant',
+          content: `I'm Mary. Bring a decision you're leaning toward and I will help pressure-test where it breaks.
 
-**Try me out with 10 free messages** - no signup required. After that, you can sign up to continue our conversation and unlock unlimited access.
+**You have 10 free messages** - no signup required. After that, sign up to save the thread and continue.
 
-**What would you like to explore today?**`,
-        timestamp: new Date()
-      }
+**What are you trying to decide?**`,
+          timestamp: new Date()
+        }
       setMessages([welcomeMessage])
     }
   }, [])
@@ -213,7 +213,7 @@ export default function GuestChatInterface() {
                   case 'error':
                     throw new Error(parsed.error || 'Unknown streaming error')
                 }
-              } catch (e) {
+              } catch {
                 // Skip malformed JSON chunks
                 continue
               }
@@ -223,9 +223,9 @@ export default function GuestChatInterface() {
       } finally {
         reader.releaseLock()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setLastFailedMessage(messageContent)
-      setError(error.message || 'Unknown error occurred')
+      setError(error instanceof Error ? error.message : 'Unknown error occurred')
       // Remove the failed assistant message placeholder
       setMessages(prev => prev.filter(msg => msg.id !== assistantMessage.id))
     } finally {
@@ -314,7 +314,7 @@ export default function GuestChatInterface() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <p className="text-sm text-ink">
-                <strong>Great conversation!</strong> Sign up to save your progress and continue later.
+                Sign up to save this thread and continue later.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -376,7 +376,7 @@ export default function GuestChatInterface() {
         <div className="flex-shrink-0 px-6 py-3 bg-terracotta/10 border-t border-terracotta/20">
           <div className="flex items-center justify-between max-w-4xl mx-auto">
             <p className="text-sm text-ink">
-              You've used all 10 free messages.{' '}
+              You&apos;ve used all 10 free messages.{' '}
               <button
                 onClick={() => setShowSignupModal(true)}
                 className="font-semibold text-terracotta hover:text-terracotta-hover underline"

@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../obsidian-vault"
+		},
+		{
+			"path": "../data-product-operator"
 		}
 	],
 	"settings": {}

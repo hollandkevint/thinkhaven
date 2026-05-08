@@ -5,7 +5,6 @@ import { PostHogProvider as PHProvider } from 'posthog-js/react'
 import { useEffect, type ReactNode } from 'react'
 import { Suspense } from 'react'
 import { FeedbackModal } from './components/feedback/FeedbackModal'
-import { OnboardingModal } from './components/onboarding/OnboardingModal'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY
@@ -44,7 +43,7 @@ function PostHogPageView() {
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
   if (!POSTHOG_KEY) {
-    return <>{children}<FeedbackModal /><OnboardingModal /></>
+    return <>{children}<FeedbackModal /></>
   }
 
   return (
@@ -54,7 +53,6 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
       </Suspense>
       {children}
       <FeedbackModal />
-      <OnboardingModal />
     </PHProvider>
   )
 }
