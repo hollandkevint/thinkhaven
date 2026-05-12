@@ -1,8 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isProtectedAppPath } from './lib/auth/app-redirect'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-th-pathname', request.nextUrl.pathname)
+  requestHeaders.set('x-th-search', request.nextUrl.search)
+
+  let supabaseResponse = NextResponse.next({
+    request: { headers: requestHeaders },
+  })
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -20,7 +27,9 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
+          supabaseResponse = NextResponse.next({
+            request: { headers: requestHeaders },
+          })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -31,7 +40,20 @@ export async function middleware(request: NextRequest) {
 
   // IMPORTANT: getUser() validates JWT and refreshes if needed
   // Do NOT use getSession() - it only validates locally
-  await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user && isProtectedAppPath(request.nextUrl.pathname)) {
+    const url = new URL(request.nextUrl.toString())
+    url.pathname = '/login'
+    url.search = ''
+    url.searchParams.set(
+      'redirect',
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    )
+    return NextResponse.redirect(url)
+  }
 
   return supabaseResponse
 }

@@ -13,9 +13,17 @@ const nextResponse = {
   },
 }
 
+const redirectResponse = {
+  status: 307,
+  cookies: {
+    set: vi.fn(),
+  },
+}
+
 vi.mock('next/server', () => ({
   NextResponse: {
     next: vi.fn(() => nextResponse),
+    redirect: vi.fn(() => redirectResponse),
   },
 }))
 
@@ -72,5 +80,41 @@ describe('root middleware public-route resilience', () => {
       expect.objectContaining({ cookies: expect.any(Object) })
     )
     expect(getUser).toHaveBeenCalled()
+  })
+
+  it('forwards the attempted path to app layout redirects', async () => {
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL
+    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    await middleware(requestFor('/app/admin/beta?tab=invites'))
+
+    const { NextResponse } = await import('next/server')
+    const nextOptions = vi.mocked(NextResponse.next).mock.calls[0]?.[0]
+    const headers = nextOptions?.request?.headers
+
+    expect(headers).toBeInstanceOf(Headers)
+    expect(headers?.get('x-th-pathname')).toBe('/app/admin/beta')
+    expect(headers?.get('x-th-search')).toBe('?tab=invites')
+  })
+
+  it('preserves the protected app path in the login redirect', async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co'
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key'
+    vi.mocked(createServerClient).mockReturnValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      },
+    } as unknown as SupabaseClient)
+
+    const response = await middleware(requestFor('/app/admin/beta'))
+
+    expect(response.status).toBe(307)
+    const { NextResponse } = await import('next/server')
+    expect(NextResponse.redirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/login',
+        search: `?redirect=${encodeURIComponent('/app/admin/beta')}`,
+      })
+    )
   })
 })
