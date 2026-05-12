@@ -1,7 +1,7 @@
 {
   "name": "thinkhaven",
   "version": "0.1.0",
-  "description": "bMAD Method Analyst Web Platform - Dual-Pane Strategic Workspace Foundation",
+  "description": "Decision architecture platform for adaptive strategic pressure-testing and defensible artifacts",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -15,11 +15,11 @@
     "type-check": "npm run type-check --workspace=apps/web"
   },
   "keywords": [
+    "thinkhaven",
+    "decision-architecture",
     "strategic-thinking",
-    "dual-pane",
-    "coaching",
-    "bmad-method",
-    "ai-assistant"
+    "pressure-testing",
+    "ai-advisors"
   ],
   "author": "Kevin Kellogg",
   "license": "MIT",

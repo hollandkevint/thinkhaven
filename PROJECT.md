@@ -1,6 +1,6 @@
 # ThinkHaven - Project Overview
 
-**AI-Powered Strategic Thinking Workspace**
+**Decision architecture platform for strategic pressure-testing**
 
 ## Quick Start
 
@@ -29,7 +29,7 @@ thinkhaven/
 │   └── web/               # Main Next.js application
 │       ├── app/           # Next.js App Router pages
 │       ├── lib/           # Core business logic
-│       │   ├── bmad/      # BMad Method engine
+│       │   ├── bmad/      # Legacy BMad/session engine
 │       │   ├── ai/        # AI integration (Claude)
 │       │   ├── auth/      # Supabase authentication
 │       │   └── monetization/ # Stripe + credits
@@ -41,8 +41,8 @@ thinkhaven/
 
 ## Core Features
 
-### 1. BMad Method Engine
-Strategic thinking framework with AI-powered analysis
+### 1. Decision Session Engine
+Structured strategic pressure-testing with persistent artifacts
 - **Location**: `apps/web/lib/bmad/`
 - **Key files**: session-orchestrator.ts, pathway-router.ts
 - **Pathways**: New idea, business model, feature refinement
@@ -51,7 +51,7 @@ Strategic thinking framework with AI-powered analysis
 Claude-powered conversations with streaming responses
 - **Location**: `apps/web/lib/ai/`
 - **API**: Anthropic Claude (Sonnet 4)
-- **Persona**: Mary (business analyst)
+- **Experience**: Mary facilitates a board of advisors with distinct decision lenses
 
 ### 3. Credit System
 Session-based monetization with Stripe integration
@@ -60,7 +60,7 @@ Session-based monetization with Stripe integration
 - **Transactions**: Atomic with row-level locking
 
 ### 4. Canvas Workspace
-Visual thinking with tldraw and Mermaid diagrams
+Visual and written artifacts that support defensible decisions
 - **Location**: `apps/web/lib/canvas/`
 - **Features**: Real-time AI sync, export to PNG/SVG
 

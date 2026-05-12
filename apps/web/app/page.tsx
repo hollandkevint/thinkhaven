@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { WaitlistForm } from '@/components/waitlist/WaitlistForm'
-import { ArrowRight, Mail, MapPin } from 'lucide-react'
+import { ArrowRight, BookOpen, Github, Mail, MapPin } from 'lucide-react'
 import { BOARD_MEMBERS, getBoardMember } from '@/lib/ai/board-members'
 import type { BoardMemberId } from '@/lib/ai/board-types'
 
@@ -224,6 +224,76 @@ export default function Home() {
                   <p className="text-ink-light font-body text-sm leading-relaxed">{item.description}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Open Method Section */}
+      <div className="relative z-10 bg-cream border-y border-ink/8">
+        <div className="container mx-auto px-4 py-20">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid lg:grid-cols-[0.95fr_1.05fr] gap-12 items-start">
+              <div>
+                <p className="text-xs font-display font-medium tracking-wider uppercase text-terracotta mb-4">
+                  Open method
+                </p>
+                <h2 className="text-3xl md:text-4xl font-medium font-display text-ink leading-tight">
+                  The method is public. The platform makes it adaptive.
+                </h2>
+              </div>
+
+              <div>
+                <p className="text-ink-light font-body text-lg leading-relaxed mb-8">
+                  ThinkHaven publishes its decision architecture techniques as an open
+                  Method Kit: prompts, playbooks, and pressure-testing drills you can
+                  run manually. Use the hosted product when you want those methods
+                  facilitated live with memory, artifacts, and a board that adapts as
+                  the decision gets sharper.
+                </p>
+
+                <div className="grid sm:grid-cols-2 gap-6 mb-8">
+                  <div className="border-t border-ink/12 pt-5">
+                    <BookOpen className="w-5 h-5 text-terracotta mb-4" aria-hidden="true" />
+                    <h3 className="font-display font-medium text-ink mb-2">Run the kit manually</h3>
+                    <p className="text-ink-light font-body text-sm leading-relaxed">
+                      Fork the public Method Kit, copy a playbook, and pressure-test a
+                      positioning, product, or client decision in your own workspace.
+                    </p>
+                  </div>
+
+                  <div className="border-t border-ink/12 pt-5">
+                    <Github className="w-5 h-5 text-terracotta mb-4" aria-hidden="true" />
+                    <h3 className="font-display font-medium text-ink mb-2">Bring it into ThinkHaven</h3>
+                    <p className="text-ink-light font-body text-sm leading-relaxed">
+                      The app turns the same method into guided sessions, durable
+                      artifacts, and board-style pressure from advisors who disagree.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    className="group bg-ink text-cream hover:bg-ink/90 font-display"
+                    asChild
+                  >
+                    <a href="https://github.com/hollandkevint/thinkhaven-method-kit" target="_blank" rel="noreferrer">
+                      View Method Kit
+                      <Github className="w-4 h-4 ml-2" aria-hidden="true" />
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="group border-ink/20 text-ink hover:bg-parchment font-display"
+                    asChild
+                  >
+                    <Link href="/try">
+                      Try the Hosted Version
+                      <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

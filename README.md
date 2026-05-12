@@ -1,72 +1,57 @@
-# 🎯 ThinkHaven - AI-Powered Strategic Thinking Workspace
+# ThinkHaven
 
-**Transform Strategic Analysis from Art into Science** with Mary, your AI Business Analyst, using the proven bMAD Method.
+Decision architecture platform for people who need to pressure-test strategic choices before they build, pitch, publish, or defend them.
 
-**🌟 Live Application**: https://thinkhaven.co
+ThinkHaven turns a messy idea into a defensible artifact: what to build, kill, pivot, defer, or defend, and why. The hosted product provides adaptive sessions, memory, artifact generation, and a board of advisors with distinct worldviews.
 
----
+**Live application:** https://thinkhaven.co
 
-## 🚀 **Quick Start**
+## Open Method
 
-### **Option 1: Live Application**
-- **Production URL**: https://thinkhaven.co
-- Complete strategic thinking workspace with Mary AI
+ThinkHaven's public method layer lives in the open-source [ThinkHaven Method Kit](https://github.com/hollandkevint/thinkhaven-method-kit). Use the kit to run prompts and playbooks manually; use the hosted product when you want guided sessions, memory, artifacts, and board-style pressure-testing.
 
-### **Option 2: Local Development**
+## Local Development
+
+Run commands from `apps/web/`:
+
 ```bash
-git clone https://github.com/kthkellogg/thinkhaven.git
-cd thinkhaven/apps/web
 npm install
 npm run dev
-# Visit: http://localhost:3000
 ```
 
-## 🧠 **Mary AI & bMAD Method**
+Visit http://localhost:3000.
 
-- **Curiosity-Driven Inquiry**: Systematic exploration of underlying assumptions
-- **Evidence-Based Analysis**: Grounded in verifiable data and research methodologies
-- **Numbered Options Protocol**: Structured decision-making with analytical rigor
-- **3 Strategic Pathways**: New Idea Development, Business Model Analysis, Strategic Optimization
+## Product Shape
 
-## 📁 **Structure**
+- **Artifact first:** chat is the input; the work product is a shareable decision artifact.
+- **Anti-sycophancy:** the system challenges assumptions instead of validating them.
+- **Board of advisors:** Mary facilitates while Victoria, Casey, Elaine, Omar, and Taylor apply distinct decision lenses.
+- **Hosted execution layer:** the app turns open decision methods into adaptive, persistent sessions.
 
-```
+## Repository Structure
+
+```text
 thinkhaven/
-├── apps/web/                     # Next.js application
-│   ├── app/workspace/           # Strategic thinking workspace
-│   ├── lib/bmad/                # bMAD Method implementation
-│   ├── tests/                   # E2E testing suite
-│   └── supabase/                # Database and auth
-└── docs/                         # Documentation
+├── apps/web/       # Next.js application
+├── docs/           # Product, architecture, plans, stories, and operations docs
+├── packages/       # Shared packages
+└── supabase/       # Database migrations and support files
 ```
 
-## ✨ **Features**
+## Quality
 
-**Core Platform:**
-- Complete Next.js strategic thinking workspace
-- Claude Sonnet 4 integration with Mary AI persona
-- Google OAuth + Supabase authentication
-- Real-time session management with database persistence
-- 30-minute structured BMad Method sessions
+Primary checks:
 
-**Testing & Quality:**
-- Comprehensive E2E testing with Playwright
-- OAuth testing with 39+ test scenarios
-- Performance monitoring and analytics
-- CI/CD pipeline with quality gates
+```bash
+npm run lint
+npm run test:run
+npm run test:e2e
+```
 
-## 📞 **Contact**
+See `AGENTS.md` for project-specific commands, constraints, and known test status.
 
-**Kevin Kellogg**
-📧 kevin@thinkhaven.co
-📍 San Francisco, CA
+## Contact
 
-**Feedback**: GitHub Issues | kevin@thinkhaven.co
+Kevin Holland
 
-## 📚 **Documentation**
-
-- **Implementation Status**: `IMPLEMENTATION_STATUS.md`
-- **Testing Guide**: `apps/web/tests/README.md`
-- **Stories & Features**: `docs/stories/`
-
-*Built with bMAD Method • Powered by AI • Designed for Strategic Thinkers*
+kevin@thinkhaven.co
