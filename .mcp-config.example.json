@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest"
+      ],
+      "env": {
+        "SUPABASE_URL": "https://YOUR_PROJECT_REF.supabase.co",
+        "SUPABASE_ANON_KEY": "sb_publishable_REPLACE_ME",
+        "SUPABASE_SERVICE_ROLE_KEY": "sb_secret_REPLACE_ME"
+      }
+    }
+  }
+}
