@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { CoachingContext } from '@/lib/ai/mary-persona'
 import MarkdownRenderer from './MarkdownRenderer'
+import ArtifactAwareContent from './ArtifactAwareContent'
 import MessageActionMenu from './MessageActionMenu'
 import { MessageBookmarkRow } from '@/lib/supabase/conversation-schema'
-import { hasArtifacts, parseArtifactsFromResponse, useSafeArtifacts } from '@/lib/artifact'
-import { Artifact } from '@/app/components/artifact'
+import { useSafeArtifacts } from '@/lib/artifact'
 
 export interface StreamingMessageProps {
   id: string
@@ -48,23 +48,10 @@ function StreamingText({ content, isStreaming, sessionId, onComplete, typingSpee
   const intervalRef = useRef<NodeJS.Timeout>()
   const indexRef = useRef(0)
 
-  // Parse artifacts from content
-  const { artifacts, cleanedContent } = useMemo(() => {
-    if (!content || isStreaming) {
-      return { artifacts: [], cleanedContent: content }
-    }
-
-    if (hasArtifacts(content)) {
-      return parseArtifactsFromResponse(content, sessionId || 'default')
-    }
-
-    return { artifacts: [], cleanedContent: content }
-  }, [content, isStreaming, sessionId])
-
   useEffect(() => {
     // Reset when content changes
     if (!isStreaming) {
-      setDisplayedContent(cleanedContent)
+      setDisplayedContent(content)
       setIsTyping(false)
       indexRef.current = 0
       if (intervalRef.current) {
@@ -94,23 +81,18 @@ function StreamingText({ content, isStreaming, sessionId, onComplete, typingSpee
         clearInterval(intervalRef.current)
       }
     }
-  }, [content, cleanedContent, isStreaming, typingSpeed, onComplete])
+  }, [content, isStreaming, typingSpeed, onComplete])
 
   return (
     <div className="relative space-y-4">
-      <MarkdownRenderer content={displayedContent} />
-
-      {/* Render artifacts inline (only when not streaming) */}
-      {!isStreaming && artifacts.length > 0 && (
-        <div className="space-y-3 mt-4">
-          {artifacts.map((artifact) => (
-            <Artifact
-              key={artifact.id}
-              artifact={artifact}
-              onPopOut={onPopOutArtifact}
-            />
-          ))}
-        </div>
+      {isStreaming ? (
+        <MarkdownRenderer content={displayedContent} />
+      ) : (
+        <ArtifactAwareContent
+          content={displayedContent}
+          sessionId={sessionId}
+          onPopOutArtifact={onPopOutArtifact}
+        />
       )}
 
       {/* Typing indicator */}

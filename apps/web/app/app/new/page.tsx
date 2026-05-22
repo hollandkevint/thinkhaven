@@ -15,24 +15,33 @@ const sessionMessages = [
   'Setting up your workspace...',
 ]
 
+const planGrillMessages = [
+  'Starting your plan grill...',
+  'Preparing Mary...',
+  'Setting up your docs-aware workspace...',
+]
+
 export default function NewSessionPage() {
   const router = useRouter()
   const { user } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [isRetrying, setIsRetrying] = useState(false)
+  const [pathway, setPathway] = useState('explore')
   const creatingRef = useRef(false)
 
   useEffect(() => {
     if (!user || creatingRef.current) return
     creatingRef.current = true
+    const pathwayParam = new URLSearchParams(window.location.search).get('pathway') || 'explore'
+    setPathway(pathwayParam)
 
     const createSession = async () => {
       try {
         const response = await fetch('/api/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pathway: 'explore' }),
+          body: JSON.stringify({ pathway: pathwayParam }),
         })
 
         if (!response.ok) {
@@ -55,7 +64,7 @@ export default function NewSessionPage() {
     }
 
     createSession()
-  }, [user, router])
+  }, [retryCount, user, router])
 
   const handleRetry = () => {
     if (retryCount >= MAX_RETRIES) {
@@ -90,7 +99,10 @@ export default function NewSessionPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <AnimatedLoader messages={sessionMessages} className="min-h-screen" />
+      <AnimatedLoader
+        messages={pathway === 'plan-grill' ? planGrillMessages : sessionMessages}
+        className="min-h-screen"
+      />
     </div>
   )
 }

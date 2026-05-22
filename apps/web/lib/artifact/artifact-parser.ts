@@ -58,6 +58,9 @@ export function parseArtifactsFromResponse(
   response: string,
   sessionId: string
 ): ParseResult {
+  ARTIFACT_REGEX.lastIndex = 0;
+  MERMAID_BLOCK_REGEX.lastIndex = 0;
+
   const artifacts: Artifact[] = [];
   let cleanedContent = response;
 
@@ -122,7 +125,13 @@ export function parseArtifactsFromResponse(
  * @returns true if the response contains artifact markers
  */
 export function hasArtifacts(response: string): boolean {
-  return ARTIFACT_REGEX.test(response) || MERMAID_BLOCK_REGEX.test(response);
+  ARTIFACT_REGEX.lastIndex = 0;
+  MERMAID_BLOCK_REGEX.lastIndex = 0;
+  const containsArtifact =
+    ARTIFACT_REGEX.test(response) || MERMAID_BLOCK_REGEX.test(response);
+  ARTIFACT_REGEX.lastIndex = 0;
+  MERMAID_BLOCK_REGEX.lastIndex = 0;
+  return containsArtifact;
 }
 
 /**

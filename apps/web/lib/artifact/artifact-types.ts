@@ -12,6 +12,8 @@ export type ArtifactType =
   | 'product-brief'
   | 'project-brief'
   | 'working-document'
+  | 'domain-context'
+  | 'decision-record'
   | 'mermaid-diagram'
   | 'brainstorm-summary';
 
@@ -92,6 +94,24 @@ export const ARTIFACT_CONFIGS: Record<ArtifactType, ArtifactConfig> = {
     icon: 'Edit',
     label: 'Working Document',
     description: 'Collaborative document',
+  },
+  'domain-context': {
+    type: 'domain-context',
+    editable: false,
+    supportsRawView: true,
+    exportFormats: ['markdown', 'pdf'],
+    icon: 'FileText',
+    label: 'Domain Context',
+    description: 'Glossary and domain-language context',
+  },
+  'decision-record': {
+    type: 'decision-record',
+    editable: false,
+    supportsRawView: true,
+    exportFormats: ['markdown', 'pdf'],
+    icon: 'Briefcase',
+    label: 'Decision Record',
+    description: 'Resolved decisions, assumptions, risks, and trade-offs',
   },
   'mermaid-diagram': {
     type: 'mermaid-diagram',

@@ -6,43 +6,13 @@ import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Users } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
 import { MessageLimitWarning } from '@/app/components/chat/MessageLimitWarning'
 import TypingIndicator from '@/app/components/chat/TypingIndicator'
 import { getBoardMember } from '@/lib/ai/board-members'
 import SpeakerMessage from '@/app/components/board/SpeakerMessage'
-
-import MermaidBlock from '@/app/components/chat/MermaidBlock'
+import ArtifactAwareContent from '@/app/components/chat/ArtifactAwareContent'
 import { VoiceInput } from '@/app/components/chat/VoiceInput'
-
-// Static ReactMarkdown components — extracted to avoid recreating on every render
-const MARKDOWN_COMPONENTS = {
-  code({ className, children, ...props }: any) {
-    const isInline = !className
-    const match = /language-(\w+)/.exec(className || '')
-    if (!isInline && match?.[1] === 'mermaid') {
-      return <MermaidBlock code={String(children).replace(/\n$/, '')} />
-    }
-    return isInline ? (
-      <code className="px-1.5 py-0.5 rounded text-sm bg-ink/5 font-mono">
-        {children}
-      </code>
-    ) : (
-      <pre className="p-4 rounded-lg overflow-x-auto bg-cream">
-        <code className="font-mono">{children}</code>
-      </pre>
-    )
-  },
-  h1: ({ children }: any) => <h1 className="font-display text-2xl font-medium mb-4 text-ink">{children}</h1>,
-  h2: ({ children }: any) => <h2 className="font-display text-xl font-medium mb-3 text-ink">{children}</h2>,
-  h3: ({ children }: any) => <h3 className="text-lg font-semibold mb-2 text-ink">{children}</h3>,
-  p: ({ children }: any) => <p className="mb-4 leading-relaxed text-ink">{children}</p>,
-  ul: ({ children }: any) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
-  ol: ({ children }: any) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
-  li: ({ children }: any) => <li className="text-ink">{children}</li>,
-}
 import HandoffAnnotation from '@/app/components/board/HandoffAnnotation'
 import BoardOverview from '@/app/components/board/BoardOverview'
 import { ArtifactProvider } from '@/lib/artifact'
@@ -55,6 +25,14 @@ import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
 import { isNonEmptyCanvas, type LeanCanvas as LeanCanvasType } from '@/lib/canvas/lean-canvas-schema'
+
+function parseSubPersonaState(raw: unknown): Record<string, unknown> | null {
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    return raw as Record<string, unknown>
+  }
+
+  return null
+}
 
 export default function SessionPage() {
   const params = useParams()
@@ -132,7 +110,7 @@ export default function SessionPage() {
         current_phase: data.current_phase,
         message_count: data.message_count,
         message_limit: data.message_limit,
-        sub_persona_state: data.sub_persona_state as any,
+        sub_persona_state: parseSubPersonaState(data.sub_persona_state),
         lean_canvas: (data.lean_canvas as LeanCanvasType) || null,
       }
 
@@ -337,6 +315,7 @@ export default function SessionPage() {
                       <SpeakerMessage
                         message={message}
                         boardMember={getBoardMember(message.metadata.speaker)}
+                        sessionId={session.id}
                       />
                     ) : message.role === 'assistant' ? (
                       <div className="flex justify-start">
@@ -350,13 +329,7 @@ export default function SessionPage() {
                               <span className="text-xs text-slate-blue">Facilitator</span>
                             </div>
                             <div className="px-5 py-4 rounded-t-xl rounded-br-xl rounded-bl bg-parchment border border-ink/8">
-                              <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                className="prose prose-sm max-w-none"
-                                components={MARKDOWN_COMPONENTS}
-                              >
-                                {message.content}
-                              </ReactMarkdown>
+                              <ArtifactAwareContent content={message.content} sessionId={session.id} />
                             </div>
                           </div>
                         </div>

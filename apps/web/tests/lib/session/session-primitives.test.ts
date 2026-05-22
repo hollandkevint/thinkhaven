@@ -4,7 +4,7 @@
  * Tests for the atomic session lifecycle and phase management functions.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   PHASE_ORDER,
   getPhaseOrder,
@@ -73,6 +73,10 @@ describe('Phase Order Constants', () => {
         'implementation',
       ]);
     });
+
+    it('should define intake phase for plan-grill pathway', () => {
+      expect(PHASE_ORDER['plan-grill']).toEqual(['intake']);
+    });
   });
 });
 
@@ -80,6 +84,10 @@ describe('getPhaseOrder', () => {
   it('should return phase order for known pathway', () => {
     const phases = getPhaseOrder('new-idea');
     expect(phases).toEqual(['discovery', 'ideation', 'validation', 'planning']);
+  });
+
+  it('should return phase order for plan-grill pathway', () => {
+    expect(getPhaseOrder('plan-grill')).toEqual(['intake']);
   });
 
   it('should return empty array for unknown pathway', () => {
@@ -137,6 +145,12 @@ describe('getNextPhase', () => {
 
   it('should return null for unknown pathway', () => {
     expect(getNextPhase('unknown', 'any-phase')).toBeNull();
+  });
+
+  describe('plan-grill pathway', () => {
+    it('should return null after intake because plan-grill is single-phase', () => {
+      expect(getNextPhase('plan-grill', 'intake')).toBeNull();
+    });
   });
 });
 
@@ -200,6 +214,12 @@ describe('calculateProgress', () => {
 
     it('should return 75% at implementation', () => {
       expect(calculateProgress('strategic-optimization', 'implementation')).toBe(75);
+    });
+  });
+
+  describe('plan-grill pathway (1 phase)', () => {
+    it('should return 0% at intake', () => {
+      expect(calculateProgress('plan-grill', 'intake')).toBe(0);
     });
   });
 

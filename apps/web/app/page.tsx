@@ -71,6 +71,17 @@ export default function Home() {
                     <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="group px-8 py-5 text-lg font-medium font-display border-ink/20 text-ink hover:bg-parchment transition-all duration-200"
+                  asChild
+                >
+                  <Link href="/try?mode=plan-grill">
+                    Grill a Plan
+                    <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Button>
               </div>
 
               <p
@@ -287,8 +298,8 @@ export default function Home() {
                     className="group border-ink/20 text-ink hover:bg-parchment font-display"
                     asChild
                   >
-                    <Link href="/try">
-                      Try the Hosted Version
+                    <Link href="/try?mode=plan-grill">
+                      Grill a Plan
                       <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>

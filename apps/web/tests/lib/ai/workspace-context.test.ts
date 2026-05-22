@@ -113,6 +113,25 @@ describe('WorkspaceContextBuilder', () => {
       expect(actions).toContain('How do I measure success?');
     });
 
+    it('should return plan-grill actions from the same set Mary exposes', () => {
+      const context: CoachingContext = {
+        currentBmadSession: {
+          pathway: 'plan-grill',
+          phase: 'intake',
+          progress: 0
+        }
+      };
+
+      const actions = WorkspaceContextBuilder.extractQuickActionsFromContext(context);
+
+      expect(actions).toEqual([
+        'Grill this plan',
+        'Sharpen the terminology',
+        'Find weak assumptions',
+        'Create a decision record'
+      ]);
+    });
+
     it('should return default actions when no BMad session', () => {
       const context: CoachingContext = {
         workspaceId: 'workspace-123'

@@ -31,4 +31,11 @@ test.describe('Smoke Tests - Public Routes Render', () => {
     await expect(page.getByText(/10 free messages/i).first()).toBeVisible();
     await expect(page.getByText('ThinkHaven is a decision design system')).toHaveCount(0);
   });
+
+  test('plan-grill trial route shows the plan-grill welcome', async ({ page }) => {
+    await page.goto('/try?mode=plan-grill');
+    await expect(page.getByText(/grill a pasted plan/i).first()).toBeVisible();
+    await expect(page.getByText(/What plan should we grill/i)).toBeVisible();
+    await expect(page.getByText(/10 free messages/i).first()).toBeVisible();
+  });
 });

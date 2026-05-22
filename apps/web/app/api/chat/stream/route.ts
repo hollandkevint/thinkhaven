@@ -25,6 +25,12 @@ interface SpeakerSegment {
   handoffReason?: string;
 }
 
+interface GeneratedDocumentArtifact {
+  type: string;
+  title: string;
+  content: string;
+}
+
 // Maximum number of tool execution rounds to prevent infinite loops
 const MAX_TOOL_ROUNDS = 5;
 
@@ -50,6 +56,7 @@ async function executeAgenticLoop(
   let rounds = 0;
   let accumulatedText = '';
   const segments: SpeakerSegment[] = [];
+  const generatedDocuments: GeneratedDocumentArtifact[] = [];
   let currentSpeaker: BoardMemberId = 'mary';
 
   // Build conversation for multi-turn tool use
@@ -110,6 +117,13 @@ async function executeAgenticLoop(
         };
         currentSpeaker = speakerData.newSpeaker as BoardMemberId;
       }
+
+      if (result.toolName === TOOL_NAMES.GENERATE_DOCUMENT && result.result.success && result.result.data) {
+        const documentData = result.result.data as { artifact?: GeneratedDocumentArtifact };
+        if (documentData.artifact) {
+          generatedDocuments.push(documentData.artifact);
+        }
+      }
     });
 
     // Format results for Claude
@@ -122,7 +136,7 @@ async function executeAgenticLoop(
 
     // Add tool results as user message to maintain valid conversation structure
     // Without this, round 2+ fails: tool_use blocks without matching tool_result
-    conversation.push({ role: 'user', content: toolResultsForClaude as any });
+    conversation.push({ role: 'user', content: toolResultsForClaude as unknown as ContentBlock[] });
 
     // Continue the conversation with tool results (already in conversation)
     response = await claudeClient.continueWithToolResults(
@@ -153,6 +167,18 @@ async function executeAgenticLoop(
     accumulatedText += '\n\n(I reached my processing limit for this turn. Let me know if you need me to continue.)';
   }
 
+  if (generatedDocuments.length > 0) {
+    const artifactMarkup = generatedDocuments
+      .map(document => serializeArtifactForChat(document))
+      .join('\n\n');
+
+    accumulatedText += `\n\n${artifactMarkup}`;
+    segments.push({
+      speaker: 'mary',
+      content: `\n\n${artifactMarkup}`,
+    });
+  }
+
   return {
     finalText: accumulatedText,
     toolsExecuted,
@@ -160,6 +186,11 @@ async function executeAgenticLoop(
     segments,
     boardActivated: toolExecutor.boardActivated,
   };
+}
+
+function serializeArtifactForChat(artifact: GeneratedDocumentArtifact): string {
+  const title = artifact.title.replace(/"/g, "'");
+  return `<artifact type="${artifact.type}" title="${title}">\n${artifact.content}\n</artifact>`;
 }
 
 export async function POST(request: NextRequest) {

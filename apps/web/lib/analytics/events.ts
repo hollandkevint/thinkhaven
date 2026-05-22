@@ -1,7 +1,7 @@
 import posthog from 'posthog-js'
 
 type TrackedEvent =
-  | { event: 'session_started'; properties: { source: 'guest' | 'authenticated' } }
+  | { event: 'session_started'; properties: { source: 'guest' | 'authenticated'; pathway?: string } }
   | { event: 'guest_limit_hit'; properties: { message_count: number } }
   | { event: 'signup_completed'; properties: { source: 'modal' | 'page'; method: 'google' | 'email' } }
   | { event: 'board_offered'; properties: { exchange_count: number; source: 'guest' | 'authenticated' } }

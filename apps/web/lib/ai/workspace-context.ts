@@ -122,6 +122,14 @@ export class WorkspaceContextBuilder {
     const actions: string[] = [];
 
     if (context.currentBmadSession) {
+      if (context.currentBmadSession.pathway === 'plan-grill') {
+        actions.push('Grill this plan');
+        actions.push('Sharpen the terminology');
+        actions.push('Find weak assumptions');
+        actions.push('Create a decision record');
+        return actions;
+      }
+
       const phase = context.currentBmadSession.phase;
       
       switch (phase) {
@@ -235,7 +243,6 @@ export class ConversationContextManager {
   ): string {
     // Generate a summary of key topics and insights from conversation
     const userMessages = messages.filter(m => m.role === 'user');
-    const assistantMessages = messages.filter(m => m.role === 'assistant');
     
     // Extract key topics (simple keyword extraction)
     const allContent = messages.map(m => m.content).join(' ');

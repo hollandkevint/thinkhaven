@@ -76,6 +76,8 @@ function TryPageContent() {
   const inviteId = inviteContext?.inviteId || null
   const inviteSource = inviteContext?.source || null
   const inviteFromGuest = inviteContext?.fromGuest === true
+  const trialMode = searchParams.get('mode') === 'plan-grill' ? 'plan-grill' : 'new-idea'
+  const isPlanGrill = trialMode === 'plan-grill'
   const signupPath = inviteContext ? buildSignupPath(inviteContext) : '/signup?from=guest'
   const inviteArrivalLoggedRef = useRef<string | null>(null)
 
@@ -220,14 +222,17 @@ function TryPageContent() {
       <div className="flex-shrink-0 px-6 py-3 bg-terracotta text-cream">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm">
-            <strong>Try before you sign up.</strong> Get 10 free messages to pressure-test a real decision with ThinkHaven&apos;s board.
+            <strong>Try before you sign up.</strong>{' '}
+            {isPlanGrill
+              ? 'Get 10 free messages to grill a pasted plan with Mary.'
+              : 'Get 10 free messages to pressure-test a real decision with ThinkHaven\'s board.'}
           </p>
         </div>
       </div>
 
       {/* Chat interface */}
       <div className="flex-1 max-w-5xl mx-auto w-full overflow-hidden">
-        <GuestChatInterface />
+        <GuestChatInterface pathway={trialMode} />
       </div>
     </div>
   )

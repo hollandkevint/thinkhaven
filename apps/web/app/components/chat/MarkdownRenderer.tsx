@@ -34,20 +34,20 @@ interface MarkdownRendererProps {
 
 export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   return (
-    <ReactMarkdown
-      className={`prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-p:text-muted-foreground-foreground prose-p:leading-relaxed prose-code:bg-parchment prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-parchment prose-pre:border prose-pre:border-divider prose-blockquote:border-l-primary prose-blockquote:pl-4 prose-blockquote:italic prose-ul:text-muted-foreground-foreground prose-ol:text-muted-foreground-foreground prose-li:mb-1 ${className}`}
-      components={{
-        code: ({ node, inline, className, children, ...props }) => {
-          const match = /language-(\w+)/.exec(className || '')
-          const language = match ? match[1] : 'text'
+    <div className={`prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-p:text-muted-foreground-foreground prose-p:leading-relaxed prose-code:bg-parchment prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-parchment prose-pre:border prose-pre:border-divider prose-blockquote:border-l-primary prose-blockquote:pl-4 prose-blockquote:italic prose-ul:text-muted-foreground-foreground prose-ol:text-muted-foreground-foreground prose-li:mb-1 ${className}`}>
+      <ReactMarkdown
+        components={{
+          code: ({ inline, className, children, ...props }) => {
+            const match = /language-(\w+)/.exec(className || '')
+            const language = match ? match[1] : 'text'
 
-          // Render Mermaid diagrams as SVG instead of syntax-highlighted code
-          if (!inline && language === 'mermaid') {
-            return <MermaidBlock code={String(children).replace(/\n$/, '')} />
-          }
+            // Render Mermaid diagrams as SVG instead of syntax-highlighted code
+            if (!inline && language === 'mermaid') {
+              return <MermaidBlock code={String(children).replace(/\n$/, '')} />
+            }
 
-          return !inline ? (
-            <div className="relative group">
+            return !inline ? (
+              <div className="relative group">
               {/* Copy button */}
               <button
                 onClick={() => {
@@ -83,13 +83,13 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
               >
                 {String(children).replace(/\n$/, '')}
               </SyntaxHighlighter>
-            </div>
-          ) : (
-            <code className="bg-parchment px-1.5 py-0.5 rounded text-sm font-mono text-ink" {...props}>
-              {children}
-            </code>
-          )
-        },
+              </div>
+            ) : (
+              <code className="bg-parchment px-1.5 py-0.5 rounded text-sm font-mono text-ink" {...props}>
+                {children}
+              </code>
+            )
+          },
         h1: ({ children, ...props }) => (
           <h1 className="text-xl font-bold text-primary mb-4 mt-6 first:mt-0 pb-2 border-b border-divider" {...props}>
             {children}
@@ -222,9 +222,10 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             )}
           </div>
         )
-      }}
-    >
-      {content}
-    </ReactMarkdown>
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
   )
 }

@@ -20,7 +20,29 @@ interface Message {
   isStreaming?: boolean
 }
 
-export default function GuestChatInterface() {
+type GuestPathway = 'new-idea' | 'plan-grill'
+
+interface GuestChatInterfaceProps {
+  pathway?: GuestPathway
+}
+
+function getWelcomeMessage(pathway: GuestPathway) {
+  if (pathway === 'plan-grill') {
+    return `I'm Mary. Paste a plan and I will grill the terminology, assumptions, and decisions one branch at a time.
+
+**You have 10 free messages** - no signup required. If you have project docs, domain context, or prior decisions, paste the relevant excerpts too. If not, we will use classic grill-me.
+
+**What plan should we grill?**`
+  }
+
+  return `I'm Mary. Bring a decision you're leaning toward and I will help pressure-test where it breaks.
+
+**You have 10 free messages** - no signup required. After that, sign up to save the thread and continue.
+
+**What are you trying to decide?**`
+}
+
+export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatInterfaceProps) {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([])
   const [currentInput, setCurrentInput] = useState('')
@@ -30,6 +52,7 @@ export default function GuestChatInterface() {
   const [remainingMessages, setRemainingMessages] = useState(10)
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [showSavePrompt, setShowSavePrompt] = useState(false)
+  const [activePathway, setActivePathway] = useState<GuestPathway>(pathway)
   // Sub-persona state round-tripped to API for exchange counting / board offer
   const [subPersonaState, setSubPersonaState] = useState<Record<string, unknown> | null>(null)
 
@@ -54,8 +77,9 @@ export default function GuestChatInterface() {
 
   // Load existing guest session on mount
   useEffect(() => {
-    track({ event: 'session_started', properties: { source: 'guest' } })
-    const session = GuestSessionStore.getOrCreateSession()
+    track({ event: 'session_started', properties: { source: 'guest', pathway } })
+    const session = GuestSessionStore.getOrCreateSession(pathway)
+    setActivePathway(session.pathway)
 
     if (session.messages.length > 0) {
       // Load existing messages
@@ -67,21 +91,17 @@ export default function GuestChatInterface() {
       }))
       setMessages(loadedMessages)
       setRemainingMessages(GuestSessionStore.getRemainingMessages())
-      } else {
-        // Show welcome message
-        const welcomeMessage: Message = {
-          id: 'welcome',
-          role: 'assistant',
-          content: `I'm Mary. Bring a decision you're leaning toward and I will help pressure-test where it breaks.
-
-**You have 10 free messages** - no signup required. After that, sign up to save the thread and continue.
-
-**What are you trying to decide?**`,
-          timestamp: new Date()
-        }
+    } else {
+      // Show welcome message
+      const welcomeMessage: Message = {
+        id: 'welcome',
+        role: 'assistant',
+        content: getWelcomeMessage(session.pathway),
+        timestamp: new Date()
+      }
       setMessages([welcomeMessage])
     }
-  }, [])
+  }, [pathway])
 
   const sendMessage = async (messageContent: string) => {
     if (!messageContent.trim() || isLoading) return
@@ -108,7 +128,7 @@ export default function GuestChatInterface() {
     setIsLoading(true)
 
     // Save user message to guest session
-    GuestSessionStore.addMessage('user', messageContent)
+    GuestSessionStore.addMessage('user', messageContent, activePathway)
     setRemainingMessages(GuestSessionStore.getRemainingMessages())
 
     // Create assistant message placeholder
@@ -135,7 +155,8 @@ export default function GuestChatInterface() {
             role: msg.role,
             content: msg.content
           })),
-          subPersonaState
+          subPersonaState,
+          pathway: activePathway
         })
       })
 
@@ -176,7 +197,7 @@ export default function GuestChatInterface() {
                 setIsLoading(false)
 
                 // Save assistant response to guest session
-                GuestSessionStore.addMessage('assistant', fullContent)
+                GuestSessionStore.addMessage('assistant', fullContent, activePathway)
 
                 // Update remaining count
                 setRemainingMessages(GuestSessionStore.getRemainingMessages())
@@ -227,6 +248,7 @@ export default function GuestChatInterface() {
                         posthog.capture('board_offered', {
                           exchange_count: exchangeCount,
                           source: 'guest',
+                          pathway: activePathway,
                         })
                       }
                     }
@@ -424,7 +446,9 @@ export default function GuestChatInterface() {
           placeholder={
             GuestSessionStore.hasReachedLimit()
               ? 'Sign up to continue chatting...'
-              : `Ask Mary for strategic guidance... (${remainingMessages} messages left)`
+              : activePathway === 'plan-grill'
+                ? `Paste a plan or answer Mary's question... (${remainingMessages} messages left)`
+                : `Ask Mary for strategic guidance... (${remainingMessages} messages left)`
           }
           maxLength={4000}
         />

@@ -108,7 +108,11 @@ export class ContextBuilder {
       const recentInsights = insights?.flatMap(i => {
         const data = i.output_data as Record<string, unknown>;
         if (Array.isArray(data?.insights)) {
-          return data.insights as string[];
+          return data.insights.filter((value): value is string => typeof value === 'string');
+        }
+        if (typeof data?.insight === 'string') {
+          const category = typeof data.category === 'string' ? data.category : 'general';
+          return [`${category}: ${data.insight}`];
         }
         return [];
       }).slice(0, 5) || [];
@@ -205,9 +209,9 @@ export class ContextBuilder {
       switch_persona_mode: 'When the user\'s emotional state suggests a different coaching approach',
       switch_speaker: 'When another board member\'s expertise is relevant to the current topic',
       recommend_action: 'After thorough exploration when you have enough information to assess viability',
-      generate_document: 'When the user has provided enough input for a deliverable',
+      generate_document: 'When the user has provided enough input for a deliverable; use domain_context for resolved glossary language and decision_record for durable trade-off decisions',
       update_lean_canvas: 'When conversation reveals information that should populate canvas cells',
-      update_session_context: 'To persist insights, decisions, or progress markers for future reference',
+      update_session_context: 'To persist insights, domain terms, decisions, assumptions, or progress markers for future reference',
     }
 
     // Generate capability list from MARY_TOOLS to prevent context drift
@@ -223,6 +227,11 @@ export class ContextBuilder {
         'Ask open-ended questions to understand the full context',
         'Surface underlying assumptions',
         'Explore the problem space before solutions',
+      ],
+      'intake': [
+        'Ask for the pasted plan and any relevant docs or project context',
+        'Clarify whether this is classic grill-me or docs-aware grill-with-docs',
+        'Challenge one term, assumption, or decision at a time',
       ],
       'ideation': [
         'Generate multiple solution approaches',
@@ -252,6 +261,8 @@ export class ContextBuilder {
       'Product Requirements Document (PRD)',
       'Feature Brief',
       'Concept Document',
+      'Domain Context',
+      'Decision Record',
       'Competitive Analysis',
     ];
 

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { claudeClient } from '@/lib/ai/claude-client';
 import { StreamEncoder, createStreamHeaders } from '@/lib/ai/streaming';
 import { maryPersona, SubPersonaSessionState, CoachingContext } from '@/lib/ai/mary-persona';
+import { getPathwayConfig } from '@/lib/session/pathway-config';
 
 /**
  * Guest Chat Stream API
@@ -19,6 +20,10 @@ import { maryPersona, SubPersonaSessionState, CoachingContext } from '@/lib/ai/m
 const GUEST_RATE_LIMIT = 15; // messages per window
 const GUEST_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const guestRateLimits = new Map<string, { count: number; resetAt: number }>();
+
+function normalizeGuestPathway(pathway: unknown): 'new-idea' | 'plan-grill' {
+  return pathway === 'plan-grill' ? 'plan-grill' : 'new-idea';
+}
 
 function checkGuestRateLimit(ip: string): boolean {
   const now = Date.now();
@@ -62,7 +67,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { message, conversationHistory, subPersonaState: clientSubPersonaState } = await request.json();
+    const {
+      message,
+      conversationHistory,
+      subPersonaState: clientSubPersonaState,
+      pathway: requestedPathway,
+    } = await request.json();
+    const guestPathway = normalizeGuestPathway(requestedPathway);
+    const pathwayConfig = guestPathway === 'plan-grill'
+      ? getPathwayConfig('plan-grill')
+      : undefined;
 
     // Validate request
     if (!message || typeof message !== 'string' || message.length > 4000) {
@@ -75,15 +89,15 @@ export async function POST(request: NextRequest) {
     // Limit conversation history to prevent abuse
     const limitedHistory = (conversationHistory || []).slice(-10);
 
-    // Initialize or use existing sub-persona state
-    // Guest sessions default to 'new-idea' pathway
+    // Initialize or use existing sub-persona state.
+    // Guest sessions default to classic grill-me/new-idea unless plan-grill was requested.
     let subPersonaState: SubPersonaSessionState;
     if (clientSubPersonaState) {
       // Restore state from client localStorage
       subPersonaState = clientSubPersonaState;
     } else {
       // Initialize fresh state for new guest session
-      subPersonaState = maryPersona.initializeSubPersonaState('new-idea');
+      subPersonaState = maryPersona.initializeSubPersonaState(guestPathway);
     }
 
     // Update sub-persona state based on user message
@@ -116,8 +130,8 @@ export async function POST(request: NextRequest) {
           // Guest-specific coaching context with sub-persona system
           const guestCoachingContext: CoachingContext = {
             currentBmadSession: {
-              pathway: 'new-idea',
-              phase: 'discovery',
+              pathway: guestPathway,
+              phase: pathwayConfig?.phase || 'discovery',
               progress: 0,
             },
             subPersonaState: subPersonaState,
