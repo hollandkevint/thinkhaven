@@ -10,6 +10,8 @@ These are intellectual foundations, not requirements. They explain *why* the pro
 |---|---|
 | [Dan Hock — How to Use AI](./dan-hock-how-to-use-ai.md) | Three-mode structure (Assessment, Stress Test, Executive Prep), No-Man mode design, Early Adopter targeting |
 | [John Cutler — You Can "Hear" Strategy](./strategy_adlib.md) | Strategy articulation prompts, anti-fuzzy-language stance |
+| [Nate Jones — Prompting to Briefing](./nate-jones-prompting-to-briefing.md) | Six-field brief structure, mode design surfacing the brief fields, Executive Prep + No-Man mode positioning |
+| [Nate Jones — AI Communication Prompt Kit](./nate-jones-ai-communication-prompt-kit.md) | Mode design benchmarks (Useful Question Builder → Assessment, Vague Ask Auditor → Stress Test, Definition-of-Done → Executive Prep) |
 
 ## Adding a new reference
 
