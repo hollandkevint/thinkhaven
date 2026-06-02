@@ -86,7 +86,7 @@ export function ArtifactPanel() {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-ink/40 z-40 transition-opacity"
         onClick={closePanel}
         aria-hidden="true"
       />

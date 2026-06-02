@@ -247,6 +247,36 @@ describe('checkBetaAccess', () => {
     });
   });
 
+  it('returns unavailable when auth validation rejects during getClaims and getUser', async () => {
+    mockGetClaims.mockRejectedValue(new Error('fetch failed'));
+    mockGetUser.mockRejectedValue(new Error('network timeout'));
+
+    await expect(checkBetaAccess()).resolves.toMatchObject({
+      user: null,
+      betaApproved: false,
+      status: 'unavailable',
+      isAdmin: false,
+      error: 'Authentication service unavailable',
+    });
+    expect(mockGetUser).toHaveBeenCalled();
+  });
+
+  it('returns unavailable when getUser reports a retryable auth service failure', async () => {
+    mockGetClaims.mockResolvedValue({ data: null, error: null });
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: Object.assign(new Error('service unavailable'), { status: 503 }),
+    });
+
+    await expect(checkBetaAccess()).resolves.toMatchObject({
+      user: null,
+      betaApproved: false,
+      status: 'unavailable',
+      isAdmin: false,
+      error: 'Authentication service unavailable',
+    });
+  });
+
   it('returns unauthenticated for invalid or missing auth state', async () => {
     mockGetClaims.mockResolvedValue({ data: null, error: new Error('invalid token') });
     mockGetUser.mockResolvedValue({

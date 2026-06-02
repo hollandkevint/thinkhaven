@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu'
 import Link from 'next/link'
-import { Menu, User, LogOut, LogIn, UserPlus, ChevronDown } from 'lucide-react'
+import { Menu, User, LogOut, LogIn, ChevronDown } from 'lucide-react'
 import { CreditGuard } from '../monetization/CreditGuard'
 
 const BetaBadge = (
@@ -73,14 +73,6 @@ export default function Navigation({ className = '' }: NavigationProps) {
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex items-center gap-4">
-        <Button
-          variant="ghost"
-          onClick={() => router.push('/try')}
-          className="text-ink-light hover:text-ink"
-        >
-          Try a Free Session
-        </Button>
-
         {/* Credit Balance - only show for logged-in users */}
         {user && <CreditGuard userId={user.id} />}
 
@@ -107,6 +99,24 @@ export default function Navigation({ className = '' }: NavigationProps) {
           </DropdownMenu>
         ) : (
           <div className="flex items-center gap-3">
+            <Link
+              href="/pricing"
+              className="text-sm font-medium text-slate-blue transition-colors hover:text-ink"
+            >
+              Pricing
+            </Link>
+            <Link
+              href="/assessment"
+              className="text-sm font-medium text-slate-blue transition-colors hover:text-ink"
+            >
+              Assessment
+            </Link>
+            <Link
+              href="/waitlist"
+              className="text-sm font-medium text-slate-blue transition-colors hover:text-ink"
+            >
+              Beta access
+            </Link>
             <Button
               variant="ghost"
               onClick={handleLogin}
@@ -115,17 +125,10 @@ export default function Navigation({ className = '' }: NavigationProps) {
               Login
             </Button>
             <Button
-              variant="outline"
-              onClick={() => router.push('/try')}
-              className="border-terracotta text-terracotta hover:bg-terracotta hover:text-cream font-medium"
-            >
-              Try a Free Session
-            </Button>
-            <Button
-              onClick={handleSignup}
+              asChild
               className="bg-terracotta hover:bg-terracotta-hover text-cream font-medium"
             >
-              Sign Up
+              <Link href="/try">Try a Free Session</Link>
             </Button>
           </div>
         )}
@@ -140,11 +143,6 @@ export default function Navigation({ className = '' }: NavigationProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => router.push('/try')}>
-              Try a Free Session
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            
             {user ? (
               <>
                 <DropdownMenuItem onClick={() => router.push('/app')}>
@@ -158,15 +156,24 @@ export default function Navigation({ className = '' }: NavigationProps) {
               </>
             ) : (
               <>
+                <DropdownMenuItem onClick={() => router.push('/try')}>
+                  Try a Free Session
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/pricing')}>
+                  Pricing
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/assessment')}>
+                  Assessment
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/waitlist')}>
+                  Beta access
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogin}>
                   <LogIn className="w-4 h-4 mr-2" />
                   Login
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/try')}>
-                  Try a Free Session
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignup}>
-                  <UserPlus className="w-4 h-4 mr-2" />
                   Sign Up
                 </DropdownMenuItem>
               </>

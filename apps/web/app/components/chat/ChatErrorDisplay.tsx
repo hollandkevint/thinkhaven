@@ -45,7 +45,7 @@ export default function ChatErrorDisplay({
       case 'auth':
         return 'Session expired. Please refresh the page.'
       default:
-        return 'Something went wrong. Please try again.'
+        return 'Mary could not complete that response. Please try again.'
     }
   }
 

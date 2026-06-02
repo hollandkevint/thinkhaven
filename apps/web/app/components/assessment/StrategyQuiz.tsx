@@ -236,16 +236,16 @@ export function StrategyQuiz() {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Assessment Complete!</CardTitle>
+          <CardTitle>Scorecard ready</CardTitle>
           <CardDescription>
-            Get your personalized strategic thinking scorecard
+            Send the decision readiness scorecard to the email you use for ThinkHaven.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2">
-                Enter your email to receive your results
+                Email for your scorecard
               </label>
               <Input
                 id="email"
@@ -257,7 +257,7 @@ export function StrategyQuiz() {
                 className="w-full"
               />
               <p className="text-xs text-slate-blue mt-2">
-                We'll send you detailed recommendations and insights based on your assessment.
+                We will send the scorecard and a recommended next session path.
               </p>
             </div>
           </form>
@@ -269,7 +269,7 @@ export function StrategyQuiz() {
             className="w-full"
             size="lg"
           >
-            {isSubmitting ? 'Processing...' : 'Get My Results →'}
+            {isSubmitting ? 'Preparing scorecard...' : 'Get scorecard'}
           </Button>
         </CardFooter>
       </Card>
@@ -299,9 +299,9 @@ export function StrategyQuiz() {
         <CardHeader>
           <div className="flex items-center justify-between mb-2">
             <Badge variant="secondary">
-              {question.category === 'evidence' && 'Evidence-Based'}
-              {question.category === 'framework' && 'Framework Mastery'}
-              {question.category === 'execution' && 'Execution Excellence'}
+              {question.category === 'evidence' && 'Evidence base'}
+              {question.category === 'framework' && 'Decision frame'}
+              {question.category === 'execution' && 'Execution path'}
             </Badge>
           </div>
           <CardTitle className="text-xl">{question.question}</CardTitle>
@@ -312,6 +312,7 @@ export function StrategyQuiz() {
               <button
                 key={option.value}
                 onClick={() => handleAnswer(question.id, option.value)}
+                aria-pressed={answers[question.id] === option.value}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer active:scale-[0.98] hover:border-terracotta hover:bg-terracotta/5 ${
                   answers[question.id] === option.value
                     ? 'border-terracotta bg-terracotta/5'
@@ -321,7 +322,9 @@ export function StrategyQuiz() {
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{option.label}</span>
                   {answers[question.id] === option.value && (
-                    <span className="text-terracotta">✓</span>
+                    <span className="text-xs font-semibold uppercase tracking-wide text-terracotta">
+                      Selected
+                    </span>
                   )}
                 </div>
               </button>
@@ -332,7 +335,7 @@ export function StrategyQuiz() {
 
       {/* Navigation hint */}
       <p className="text-center text-sm text-slate-blue">
-        Click an option to continue
+        Choose the closest current pattern.
       </p>
     </div>
   );

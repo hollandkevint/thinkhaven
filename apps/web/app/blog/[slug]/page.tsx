@@ -120,7 +120,7 @@ export default async function BlogPostPage({ params }: Props) {
             prose-ul:my-6 prose-ul:pl-6
             prose-ol:my-6 prose-ol:pl-6
             prose-li:text-ink-light prose-li:font-body prose-li:mb-2
-            prose-blockquote:border-l-4 prose-blockquote:border-terracotta prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-ink-light
+            prose-blockquote:border prose-blockquote:border-ink/10 prose-blockquote:bg-parchment prose-blockquote:rounded-lg prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:italic prose-blockquote:text-ink-light
             prose-hr:border-ink/10 prose-hr:my-12
           ">
             <ReactMarkdown>{post.content}</ReactMarkdown>

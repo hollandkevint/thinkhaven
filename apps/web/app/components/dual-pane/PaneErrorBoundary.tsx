@@ -58,7 +58,7 @@ export class PaneErrorBoundary extends Component<Props, State> {
             </h3>
             
             <p className="text-muted-foreground mb-4 max-w-md">
-              Something went wrong in the {this.props.paneName} pane. This is likely a temporary issue.
+              The {this.props.paneName} pane did not finish loading. This is likely temporary.
             </p>
             
             {process.env.NODE_ENV === 'development' && this.state.error && (
@@ -147,7 +147,7 @@ export function OfflineIndicator() {
     <div className="offline-indicator">
       <div className="flex items-center gap-2 p-3 bg-warning/10 border border-warning/20 rounded-lg mb-4">
         <div className="w-4 h-4 bg-warning rounded-full flex items-center justify-center">
-          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 text-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-12.728 12.728m0-12.728l12.728 12.728" />
           </svg>
         </div>

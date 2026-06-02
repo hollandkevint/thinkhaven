@@ -1,18 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
-// Redirect to new /app/session/[id] route
-export default function WorkspaceRedirect() {
+// Redirect to new /app/new route
+export default function BmadRedirect() {
   const router = useRouter();
-  const params = useParams();
 
   useEffect(() => {
-    if (params.id) {
-      router.replace(`/app/session/${params.id}`);
-    }
-  }, [router, params.id]);
+    router.replace('/app/new');
+  }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

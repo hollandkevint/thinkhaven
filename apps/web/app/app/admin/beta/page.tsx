@@ -9,7 +9,29 @@ export default async function BetaAdminPage() {
   const access = await checkBetaAccess({ recordGate: false });
 
   if (access.status === 'unavailable') {
-    throw new Error('Authentication service unavailable');
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-6">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-terracotta/10">
+            <span className="font-display text-xl font-medium text-terracotta">!</span>
+          </div>
+          <div className="space-y-2">
+            <h1 className="font-display text-2xl font-medium text-ink">
+              Beta access controls are unavailable
+            </h1>
+            <p className="font-body text-sm leading-relaxed text-ink-light">
+              The authentication service could not verify admin access. No beta access changes are available until the service recovers.
+            </p>
+          </div>
+          <Link
+            href="/app"
+            className="inline-flex rounded-lg border border-ink/10 bg-parchment px-4 py-2 font-display text-sm font-medium text-ink transition-colors hover:border-ink/20"
+          >
+            Back to dashboard
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   if (!access.user || access.status === 'unauthenticated') {

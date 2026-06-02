@@ -23,9 +23,10 @@ function ValidateSuccessContent() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terracotta mx-auto mb-4"></div>
-          <p className="text-ink-light">Confirming your purchase...</p>
+        <div className="w-full max-w-sm rounded-lg border border-ink/10 bg-parchment p-6 text-center">
+          <div className="mx-auto h-4 w-32 rounded bg-ink/10 animate-pulse" />
+          <div className="mx-auto mt-4 h-8 w-52 rounded bg-ink/10 animate-pulse" />
+          <p className="mt-5 text-sm text-ink-light">Confirming your purchase.</p>
         </div>
       </div>
     )
@@ -36,13 +37,15 @@ function ValidateSuccessContent() {
       <div className="min-h-screen flex items-center justify-center bg-cream p-4">
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
-            <div className="text-5xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-ink mb-2">Something went wrong</h1>
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-md bg-rust/10 text-rust">
+              <span className="font-display text-xl font-semibold">!</span>
+            </div>
+            <h1 className="text-2xl font-bold text-ink mb-2">Payment confirmation unavailable</h1>
             <p className="text-ink-light mb-6">
-              We couldn&apos;t confirm your purchase. If you were charged, please contact support.
+              We could not confirm this purchase from the current link. If you were charged, contact support and keep the receipt email.
             </p>
-            <Button onClick={() => router.push('/')}>
-              Return Home
+            <Button onClick={() => router.push('/pricing')}>
+              Return to pricing
             </Button>
           </CardContent>
         </Card>
@@ -54,12 +57,11 @@ function ValidateSuccessContent() {
     <div className="min-h-screen flex items-center justify-center bg-cream p-4">
       <Card className="max-w-lg w-full">
         <CardContent className="p-8 text-center">
-          <div className="text-6xl mb-4">🎉</div>
           <h1 className="text-3xl font-bold text-ink mb-2">
-            You&apos;re all set!
+            Your session credits are ready
           </h1>
           <p className="text-xl text-ink-light mb-6">
-            Your Idea Validation session is ready.
+            Open the workspace to start saved decision work.
           </p>
 
           <div className="bg-parchment rounded-lg p-4 mb-6 text-left">
@@ -67,15 +69,15 @@ function ValidateSuccessContent() {
             <ul className="space-y-2 text-ink-light">
               <li className="flex items-start">
                 <span className="text-forest mr-2">1.</span>
-                Start your 30-minute validation session
+                Start a saved ThinkHaven session
               </li>
               <li className="flex items-start">
                 <span className="text-forest mr-2">2.</span>
-                Answer 10 critical questions about your idea
+                Pressure-test the decision with Mary and the board
               </li>
               <li className="flex items-start">
                 <span className="text-forest mr-2">3.</span>
-                Get your validation scorecard and PDF report
+                Export the artifact when the case is ready
               </li>
             </ul>
           </div>
@@ -85,7 +87,7 @@ function ValidateSuccessContent() {
             className="w-full py-6 text-lg font-bold"
             onClick={() => router.push('/app')}
           >
-            Start My Validation Session
+            Open workspace
           </Button>
 
           <p className="text-sm text-slate-blue mt-4">
@@ -100,9 +102,10 @@ function ValidateSuccessContent() {
 function LoadingFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-cream">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terracotta mx-auto mb-4"></div>
-        <p className="text-ink-light">Loading...</p>
+      <div className="w-full max-w-sm rounded-lg border border-ink/10 bg-parchment p-6 text-center">
+        <div className="mx-auto h-4 w-32 rounded bg-ink/10 animate-pulse" />
+        <div className="mx-auto mt-4 h-8 w-52 rounded bg-ink/10 animate-pulse" />
+        <p className="mt-5 text-sm text-ink-light">Loading payment confirmation.</p>
       </div>
     </div>
   )

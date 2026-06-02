@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,19 +26,26 @@ export default function ResultsPage() {
 
   useEffect(() => {
     // Load results from localStorage
-    const storedResults = localStorage.getItem('assessmentResults');
-    if (storedResults) {
-      setResults(JSON.parse(storedResults));
+    try {
+      const storedResults = localStorage.getItem('assessmentResults');
+      if (storedResults) {
+        setResults(JSON.parse(storedResults));
+      }
+    } catch (error) {
+      console.error('Failed to load assessment results:', error);
+      localStorage.removeItem('assessmentResults');
     }
     setLoading(false);
   }, []);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-terracotta border-t-transparent mx-auto mb-4" />
-          <p className="text-ink-light">Loading your results...</p>
+      <div className="min-h-screen flex items-center justify-center bg-cream px-4">
+        <div className="w-full max-w-md rounded-lg border border-ink/10 bg-parchment p-6">
+          <div className="h-4 w-32 rounded bg-ink/10 animate-pulse" />
+          <div className="mt-4 h-7 w-3/4 rounded bg-ink/10 animate-pulse" />
+          <div className="mt-3 h-4 w-full rounded bg-ink/10 animate-pulse" />
+          <p className="mt-5 text-sm text-ink-light">Preparing your decision readiness scorecard.</p>
         </div>
       </div>
     );
@@ -45,15 +53,22 @@ export default function ResultsPage() {
 
   if (!results) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-cream px-4">
+        <Card className="max-w-md border-ink/10 bg-parchment">
           <CardHeader>
-            <CardTitle>No Results Found</CardTitle>
-            <CardDescription>Complete the assessment to see your results</CardDescription>
+            <h1 className="text-lg font-semibold leading-none text-ink">
+              No decision readiness scorecard found
+            </h1>
+            <CardDescription className="text-ink-light">
+              Complete the diagnostic to generate a scorecard, or skip straight to a 10-message pressure test with Mary.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button onClick={() => router.push('/assessment')} className="w-full">
-              Take Assessment
+          <CardContent className="space-y-3">
+            <Button asChild className="w-full bg-terracotta text-cream hover:bg-terracotta-hover">
+              <Link href="/assessment">Take Assessment</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full border-ink/15 text-ink hover:bg-cream">
+              <Link href="/try">Try Mary Instead</Link>
             </Button>
           </CardContent>
         </Card>
@@ -62,10 +77,10 @@ export default function ResultsPage() {
   }
 
   const getScoreLevel = (score: number) => {
-    if (score >= 4.5) return { level: 'Expert', color: 'bg-forest', description: 'Outstanding' };
-    if (score >= 3.5) return { level: 'Advanced', color: 'bg-terracotta', description: 'Strong' };
-    if (score >= 2.5) return { level: 'Intermediate', color: 'bg-mustard', description: 'Developing' };
-    return { level: 'Beginner', color: 'bg-rust', description: 'Opportunity to grow' };
+    if (score >= 4.5) return { level: 'High confidence', color: 'bg-forest', description: 'Defensible' };
+    if (score >= 3.5) return { level: 'Strong case', color: 'bg-terracotta', description: 'Mostly clear' };
+    if (score >= 2.5) return { level: 'Needs pressure', color: 'bg-mustard', description: 'Uneven' };
+    return { level: 'Fragile case', color: 'bg-rust', description: 'Under-evidenced' };
   };
 
   const evidenceLevel = getScoreLevel(results.scores.evidence);
@@ -80,19 +95,19 @@ export default function ResultsPage() {
 
   const recommendations: Record<string, string[]> = {
     evidence: [
-      "Start tracking decisions with evidence requirements",
-      "Implement a 'data-first' policy for strategic choices",
-      "Create templates for market research and validation"
+      "Name the claim that would change the decision",
+      "Separate evidence you have from evidence you need",
+      "Ask Mary to pressure-test the highest-risk assumption"
     ],
     framework: [
-      "Learn 3 core strategic frameworks (SWOT, Porter's Five Forces, BMC)",
-      "Practice applying frameworks to real scenarios weekly",
-      "Join strategic thinking communities for peer learning"
+      "Write the decision in one sentence",
+      "List the rejected alternatives and why they lost",
+      "Use plan-grill mode to expose the hidden tradeoffs"
     ],
     execution: [
-      "Build decision documentation templates",
-      "Set up quarterly strategy review meetings",
-      "Create stakeholder communication playbooks"
+      "Turn the decision into owners, dates, and first proof",
+      "Identify the failure signal you will watch first",
+      "Ask Mary to convert the plan into a defensible artifact"
     ]
   };
 
@@ -102,10 +117,10 @@ export default function ResultsPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <Badge variant="secondary" className="mb-4">
-            Assessment Complete ✓
+            Assessment complete
           </Badge>
           <h1 className="text-4xl font-bold text-ink mb-4">
-            Your Strategic Thinking Scorecard
+            Your Decision Readiness Scorecard
           </h1>
           <p className="text-lg text-ink-light">
             Results sent to: <strong>{results.email}</strong>
@@ -115,7 +130,7 @@ export default function ResultsPage() {
         {/* Overall Score */}
         <Card className="mb-8 border-2 border-terracotta">
           <CardHeader>
-            <CardTitle className="text-2xl">Overall Strategic Maturity</CardTitle>
+            <CardTitle className="text-2xl">Overall decision readiness</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between mb-4">
@@ -126,7 +141,7 @@ export default function ResultsPage() {
                 <div className="text-sm text-ink-light">out of 5.0</div>
               </div>
               <div className="text-right">
-                <div className={`inline-block px-4 py-2 rounded-lg text-white ${overallLevel.color}`}>
+                <div className={`inline-block px-4 py-2 rounded-lg text-cream ${overallLevel.color}`}>
                   {overallLevel.level}
                 </div>
                 <div className="text-sm text-ink-light mt-2">{overallLevel.description}</div>
@@ -145,8 +160,8 @@ export default function ResultsPage() {
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">📊 Evidence-Based</CardTitle>
-              <CardDescription>Data-driven decision making</CardDescription>
+              <CardTitle className="text-lg">Evidence base</CardTitle>
+              <CardDescription>How well the decision is supported</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold mb-2">{results.scores.evidence.toFixed(1)}</div>
@@ -162,8 +177,8 @@ export default function ResultsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">🎯 Framework Mastery</CardTitle>
-              <CardDescription>Systematic methodologies</CardDescription>
+              <CardTitle className="text-lg">Decision frame</CardTitle>
+              <CardDescription>How clearly the options and tradeoffs are named</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold mb-2">{results.scores.framework.toFixed(1)}</div>
@@ -179,8 +194,8 @@ export default function ResultsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">🚀 Execution Excellence</CardTitle>
-              <CardDescription>Implementation & tracking</CardDescription>
+              <CardTitle className="text-lg">Execution path</CardTitle>
+              <CardDescription>How directly the decision becomes action</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold mb-2">{results.scores.execution.toFixed(1)}</div>
@@ -198,25 +213,25 @@ export default function ResultsPage() {
         {/* Personalized Recommendations */}
         <Card className="mb-8 bg-terracotta text-cream">
           <CardHeader>
-            <CardTitle>💡 Your Personalized Action Plan</CardTitle>
-            <CardDescription className="text-white/80">
-              Based on your assessment, here's where to focus first
+            <CardTitle>Recommended pressure test</CardTitle>
+            <CardDescription className="text-cream/85">
+              Based on the scorecard, start where the case is easiest to challenge.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-4">
               <h3 className="font-semibold text-lg mb-2">
-                Priority Focus Area: {weakestArea === 'evidence' && '📊 Evidence-Based Decision Making'}
-                {weakestArea === 'framework' && '🎯 Framework Mastery'}
-                {weakestArea === 'execution' && '🚀 Execution Excellence'}
+                Priority focus: {weakestArea === 'evidence' && 'Evidence base'}
+                {weakestArea === 'framework' && 'Decision frame'}
+                {weakestArea === 'execution' && 'Execution path'}
               </h3>
-              <p className="text-white/80 mb-4">
-                This is your biggest opportunity for improvement. Strengthening this area will have the highest impact.
+              <p className="text-cream/85 mb-4">
+                This is the part of the decision most likely to break under scrutiny.
               </p>
               <ul className="space-y-2">
                 {recommendations[weakestArea].map((rec, idx) => (
                   <li key={idx} className="flex items-start">
-                    <span className="mr-2">✓</span>
+                    <span className="mr-2" aria-hidden="true">&middot;</span>
                     <span>{rec}</span>
                   </li>
                 ))}
@@ -228,24 +243,24 @@ export default function ResultsPage() {
         {/* CTA Section */}
         <Card className="border-2 border-terracotta">
           <CardHeader>
-            <CardTitle>🎯 Ready to Level Up Your Strategic Thinking?</CardTitle>
+            <CardTitle>Ready to test a real decision?</CardTitle>
             <CardDescription>
-              Get personalized AI coaching with Mary using the bMAD Method
+              Bring the highest-risk decision on your desk. Mary will turn it into artifact, decision, and confidence.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-3 gap-4 text-sm">
               <div>
-                <div className="font-semibold mb-1">✓ 2 Free Sessions</div>
-                <div className="text-ink-light">Try before you commit</div>
+                <div className="font-semibold mb-1">10 guest messages</div>
+                <div className="text-ink-light">Pressure-test before signup</div>
               </div>
               <div>
-                <div className="font-semibold mb-1">✓ Systematic Frameworks</div>
-                <div className="text-ink-light">Evidence-based methods</div>
+                <div className="font-semibold mb-1">Board perspectives</div>
+                <div className="text-ink-light">Opposing lenses, not agreement</div>
               </div>
               <div>
-                <div className="font-semibold mb-1">✓ Actionable Outputs</div>
-                <div className="text-ink-light">Professional documents</div>
+                <div className="font-semibold mb-1">Defensible output</div>
+                <div className="text-ink-light">A decision artifact you can share</div>
               </div>
             </div>
           </CardContent>
@@ -254,17 +269,17 @@ export default function ResultsPage() {
               <Button
                 size="lg"
                 className="flex-1"
-                onClick={() => router.push('/')}
+                onClick={() => router.push('/try')}
               >
-                Start Free Trial →
+                Try Mary Free
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="flex-1"
-                onClick={() => router.push('/try')}
+                onClick={() => router.push('/pricing')}
               >
-                Try It Free
+                View Pricing
               </Button>
             </div>
           </CardContent>
@@ -272,7 +287,7 @@ export default function ResultsPage() {
 
         {/* Results Summary */}
         <div className="mt-8 text-center text-sm text-slate-blue">
-          <p>📧 Check your email for detailed recommendations</p>
+          <p>Check your email for the saved scorecard.</p>
           <p className="mt-2">Questions? Contact kevin@thinkhaven.co</p>
         </div>
       </div>

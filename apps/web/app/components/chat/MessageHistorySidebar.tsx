@@ -488,7 +488,7 @@ export default function MessageHistorySidebar({
 
                     {/* Expanded Message Preview */}
                     {expandedConversations.has(conversation.id) && (
-                      <div className="ml-4 pl-3 border-l-2 border-ink/10 space-y-2 pb-2">
+                      <div className="ml-2 p-3 border border-ink/8 bg-parchment/45 rounded-lg space-y-2">
                         {messages.slice(0, 3).map((message) => (
                           <div key={message.id} className="py-1">
                             <div className="flex items-center gap-2 mb-1">

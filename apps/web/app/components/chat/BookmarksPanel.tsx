@@ -288,7 +288,7 @@ export default function BookmarksPanel({
                 )}
 
                 {/* Message preview */}
-                <div className="text-sm text-muted-foreground bg-parchment rounded p-2 mb-2 border-l-2 border-ink/8">
+                <div className="text-sm text-muted-foreground bg-parchment rounded p-2 mb-2 border border-ink/8">
                   {truncateText(bookmark.message.content, 120)}
                 </div>
 

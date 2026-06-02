@@ -17,7 +17,7 @@ export function FeedbackButton({ variant = 'sidebar', sessionId }: FeedbackButto
     return (
       <button
         onClick={handleClick}
-        className="flex items-center gap-1 px-3 py-1 rounded transition-colors hover:bg-black/5"
+        className="flex items-center gap-1 px-3 py-1 rounded transition-colors hover:bg-ink/5"
         style={{ border: '1px solid var(--border)', color: 'var(--foreground)' }}
       >
         <MessageSquare className="w-3 h-3" />
