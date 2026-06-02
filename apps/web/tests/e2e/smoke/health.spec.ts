@@ -86,6 +86,13 @@ test.describe('Smoke Tests - Public Routes Render', () => {
     await expect(page.getByText(/saved workspace/i).first()).toBeVisible();
   });
 
+  test('public share route renders without auth and points back to plan-grill', async ({ page }) => {
+    // An unknown token renders the branded unavailable state (no auth wall, no crash) and keeps the marketing CTA.
+    await page.goto('/share/nonexistent-token-smoke');
+    await expect(page.getByRole('heading', { name: /this decision record is not available/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /grill your own plan/i })).toHaveAttribute('href', '/try?mode=plan-grill');
+  });
+
   test('assessment results has a restart path without stored quiz state', async ({ page }) => {
     await page.goto(ROUTES.assessmentResults);
     await expect(page.getByRole('heading', { name: /no decision readiness scorecard found/i })).toBeVisible();

@@ -178,6 +178,34 @@ export class ClaudeClient {
   }
 
   /**
+   * Single-shot completion with a custom system prompt, no tools and no Mary persona.
+   * Used for server-side synthesis such as the guest decision-record generation.
+   */
+  async complete(options: {
+    system: string;
+    prompt: string;
+    maxTokens?: number;
+    temperature?: number;
+  }): Promise<string> {
+    const client = getAnthropicClient();
+    const response = await client.messages.create({
+      model: ANTHROPIC_MODEL,
+      max_tokens: options.maxTokens ?? 2048,
+      temperature: options.temperature ?? 0.4,
+      system: options.system,
+      messages: [{ role: 'user', content: options.prompt }],
+    });
+
+    let text = '';
+    for (const block of response.content) {
+      if (block.type === 'text') {
+        text += (block as TextBlock).text;
+      }
+    }
+    return text;
+  }
+
+  /**
    * Send a message with tool support (non-streaming).
    * Returns the full response including any tool use blocks.
    */

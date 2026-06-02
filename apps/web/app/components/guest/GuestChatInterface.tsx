@@ -8,9 +8,9 @@ import MessageInput from '../chat/MessageInput'
 import TypingIndicator from '../chat/TypingIndicator'
 import ChatErrorDisplay from '../chat/ChatErrorDisplay'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { track } from '@/lib/analytics/events'
 import posthog from 'posthog-js'
+import DecisionArtifactDialog, { type DecisionArtifact } from './DecisionArtifactDialog'
 
 interface Message {
   id: string
@@ -55,6 +55,11 @@ export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatIn
   const [activePathway, setActivePathway] = useState<GuestPathway>(pathway)
   // Sub-persona state round-tripped to API for exchange counting / board offer
   const [subPersonaState, setSubPersonaState] = useState<Record<string, unknown> | null>(null)
+  // Decision-record artifact (the shareable hero output)
+  const [showArtifact, setShowArtifact] = useState(false)
+  const [artifact, setArtifact] = useState<DecisionArtifact | null>(null)
+  const [artifactLoading, setArtifactLoading] = useState(false)
+  const [artifactError, setArtifactError] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const savePromptTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -294,6 +299,39 @@ export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatIn
     router.push('/signup?from=guest')
   }
 
+  const buildArtifact = async () => {
+    setShowArtifact(true)
+    setArtifactError(null)
+    setArtifact(null)
+    setArtifactLoading(true)
+    try {
+      const transcript = messages
+        .filter((m) => m.id !== 'welcome' && m.content.trim())
+        .map(({ role, content }) => ({ role, content }))
+
+      const res = await fetch('/api/chat/guest/artifact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript, pathway: activePathway }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || `HTTP ${res.status}`)
+      }
+
+      const data = await res.json()
+      setArtifact({ title: data.title, content: data.content })
+      posthog.capture('artifact_generated', { source: 'guest', pathway: activePathway })
+    } catch (error) {
+      setArtifactError(error instanceof Error ? error.message : 'Could not build the decision record.')
+    } finally {
+      setArtifactLoading(false)
+    }
+  }
+
+  const hasConversation = messages.some((m) => m.role === 'user')
+
   return (
     <div className="chat-interface flex h-full min-w-0 flex-col overflow-hidden">
       {/* Header */}
@@ -339,6 +377,17 @@ export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatIn
                 {remainingMessages}/10 messages
               </span>
             </div>
+
+            {/* Build decision record (the shareable hero output) */}
+            {hasConversation && (
+              <button
+                onClick={buildArtifact}
+                disabled={artifactLoading}
+                className="rounded-lg border border-ink/15 bg-cream px-3 py-2 text-sm font-medium text-ink transition-colors hover:border-ink/25 disabled:opacity-60 sm:px-4"
+              >
+                Decision record
+              </button>
+            )}
 
             {/* Sign Up Button */}
             <button
@@ -422,17 +471,23 @@ export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatIn
         <div className="flex-shrink-0 px-4 py-3 bg-terracotta/10 border-t border-terracotta/20 sm:px-6">
           <div className="flex max-w-4xl flex-col gap-2 mx-auto sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-ink">
-              You&apos;ve used all 10 free messages.{' '}
+              You&apos;ve used all 10 free messages. Walk away with your decision record.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={buildArtifact}
+                disabled={artifactLoading}
+                className="rounded-lg bg-terracotta px-4 py-2 text-sm font-medium text-cream transition-colors hover:bg-terracotta-hover disabled:opacity-60"
+              >
+                Build my decision record
+              </button>
               <button
                 onClick={() => setShowSignupModal(true)}
-                className="font-semibold text-terracotta hover:text-terracotta-hover underline"
+                className="text-sm font-medium text-terracotta hover:text-terracotta-hover underline"
               >
                 Sign up to continue
               </button>
-            </p>
-            <Link href="/login" className="text-sm text-slate-blue hover:text-ink">
-              Already have an account?
-            </Link>
+            </div>
           </div>
         </div>
       )}
@@ -454,6 +509,17 @@ export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatIn
           maxLength={4000}
         />
       </div>
+
+      {/* Decision Record Artifact */}
+      <DecisionArtifactDialog
+        open={showArtifact}
+        onOpenChange={setShowArtifact}
+        artifact={artifact}
+        loading={artifactLoading}
+        error={artifactError}
+        pathway={activePathway}
+        onRetry={buildArtifact}
+      />
 
       {/* Signup Modal */}
       <SignupPromptModal
