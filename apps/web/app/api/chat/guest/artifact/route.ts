@@ -24,6 +24,19 @@ interface TranscriptMessage {
   content: string;
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+function json(body: unknown, status: number) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+  });
+}
+
 function checkArtifactRateLimit(ip: string): boolean {
   const now = Date.now();
   const entry = artifactRateLimits.get(ip);
@@ -77,6 +90,10 @@ function renderTranscript(transcript: TranscriptMessage[]): string {
     .join('\n\n');
 }
 
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -84,19 +101,17 @@ export async function POST(request: NextRequest) {
       || 'unknown';
 
     if (!checkArtifactRateLimit(ip)) {
-      return new Response(JSON.stringify({
+      return json({
         error: 'Rate limit exceeded',
         message: 'Too many decision records generated. Sign up for unlimited access.',
-      }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+      }, 429);
     }
 
     const body = await request.json();
     const rawTranscript = body?.transcript;
 
     if (!Array.isArray(rawTranscript) || rawTranscript.length === 0) {
-      return new Response(JSON.stringify({ error: 'A non-empty transcript is required' }), {
-        status: 400, headers: { 'Content-Type': 'application/json' },
-      });
+      return json({ error: 'A non-empty transcript is required' }, 400);
     }
 
     // Sanitize and bound the transcript.
@@ -110,46 +125,54 @@ export async function POST(request: NextRequest) {
       .map((m) => ({ role: m.role, content: m.content.slice(0, 6000) }));
 
     if (transcript.length === 0 || !transcript.some((m) => m.role === 'user')) {
-      return new Response(JSON.stringify({ error: 'Transcript has no usable messages yet. Grill your plan first.' }), {
-        status: 400, headers: { 'Content-Type': 'application/json' },
-      });
+      return json({ error: 'Transcript has no usable messages yet. Grill your plan first.' }, 400);
     }
 
     let rendered = renderTranscript(transcript);
     if (rendered.length > MAX_TRANSCRIPT_CHARS) {
-      // Keep the most recent exchanges, where the sharpened decision lives.
-      rendered = rendered.slice(-MAX_TRANSCRIPT_CHARS);
+      // Keep the opening plan (first user message) plus the most recent exchanges, so truncation
+      // never drops what the user originally pasted (the decision under review).
+      const firstUser = transcript.find((m) => m.role === 'user');
+      const head = firstUser ? `User: ${firstUser.content}\n\n` : '';
+      const tail = rendered.slice(-Math.max(0, MAX_TRANSCRIPT_CHARS - head.length - 40));
+      rendered = `${head}[...earlier exchanges omitted...]\n\n${tail}`;
     }
 
-    const content = await claudeClient.complete({
-      system: SYNTHESIS_SYSTEM_PROMPT,
-      prompt: `Here is the plan-grill transcript. Synthesize the decision record.\n\n---\n${rendered}\n---`,
-      maxTokens: 2048,
-      temperature: 0.4,
-    });
+    let content: string;
+    try {
+      content = await claudeClient.complete({
+        system: SYNTHESIS_SYSTEM_PROMPT,
+        prompt: `Here is the plan-grill transcript. Synthesize the decision record.\n\n---\n${rendered}\n---`,
+        maxTokens: 2048,
+        temperature: 0.4,
+      });
+    } catch (error) {
+      // Distinguish upstream model failures (incl. 402 credit-exhausted) from server bugs.
+      const status = (error as { status?: number })?.status;
+      if (status === 429) return json({ error: 'The service is busy right now. Please try again in a moment.' }, 429);
+      if (status === 402) return json({ error: 'The decision-record service is temporarily unavailable.' }, 503);
+      if (typeof status === 'number' && status >= 500) return json({ error: 'The model service is temporarily unavailable.' }, 502);
+      throw error;
+    }
 
     const trimmed = content.trim();
     if (!trimmed) {
-      return new Response(JSON.stringify({ error: 'Could not synthesize a decision record. Please try again.' }), {
-        status: 502, headers: { 'Content-Type': 'application/json' },
-      });
+      return json({ error: 'Could not synthesize a decision record. Please try again.' }, 502);
     }
 
     // Derive a title from the first H1, falling back to a default.
     const headingMatch = trimmed.match(/^#\s+(.+)$/m);
     const title = headingMatch?.[1]?.trim().slice(0, 120) || 'Decision Record';
 
-    return new Response(JSON.stringify({ title, content: trimmed }), {
-      status: 200, headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ title, content: trimmed }, 200);
   } catch (error) {
     console.error('[Guest Artifact] Error:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
     });
-    return new Response(JSON.stringify({
+    return json({
       error: 'Failed to generate decision record',
       details: process.env.NODE_ENV !== 'production' ? (error instanceof Error ? error.message : 'Unknown error') : undefined,
-    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }, 500);
   }
 }

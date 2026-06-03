@@ -382,7 +382,7 @@ export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatIn
             {hasConversation && (
               <button
                 onClick={buildArtifact}
-                disabled={artifactLoading}
+                disabled={artifactLoading || isLoading}
                 className="rounded-lg border border-ink/15 bg-cream px-3 py-2 text-sm font-medium text-ink transition-colors hover:border-ink/25 disabled:opacity-60 sm:px-4"
               >
                 Decision record
@@ -476,7 +476,7 @@ export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatIn
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={buildArtifact}
-                disabled={artifactLoading}
+                disabled={artifactLoading || isLoading}
                 className="rounded-lg bg-terracotta px-4 py-2 text-sm font-medium text-cream transition-colors hover:bg-terracotta-hover disabled:opacity-60"
               >
                 Build my decision record

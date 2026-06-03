@@ -18,6 +18,8 @@ const shareRateLimits = new Map<string, { count: number; resetAt: number }>();
 const MAX_CONTENT_CHARS = 50000;
 const MAX_TITLE_CHARS = 200;
 const ALLOWED_SOURCES = new Set(['guest', 'session', 'cli']);
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const TOKEN_RE = /^[a-f0-9]{16,64}$/;
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -107,9 +109,10 @@ export async function POST(request: NextRequest) {
     const pathway = typeof body?.pathway === 'string' ? body.pathway.slice(0, 64) : null;
     const source = ALLOWED_SOURCES.has(body?.source) ? body.source : 'guest';
     const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : null;
-    const email = typeof body?.email === 'string' && body.email.includes('@')
-      ? body.email.trim().slice(0, 320)
-      : null;
+    const emailRaw = typeof body?.email === 'string' ? body.email.trim() : '';
+    const email = emailRaw && EMAIL_RE.test(emailRaw) ? emailRaw.slice(0, 320) : null;
+    // When the client passes back a token from a prior share, reuse that row instead of inserting a new one.
+    const reuseToken = typeof body?.token === 'string' && TOKEN_RE.test(body.token) ? body.token : null;
 
     if (!content.trim()) {
       return json({ error: 'Artifact content is required' }, 400);
@@ -123,33 +126,38 @@ export async function POST(request: NextRequest) {
       return json({ error: 'Sharing is temporarily unavailable' }, 503);
     }
 
-    const token = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, '').slice(0, 22);
+    const token = reuseToken || `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, '').slice(0, 22);
 
-    const { error: insertError } = await admin.from('public_artifacts').insert({
-      token,
-      title: title || 'Decision Record',
-      content,
-      pathway,
-      source,
-      session_id: sessionId,
-      email,
-    });
+    if (!reuseToken) {
+      const { error: insertError } = await admin.from('public_artifacts').insert({
+        token,
+        title: title || 'Decision Record',
+        content,
+        pathway,
+        source,
+        session_id: sessionId,
+        email,
+      });
 
-    if (insertError) {
-      console.error('[Artifact Share] Insert failed:', insertError.message);
-      return json({ error: 'Could not create share link' }, 500);
+      if (insertError) {
+        console.error('[Artifact Share] Insert failed:', insertError.message);
+        return json({ error: 'Could not create share link' }, 500);
+      }
     }
 
     const url = `/share/${token}`;
+    // Absolute URL so non-browser callers (CLI/skill) get a usable link, not a bare path.
+    // Prefer the browser Origin header; fall back to the request URL's origin for server-to-server callers.
+    const origin = request.headers.get('origin') || new URL(request.url).origin;
+    const absoluteUrl = `${origin}${url}`;
 
     if (email) {
       await captureLead(admin, email);
-      // Best-effort send using the request origin so the link is absolute in the email.
-      const origin = request.headers.get('origin') || request.nextUrl.origin;
-      await sendShareEmail(email, title || 'Decision Record', `${origin}${url}`);
+      // Best-effort send (feature-flagged on RESEND_API_KEY).
+      await sendShareEmail(email, title || 'Decision Record', absoluteUrl);
     }
 
-    return json({ token, url }, 200);
+    return json({ token, url, absoluteUrl }, 200);
   } catch (error) {
     console.error('[Artifact Share] Error:', {
       error: error instanceof Error ? error.message : 'Unknown error',

@@ -194,7 +194,7 @@ export class ClaudeClient {
       temperature: options.temperature ?? 0.4,
       system: options.system,
       messages: [{ role: 'user', content: options.prompt }],
-    });
+    }, { timeout: 60_000 }); // Override the SDK's 10-minute default so a hung call cannot pin a serverless function.
 
     let text = '';
     for (const block of response.content) {

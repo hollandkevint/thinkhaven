@@ -57,6 +57,7 @@ describe('artifact share API', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.url).toMatch(/^\/share\/[A-Za-z0-9_-]+$/);
+    expect(body.absoluteUrl).toMatch(/^https?:\/\/.+\/share\/.+$/);
     expect(typeof body.token).toBe('string');
     expect(body.token.length).toBeGreaterThan(10);
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({
@@ -72,5 +73,26 @@ describe('artifact share API', () => {
 
     await POST(request({ content: '# D', source: 'totally-made-up' }));
     expect(insert).toHaveBeenCalledWith(expect.objectContaining({ source: 'guest' }));
+  });
+
+  it('reuses an existing token without inserting a new row', async () => {
+    const { client, insert } = adminWithInsert({ error: null });
+    vi.mocked(createAdminClient).mockReturnValue(client);
+
+    const token = 'a'.repeat(22);
+    const res = await POST(request({ content: '# D', source: 'guest', token }));
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.token).toBe(token);
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it('drops a malformed email rather than storing it', async () => {
+    const { client, insert } = adminWithInsert({ error: null });
+    vi.mocked(createAdminClient).mockReturnValue(client);
+
+    await POST(request({ content: '# D', source: 'guest', email: 'not-an-email' }));
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ email: null }));
   });
 });

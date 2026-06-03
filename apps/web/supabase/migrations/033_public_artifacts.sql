@@ -36,11 +36,9 @@ CREATE INDEX idx_public_artifacts_created ON public.public_artifacts(created_at)
 
 ALTER TABLE public.public_artifacts ENABLE ROW LEVEL SECURITY;
 
--- Public read: anyone can SELECT (the app only ever queries by exact token).
-CREATE POLICY "Anyone can read shared artifacts"
-    ON public.public_artifacts
-    FOR SELECT
-    USING (true);
-
--- No INSERT/UPDATE/DELETE policies. Inserts run through the service-role share API,
--- which bypasses RLS. This prevents anonymous clients from writing arbitrary rows.
+-- No anon policies, by design. Both reads (the /share/[token] page) and writes (the share API)
+-- go through the service-role admin client, which bypasses RLS. A permissive public SELECT
+-- (USING(true)) would expose every row -- including captured lead emails and full artifact
+-- content -- to any holder of the NEXT_PUBLIC anon key via PostgREST, with the token providing
+-- no protection. RLS-enabled-with-no-policies denies the anon role entirely.
+-- If a future anon read path is ever needed, scope it by token: USING (token = <value>), never USING(true).

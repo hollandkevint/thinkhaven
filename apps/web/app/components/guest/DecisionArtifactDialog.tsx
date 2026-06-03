@@ -36,6 +36,7 @@ export default function DecisionArtifactDialog({
 }: DecisionArtifactDialogProps) {
   const [copied, setCopied] = useState(false)
   const [shareUrl, setShareUrl] = useState<string | null>(null)
+  const [shareToken, setShareToken] = useState<string | null>(null)
   const [sharing, setSharing] = useState(false)
   const [shareError, setShareError] = useState<string | null>(null)
   const [shareCopied, setShareCopied] = useState(false)
@@ -77,6 +78,8 @@ export default function DecisionArtifactDialog({
         pathway,
         source: 'guest',
         email: withEmail,
+        // Reuse the existing row (e.g. when emailing after already creating a link) instead of minting a duplicate.
+        token: shareToken ?? undefined,
       }),
     })
     if (!res.ok) {
@@ -84,7 +87,8 @@ export default function DecisionArtifactDialog({
       throw new Error(data.error || `HTTP ${res.status}`)
     }
     const data = await res.json()
-    return `${window.location.origin}${data.url}` as string
+    if (data.token) setShareToken(data.token)
+    return (data.absoluteUrl || `${window.location.origin}${data.url}`) as string
   }
 
   const handleShare = async () => {
