@@ -25,6 +25,8 @@ export function ArtifactPanel() {
   const [copyFeedback, setCopyFeedback] = useState(false);
   const [isRawView, setIsRawView] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState(false);
 
   // Check if current artifact is editable
   const canEdit = selectedArtifact ? isArtifactEditable(selectedArtifact.type) : false;
@@ -76,6 +78,33 @@ export function ArtifactPanel() {
     URL.revokeObjectURL(url);
   }, [selectedArtifact]);
 
+  // Create a public share link for the artifact and copy it to the clipboard
+  const handleShare = useCallback(async () => {
+    if (!selectedArtifact || shareBusy) return;
+    setShareBusy(true);
+    try {
+      const res = await fetch('/api/artifact/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: selectedArtifact.title,
+          content: selectedArtifact.content,
+          source: 'session',
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const url = `${window.location.origin}${data.url}`;
+      try { await navigator.clipboard.writeText(url); } catch { /* clipboard optional */ }
+      setShareFeedback(true);
+      setTimeout(() => setShareFeedback(false), 2500);
+    } catch (err) {
+      console.error('Failed to create share link:', err);
+    } finally {
+      setShareBusy(false);
+    }
+  }, [selectedArtifact, shareBusy]);
+
   if (!isPanelOpen) return null;
 
   const config = selectedArtifact
@@ -86,7 +115,7 @@ export function ArtifactPanel() {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-ink/40 z-40 transition-opacity"
         onClick={closePanel}
         aria-hidden="true"
       />
@@ -178,6 +207,24 @@ export function ArtifactPanel() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
+            </button>
+
+            {/* Share button */}
+            <button
+              onClick={handleShare}
+              disabled={shareBusy}
+              className="p-2 text-slate-blue hover:text-ink hover:bg-parchment rounded-lg transition-colors disabled:opacity-50"
+              title={shareFeedback ? 'Share link copied' : 'Create shareable link'}
+            >
+              {shareFeedback ? (
+                <svg className="w-4 h-4 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+              )}
             </button>
 
             {/* Close button */}

@@ -1,6 +1,7 @@
 'use client'
 
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import MermaidBlock from './MermaidBlock'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
@@ -32,64 +33,114 @@ interface MarkdownRendererProps {
   className?: string
 }
 
+type HastProperties = {
+  className?: string | string[]
+}
+
+type HastNode = {
+  type?: string
+  tagName?: string
+  value?: string
+  properties?: HastProperties
+  children?: HastNode[]
+}
+
+function getTextContent(node: HastNode | undefined): string {
+  if (!node) return ''
+  if (node.type === 'text') return node.value || ''
+  return node.children?.map(getTextContent).join('') || ''
+}
+
+function getClassName(node: HastNode | undefined): string {
+  const className = node?.properties?.className
+  if (Array.isArray(className)) return className.join(' ')
+  return className || ''
+}
+
+function getCodeNode(preNode: HastNode | undefined): HastNode | undefined {
+  return preNode?.children?.find(
+    (child) => child.type === 'element' && child.tagName === 'code'
+  )
+}
+
+function CodeBlock({ code, language }: { code: string; language: string }) {
+  return (
+    <div className="relative group">
+      {/* Copy button */}
+      <button
+        onClick={() => {
+          navigator.clipboard.writeText(code)
+        }}
+        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-cream/80 hover:bg-cream text-slate-blue hover:text-ink rounded p-1.5 text-xs border shadow-sm"
+        title="Copy code"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      </button>
+
+      {/* Language label */}
+      {language !== 'text' && (
+        <div className="absolute top-2 left-2 bg-ink/80 text-cream px-2 py-1 rounded text-xs font-mono">
+          {language}
+        </div>
+      )}
+
+      <SyntaxHighlighter
+        style={tomorrow}
+        language={language}
+        PreTag="div"
+        className="rounded-lg !bg-ink !p-4 !m-0 text-sm"
+        showLineNumbers={code.split('\n').length > 5}
+        lineNumberStyle={{
+          color: 'var(--slate-blue)',
+          paddingRight: '1em',
+          minWidth: '2.5em'
+        }}
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  )
+}
+
 export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   return (
-    <ReactMarkdown
-      className={`prose prose-sm max-w-none dark:prose-invert prose-headings:text-primary prose-p:text-muted-foreground-foreground prose-p:leading-relaxed prose-code:bg-parchment prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-parchment prose-pre:border prose-pre:border-divider prose-blockquote:border-l-primary prose-blockquote:pl-4 prose-blockquote:italic prose-ul:text-muted-foreground-foreground prose-ol:text-muted-foreground-foreground prose-li:mb-1 ${className}`}
-      components={{
-        code: ({ node, inline, className, children, ...props }) => {
-          const match = /language-(\w+)/.exec(className || '')
-          const language = match ? match[1] : 'text'
+    <div className={`prose prose-sm max-w-none prose-headings:text-ink prose-p:text-ink-light prose-p:leading-relaxed prose-code:bg-parchment prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-pre:bg-parchment prose-pre:border prose-pre:border-divider prose-blockquote:border prose-blockquote:border-ink/10 prose-blockquote:bg-parchment prose-blockquote:rounded-lg prose-blockquote:italic prose-ul:text-ink-light prose-ol:text-ink-light prose-li:mb-1 ${className}`}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          pre: ({ node, children, ...props }) => {
+            const codeNode = getCodeNode(node as HastNode | undefined)
+            const className = getClassName(codeNode)
+            const match = /language-(\w+)/.exec(className || '')
+            const language = match ? match[1] : 'text'
+            const code = getTextContent(codeNode).replace(/\n$/, '')
 
-          // Render Mermaid diagrams as SVG instead of syntax-highlighted code
-          if (!inline && language === 'mermaid') {
-            return <MermaidBlock code={String(children).replace(/\n$/, '')} />
-          }
+            if (!codeNode) {
+              return (
+                <pre className="rounded-lg border border-divider bg-parchment p-4" {...props}>
+                  {children}
+                </pre>
+              )
+            }
 
-          return !inline ? (
-            <div className="relative group">
-              {/* Copy button */}
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(String(children).replace(/\n$/, ''))
-                }}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-cream/80 hover:bg-cream text-slate-blue hover:text-ink rounded p-1.5 text-xs border shadow-sm"
-                title="Copy code"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </button>
+            // Render Mermaid diagrams as SVG instead of syntax-highlighted code
+            if (language === 'mermaid') {
+              return <MermaidBlock code={code} />
+            }
 
-              {/* Language label */}
-              {language !== 'text' && (
-                <div className="absolute top-2 left-2 bg-ink/80 text-cream px-2 py-1 rounded text-xs font-mono">
-                  {language}
-                </div>
-              )}
-
-              <SyntaxHighlighter
-                style={tomorrow}
-                language={language}
-                PreTag="div"
-                className="rounded-lg !bg-ink !p-4 !m-0 text-sm"
-                showLineNumbers={String(children).split('\n').length > 5}
-                lineNumberStyle={{
-                  color: 'var(--slate-blue)',
-                  paddingRight: '1em',
-                  minWidth: '2.5em'
-                }}
-                {...props}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            </div>
-          ) : (
-            <code className="bg-parchment px-1.5 py-0.5 rounded text-sm font-mono text-ink" {...props}>
-              {children}
-            </code>
-          )
-        },
+            return <CodeBlock code={code} language={language} />
+          },
+          code: ({ children, node, className, ...props }) => {
+            void node
+            void className
+            return (
+              <code className="bg-parchment px-1.5 py-0.5 rounded text-sm font-mono text-ink" {...props}>
+                {children}
+              </code>
+            )
+          },
         h1: ({ children, ...props }) => (
           <h1 className="text-xl font-bold text-primary mb-4 mt-6 first:mt-0 pb-2 border-b border-divider" {...props}>
             {children}
@@ -112,34 +163,27 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </h4>
         ),
         p: ({ children, ...props }) => (
-          <p className="text-muted-foreground-foreground leading-relaxed mb-4 last:mb-0" {...props}>
+          <p className="text-ink-light leading-relaxed mb-4 last:mb-0" {...props}>
             {children}
           </p>
         ),
         ul: ({ children, ...props }) => (
-          <ul className="space-y-2 mb-4 pl-0" {...props}>
+          <ul className="mb-4 list-disc space-y-2 pl-5 text-ink-light marker:text-terracotta" {...props}>
             {children}
           </ul>
         ),
         ol: ({ children, ...props }) => (
-          <ol className="space-y-2 mb-4 pl-0 counter-reset-item" {...props}>
+          <ol className="mb-4 list-decimal space-y-2 pl-5 text-ink-light marker:text-terracotta" {...props}>
             {children}
           </ol>
         ),
-        li: ({ children, ordered, ...props }) => (
-          <li className="text-muted-foreground-foreground flex items-start gap-3 relative" {...props}>
-            {ordered ? (
-              <span className="flex-shrink-0 w-6 h-6 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-semibold mt-0.5">
-                {/* Counter will be handled by CSS */}
-              </span>
-            ) : (
-              <span className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-2"></span>
-            )}
-            <span className="flex-1 -mt-0.5">{children}</span>
+        li: ({ children, ...props }) => (
+          <li className="pl-1 text-ink-light" {...props}>
+            {children}
           </li>
         ),
         blockquote: ({ children, ...props }) => (
-          <blockquote className="border-l-4 border-terracotta bg-terracotta/5 pl-4 py-3 my-4 rounded-r-lg" {...props}>
+          <blockquote className="border border-ink/10 bg-parchment px-4 py-3 my-4 rounded-lg" {...props}>
             <div className="flex items-start gap-2">
               <svg className="w-5 h-5 text-terracotta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
@@ -156,7 +200,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </strong>
         ),
         em: ({ children, ...props }) => (
-          <em className="italic text-muted-foreground-foreground" {...props}>
+          <em className="italic text-ink-light" {...props}>
             {children}
           </em>
         ),
@@ -175,8 +219,8 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </a>
         ),
         table: ({ children, ...props }) => (
-          <div className="overflow-x-auto my-4">
-            <table className="min-w-full divide-y divide-ink/10 border border-ink/10 rounded-lg" {...props}>
+          <div className="my-4 max-w-full overflow-x-auto rounded-lg border border-ink/10">
+            <table className="w-full min-w-[36rem] divide-y divide-ink/10" {...props}>
               {children}
             </table>
           </div>
@@ -202,7 +246,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           </th>
         ),
         td: ({ children, ...props }) => (
-          <td className="px-4 py-3 text-sm text-muted-foreground-foreground" {...props}>
+          <td className="px-4 py-3 text-sm text-ink-light" {...props}>
             {children}
           </td>
         ),
@@ -222,9 +266,10 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             )}
           </div>
         )
-      }}
-    >
-      {content}
-    </ReactMarkdown>
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
   )
 }

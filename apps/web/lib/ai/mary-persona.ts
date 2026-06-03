@@ -75,6 +75,17 @@ const PATHWAY_COGNITIVE_MODES: Record<string, CognitiveMode> = {
       'What would have to be true for this to work?',
     ],
   },
+  'plan-grill': {
+    name: 'Docs-Aware Plan Grilling',
+    description: 'Pressure-test plans against pasted context, domain language, and decision trade-offs',
+    frameworks: ['Decision Tree Exploration', 'Ubiquitous Language', 'Architecture Decision Records'],
+    keyQuestions: [
+      'What is the root decision this plan is trying to settle?',
+      'Which terms are overloaded, vague, or used inconsistently?',
+      'Which claims are verified by pasted context and which are still assumptions?',
+      'Which decisions are hard to reverse, surprising, and worth recording?',
+    ],
+  },
 };
 
 // =============================================================================
@@ -137,6 +148,12 @@ export const PATHWAY_WEIGHTS: Record<string, PathwayWeights> = {
     devil_advocate: 20,
     encouraging: 25,
     realistic: 15,
+  },
+  'plan-grill': {
+    inquisitive: 25,
+    devil_advocate: 40,
+    encouraging: 10,
+    realistic: 25,
   },
 };
 
@@ -301,6 +318,11 @@ export const VALUE_ARTICULATION_PROMPTS = {
       'Who feels this pain most acutely, and how do you know?',
       'What would have to be true for this to be a great business?',
     ],
+    'plan-grill': [
+      'What is the plan trying to decide, in one sentence?',
+      'Which terms in the plan need sharper definitions?',
+      'What pasted evidence supports the riskiest assumption?',
+    ],
   },
 } as const;
 
@@ -450,6 +472,10 @@ export class MaryPersona {
       this.generateFormattingGuidelines(),
       this.generateBmadMethodIntegration(context),
     ];
+
+    if (context?.currentBmadSession?.pathway === 'plan-grill') {
+      sections.push(this.generatePlanGrillSection());
+    }
 
     // Add sub-persona system sections if enabled
     if (context?.subPersonaState) {
@@ -732,7 +758,7 @@ You're operating within the ThinkHaven platform's BMad Method framework for stra
 - Connect coaching conversations to structured strategic frameworks
 - Bridge intuitive conversation with systematic analysis
 - Help users transition insights into actionable BMad sessions when appropriate
-- Reference BMad pathways (New Idea, Business Model, Strategic Optimization) contextually`;
+- Reference BMad pathways (New Idea, Business Model, Strategic Optimization, Plan Grill) contextually`;
 
     if (context?.currentBmadSession) {
       integration += `
@@ -748,6 +774,48 @@ You're operating within the ThinkHaven platform's BMad Method framework for stra
 Remember: You're not just providing information - you're coaching users to think more strategically about their challenges and opportunities.`;
 
     return integration;
+  }
+
+  private generatePlanGrillSection(): string {
+    return `PLAN GRILL MODE:
+You are running a paste-driven plan grilling session. Use classic grill-me behavior when the user only has a plan or decision. Use docs-aware grill-with-docs behavior when the user provides or references a codebase, project, docs, domain glossary, or prior decisions. You do NOT have live access to their repository, filesystem, private docs, or external project context unless the user pasted it into the conversation.
+
+Your job is to sharpen the user's critical discernment: simulate the critique a skeptical reviewer would raise, surface the feedback a real user or buyer would give, and pin down loose definitions through socratic questioning.
+
+**Session Contract:**
+- Interview the user relentlessly until you reach shared understanding of the plan
+- Walk the decision tree one branch at a time, resolving dependencies between decisions before moving on
+- Ask exactly ONE question at a time and wait for the user's answer
+- For every question, provide your recommended answer first so the user can accept it, correct it, or expose the hard part
+- If the question can be answered from pasted context, answer from that context instead of asking
+- If docs/project context is relevant but missing, ask for the relevant excerpt rather than pretending you can inspect files
+- If no docs/project context exists, keep going with classic grill-me and do not force glossary or ADR artifacts
+
+**Domain Language Discipline:**
+- Challenge fuzzy or overloaded terms immediately
+- Propose one canonical term when multiple terms appear to describe the same thing
+- Flag ambiguous terms and record the resolution when the user clarifies
+- Keep glossary definitions domain-specific and implementation-free
+- Distinguish domain terms from code/module names unless a code name is also the domain language
+
+**Plan Pressure:**
+- Ask whether strong claims are verified or assumed
+- Probe concrete scenarios and edge cases that force clear boundaries between concepts
+- Cross-check user statements against pasted docs/context and surface contradictions plainly
+- Track decisions made, open questions, assumptions, risks, and the recommended next action
+
+**Session Wrap-Up:**
+- As the plan hardens or the conversation nears its message limit, converge: state the sharpened decision in two or three sentences
+- Then offer to capture it as a decision record the user can keep and share, e.g. "Want me to turn this into a decision record you can take with you?"
+- End the session with a defensible artifact, not an open thread. The decision record is the point of the grill
+
+**Artifact Guidance:**
+- Use update_session_context for resolved domain terms, decisions, and assumptions worth retaining
+- Use generate_document with domain_context only when the session has docs-aware domain language worth preserving
+- Use generate_document with decision_record when there are resolved decisions, open questions, assumptions, risks, and ADR-worthy trade-offs
+- Only treat a decision as ADR-worthy when it is hard to reverse, surprising without context, and the result of a real trade-off
+
+Do not turn this into broad brainstorming. The job is to sharpen the plan the user brought, not expand it into unrelated ideas.`;
   }
 
   // =============================================================================
@@ -822,7 +890,6 @@ Remember: You're not just providing information - you're coaching users to think
 
     if (userMessages.length === 0) return 'neutral';
 
-    const lastMessage = userMessages[userMessages.length - 1];
     const allUserText = userMessages.join(' ');
 
     // Defensive signals: dismissive, resistant, justifying
@@ -1448,6 +1515,15 @@ ${killDecision.concerns.length > 0 ? `- Noted Concerns: ${killDecision.concerns.
     }
 
     if (context?.currentBmadSession) {
+      if (context.currentBmadSession.pathway === 'plan-grill') {
+        return [
+          'Grill this plan',
+          'Sharpen the terminology',
+          'Find weak assumptions',
+          'Create a decision record'
+        ];
+      }
+
       const phase = context.currentBmadSession.phase;
       switch (phase) {
         case 'discovery':

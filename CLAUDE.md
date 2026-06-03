@@ -7,6 +7,7 @@
 - **Tech Stack**: Next.js 15.5, React 19, TypeScript, Supabase, Stripe, Anthropic Claude
 - **Architecture**: Monorepo with Next.js app in `apps/web/`
 - **Deployment**: Vercel project `thinkhaven` (https://thinkhaven.co)
+- **Documented Solutions**: `docs/solutions/` contains searchable solution notes for past bugs, architecture patterns, conventions, and workflow issues, organized by category with YAML frontmatter (`module`, `problem_type`, `tags`). Relevant when implementing or debugging in documented areas.
 
 ## Essential Commands
 

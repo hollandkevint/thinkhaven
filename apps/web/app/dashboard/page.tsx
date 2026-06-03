@@ -14,7 +14,7 @@ export default function DashboardRedirect() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-terracotta mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-parchment border-t-terracotta mx-auto mb-4"></div>
         <p className="text-ink-light">Redirecting...</p>
       </div>
     </div>

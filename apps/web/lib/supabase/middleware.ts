@@ -85,7 +85,7 @@ export async function updateSession(request: NextRequest) {
 
 
   // Define route security policies
-  const publicRoutes = ['/', '/login', '/signup', '/resend-confirmation', '/.well-known', '/auth/callback']
+  const publicRoutes = ['/', '/login', '/signup', '/resend-confirmation', '/.well-known', '/auth/callback', '/share']
   const testOnlyRoutes = ['/test-dual-pane', '/test-bmad-buttons'] // Restrict these in production
   const staticAssets = ['.css', '.js', '.map', '.ico', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']
 

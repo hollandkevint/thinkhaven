@@ -10,9 +10,12 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
+import { PATHWAY_PHASE_ORDER } from './pathway-config';
+import type { PathwayType } from './pathway-config';
 
-// Re-export from client-safe module (session-primitives imports server-only code)
-export { type PathwayType, PATHWAY_LABELS } from './pathway-labels';
+// Re-export from client-safe modules (session-primitives imports server-only code)
+export { PATHWAY_LABELS } from './pathway-labels';
+export type { PathwayType } from './pathway-config';
 
 export class BmadMethodError extends Error {
   constructor(
@@ -58,7 +61,16 @@ export interface SessionInsight {
   id: string;
   sessionId: string;
   phaseId: string;
-  category: 'market' | 'product' | 'competition' | 'risk' | 'opportunity' | 'general';
+  category:
+    | 'market'
+    | 'product'
+    | 'competition'
+    | 'risk'
+    | 'opportunity'
+    | 'domain'
+    | 'decision'
+    | 'assumption'
+    | 'general';
   content: string;
   createdAt: Date;
 }
@@ -278,10 +290,7 @@ export async function deleteSession(sessionId: string): Promise<void> {
  * This is the single source of truth for phase sequences.
  */
 export const PHASE_ORDER: Record<string, string[]> = {
-  'new-idea': ['discovery', 'ideation', 'validation', 'planning'],
-  'business-model': ['analysis', 'revenue', 'customer', 'validation', 'planning'],
-  'strategic-optimization': ['assessment', 'analysis', 'strategy', 'implementation'],
-  'explore': ['discovery'],
+  ...PATHWAY_PHASE_ORDER,
 };
 
 /**

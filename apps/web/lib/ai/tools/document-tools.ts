@@ -19,6 +19,11 @@ interface DocumentTemplate {
   description: string;
 }
 
+const DOCUMENT_ARTIFACT_TYPES: Record<string, string> = {
+  domain_context: 'domain-context',
+  decision_record: 'decision-record',
+};
+
 const DOCUMENT_TEMPLATES: Record<string, DocumentTemplate> = {
   lean_canvas: {
     type: 'lean_canvas',
@@ -100,6 +105,30 @@ const DOCUMENT_TEMPLATES: Record<string, DocumentTemplate> = {
     ],
     description: 'High-level concept exploration document',
   },
+  domain_context: {
+    type: 'domain_context',
+    name: 'Domain Context',
+    sections: [
+      'Language',
+      'Relationships',
+      'Example Dialogue',
+      'Flagged Ambiguities',
+    ],
+    description: 'Glossary and domain-language context for a plan or project, without implementation details',
+  },
+  decision_record: {
+    type: 'decision_record',
+    name: 'Decision Record',
+    sections: [
+      'Resolved Decisions',
+      'Open Questions',
+      'Assumptions',
+      'Risks',
+      'ADR-Worthy Decisions',
+      'Recommended Next Action',
+    ],
+    description: 'Sparse record of resolved decisions, open questions, assumptions, risks, and durable trade-offs',
+  },
 };
 
 // =============================================================================
@@ -154,6 +183,9 @@ export async function generateDocument(
       competition: [],
       risk: [],
       opportunity: [],
+      domain: [],
+      decision: [],
+      assumption: [],
       general: [],
     };
 
@@ -176,22 +208,42 @@ export async function generateDocument(
     const documentTitle = input.title || `${template.name} - Session ${sessionId.slice(0, 8)}`;
     const documentContent = buildDocumentContent(template, sectionsToInclude, insights);
 
-    // Generate document ID
-    const documentId = `doc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
     // Store the document
-    const { error: insertError } = await supabase.from('bmad_generated_documents').insert({
+    const { data: documentRow, error: insertError } = await supabase.from('bmad_generated_documents').insert({
       session_id: sessionId,
       document_name: documentTitle,
       document_type: input.document_type,
       content: documentContent,
       format: 'markdown',
-    });
+    }).select('id').single();
 
-    if (insertError) {
+    if (insertError || !documentRow) {
       return {
         success: false,
-        error: `Failed to save document: ${insertError.message}`,
+        error: `Failed to save document: ${insertError?.message || 'No document id returned'}`,
+      };
+    }
+
+    const artifactType = DOCUMENT_ARTIFACT_TYPES[input.document_type] || 'working-document';
+    const { error: artifactError } = await supabase.from('session_artifacts').insert({
+      id: documentRow.id,
+      session_id: sessionId,
+      type: artifactType,
+      title: documentTitle,
+      content: documentContent,
+      metadata: {
+        source: 'generate_document',
+        document_type: input.document_type,
+        generated_document_id: documentRow.id,
+      },
+      view_mode: 'inline',
+      render_mode: 'rendered',
+    });
+
+    if (artifactError) {
+      return {
+        success: false,
+        error: `Failed to save document artifact: ${artifactError.message}`,
       };
     }
 
@@ -202,8 +254,14 @@ export async function generateDocument(
       success: true,
       data: {
         documentType: input.document_type,
-        documentId,
+        documentId: documentRow.id,
+        title: documentTitle,
         preview,
+        artifact: {
+          type: artifactType,
+          title: documentTitle,
+          content: documentContent,
+        },
       },
     };
   } catch (error) {
@@ -261,7 +319,7 @@ function buildDocumentContent(
     'Technical Considerations': ['risk', 'general'],
     'Timeline & Milestones': ['general'],
     'Risks & Mitigations': ['risk'],
-    'Open Questions': ['general'],
+    'Open Questions': ['assumption', 'risk', 'general'],
 
     // Feature Brief mappings
     'Feature Overview': ['product'],
@@ -283,6 +341,19 @@ function buildDocumentContent(
     'Initial Assumptions': ['general', 'risk'],
     'Validation Approach': ['general'],
     'Next Steps': ['general'],
+
+    // Domain Context mappings
+    'Language': ['domain', 'general'],
+    'Relationships': ['domain', 'decision', 'general'],
+    'Example Dialogue': ['domain', 'general'],
+    'Flagged Ambiguities': ['domain', 'risk', 'assumption'],
+
+    // Decision Record mappings
+    'Resolved Decisions': ['decision', 'general'],
+    'Assumptions': ['assumption', 'risk'],
+    'Risks': ['risk'],
+    'ADR-Worthy Decisions': ['decision', 'risk'],
+    'Recommended Next Action': ['decision', 'assumption', 'general'],
   };
 
   for (const section of sections) {

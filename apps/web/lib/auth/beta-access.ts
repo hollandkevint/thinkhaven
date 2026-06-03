@@ -31,33 +31,118 @@ interface ValidatedAuthUser {
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-async function getValidatedAuthUser(
-  supabase: NonNullable<SupabaseServerClient>
-): Promise<ValidatedAuthUser | null> {
-  if (typeof supabase.auth.getClaims === 'function') {
-    const { data } = await supabase.auth.getClaims();
-    const claims = data?.claims;
+interface AuthValidationResult {
+  user: ValidatedAuthUser | null;
+  unavailable: boolean;
+}
 
-    if (claims?.sub) {
-      return {
-        id: claims.sub,
-        email: typeof claims.email === 'string' ? claims.email : undefined,
-        betaApprovedClaim: claims.beta_approved === true,
-      };
+function getErrorField(error: unknown, field: 'code' | 'message'): string | null {
+  if (!error || typeof error !== 'object') return null;
+
+  const value = (error as Record<string, unknown>)[field];
+  return typeof value === 'string' ? value.toLowerCase() : null;
+}
+
+function getErrorStatus(error: unknown): number | null {
+  if (!error || typeof error !== 'object') return null;
+
+  const value = (error as Record<string, unknown>).status;
+  return typeof value === 'number' ? value : null;
+}
+
+function isUnavailableAuthError(error: unknown): boolean {
+  const status = getErrorStatus(error);
+  const code = getErrorField(error, 'code');
+  const message = getErrorField(error, 'message');
+
+  if (status && (status >= 500 || status === 429)) return true;
+  if (status === 401 || status === 403) return false;
+
+  if (code) {
+    if (
+      code.includes('invalid') ||
+      code.includes('expired') ||
+      code.includes('session_not_found') ||
+      code.includes('refresh_token_not_found')
+    ) {
+      return false;
+    }
+
+    if (
+      code.includes('timeout') ||
+      code.includes('unavailable') ||
+      code.includes('rate_limit')
+    ) {
+      return true;
     }
   }
 
-  const { data, error } = await supabase.auth.getUser();
+  if (!message) return false;
 
-  if (error || !data.user) {
-    return null;
+  if (
+    message.includes('invalid token') ||
+    message.includes('jwt expired') ||
+    message.includes('session not found') ||
+    message.includes('not authenticated')
+  ) {
+    return false;
   }
 
-  return {
-    id: data.user.id,
-    email: data.user.email,
-    betaApprovedClaim: data.user.app_metadata?.beta_approved === true,
-  };
+  return (
+    message.includes('fetch failed') ||
+    message.includes('network') ||
+    message.includes('timeout') ||
+    message.includes('temporarily unavailable') ||
+    message.includes('service unavailable') ||
+    message.includes('database unavailable') ||
+    message.includes('connection')
+  );
+}
+
+async function getValidatedAuthUser(
+  supabase: NonNullable<SupabaseServerClient>
+): Promise<AuthValidationResult> {
+  if (typeof supabase.auth.getClaims === 'function') {
+    try {
+      const { data } = await supabase.auth.getClaims();
+      const claims = data?.claims;
+
+      if (claims?.sub) {
+        return {
+          user: {
+            id: claims.sub,
+            email: typeof claims.email === 'string' ? claims.email : undefined,
+            betaApprovedClaim: claims.beta_approved === true,
+          },
+          unavailable: false,
+        };
+      }
+    } catch {
+      // Fall back to getUser; if auth is truly unavailable it will fail there too.
+    }
+  }
+
+  try {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data.user) {
+      return {
+        user: null,
+        unavailable: Boolean(error && isUnavailableAuthError(error)),
+      };
+    }
+
+    return {
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        betaApprovedClaim: data.user.app_metadata?.beta_approved === true,
+      },
+      unavailable: false,
+    };
+  } catch {
+    return { user: null, unavailable: true };
+  }
 }
 
 function betaResult({
@@ -94,7 +179,18 @@ export async function checkBetaAccess(
     });
   }
 
-  const authUser = await getValidatedAuthUser(supabase);
+  const authValidation = await getValidatedAuthUser(supabase);
+
+  if (authValidation.unavailable) {
+    return betaResult({
+      user: null,
+      betaApproved: false,
+      status: 'unavailable',
+      error: 'Authentication service unavailable',
+    });
+  }
+
+  const authUser = authValidation.user;
 
   if (!authUser) {
     return betaResult({

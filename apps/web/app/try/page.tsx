@@ -43,6 +43,18 @@ async function readBetaAccessStatus(): Promise<BetaAccessStatusResponse | null> 
   }
 }
 
+function TrialLoadingState({ message }: { message: string }) {
+  return (
+    <div className="flex h-screen items-center justify-center bg-cream px-4">
+      <div className="w-full max-w-sm rounded-lg border border-ink/10 bg-parchment p-6 text-center">
+        <div className="mx-auto h-4 w-32 rounded bg-ink/10 animate-pulse" />
+        <div className="mx-auto mt-4 h-8 w-52 rounded bg-ink/10 animate-pulse" />
+        <p className="mt-5 text-sm text-slate-blue">{message}</p>
+      </div>
+    </div>
+  )
+}
+
 function buildWaitlistRedirect({
   inviteId,
   source,
@@ -76,6 +88,8 @@ function TryPageContent() {
   const inviteId = inviteContext?.inviteId || null
   const inviteSource = inviteContext?.source || null
   const inviteFromGuest = inviteContext?.fromGuest === true
+  const trialMode = searchParams.get('mode') === 'plan-grill' ? 'plan-grill' : 'new-idea'
+  const isPlanGrill = trialMode === 'plan-grill'
   const signupPath = inviteContext ? buildSignupPath(inviteContext) : '/signup?from=guest'
   const inviteArrivalLoggedRef = useRef<string | null>(null)
 
@@ -176,14 +190,9 @@ function TryPageContent() {
   // Show loading state while checking auth or migrating
   if (loading || migrating) {
     return (
-      <div className="flex items-center justify-center h-screen bg-cream">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-terracotta border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-blue">
-            {migrating ? 'Saving your conversation...' : 'Loading...'}
-          </p>
-        </div>
-      </div>
+      <TrialLoadingState
+        message={migrating ? 'Saving your guest conversation.' : 'Checking your sign-in state.'}
+      />
     )
   }
 
@@ -193,13 +202,13 @@ function TryPageContent() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-cream">
+    <div className="h-screen min-w-0 overflow-x-hidden flex flex-col bg-cream">
       {/* Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-cream">
-        <Link href="/" className="text-2xl font-bold font-display text-ink">
+      <header className="flex-shrink-0 flex items-center justify-between gap-3 px-4 py-4 border-b border-border bg-cream md:px-6">
+        <Link href="/" className="text-xl font-bold font-display text-ink sm:text-2xl">
           ThinkHaven
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="hidden items-center gap-4 sm:flex">
           <FeedbackButton variant="nav" />
           <Link href="/assessment" className="text-sm font-medium text-slate-blue">
             Take Assessment
@@ -214,20 +223,29 @@ function TryPageContent() {
             Sign up
           </Link>
         </nav>
+        <Link
+          href={signupPath}
+          className="rounded-lg bg-terracotta px-3 py-2 text-sm font-medium text-cream sm:hidden"
+        >
+          Sign up
+        </Link>
       </header>
 
       {/* Info banner */}
-      <div className="flex-shrink-0 px-6 py-3 bg-terracotta text-cream">
+      <div className="flex-shrink-0 px-4 py-3 bg-terracotta text-cream sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm">
-            <strong>Try before you sign up.</strong> Get 10 free messages to pressure-test a real decision with ThinkHaven&apos;s board.
+            <strong>Try before you sign up.</strong>{' '}
+            {isPlanGrill
+              ? 'Get 10 free messages to grill a pasted plan with Mary.'
+              : 'Get 10 free messages to pressure-test a real decision with ThinkHaven\'s board.'}
           </p>
         </div>
       </div>
 
       {/* Chat interface */}
-      <div className="flex-1 max-w-5xl mx-auto w-full overflow-hidden">
-        <GuestChatInterface />
+      <div className="flex-1 min-w-0 max-w-5xl mx-auto w-full overflow-hidden">
+        <GuestChatInterface pathway={trialMode} />
       </div>
     </div>
   )
@@ -235,14 +253,7 @@ function TryPageContent() {
 
 export default function TryPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-screen bg-cream">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-terracotta border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-blue">Loading...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<TrialLoadingState message="Preparing the guest trial." />}>
       <TryPageContent />
     </Suspense>
   )

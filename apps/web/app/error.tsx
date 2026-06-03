@@ -27,11 +27,11 @@ export default function Error({
 
         <div className="space-y-2">
           <h1 className="font-display text-2xl font-semibold text-ink">
-            Something went wrong
+            This page did not load
           </h1>
           <p className="text-ink-light font-body leading-relaxed">
-            We hit an unexpected snag. This is on us, not you. Try again or head
-            back to familiar ground.
+            The request stopped before the page could finish. Try again or return
+            to a stable route.
           </p>
         </div>
 

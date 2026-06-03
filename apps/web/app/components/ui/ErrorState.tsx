@@ -42,7 +42,7 @@ export function ErrorState({
     } else if (error.toLowerCase().includes('authentication') || error.toLowerCase().includes('auth')) {
       return 'Authentication Issue'
     }
-    return 'Something went wrong'
+    return 'This view did not load'
   }
 
   const getErrorDescription = () => {
@@ -53,7 +53,7 @@ export function ErrorState({
     } else if (error.toLowerCase().includes('authentication')) {
       return 'Your session may have expired. Please sign out and sign in again.'
     }
-    return 'An unexpected error occurred.'
+    return 'The view could not finish loading. Retry the request or refresh the page.'
   }
 
   const canRetry = retryCount < maxRetries && !isRetrying && onRetry

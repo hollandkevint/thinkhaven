@@ -159,7 +159,7 @@ export const SELECTORS = {
   // ===================
   assessment: {
     // Quiz
-    title: 'text=/Strategic Thinking Assessment/i',
+    title: 'text=/Decision readiness|weak point/i',
     questionNumber: 'text=/Question \\d+ of 15/i',
     progressBar: '[role="progressbar"], .progress-bar',
 

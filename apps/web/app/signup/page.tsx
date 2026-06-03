@@ -102,13 +102,21 @@ function SignUpPageContent() {
       {/* Minimal Navigation - Logo only */}
       <div className="absolute top-8 left-8">
         <Link href="/" className="text-2xl font-bold font-display text-foreground">
-          Thinkhaven
+          ThinkHaven
         </Link>
       </div>
 
       {/* Centered Signup Form */}
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-[400px] space-y-8">
+          <div className="text-center">
+            <h1 className="font-display text-3xl font-semibold text-ink">
+              Create your ThinkHaven account
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-ink-light">
+              Use the email tied to your beta request or invite. Saved workspace access opens after approval.
+            </p>
+          </div>
 
           {/* Google OAuth Button - Primary */}
           <button

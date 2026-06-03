@@ -166,6 +166,8 @@ describe('Individual Tool Schemas', () => {
         'prd',
         'feature_brief',
         'concept_document',
+        'domain_context',
+        'decision_record',
       ]);
     });
   });
@@ -185,6 +187,9 @@ describe('Individual Tool Schemas', () => {
         'competition',
         'risk',
         'opportunity',
+        'domain',
+        'decision',
+        'assumption',
         'general',
       ]);
     });

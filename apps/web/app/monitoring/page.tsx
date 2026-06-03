@@ -1,36 +1,49 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import Link from 'next/link'
 import AuthMetricsDashboard from '@/app/components/monitoring/AuthMetricsDashboard'
-import { isAdminEmail } from '@/lib/auth/admin'
+import { checkBetaAccess } from '@/lib/auth/beta-access'
+
+export const dynamic = 'force-dynamic'
 
 export default async function MonitoringPage() {
-  const cookieStore = await cookies()
+  const access = await checkBetaAccess({
+    recordGate: false,
+    requestPath: '/monitoring',
+  })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options)
-          })
-        }
-      }
-    }
-  )
-
-  const { data: { user }, error } = await supabase.auth.getUser()
-
-  if (error || !user) {
-    redirect('/login')
+  if (access.status === 'unavailable') {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-6">
+        <div className="max-w-md text-center space-y-6" role="alert">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-terracotta/10">
+            <span className="font-display text-xl font-medium text-terracotta">!</span>
+          </div>
+          <div className="space-y-2">
+            <h1 className="font-display text-2xl font-medium text-ink">
+              Monitoring is unavailable
+            </h1>
+            <p className="font-body text-sm leading-relaxed text-ink-light">
+              The authentication service is not configured for this environment. Monitoring data remains unavailable until access can be verified.
+            </p>
+          </div>
+          <Link
+            href="/"
+            className="inline-flex rounded-lg border border-ink/10 bg-parchment px-4 py-2 font-display text-sm font-medium text-ink transition-colors hover:border-ink/20"
+          >
+            Go home
+          </Link>
+        </div>
+      </div>
+    )
   }
 
-  const isAdmin = isAdminEmail(user.email)
+  if (!access.user || access.status === 'unauthenticated') {
+    redirect('/login?redirect=' + encodeURIComponent('/monitoring'))
+  }
+
+  if (!access.isAdmin) {
+    redirect('/app')
+  }
 
   return (
     <div className="min-h-screen bg-cream">
@@ -56,14 +69,12 @@ export default async function MonitoringPage() {
               >
                 Monitoring
               </a>
-              {isAdmin && (
-                <a
-                  href="/app/admin/beta"
-                  className="text-slate-blue hover:text-ink px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Beta access
-                </a>
-              )}
+              <a
+                href="/app/admin/beta"
+                className="text-slate-blue hover:text-ink px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Beta access
+              </a>
             </nav>
           </div>
         </div>

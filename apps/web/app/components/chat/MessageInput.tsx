@@ -225,7 +225,7 @@ export default function MessageInput({
     <div className={`relative ${className}`}>
       {/* Formatting Toolbar */}
       {showToolbar && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 bg-cream border border-divider rounded-lg shadow-lg p-2 flex items-center gap-1 z-10">
+        <div className="absolute bottom-full left-0 right-0 z-10 mb-2 flex items-center gap-1 overflow-x-auto rounded-lg border border-divider bg-cream p-2 shadow-lg">
           {formatActions.map((action) => (
             <button
               key={action.id}
@@ -263,7 +263,7 @@ export default function MessageInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="w-full px-4 py-3 pr-20 resize-none bg-transparent border-none outline-none text-muted-foreground placeholder:text-slate-blue/60 min-h-[50px] max-h-[200px]"
+          className="w-full px-4 py-3 pr-20 resize-none bg-transparent border-none outline-none text-muted-foreground placeholder:text-slate-blue/60 min-h-[46px] max-h-[160px] sm:min-h-[50px] sm:max-h-[200px]"
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: 'var(--slate-blue) transparent'
@@ -317,13 +317,16 @@ export default function MessageInput({
       </div>
 
       {/* Help Text */}
-      <div className="mt-2 text-xs text-slate-blue flex items-center gap-4">
+      <div className="mt-2 hidden flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-blue sm:flex">
         <span>Press Enter to send, Shift+Enter for new line</span>
         <span>•</span>
         <span>Use Ctrl+B for bold, Ctrl+I for italic</span>
         <span>•</span>
         <span>Supports Markdown formatting</span>
       </div>
+      <p className="mt-2 text-xs text-slate-blue sm:hidden">
+        Enter sends. Shift+Enter adds a line.
+      </p>
     </div>
   )
 }

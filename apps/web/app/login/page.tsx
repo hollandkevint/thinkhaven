@@ -108,13 +108,21 @@ function LoginPageContent() {
       {/* Minimal Navigation - Logo only */}
       <div className="absolute top-8 left-8">
         <Link href="/" className="text-2xl font-bold font-display text-foreground">
-          Thinkhaven
+          ThinkHaven
         </Link>
       </div>
 
       {/* Centered Login Form */}
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-[400px] space-y-8">
+          <div className="text-center">
+            <h1 className="font-display text-3xl font-semibold text-ink">
+              Sign in to ThinkHaven
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-ink-light">
+              Beta workspace access is checked after sign-in. Your saved work stays protected.
+            </p>
+          </div>
 
           {/* Google OAuth Button - Primary */}
           <button

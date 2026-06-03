@@ -154,7 +154,7 @@ export default function AuthMetricsDashboard() {
   if (loading && !metricsData) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-terracotta"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-parchment border-t-terracotta"></div>
         <span className="ml-2 text-ink-light">Loading metrics...</span>
       </div>
     )

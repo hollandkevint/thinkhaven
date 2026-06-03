@@ -25,6 +25,10 @@ export default defineConfig({
 
   // Only run .spec.ts files (exclude .test.ts which are Vitest unit tests)
   testMatch: '**/*.spec.ts',
+  // beta-checklist.spec.ts is production verification (auth-dependent, run via `npm run test:prod`
+  // against thinkhaven.co). It cannot pass against a local server without a real session, so it is
+  // excluded from the local smoke gate. Public-route coverage lives in health.spec.ts.
+  testIgnore: '**/beta-checklist.spec.ts',
 
   projects: [
     {

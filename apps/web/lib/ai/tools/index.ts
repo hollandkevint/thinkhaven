@@ -51,7 +51,13 @@ export interface GenerateDocumentResult extends ToolResult {
   data?: {
     documentType: string;
     documentId: string;
+    title: string;
     preview: string;
+    artifact?: {
+      type: string;
+      title: string;
+      content: string;
+    };
   };
 }
 
@@ -108,14 +114,30 @@ export interface RecommendActionInput {
 }
 
 export interface GenerateDocumentInput {
-  document_type: 'lean_canvas' | 'business_model_canvas' | 'prd' | 'feature_brief' | 'concept_document';
+  document_type:
+    | 'lean_canvas'
+    | 'business_model_canvas'
+    | 'prd'
+    | 'feature_brief'
+    | 'concept_document'
+    | 'domain_context'
+    | 'decision_record';
   title?: string;
   sections_to_include?: string[];
 }
 
 export interface UpdateContextInput {
   insight: string;
-  category?: 'market' | 'product' | 'competition' | 'risk' | 'opportunity' | 'general';
+  category?:
+    | 'market'
+    | 'product'
+    | 'competition'
+    | 'risk'
+    | 'opportunity'
+    | 'domain'
+    | 'decision'
+    | 'assumption'
+    | 'general';
 }
 
 // UpdateLeanCanvasInput and UpdateLeanCanvasResult are defined in
@@ -225,7 +247,15 @@ export const MARY_TOOLS: Tool[] = [
       properties: {
         document_type: {
           type: 'string',
-          enum: ['lean_canvas', 'business_model_canvas', 'prd', 'feature_brief', 'concept_document'],
+          enum: [
+            'lean_canvas',
+            'business_model_canvas',
+            'prd',
+            'feature_brief',
+            'concept_document',
+            'domain_context',
+            'decision_record',
+          ],
           description: 'Type of document to generate',
         },
         title: {
@@ -283,7 +313,17 @@ Examples:
         },
         category: {
           type: 'string',
-          enum: ['market', 'product', 'competition', 'risk', 'opportunity', 'general'],
+          enum: [
+            'market',
+            'product',
+            'competition',
+            'risk',
+            'opportunity',
+            'domain',
+            'decision',
+            'assumption',
+            'general',
+          ],
           description: 'Category of the insight',
         },
       },

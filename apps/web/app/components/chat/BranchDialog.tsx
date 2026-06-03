@@ -114,7 +114,7 @@ export default function BranchDialog({
   if (!isOpen) return null
 
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${className}`}>
+    <div className={`fixed inset-0 bg-ink/45 flex items-center justify-center z-50 ${className}`}>
       <div className="bg-cream rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-divider">
@@ -264,7 +264,7 @@ export default function BranchDialog({
               className="px-4 py-2 text-sm bg-terracotta text-cream rounded hover:bg-terracotta-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {creating && (
-                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                <div className="animate-spin w-4 h-4 border-2 border-cream border-t-transparent rounded-full"></div>
               )}
               {creating ? 'Creating Branch...' : 'Create Branch'}
             </button>

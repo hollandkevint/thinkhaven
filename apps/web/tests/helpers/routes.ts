@@ -27,6 +27,15 @@ export const ROUTES = {
   /** Guest chat experience - 10 free messages */
   try: '/try',
 
+  /** Guest chat experience - plan-grill mode */
+  tryPlanGrill: '/try?mode=plan-grill',
+
+  /** Pricing and credit packages */
+  pricing: '/pricing',
+
+  /** Beta waitlist */
+  waitlist: '/waitlist',
+
   /** Strategic thinking assessment quiz */
   assessment: '/assessment',
 
@@ -35,6 +44,9 @@ export const ROUTES = {
 
   /** Resend email confirmation */
   resendConfirmation: '/resend-confirmation',
+
+  /** Blog index */
+  blog: '/blog',
 
   /** Stripe checkout success */
   validateSuccess: '/validate/success',
@@ -178,11 +190,16 @@ export function getLegacyRedirect(legacyUrl: string): string | null {
  */
 export const PUBLIC_ROUTES = [
   { name: 'Landing', path: ROUTES.landing },
+  { name: 'Pricing', path: ROUTES.pricing },
+  { name: 'Waitlist', path: ROUTES.waitlist },
   { name: 'Login', path: ROUTES.login },
   { name: 'Signup', path: ROUTES.signup },
   { name: 'Try (Guest)', path: ROUTES.try },
   { name: 'Assessment', path: ROUTES.assessment },
+  { name: 'Assessment Results', path: ROUTES.assessmentResults },
   { name: 'Resend Confirmation', path: ROUTES.resendConfirmation },
+  { name: 'Blog', path: ROUTES.blog },
+  { name: 'Validate Success', path: ROUTES.validateSuccess },
 ];
 
 /**

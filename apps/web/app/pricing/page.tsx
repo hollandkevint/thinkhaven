@@ -1,113 +1,146 @@
 import Link from 'next/link'
+import { ArrowRight, CheckCircle2 } from 'lucide-react'
 
 const STRIPE_PAYMENT_LINK = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK
+
+const includedRows = [
+  {
+    title: 'Artifact',
+    description: 'A saved brief, scorecard, canvas, or structured analysis you can return to.',
+  },
+  {
+    title: 'Decision',
+    description: 'Mary and the board keep pressure on the choice until the tradeoffs are explicit.',
+  },
+  {
+    title: 'Confidence',
+    description: 'You leave with the strongest case and the fragile points still visible.',
+  },
+]
 
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-cream">
-      <div className="absolute top-8 left-8">
-        <Link href="/" className="text-2xl font-bold font-display text-foreground">
-          Thinkhaven
-        </Link>
-      </div>
-
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="max-w-3xl w-full">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl font-bold font-display text-ink mb-3">
-              Simple pricing for clear thinking
+      <main className="px-4 py-16 sm:px-6 lg:py-20">
+        <div className="mx-auto w-full max-w-5xl">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="mb-4 text-xs font-display font-medium uppercase tracking-wider text-terracotta">
+              Public trial, beta workspace
+            </p>
+            <h1 className="font-display text-3xl font-semibold leading-tight text-ink sm:text-4xl">
+              Choose the amount of saved decision work you need
             </h1>
-            <p className="text-ink-light text-lg">
-              Each session gets you a structured challenge from Mary and a filled Lean Canvas.
+            <p className="mt-4 text-lg leading-relaxed text-ink-light">
+              Start with 10 guest messages. When you need a workspace, saved sessions, and exportable artifacts, use the beta access list or a one-time session pack.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            {/* Free Tier */}
-            <div className="bg-cream border border-ink/10 rounded-xl p-8">
-              <h2 className="font-display font-semibold text-lg text-ink mb-1">Free</h2>
-              <p className="text-3xl font-bold font-display text-ink mb-1">$0</p>
-              <p className="text-sm text-ink-light mb-6">5 sessions included</p>
-
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-2 text-sm text-ink">
-                  <svg className="w-4 h-4 text-forest flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Full access to Mary
-                </li>
-                <li className="flex items-start gap-2 text-sm text-ink">
-                  <svg className="w-4 h-4 text-forest flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Board of Directors
-                </li>
-                <li className="flex items-start gap-2 text-sm text-ink">
-                  <svg className="w-4 h-4 text-forest flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Lean Canvas generation
-                </li>
-              </ul>
-
-              <Link
-                href="/signup"
-                className="block w-full text-center py-3 px-6 rounded-lg border border-ink/20 text-ink font-medium hover:bg-parchment transition-colors"
-              >
-                Get started free
-              </Link>
-            </div>
-
-            {/* Pro Tier */}
-            <div className="bg-cream border-2 border-terracotta rounded-xl p-8 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-cream text-xs font-semibold px-3 py-1 rounded-full">
-                Most Popular
+          <div className="mt-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <section className="rounded-lg border border-ink/10 bg-parchment p-6">
+              <h2 className="font-display text-xl font-semibold text-ink">What each saved session is for</h2>
+              <div className="mt-6 space-y-5">
+                {includedRows.map((row) => (
+                  <div key={row.title} className="flex gap-3">
+                    <div className="mt-0.5 flex size-7 flex-shrink-0 items-center justify-center rounded-md bg-forest/10 text-forest">
+                      <CheckCircle2 className="size-4" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-ink">
+                        {row.title}
+                      </h3>
+                      <p className="mt-1 text-sm leading-relaxed text-ink-light">{row.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <h2 className="font-display font-semibold text-lg text-ink mb-1">Pro</h2>
-              <p className="text-3xl font-bold font-display text-ink mb-1">$39</p>
-              <p className="text-sm text-ink-light mb-6">10 sessions, one-time</p>
+              <p className="mt-6 border-t border-ink/10 pt-5 text-sm leading-relaxed text-slate-blue">
+                Pricing does not change the public trial. Every visitor can test Mary before creating an account.
+              </p>
+            </section>
 
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-2 text-sm text-ink">
-                  <svg className="w-4 h-4 text-forest flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Everything in Free
-                </li>
-                <li className="flex items-start gap-2 text-sm text-ink">
-                  <svg className="w-4 h-4 text-forest flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  10 strategic sessions
-                </li>
-                <li className="flex items-start gap-2 text-sm text-ink">
-                  <svg className="w-4 h-4 text-forest flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Canvas markdown export
-                </li>
-              </ul>
-
-              {STRIPE_PAYMENT_LINK ? (
-                <a
-                  href={STRIPE_PAYMENT_LINK}
-                  className="block w-full text-center py-3 px-6 rounded-lg bg-terracotta text-cream font-medium hover:bg-terracotta-hover transition-colors shadow-lg"
-                >
-                  Get 10 sessions
-                </a>
-              ) : (
-                <div className="w-full text-center py-3 px-6 rounded-lg bg-parchment text-ink-light font-medium">
-                  Coming soon
+            <section className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-lg border border-ink/10 bg-cream p-6">
+                <div className="flex min-h-24 flex-col justify-between">
+                  <div>
+                    <h2 className="font-display text-lg font-semibold text-ink">Guest trial</h2>
+                    <p className="mt-1 text-sm text-ink-light">For the first pressure test.</p>
+                  </div>
+                  <p className="mt-5 font-display text-4xl font-semibold text-ink">$0</p>
                 </div>
-              )}
-            </div>
+
+                <ul className="mt-6 space-y-3 text-sm text-ink">
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 flex-shrink-0 text-forest" aria-hidden="true" />
+                    <span>10 messages with Mary before signup</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 flex-shrink-0 text-forest" aria-hidden="true" />
+                    <span>Plan-grill mode for pasted strategy docs</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 flex-shrink-0 text-forest" aria-hidden="true" />
+                    <span>Beta account path for saved sessions</span>
+                  </li>
+                </ul>
+
+                <Link
+                  href="/try"
+                  className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ink/20 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-parchment"
+                >
+                  Try 10 messages
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className="rounded-lg border border-terracotta bg-cream p-6 shadow-sm">
+                <div className="flex min-h-24 flex-col justify-between">
+                  <div>
+                    <p className="mb-2 inline-flex rounded-full bg-terracotta/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-terracotta">
+                      One-time pack
+                    </p>
+                    <h2 className="font-display text-lg font-semibold text-ink">Saved workspace</h2>
+                    <p className="mt-1 text-sm text-ink-light">For decisions that need artifacts and history.</p>
+                  </div>
+                  <p className="mt-5 font-display text-4xl font-semibold text-ink">$39</p>
+                </div>
+
+                <ul className="mt-6 space-y-3 text-sm text-ink">
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 flex-shrink-0 text-forest" aria-hidden="true" />
+                    <span>10 saved sessions, one-time</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 flex-shrink-0 text-forest" aria-hidden="true" />
+                    <span>Decision artifacts and markdown export</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 flex-shrink-0 text-forest" aria-hidden="true" />
+                    <span>Session history for defended decisions</span>
+                  </li>
+                </ul>
+
+                {STRIPE_PAYMENT_LINK ? (
+                  <a
+                    href={STRIPE_PAYMENT_LINK}
+                    className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-terracotta px-4 py-3 text-sm font-semibold text-cream transition hover:bg-terracotta-hover"
+                  >
+                    Get 10 sessions
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </a>
+                ) : (
+                  <div className="mt-8 w-full rounded-lg bg-parchment px-4 py-3 text-center text-sm font-semibold text-ink-light">
+                    Checkout opens when beta access is active
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
 
-          <p className="text-center text-sm text-ink-light mt-8">
-            Each session includes Mary's structured challenge loop, Board of Directors perspectives, and a progressive Lean Canvas. No subscriptions.
+          <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-ink-light">
+            No subscriptions. Beta workspace access is reviewed separately so saved decision work stays inside the current product capacity.
           </p>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

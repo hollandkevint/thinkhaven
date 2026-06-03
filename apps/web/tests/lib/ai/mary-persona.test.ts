@@ -3,9 +3,6 @@ import {
   maryPersona,
   type CoachingContext,
   type SubPersonaSessionState,
-  type PathwayWeights,
-  type UserEmotionalState,
-  type UserControlAction,
   PATHWAY_WEIGHTS,
   MODE_BEHAVIORS,
   createSubPersonaState,
@@ -138,6 +135,31 @@ describe('MaryPersona', () => {
       expect(prompt).toContain("Devil's Advocate");
       expect(prompt).toContain('Challenge assumptions');
     });
+
+    it('should include docs-aware plan grilling only for plan-grill sessions', () => {
+      const planGrillPrompt = maryPersona.generateSystemPrompt({
+        currentBmadSession: {
+          pathway: 'plan-grill',
+          phase: 'intake',
+          progress: 0,
+        },
+      });
+
+      expect(planGrillPrompt).toContain('PLAN GRILL MODE');
+      expect(planGrillPrompt).toContain('classic grill-me');
+      expect(planGrillPrompt).toContain('docs-aware grill-with-docs');
+      expect(planGrillPrompt).toContain('pasted context');
+
+      const regularPrompt = maryPersona.generateSystemPrompt({
+        currentBmadSession: {
+          pathway: 'explore',
+          phase: 'discovery',
+          progress: 0,
+        },
+      });
+
+      expect(regularPrompt).not.toContain('PLAN GRILL MODE');
+    });
   });
 
   describe('generateQuickActions', () => {
@@ -196,6 +218,23 @@ describe('MaryPersona', () => {
       expect(actions).toContain('Prioritize these options');
       expect(actions).toContain('Identify key risks');
       expect(actions).toContain('Plan implementation');
+    });
+
+    it('should return plan-grill actions for plan-grill pathway', () => {
+      const actions = maryPersona.generateQuickActions({
+        currentBmadSession: {
+          pathway: 'plan-grill',
+          phase: 'intake',
+          progress: 0,
+        },
+      });
+
+      expect(actions).toEqual([
+        'Grill this plan',
+        'Sharpen the terminology',
+        'Find weak assumptions',
+        'Create a decision record',
+      ]);
     });
 
     it('should return user control actions after 10 exchanges (FR-AC9)', () => {
@@ -278,6 +317,17 @@ describe('Sub-Persona System', () => {
       expect(weights.devil_advocate).toBe(30);
       expect(weights.encouraging).toBe(15);
       expect(weights.realistic).toBe(30);
+
+      const total = weights.inquisitive + weights.devil_advocate + weights.encouraging + weights.realistic;
+      expect(total).toBe(100);
+    });
+
+    it('should have correct weights for plan-grill pathway', () => {
+      const weights = PATHWAY_WEIGHTS['plan-grill'];
+      expect(weights.inquisitive).toBe(25);
+      expect(weights.devil_advocate).toBe(40);
+      expect(weights.encouraging).toBe(10);
+      expect(weights.realistic).toBe(25);
 
       const total = weights.inquisitive + weights.devil_advocate + weights.encouraging + weights.realistic;
       expect(total).toBe(100);

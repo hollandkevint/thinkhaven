@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Clock, Mail, RefreshCw, ShieldOff } from 'lucide-react';
+import { ArrowRight, Clock, ListChecks, Mail, RefreshCw, ShieldOff } from 'lucide-react';
 
 export type WaitlistRecoveryStatus =
   | 'guest'
@@ -34,15 +34,15 @@ function statusContent(status: WaitlistRecoveryStatus, fromInvite: boolean | und
       return {
         icon: Mail,
         eyebrow: 'Invite received',
-        title: 'Your beta request is queued',
-        body: 'This invite brought you to the right place. Access still opens only after an operator approves your account.',
+        title: 'Your invite is recorded',
+        body: 'Sign in with the invited email. Workspace access opens after the beta access check confirms the account.',
       };
     case 'revoked':
       return {
         icon: ShieldOff,
         eyebrow: 'Access paused',
-        title: 'Your beta access needs support',
-        body: 'This account is not currently approved for the beta. Contact support if you expected to have access.',
+        title: 'This account is not currently approved',
+        body: 'The workspace remains protected. Contact support if you expected this account to have beta access.',
       };
     case 'missing':
       return {
@@ -54,9 +54,9 @@ function statusContent(status: WaitlistRecoveryStatus, fromInvite: boolean | und
     case 'unavailable':
       return {
         icon: RefreshCw,
-        eyebrow: 'Status unavailable',
-        title: 'We could not check beta access',
-        body: 'The access service is temporarily unavailable. Try again in a moment or contact support if this persists.',
+        eyebrow: 'Access check unavailable',
+        title: 'We could not check the beta access list',
+        body: 'The access service is temporarily unavailable. Saved workspaces stay protected until the check succeeds.',
       };
     case 'guest':
       return {
@@ -64,8 +64,8 @@ function statusContent(status: WaitlistRecoveryStatus, fromInvite: boolean | und
         eyebrow: fromInvite ? 'Invite link opened' : 'Beta waitlist',
         title: fromInvite ? 'Sign in or join to continue' : 'You are on the waitlist path',
         body: fromInvite
-          ? 'Create an account or sign in so we can connect this invite with your beta request.'
-          : 'ThinkHaven beta access opens gradually while the product is tuned for early users.',
+          ? 'Create an account or sign in so the invite can be matched to your workspace access.'
+          : 'ThinkHaven beta access opens gradually while saved decision work is reviewed for product capacity.',
       };
     case 'pending':
     default:
@@ -73,8 +73,50 @@ function statusContent(status: WaitlistRecoveryStatus, fromInvite: boolean | und
         icon: Clock,
         eyebrow: 'Pending approval',
         title: 'Your beta request is pending',
-        body: 'You are signed in and on the list. We will email you when your account is approved.',
+        body: 'You are signed in and on the list. We will email you when the account is approved for saved workspace access.',
       };
+  }
+}
+
+function betaAccessSteps(status: WaitlistRecoveryStatus) {
+  switch (status) {
+    case 'pending':
+      return [
+        'Your request is on the beta access list.',
+        'Approval is manual while saved workspaces are capacity-limited.',
+        'You will receive an email when access is active.',
+      ];
+    case 'invited':
+      return [
+        'The invite link reached ThinkHaven.',
+        'Sign in or create the account tied to the invite.',
+        'Access opens after the account check succeeds.',
+      ];
+    case 'revoked':
+      return [
+        'This account is not approved for beta workspace access.',
+        'No workspace access changes are made from this screen.',
+        'Support can review the account status.',
+      ];
+    case 'unavailable':
+      return [
+        'The beta access service did not respond.',
+        'Your workspace remains protected.',
+        'Refresh the status check or contact support if it persists.',
+      ];
+    case 'missing':
+      return [
+        'Join the beta access list with your sign-in email.',
+        'Keep using the guest trial while the request is reviewed.',
+        'Approved accounts can save sessions and artifacts.',
+      ];
+    case 'guest':
+    default:
+      return [
+        'Use the guest trial without an account.',
+        'Join the beta access list when you need saved workspaces.',
+        'Approved accounts can save sessions and artifacts.',
+      ];
   }
 }
 
@@ -91,9 +133,16 @@ export default function WaitlistStatusPanel({
   const Icon = content.icon;
   const joinedDate = formatDate(joinedAt);
   const invitedDate = formatDate(invitedAt);
+  const steps = betaAccessSteps(status);
+  const primaryAction = status === 'guest' || status === 'missing'
+    ? { href: '/signup', label: 'Sign up', icon: ArrowRight }
+    : status === 'unavailable'
+      ? { href: '/waitlist', label: 'Refresh status', icon: RefreshCw }
+      : { href: '/login', label: 'Refresh sign-in', icon: RefreshCw };
+  const PrimaryIcon = primaryAction.icon;
 
   return (
-    <section className="mx-auto w-full max-w-2xl px-6 py-16">
+    <section className="mx-auto w-full max-w-3xl px-6 py-16">
       <div className="rounded-lg border border-ink/10 bg-cream p-6 shadow-sm">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
           <div className="flex size-12 items-center justify-center rounded-md bg-terracotta/10 text-terracotta">
@@ -143,24 +192,31 @@ export default function WaitlistStatusPanel({
               </dl>
             )}
 
+            <div className="mt-6 border-t border-ink/10 pt-5">
+              <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <ListChecks className="size-4 text-terracotta" aria-hidden="true" />
+                <h2>Beta access list</h2>
+              </div>
+              <ol className="mt-3 space-y-2 text-sm leading-relaxed text-ink-light">
+                {steps.map((step, index) => (
+                  <li key={step} className="flex gap-3">
+                    <span className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-parchment text-xs font-semibold text-slate-blue">
+                      {index + 1}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              {status === 'guest' || status === 'missing' ? (
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-terracotta px-4 py-2 text-sm font-semibold text-cream transition hover:bg-terracotta-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta/40"
-                >
-                  Sign up
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-parchment px-4 py-2 text-sm font-semibold text-ink transition hover:bg-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta/40"
-                >
-                  Refresh sign-in
-                  <RefreshCw className="size-4" aria-hidden="true" />
-                </Link>
-              )}
+              <Link
+                href={primaryAction.href}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-terracotta px-4 py-2 text-sm font-semibold text-cream transition hover:bg-terracotta-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta/40"
+              >
+                {primaryAction.label}
+                <PrimaryIcon className="size-4" aria-hidden="true" />
+              </Link>
               <a
                 href="mailto:kevin@kevintholland.com?subject=ThinkHaven%20beta%20access"
                 className="inline-flex items-center justify-center rounded-md border border-ink/10 px-4 py-2 text-sm font-semibold text-slate-blue transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta/40"

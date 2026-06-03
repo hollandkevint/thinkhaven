@@ -5,7 +5,8 @@
  */
 
 import { supabase } from '@/lib/supabase/client'
-import { GuestSessionStore, GuestMessage } from './session-store'
+import { GuestSessionStore } from './session-store'
+import { getPathwayConfig } from '@/lib/session/pathway-config'
 
 export interface MigrationResult {
   success: boolean
@@ -52,15 +53,19 @@ export class SessionMigration {
       const autoTitle = firstUserMsg
         ? firstUserMsg.content.split(/\s+/).slice(0, 6).join(' ')
         : 'Guest Session'
+      const migratedPathway = guestData.pathway === 'plan-grill' ? 'plan-grill' : 'quick-decision'
+      const planGrillConfig = migratedPathway === 'plan-grill'
+        ? getPathwayConfig('plan-grill')
+        : undefined
 
       const { data: newSession, error: createError } = await supabase
         .from('bmad_sessions')
         .insert({
           user_id: userId,
           workspace_id: userId,
-          pathway: 'quick-decision',
+          pathway: migratedPathway,
           title: autoTitle,
-          current_phase: 'discovery',
+          current_phase: planGrillConfig?.phase || 'discovery',
           current_template: 'general',
           current_step: 'chat',
           templates: [],
@@ -68,7 +73,7 @@ export class SessionMigration {
           status: 'active',
           overall_completion: 0,
           message_count: chatMessages.filter(m => m.role === 'user').length,
-          message_limit: 10,
+          message_limit: planGrillConfig?.messageLimit || 10,
           chat_context: chatMessages,
         })
         .select('id')
@@ -142,6 +147,7 @@ export class SessionMigration {
 
     return {
       sessionId: session.id,
+      pathway: session.pathway,
       messageCount: session.messageCount,
       totalMessages: session.messages.length,
       createdAt: session.createdAt,

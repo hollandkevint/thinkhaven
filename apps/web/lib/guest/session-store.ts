@@ -14,6 +14,7 @@ export interface GuestMessage {
 
 export interface GuestSession {
   id: string
+  pathway: 'new-idea' | 'plan-grill'
   messages: GuestMessage[]
   messageCount: number
   createdAt: string
@@ -22,6 +23,12 @@ export interface GuestSession {
 
 const STORAGE_KEY = 'thinkhaven_guest_session'
 const MAX_MESSAGES = 10
+
+type GuestPathway = GuestSession['pathway']
+
+function normalizePathway(pathway?: string): GuestPathway {
+  return pathway === 'plan-grill' ? 'plan-grill' : 'new-idea'
+}
 
 export class GuestSessionStore {
   /**
@@ -35,7 +42,10 @@ export class GuestSessionStore {
       if (!data) return null
 
       const session = JSON.parse(data) as GuestSession
-      return session
+      return {
+        ...session,
+        pathway: normalizePathway(session.pathway)
+      }
     } catch (error) {
       console.error('Failed to read guest session:', error)
       return null
@@ -45,9 +55,10 @@ export class GuestSessionStore {
   /**
    * Create new guest session
    */
-  static createSession(): GuestSession {
+  static createSession(pathway: GuestPathway = 'new-idea'): GuestSession {
     const session: GuestSession = {
       id: `guest-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      pathway,
       messages: [],
       messageCount: 0,
       createdAt: new Date().toISOString(),
@@ -61,10 +72,16 @@ export class GuestSessionStore {
   /**
    * Get or create guest session
    */
-  static getOrCreateSession(): GuestSession {
+  static getOrCreateSession(pathway?: GuestPathway): GuestSession {
     const existing = this.getSession()
-    if (existing) return existing
-    return this.createSession()
+    if (!existing) return this.createSession(pathway ?? 'new-idea')
+
+    if (pathway && existing.messages.length === 0 && existing.pathway !== pathway) {
+      existing.pathway = pathway
+      this.saveSession(existing)
+    }
+
+    return existing
   }
 
   /**
@@ -84,8 +101,8 @@ export class GuestSessionStore {
   /**
    * Add message to session
    */
-  static addMessage(role: 'user' | 'assistant', content: string): GuestSession {
-    const session = this.getOrCreateSession()
+  static addMessage(role: 'user' | 'assistant', content: string, pathway?: GuestPathway): GuestSession {
+    const session = this.getOrCreateSession(pathway)
 
     const message: GuestMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -143,12 +160,14 @@ export class GuestSessionStore {
     sessionId: string
     messages: GuestMessage[]
     messageCount: number
+    pathway: GuestPathway
   } | null {
     const session = this.getSession()
     if (!session) return null
 
     return {
       sessionId: session.id,
+      pathway: session.pathway,
       messages: session.messages,
       messageCount: session.messageCount
     }

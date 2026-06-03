@@ -33,14 +33,6 @@ export default function Home() {
           <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
             {/* Left Column: Copy */}
             <div className="text-center lg:text-left mb-12 lg:mb-0">
-              {/* Beta Badge */}
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-forest/10 text-forest text-xs font-display font-medium tracking-wider uppercase mb-6 animate-fadeIn"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-forest animate-beta-pulse" />
-                Beta
-              </span>
-
               <h1
                 className="text-4xl md:text-5xl lg:text-6xl font-medium font-display text-ink mb-6 leading-[1.1] tracking-tight animate-fadeIn"
               >
@@ -71,13 +63,28 @@ export default function Home() {
                     <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="group px-8 py-5 text-lg font-medium font-display border-ink/20 text-ink hover:bg-parchment transition-all duration-200"
+                  asChild
+                >
+                  <Link href="/try?mode=plan-grill">
+                    Grill a Plan
+                    <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Button>
               </div>
 
               <p
                 className="text-sm text-slate-blue animate-fadeIn"
                 style={{ animationDelay: '300ms' }}
               >
-                No account needed. No credit card. 10 free messages to see if it&apos;s for you.
+                No account needed for the guest trial. Saved workspace access is approved from the{' '}
+                <Link href="/waitlist" className="font-medium text-terracotta hover:text-terracotta-hover">
+                  beta access list
+                </Link>
+                .
               </p>
             </div>
 
@@ -287,8 +294,8 @@ export default function Home() {
                     className="group border-ink/20 text-ink hover:bg-parchment font-display"
                     asChild
                   >
-                    <Link href="/try">
-                      Try the Hosted Version
+                    <Link href="/try?mode=plan-grill">
+                      Grill a Plan
                       <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>

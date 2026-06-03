@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
 import AppLayout from '@/app/app/layout'
 import { checkBetaAccess } from '@/lib/auth/beta-access'
 import { headers } from 'next/headers'
@@ -45,5 +46,22 @@ describe('AppLayout', () => {
     expect(redirect).toHaveBeenCalledWith(
       '/login?redirect=%2Fapp%2Fadmin%2Fbeta'
     )
+  })
+
+  it('renders a protected recovery state when access cannot be verified', async () => {
+    vi.mocked(checkBetaAccess).mockResolvedValue({
+      user: null,
+      betaApproved: false,
+      status: 'unavailable',
+      isAdmin: false,
+      error: 'No Supabase client',
+    })
+
+    const result = await AppLayout({ children: <div>Protected child</div> })
+    const html = renderToStaticMarkup(result)
+
+    expect(html).toContain('Access check unavailable')
+    expect(html).toContain('Your workspace remains protected')
+    expect(html).not.toContain('Protected child')
   })
 })

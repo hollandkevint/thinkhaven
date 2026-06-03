@@ -368,7 +368,7 @@ export default function AppDashboardPage() {
           </div>
 
           {/* New Session CTA */}
-          <div className="mb-10">
+          <div className="mb-10 grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Link
               href="/app/new"
               className="bg-parchment rounded-2xl shadow border border-ink/8 p-6 flex items-center gap-4 transition-all duration-200 hover:shadow-md active:scale-[0.98] cursor-pointer"
@@ -382,6 +382,22 @@ export default function AppDashboardPage() {
                 </h3>
                 <p className="font-body text-sm leading-relaxed text-ink-light">
                   Share your idea and Mary will pressure-test it through structured loops.
+                </p>
+              </div>
+            </Link>
+            <Link
+              href="/app/new?pathway=plan-grill"
+              className="bg-cream rounded-2xl shadow border border-terracotta/20 p-6 flex items-center gap-4 transition-all duration-200 hover:shadow-md active:scale-[0.98] cursor-pointer"
+            >
+              <div className="w-12 h-12 bg-ink rounded-full flex items-center justify-center flex-shrink-0">
+                <Pencil className="w-5 h-5 text-cream" />
+              </div>
+              <div>
+                <h3 className="font-display text-lg font-medium text-ink mb-1">
+                  Grill a plan
+                </h3>
+                <p className="font-body text-sm leading-relaxed text-ink-light">
+                  Paste a plan and supporting docs. Mary will challenge terms, assumptions, and decisions one branch at a time.
                 </p>
               </div>
             </Link>

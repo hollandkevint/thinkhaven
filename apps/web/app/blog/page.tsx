@@ -72,9 +72,6 @@ export default function BlogPage() {
                     className="group bg-parchment border-ink/8 hover:border-terracotta/40 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    {/* Decorative corner */}
-                    <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-terracotta/20 rounded-tl-lg transition-colors group-hover:border-terracotta/40" />
-
                     <CardContent className="p-8">
                       <div className="flex flex-wrap gap-2 mb-4">
                         {post.tags.map(tag => (

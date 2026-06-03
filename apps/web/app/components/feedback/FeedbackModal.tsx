@@ -80,7 +80,7 @@ export function FeedbackModal() {
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => { if (!open) close() }}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50 data-[state=open]:animate-fadeIn" />
+        <Dialog.Overlay className="fixed inset-0 bg-ink/45 z-50 data-[state=open]:animate-fadeIn" />
         <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream rounded-lg shadow-xl max-w-lg w-full mx-4 z-50 p-6 focus:outline-none">
           <Dialog.Title className="font-display text-lg font-semibold text-ink mb-1">
             {submitted ? 'Thank you!' : 'Send Feedback'}

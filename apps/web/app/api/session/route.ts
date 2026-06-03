@@ -2,25 +2,7 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
 import { RateLimiter } from '@/lib/security/rate-limiter';
-
-interface PathwayConfig {
-  id: string;
-  phase: string;
-  messageLimit: number;
-  defaultTitle: string;
-}
-
-const PATHWAYS: Record<string, PathwayConfig> = {
-  'decision': { id: 'decision', phase: 'discovery', messageLimit: 15, defaultTitle: 'New Decision' },
-  'product-idea': { id: 'product-idea', phase: 'discovery', messageLimit: 20, defaultTitle: 'New Product Idea' },
-  'strategy-review': { id: 'strategy-review', phase: 'discovery', messageLimit: 25, defaultTitle: 'Strategy Review' },
-  'explore': { id: 'explore', phase: 'discovery', messageLimit: 20, defaultTitle: 'New Session' },
-  // Legacy pathways (existing sessions still reference these)
-  'quick-decision': { id: 'quick-decision', phase: 'discovery', messageLimit: 10, defaultTitle: 'Quick Decision' },
-  'deep-analysis': { id: 'deep-analysis', phase: 'discovery', messageLimit: 30, defaultTitle: 'Deep Analysis' },
-  'board-of-directors': { id: 'board-of-directors', phase: 'discovery', messageLimit: 40, defaultTitle: 'Board Session' },
-  'strategy-sprint': { id: 'strategy-sprint', phase: 'discovery', messageLimit: 20, defaultTitle: 'Strategy Sprint' },
-};
+import { getPathwayConfig } from '@/lib/session/pathway-config';
 
 /**
  * POST /api/session - Create a new session.
@@ -52,7 +34,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const pathwayId = body.pathway || 'explore';
 
-    const pathway = PATHWAYS[pathwayId];
+    const pathway = getPathwayConfig(pathwayId);
     if (!pathway) {
       return new Response(JSON.stringify({ error: 'Invalid pathway' }), {
         status: 400,
