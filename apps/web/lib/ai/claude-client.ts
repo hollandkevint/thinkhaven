@@ -6,6 +6,7 @@ type ToolUseBlock = Anthropic.Messages.ToolUseBlock;
 type TextBlock = Anthropic.Messages.TextBlock;
 import { maryPersona, type CoachingContext } from './mary-persona';
 import { MARY_TOOLS } from './tools/index';
+import { isOpenRouterConfigured, openRouterComplete } from './openrouter-client';
 
 const DEFAULT_MODEL = 'claude-sonnet-4-20250514';
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
@@ -25,6 +26,29 @@ function getAnthropicClient(): Anthropic {
     console.log('[Claude Client] Initialized');
   }
   return anthropic;
+}
+
+/**
+ * Whether an Anthropic failure should trigger the OpenRouter fallback.
+ * Credit-exhausted (402), rate-limited (429), and upstream 5xx are transient/provider
+ * failures worth retrying elsewhere; a missing API key means Anthropic can't run at all.
+ * Other 4xx (e.g. 400 invalid request) are re-thrown unmasked so real bugs surface.
+ */
+function isFallbackWorthy(error: unknown): boolean {
+  const status = (error as { status?: number })?.status;
+  if (typeof status === 'number') {
+    return status === 402 || status === 429 || status >= 500;
+  }
+  if (error instanceof Error && error.message.includes('ANTHROPIC_API_KEY')) {
+    return true;
+  }
+  return false;
+}
+
+function describeError(error: unknown): string {
+  const status = (error as { status?: number })?.status;
+  if (typeof status === 'number') return `status ${status}`;
+  return error instanceof Error ? error.message : 'unknown error';
 }
 
 export interface TokenUsage {
@@ -182,6 +206,35 @@ export class ClaudeClient {
    * Used for server-side synthesis such as the guest decision-record generation.
    */
   async complete(options: {
+    system: string;
+    prompt: string;
+    maxTokens?: number;
+    temperature?: number;
+  }): Promise<string> {
+    // Manual override for local/testing: force OpenRouter without spending Anthropic credit.
+    if (process.env.AI_PROVIDER?.trim() === 'openrouter') {
+      if (isOpenRouterConfigured()) {
+        return openRouterComplete(options);
+      }
+      console.warn('[Claude Client] AI_PROVIDER=openrouter but OPENROUTER_API_KEY is unset; using Anthropic.');
+    }
+
+    try {
+      return await this.completeWithAnthropic(options);
+    } catch (error) {
+      // Anthropic is primary; OpenRouter is the fallback when Anthropic is unavailable
+      // (credit exhausted, rate-limited, upstream 5xx, or missing key).
+      if (isFallbackWorthy(error) && isOpenRouterConfigured()) {
+        console.warn(
+          `[Claude Client] Anthropic synthesis failed (${describeError(error)}); falling back to OpenRouter.`,
+        );
+        return openRouterComplete(options);
+      }
+      throw error;
+    }
+  }
+
+  private async completeWithAnthropic(options: {
     system: string;
     prompt: string;
     maxTokens?: number;
