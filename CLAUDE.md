@@ -38,7 +38,7 @@ Migrations: `apps/web/supabase/migrations/` (001 → 017, sequential, never skip
 
 ## Environment Variables
 
-See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_APP_URL`
+See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_APP_URL`. Optional: `OPENROUTER_API_KEY` (server-only fallback for guest synthesis when Anthropic is unavailable; `OPENROUTER_MODEL` and `AI_PROVIDER=openrouter` tune it — streaming/tool chat paths are not covered).
 
 ## Testing
 
