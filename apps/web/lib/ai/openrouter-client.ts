@@ -9,7 +9,9 @@
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-// Same model family as the Anthropic default, expressed as an OpenRouter model id.
+// Degraded fallback for synthesis when Anthropic is unavailable. Synthesis primary is now
+// the frontier tier (Fable 5) via model-config.ts; this is intentionally a cheaper, widely
+// available model for the down-path. Override with OPENROUTER_MODEL to match the primary tier.
 const DEFAULT_OPENROUTER_MODEL = 'anthropic/claude-sonnet-4';
 
 const REQUEST_TIMEOUT_MS = 60_000; // Mirrors the Anthropic complete() timeout override.

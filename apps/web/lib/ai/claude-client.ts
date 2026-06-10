@@ -7,9 +7,7 @@ type TextBlock = Anthropic.Messages.TextBlock;
 import { maryPersona, type CoachingContext } from './mary-persona';
 import { MARY_TOOLS } from './tools/index';
 import { isOpenRouterConfigured, openRouterComplete } from './openrouter-client';
-
-const DEFAULT_MODEL = 'claude-sonnet-4-20250514';
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+import { modelFor, samplingFor, estimateCostUsd } from './model-config';
 
 // Initialize Anthropic client (lazy initialization to avoid build-time errors)
 let anthropic: Anthropic | null = null;
@@ -108,17 +106,18 @@ export class ClaudeClient {
       ];
 
       const client = getAnthropicClient();
+      const model = modelFor('chat');
 
       const stream = await client.messages.create({
-        model: ANTHROPIC_MODEL, // Claude Sonnet 4 - upgraded per API docs
+        model,
         max_tokens: 4096,
-        temperature: 0.7,
+        ...samplingFor(model, 0.7),
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages,
         stream: true,
       });
 
-      const { content, usage } = await this.processStreamWithUsage(stream);
+      const { content, usage } = await this.processStreamWithUsage(stream, model);
       
       if (usage && this.tokenUsageCallback) {
         this.tokenUsageCallback(usage);
@@ -135,7 +134,7 @@ export class ClaudeClient {
     }
   }
 
-  private async processStreamWithUsage(stream: AsyncIterable<unknown>): Promise<{
+  private async processStreamWithUsage(stream: AsyncIterable<unknown>, model: string): Promise<{
     content: AsyncIterable<string>,
     usage?: TokenUsage
   }> {
@@ -172,8 +171,8 @@ export class ClaudeClient {
                 cost_estimate_usd: 0
               };
               usage.total_tokens = usage.input_tokens + usage.output_tokens;
-              // Rough cost estimate for Sonnet (input: $3/1M, output: $15/1M). Adjust if using Haiku via ANTHROPIC_MODEL.
-              usage.cost_estimate_usd = (usage.input_tokens * 0.000003) + (usage.output_tokens * 0.000015);
+              // Cost estimate priced by the resolved model (see model-config.ts).
+              usage.cost_estimate_usd = estimateCostUsd(model, usage.input_tokens, usage.output_tokens);
             }
           }
         }
@@ -190,7 +189,7 @@ export class ClaudeClient {
     try {
       const client = getAnthropicClient();
       const response = await client.messages.create({
-        model: ANTHROPIC_MODEL, // Claude Sonnet 4 - upgraded per API docs
+        model: modelFor('util'),
         max_tokens: 10,
         messages: [{ role: 'user', content: 'test' }],
       });
@@ -241,10 +240,11 @@ export class ClaudeClient {
     temperature?: number;
   }): Promise<string> {
     const client = getAnthropicClient();
+    const model = modelFor('synthesis');
     const response = await client.messages.create({
-      model: ANTHROPIC_MODEL,
+      model,
       max_tokens: options.maxTokens ?? 2048,
-      temperature: options.temperature ?? 0.4,
+      ...samplingFor(model, options.temperature ?? 0.4),
       system: options.system,
       messages: [{ role: 'user', content: options.prompt }],
     }, { timeout: 60_000 }); // Override the SDK's 10-minute default so a hung call cannot pin a serverless function.
@@ -284,11 +284,12 @@ export class ClaudeClient {
 
       const client = getAnthropicClient();
       const tools = options?.tools || MARY_TOOLS;
+      const model = modelFor('board');
 
       const response = await client.messages.create({
-        model: ANTHROPIC_MODEL,
+        model,
         max_tokens: options?.maxTokens || 4096,
-        temperature: 0.7,
+        ...samplingFor(model, 0.7),
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages,
         tools: tools,
@@ -316,7 +317,7 @@ export class ClaudeClient {
         input_tokens: response.usage.input_tokens,
         output_tokens: response.usage.output_tokens,
         total_tokens: response.usage.input_tokens + response.usage.output_tokens,
-        cost_estimate_usd: (response.usage.input_tokens * 0.000003) + (response.usage.output_tokens * 0.000015),
+        cost_estimate_usd: estimateCostUsd(model, response.usage.input_tokens, response.usage.output_tokens),
       };
 
       if (this.tokenUsageCallback) {
@@ -355,14 +356,15 @@ export class ClaudeClient {
     try {
       const client = getAnthropicClient();
       const tools = options?.tools || MARY_TOOLS;
+      const model = modelFor('board');
 
       // Conversation already includes tool results as the last user message
       const messages = [...conversationHistory];
 
       const response = await client.messages.create({
-        model: ANTHROPIC_MODEL,
+        model,
         max_tokens: options?.maxTokens || 4096,
-        temperature: 0.7,
+        ...samplingFor(model, 0.7),
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages as Anthropic.MessageParam[],
         tools: tools,
@@ -389,7 +391,7 @@ export class ClaudeClient {
         input_tokens: response.usage.input_tokens,
         output_tokens: response.usage.output_tokens,
         total_tokens: response.usage.input_tokens + response.usage.output_tokens,
-        cost_estimate_usd: (response.usage.input_tokens * 0.000003) + (response.usage.output_tokens * 0.000015),
+        cost_estimate_usd: estimateCostUsd(model, response.usage.input_tokens, response.usage.output_tokens),
       };
 
       if (this.tokenUsageCallback) {
