@@ -61,6 +61,7 @@ export interface AddCreditsResult {
  */
 export async function getCreditBalance(userId: string): Promise<CreditBalance | null> {
   const supabase = await createClient();
+  if (!supabase) return null;
 
   const { data, error } = await supabase
     .from('user_credits')
@@ -88,6 +89,7 @@ export async function hasCredits(userId: string, required: number = 1, userEmail
   // Admin bypass — use provided email to avoid extra getUser() round-trip
   const email = userEmail ?? (await (async () => {
     const supabase = await createClient();
+    if (!supabase) return undefined;
     const { data: { user } } = await supabase.auth.getUser();
     return user?.email;
   })());
@@ -130,6 +132,7 @@ export async function deductCredit(
   // Admin bypass — use provided email to avoid extra getUser() round-trip
   const email = userEmail ?? (await (async () => {
     const supabase = await createClient();
+    if (!supabase) return undefined;
     const { data: { user } } = await supabase.auth.getUser();
     return user?.email;
   })());
@@ -153,6 +156,13 @@ export async function deductCredit(
 
   try {
     const supabase = await createClient();
+    if (!supabase) {
+      return {
+        success: false,
+        balance: 0,
+        message: 'Service unavailable',
+      };
+    }
     const { data, error } = await supabase.rpc('deduct_credit_transaction', {
       p_user_id: userId,
       p_session_id: sessionId || null,
@@ -210,6 +220,13 @@ export async function addCredits(options: {
   }
 
   const supabase = await createClient();
+  if (!supabase) {
+    return {
+      success: false,
+      balance: 0,
+      message: 'Service unavailable',
+    };
+  }
 
   try {
     const { data, error } = await supabase.rpc('add_credits_transaction', {
@@ -256,6 +273,7 @@ export async function getCreditHistory(
   limit: number = 50
 ): Promise<CreditTransaction[]> {
   const supabase = await createClient();
+  if (!supabase) return [];
 
   const { data, error } = await supabase
     .from('credit_transactions')

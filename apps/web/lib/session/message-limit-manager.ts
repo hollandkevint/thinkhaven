@@ -63,6 +63,7 @@ export async function checkMessageLimit(sessionId: string): Promise<MessageLimit
   }
 
   const supabase = await createClient();
+  if (!supabase) return null;
 
   try {
     const { data, error } = await supabase.rpc('check_message_limit', {
@@ -108,6 +109,7 @@ export async function incrementMessageCount(sessionId: string): Promise<Incremen
   }
 
   const supabase = await createClient();
+  if (!supabase) return null;
 
   try {
     const { data, error } = await supabase.rpc('increment_message_count', {

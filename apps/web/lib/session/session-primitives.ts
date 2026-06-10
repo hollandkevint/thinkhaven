@@ -106,6 +106,12 @@ export async function createSessionRecord(
   options: CreateSessionOptions
 ): Promise<string> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   // Credit check (optional, defaults to true)
   if (options.requireCredits !== false) {
@@ -168,6 +174,12 @@ export async function loadSessionState(
   sessionId: string
 ): Promise<SessionRecord | null> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   const { data, error } = await supabase
     .from('bmad_sessions')
@@ -234,6 +246,12 @@ export async function persistSessionState(
   }>
 ): Promise<void> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
@@ -266,6 +284,12 @@ export async function persistSessionState(
  */
 export async function deleteSession(sessionId: string): Promise<void> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   const { error } = await supabase
     .from('bmad_sessions')
@@ -338,6 +362,12 @@ export async function readPhaseState(
   phaseId: string
 ): Promise<PhaseState | null> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   const { data, error } = await supabase
     .from('bmad_session_progress')
@@ -378,6 +408,12 @@ export async function completePhase(
   keyOutcomes?: string[]
 ): Promise<PhaseCompletionResult> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   // Load current session state
   const session = await loadSessionState(sessionId);
@@ -457,6 +493,12 @@ export async function recordInsight(
   category: SessionInsight['category'] = 'general'
 ): Promise<string> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   // Get current phase
   const session = await loadSessionState(sessionId);
@@ -500,6 +542,12 @@ export async function getSessionInsights(
   limit: number = 50
 ): Promise<SessionInsight[]> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   let query = supabase
     .from('bmad_phase_outputs')
@@ -550,6 +598,12 @@ export async function recordUserResponse(
   }
 ): Promise<void> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   const { error } = await supabase
     .from('bmad_user_responses')
@@ -582,6 +636,12 @@ export async function getActiveSessions(
   workspaceId?: string
 ): Promise<SessionRecord[]> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   let query = supabase
     .from('bmad_sessions')
@@ -630,6 +690,12 @@ export async function sessionBelongsToUser(
   userId: string
 ): Promise<boolean> {
   const supabase = await createClient();
+  if (!supabase) {
+    throw new BmadMethodError(
+      'Supabase client unavailable',
+      'SUPABASE_UNAVAILABLE'
+    );
+  }
 
   const { data, error } = await supabase
     .from('bmad_sessions')
