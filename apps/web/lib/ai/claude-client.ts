@@ -59,7 +59,6 @@ export interface TokenUsage {
 export interface StreamingResponse {
   id: string;
   content: AsyncIterable<string>;
-  usage?: TokenUsage;
 }
 
 export interface ConversationMessage {
@@ -117,16 +116,15 @@ export class ClaudeClient {
         stream: true,
       });
 
-      const { content, usage } = await this.processStreamWithUsage(stream, model);
-      
-      if (usage && this.tokenUsageCallback) {
-        this.tokenUsageCallback(usage);
-      }
+      // Usage arrives in the final stream chunks, so it can only be reported after the
+      // consumer drains the stream — hence the completion callback, not a return value.
+      const { content } = await this.processStreamWithUsage(stream, model, (usage) => {
+        this.tokenUsageCallback?.(usage);
+      });
 
       return {
         id: crypto.randomUUID(),
-        content,
-        usage
+        content
       };
     } catch (error) {
       console.error('Claude API Error:', error);
@@ -134,9 +132,12 @@ export class ClaudeClient {
     }
   }
 
-  private async processStreamWithUsage(stream: AsyncIterable<unknown>, model: string): Promise<{
-    content: AsyncIterable<string>,
-    usage?: TokenUsage
+  private async processStreamWithUsage(
+    stream: AsyncIterable<unknown>,
+    model: string,
+    onUsage?: (usage: TokenUsage) => void
+  ): Promise<{
+    content: AsyncIterable<string>
   }> {
     const chunks: string[] = [];
     let usage: TokenUsage | undefined;
@@ -177,11 +178,13 @@ export class ClaudeClient {
           }
         }
       }
+      if (usage && onUsage) {
+        onUsage(usage);
+      }
     };
 
     return {
-      content: processedStream(),
-      usage
+      content: processedStream()
     };
   }
 

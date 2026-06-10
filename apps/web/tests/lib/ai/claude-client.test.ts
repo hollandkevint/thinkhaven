@@ -1,212 +1,176 @@
-import { ClaudeClient, claudeClient } from '@/lib/ai/claude-client';
-import { type CoachingContext } from '@/lib/ai/mary-persona';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { CoachingContext } from '@/lib/ai/mary-persona';
 
-// Mock Anthropic SDK
-jest.mock('@anthropic-ai/sdk', () => {
-  return {
-    __esModule: true,
-    default: jest.fn().mockImplementation(() => ({
-      messages: {
-        create: jest.fn()
-      }
-    }))
-  };
-});
+// Vitest-native coverage for ClaudeClient streaming chat (sendMessage) and testConnection.
+// Ported from the legacy jest version; expectations match the per-workload model router
+// (lib/ai/model-config.ts): chat -> claude-sonnet-4-6, util -> claude-haiku-4-5.
 
-// Mock the mary-persona module
-jest.mock('@/lib/ai/mary-persona', () => ({
-  maryPersona: {
-    generateSystemPrompt: jest.fn().mockReturnValue('Mock system prompt')
-  }
+const mockCreate = vi.fn();
+const mockGenerateSystemPrompt = vi.fn().mockReturnValue('Mock system prompt');
+
+vi.mock('@anthropic-ai/sdk', () => ({
+  __esModule: true,
+  default: vi.fn().mockImplementation(() => ({ messages: { create: mockCreate } })),
 }));
 
-import Anthropic from '@anthropic-ai/sdk';
-import { maryPersona } from '@/lib/ai/mary-persona';
+vi.mock('@/lib/ai/mary-persona', () => ({
+  maryPersona: { generateSystemPrompt: (ctx: unknown) => mockGenerateSystemPrompt(ctx) },
+}));
 
-const mockAnthropic = Anthropic as jest.MockedClass<typeof Anthropic>;
-const mockCreate = jest.fn();
-const mockGenerateSystemPrompt = maryPersona.generateSystemPrompt as jest.Mock;
+vi.mock('@/lib/ai/tools/index', () => ({ MARY_TOOLS: [] }));
 
-beforeEach(() => {
-  jest.clearAllMocks();
-  mockAnthropic.mockImplementation(() => ({
-    messages: {
-      create: mockCreate
-    }
-  }) as any);
-});
+function streamOf(...chunks: unknown[]) {
+  return {
+    [Symbol.asyncIterator]: async function* () {
+      for (const c of chunks) yield c;
+    },
+  };
+}
+
+function textDelta(text: string) {
+  return { type: 'content_block_delta', delta: { text } };
+}
+
+async function drain(content: AsyncIterable<string>): Promise<string> {
+  let out = '';
+  for await (const piece of content) out += piece;
+  return out;
+}
+
+async function freshClient() {
+  // Re-import so the lazy Anthropic singleton inside the module is rebuilt per test.
+  vi.resetModules();
+  const mod = await import('@/lib/ai/claude-client');
+  return mod.claudeClient;
+}
 
 describe('ClaudeClient', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGenerateSystemPrompt.mockReturnValue('Mock system prompt');
+    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-test');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   describe('sendMessage', () => {
-    it('should send message with basic parameters', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { type: 'content_block_delta', delta: { text: 'Hello' } };
-          yield { type: 'content_block_delta', delta: { text: ' world' } };
-        }
-      };
+    it('sends the chat-tier request shape (model, sampling, system, stream)', async () => {
+      mockCreate.mockResolvedValue(streamOf(textDelta('Hello'), textDelta(' world')));
+      const client = await freshClient();
 
-      mockCreate.mockResolvedValue(mockStream);
-
-      const response = await claudeClient.sendMessage('Test message');
+      const response = await client.sendMessage('Test message');
 
       expect(mockCreate).toHaveBeenCalledWith({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4096,
         temperature: 0.7,
         system: 'Mock system prompt',
         messages: [{ role: 'user', content: 'Test message' }],
-        stream: true
+        stream: true,
       });
-
       expect(response).toHaveProperty('id');
-      expect(response).toHaveProperty('content');
+      await expect(drain(response.content)).resolves.toBe('Hello world');
     });
 
-    it('should include conversation history', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { type: 'content_block_delta', delta: { text: 'Response' } };
-        }
-      };
+    it('includes conversation history before the new message', async () => {
+      mockCreate.mockResolvedValue(streamOf(textDelta('Response')));
+      const client = await freshClient();
 
-      mockCreate.mockResolvedValue(mockStream);
+      await client.sendMessage('New message', [
+        { role: 'user', content: 'Previous user message' },
+        { role: 'assistant', content: 'Previous assistant response' },
+      ]);
 
-      const conversationHistory = [
-        { role: 'user' as const, content: 'Previous user message' },
-        { role: 'assistant' as const, content: 'Previous assistant response' }
-      ];
-
-      await claudeClient.sendMessage('New message', conversationHistory);
-
-      expect(mockCreate).toHaveBeenCalledWith({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 4096,
-        temperature: 0.7,
-        system: 'Mock system prompt',
-        messages: [
-          { role: 'user', content: 'Previous user message' },
-          { role: 'assistant', content: 'Previous assistant response' },
-          { role: 'user', content: 'New message' }
-        ],
-        stream: true
-      });
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [
+            { role: 'user', content: 'Previous user message' },
+            { role: 'assistant', content: 'Previous assistant response' },
+            { role: 'user', content: 'New message' },
+          ],
+        })
+      );
     });
 
-    it('should use coaching context when provided', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { type: 'content_block_delta', delta: { text: 'Response' } };
-        }
-      };
-
-      mockCreate.mockResolvedValue(mockStream);
+    it('passes coaching context to the persona prompt generator', async () => {
+      mockCreate.mockResolvedValue(streamOf(textDelta('Response')));
+      const client = await freshClient();
 
       const coachingContext: CoachingContext = {
         workspaceId: 'workspace-123',
-        userProfile: { experienceLevel: 'intermediate' }
+        userProfile: { experienceLevel: 'intermediate' },
       };
-
-      await claudeClient.sendMessage('Test message', [], coachingContext);
+      await client.sendMessage('Test message', [], coachingContext);
 
       expect(mockGenerateSystemPrompt).toHaveBeenCalledWith(coachingContext);
     });
 
-    it('should handle API errors gracefully', async () => {
+    it('wraps API errors in ClaudeApiError', async () => {
       mockCreate.mockRejectedValue(new Error('API Error'));
+      const client = await freshClient();
 
-      await expect(claudeClient.sendMessage('Test message')).rejects.toThrow('Failed to send message: API Error');
+      await expect(client.sendMessage('Test message')).rejects.toThrow(
+        'Failed to send message: API Error'
+      );
     });
 
-    it('should process token usage when available', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { type: 'content_block_delta', delta: { text: 'Hello' } };
-          yield { 
-            type: 'message_delta', 
-            usage: { input_tokens: 100, output_tokens: 50 }
-          };
-        }
-      };
+    it('reports token usage via callback after the stream is consumed', async () => {
+      mockCreate.mockResolvedValue(
+        streamOf(textDelta('Hello'), {
+          type: 'message_delta',
+          usage: { input_tokens: 100, output_tokens: 50 },
+        })
+      );
+      const client = await freshClient();
+      const usageCallback = vi.fn();
+      client.setTokenUsageCallback(usageCallback);
 
-      mockCreate.mockResolvedValue(mockStream);
-
-      const response = await claudeClient.sendMessage('Test message');
-      
-      expect(response.usage).toBeDefined();
-      expect(response.usage?.input_tokens).toBe(100);
-      expect(response.usage?.output_tokens).toBe(50);
-      expect(response.usage?.total_tokens).toBe(150);
-      expect(response.usage?.cost_estimate_usd).toBeGreaterThan(0);
-    });
-
-    it('should call token usage callback when set', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { type: 'content_block_delta', delta: { text: 'Hello' } };
-          yield { 
-            type: 'message_delta', 
-            usage: { input_tokens: 100, output_tokens: 50 }
-          };
-        }
-      };
-
-      mockCreate.mockResolvedValue(mockStream);
-
-      const usageCallback = jest.fn();
-      claudeClient.setTokenUsageCallback(usageCallback);
-
-      await claudeClient.sendMessage('Test message');
+      const response = await client.sendMessage('Test message');
+      // Usage arrives in the final stream chunks, so the callback fires on completion.
+      expect(usageCallback).not.toHaveBeenCalled();
+      await drain(response.content);
 
       expect(usageCallback).toHaveBeenCalledWith({
         input_tokens: 100,
         output_tokens: 50,
         total_tokens: 150,
-        cost_estimate_usd: expect.any(Number)
+        cost_estimate_usd: expect.any(Number),
       });
+      expect(usageCallback.mock.calls[0][0].cost_estimate_usd).toBeGreaterThan(0);
+    });
+
+    it('skips malformed chunks without breaking the stream', async () => {
+      mockCreate.mockResolvedValue(
+        streamOf({ type: 'invalid_chunk' }, textDelta('Valid text'), { malformed: 'chunk' })
+      );
+      const client = await freshClient();
+
+      const response = await client.sendMessage('Test message');
+
+      await expect(drain(response.content)).resolves.toBe('Valid text');
     });
   });
 
   describe('testConnection', () => {
-    it('should return true for successful connection', async () => {
+    it('returns true on success using the util tier', async () => {
       mockCreate.mockResolvedValue({ id: 'test-response' });
+      const client = await freshClient();
 
-      const result = await claudeClient.testConnection();
-
-      expect(result).toBe(true);
+      await expect(client.testConnection()).resolves.toBe(true);
       expect(mockCreate).toHaveBeenCalledWith({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-haiku-4-5',
         max_tokens: 10,
-        messages: [{ role: 'user', content: 'test' }]
+        messages: [{ role: 'user', content: 'test' }],
       });
     });
 
-    it('should return false for connection failure', async () => {
+    it('returns false on failure', async () => {
       mockCreate.mockRejectedValue(new Error('Connection failed'));
+      const client = await freshClient();
 
-      const result = await claudeClient.testConnection();
-
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('stream processing', () => {
-    it('should handle malformed chunks gracefully', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { type: 'invalid_chunk' };
-          yield { type: 'content_block_delta', delta: { text: 'Valid text' } };
-          yield { malformed: 'chunk' };
-        }
-      };
-
-      mockCreate.mockResolvedValue(mockStream);
-
-      const response = await claudeClient.sendMessage('Test message');
-      
-      // Should still work despite malformed chunks
-      expect(response).toHaveProperty('content');
-      expect(response).toHaveProperty('id');
+      await expect(client.testConnection()).resolves.toBe(false);
     });
   });
 });
