@@ -119,7 +119,8 @@ describe('Landing Page', () => {
     it('does not show the removed global onboarding modal copy', () => {
       render(<Home />)
       expect(screen.queryByText('ThinkHaven is a decision design system')).not.toBeInTheDocument()
-      expect(screen.getByText(/10 free messages/)).toBeInTheDocument()
+      // Positive control: the page rendered its real CTA ("10 free messages" copy moved to /try).
+      expect(screen.getAllByText('Try a Free Session').length).toBeGreaterThan(0)
     })
   })
 })

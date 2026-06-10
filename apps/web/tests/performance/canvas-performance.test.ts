@@ -131,7 +131,9 @@ describe('Canvas Performance Validation', () => {
         autoSave: 500, // <500ms
       }
 
-      expect(benchmarks.canvasModeSwitch).toBeLessThan(100)
+      // These compare declared targets against budget ceilings (spec consistency,
+      // not measured runtime). canvasModeSwitch's target IS the 100ms ceiling.
+      expect(benchmarks.canvasModeSwitch).toBeLessThanOrEqual(100)
       expect(benchmarks.mermaidRenderCached).toBeLessThan(100)
       expect(benchmarks.pngExport).toBeLessThan(5000)
     })
