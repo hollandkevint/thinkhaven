@@ -1,29 +1,31 @@
 ---
 name: ThinkHaven
-last_updated: 2026-05-22
+last_updated: 2026-06-10
 ---
 
 # ThinkHaven Strategy
 
 ## Target problem
 
-Builders, PMMs, product people, and consultants often bring half-baked ideas they do not recognize as half-baked. No one has said no yet, AI can amplify their confidence, and they lack a structured way to expose the idea to skeptical, useful perspectives before they build, pitch, or delegate.
+An independent advisor facing a vague or risky idea reaches for GenAI — which flatters, hallucinates, and maps the idea into a framework sloppily — or for borrowed McKinsey/BCG/PwC frameworks that give a generic map rather than a test of *this specific* idea. No one has said no yet, so the weak assumption stays buried. The hard part is drilling into the real problem and accurately mapping the idea onto the problem space before they pitch, build, or advise.
 
 ## Our approach
 
-ThinkHaven wins by making structured dissent and multi-perspective refinement cheap, repeatable, and artifact-producing. Instead of acting like a flattering chatbot, blank document, expensive consultant, or polite friend group, it stages board-style pressure tests that force the user to clarify intent, confront weak assumptions, and leave with a defensible next move.
+ThinkHaven wins with a multi-perspective adversarial stance that forces the idea to be mapped onto the problem space and committed to an artifact. Instead of one flattering voice, it stages a board of skeptical perspectives that drill the idea, expose weak assumptions, and won't let the session close without a defensible, mapped next move.
 
 ## Who it's for
 
-**Primary:** Independent consultants and expert service providers - They're hiring ThinkHaven to turn a vague or risky client idea into a sharper painkiller, defensible recommendation, and next move before they pitch, build, or advise.
+**Primary:** Fractional operators and independent advisors (fractional C-suite/VPs, solo strategy consultants) — They're hiring ThinkHaven to be the peer board they no longer have: pressure-testing a risky idea they're about to map into an unfamiliar domain before they pitch a client, advise a founder, or commit a company to a direction.
+
+**Secondary:** Product builders (PMs and senior engineers) — They hit the same half-baked-idea problem inside an org that already has some built-in dissent (design review, eng review), so they benefit from a sharper pressure test without anchoring the product roadmap.
 
 ## Key metrics
 
 - **Completed pressure tests** - Sessions that finish with a decision artifact; measured in product analytics and the database.
-- **Artifact usage** - Exports, downloads, and shares of decision artifacts, including Excalidraw-style visual diagrams; measured in product analytics.
-- **Open method traction** - Stars, forks, integrations, and skill usage from the public method kit; measured through GitHub and repo-linked distribution signals.
-- **Repeat expert usage** - Repeat sessions by consultants or expert service providers; measured in product analytics and account activity.
-- **Paid conversion** - Visitors or free users who put money down for hosted ThinkHaven; measured through billing and conversion analytics.
+- **Artifact share-out** - Decision artifacts an advisor exports or shares externally (to a client, founder, or board) — the tell that the output is defensible enough to put in front of the person paying them; measured in product analytics.
+- **Activated method forks** - Forks or skill installs of the public method kit that go on to produce at least one session; measured through GitHub and repo-linked distribution signals tied back to product analytics.
+- **Repeat advisor usage** - Repeat sessions by fractional operators and independent advisors, ideally across distinct engagements; measured in product analytics and account activity.
+- **Paid conversion** - Free users who put money down for hosted ThinkHaven; measured through billing and conversion analytics.
 
 ## Tracks
 
@@ -31,7 +33,7 @@ ThinkHaven wins by making structured dissent and multi-perspective refinement ch
 
 Make the ThinkHaven method kit credible, forkable, and useful on its own.
 
-_Why it serves the approach:_ It creates distribution, trust, and an open signal around the thinking system without exposing private platform internals.
+_Why it serves the approach:_ Advisors trust a method they can inspect and fork; the open kit creates distribution and an open signal without exposing private platform internals.
 
 ### Hosted pressure-test experience
 
@@ -41,15 +43,15 @@ _Why it serves the approach:_ The product has to deliver adaptive questioning, m
 
 ### Defensible artifacts
 
-Produce outputs consultants can trust, share, and use in real recommendations.
+Produce outputs an advisor can put in front of a paying client, founder, or board.
 
-_Why it serves the approach:_ The method only matters if it leaves behind a concrete artifact that sharpens intent, exposes assumptions, and supports a next move.
+_Why it serves the approach:_ The method only matters if it leaves behind a concrete artifact that sharpens intent, exposes assumptions, and survives the advisor's reputation bar with the person paying them.
 
 ### Simple paid product loop
 
 Keep the experience complete and lovable enough that payment feels like a natural upgrade, with a generous revenue model.
 
-_Why it serves the approach:_ The business works when the open method creates trust and the hosted execution layer is valuable enough for expert users to pay for.
+_Why it serves the approach:_ The business works when the open method builds trust and the hosted execution layer is valuable enough for fractional operators and advisors to pay for.
 
 ## Not working on
 
