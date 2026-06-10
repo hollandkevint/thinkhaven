@@ -163,8 +163,10 @@ export default function StreamingMessage({
   const isUser = role === 'user'
 
   return (
-    <div 
+    <div
       ref={messageRef}
+      role="group"
+      aria-label={isAssistant ? 'Message from Mary' : 'Your message'}
       className={`group flex gap-4 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${className}`}
       id={`message-${id}`}
     >
@@ -261,6 +263,7 @@ export default function StreamingMessage({
           <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
               className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
             >
               <svg 

@@ -3,8 +3,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import StreamingMessage from '@/app/components/chat/StreamingMessage'
 import { CoachingContext } from '@/lib/ai/mary-persona'
 
-// Mock the MarkdownRenderer component
+// Mock the MarkdownRenderer component (streaming render path)
 vi.mock('@/app/components/chat/MarkdownRenderer', () => ({
+  default: ({ content }: { content: string }) => <div data-testid="markdown-content">{content}</div>
+}))
+
+// Mock ArtifactAwareContent (non-streaming render path) — same testid so
+// assertions hold across both states; only one renders at a time.
+vi.mock('@/app/components/chat/ArtifactAwareContent', () => ({
   default: ({ content }: { content: string }) => <div data-testid="markdown-content">{content}</div>
 }))
 
@@ -85,10 +91,12 @@ describe('StreamingMessage', () => {
 
       expect(screen.getByText('You')).toBeInTheDocument()
       expect(screen.getByText('Hello, I need help with strategy')).toBeInTheDocument()
-      
-      // User messages should have different styling
-      const messageElement = screen.getByText('Hello, I need help with strategy')
-      expect(messageElement.closest('div')).toHaveClass('bg-primary', 'text-white')
+
+      // User bubble uses the terracotta-on-cream design system
+      const bubble = screen
+        .getByText('Hello, I need help with strategy')
+        .closest('[class*="rounded-2xl"]')
+      expect(bubble).toHaveClass('bg-terracotta', 'text-cream')
     })
 
     it('should render assistant message correctly', () => {
@@ -102,16 +110,17 @@ describe('StreamingMessage', () => {
 
       expect(screen.getByText('Mary')).toBeInTheDocument()
       expect(screen.getByTestId('markdown-content')).toHaveTextContent("I'll help you with your strategic planning")
-      
-      // Assistant messages should have different styling
-      const messageElement = screen.getByTestId('markdown-content').closest('div')
-      expect(messageElement).toHaveClass('bg-cream', 'border')
+
+      // Assistant bubble uses the cream-with-border design system
+      const bubble = screen.getByTestId('markdown-content').closest('[class*="rounded-2xl"]')
+      expect(bubble).toHaveClass('bg-cream', 'border')
     })
 
     it('should show timestamp when provided', () => {
-      render(<StreamingMessage {...defaultProps} />)
-      
-      // The timestamp should be formatted relative to now
+      // Relative formatting only fires for recent timestamps; old dates fall
+      // back to toLocaleDateString.
+      render(<StreamingMessage {...defaultProps} timestamp={new Date(Date.now() - 60_000)} />)
+
       expect(screen.getByText(/ago|Just now/)).toBeInTheDocument()
     })
 
@@ -138,9 +147,9 @@ describe('StreamingMessage', () => {
         />
       )
 
-      // Check for streaming visual indicator
-      const messageElement = screen.getByTestId('markdown-content').closest('div')
-      expect(messageElement).toHaveClass('ring-2', 'ring-blue-200')
+      // Check for streaming visual indicator (terracotta ring in the design system)
+      const bubble = screen.getByTestId('markdown-content').closest('[class*="rounded-2xl"]')
+      expect(bubble).toHaveClass('ring-2', 'ring-terracotta/20')
     })
 
     it('should not show action menu when streaming', () => {
@@ -165,26 +174,18 @@ describe('StreamingMessage', () => {
       expect(screen.getByTestId('action-menu')).toBeInTheDocument()
     })
 
-    it('should call onComplete when streaming finishes', async () => {
+    it('should call onComplete when the typing animation finishes', async () => {
       const onComplete = vi.fn()
-      const { rerender } = render(
+      // Short content so the 20ms/char typing interval completes quickly.
+      render(
         <StreamingMessage
           {...defaultProps}
           isStreaming={true}
+          content="Hi"
           onComplete={onComplete}
         />
       )
 
-      // Simulate streaming completion
-      rerender(
-        <StreamingMessage
-          {...defaultProps}
-          isStreaming={false}
-          onComplete={onComplete}
-        />
-      )
-
-      // onComplete should be called when streaming stops
       await waitFor(() => {
         expect(onComplete).toHaveBeenCalled()
       })
@@ -291,9 +292,9 @@ describe('StreamingMessage', () => {
 
       // Should show bookmark count
       expect(screen.getByText('1')).toBeInTheDocument()
-      
-      // Should show bookmark icon
-      const bookmarkIcon = screen.getByRole('img', { hidden: true }) // SVG icons don't have accessible names
+
+      // Should show the mustard bookmark icon (decorative svg, no img role)
+      const bookmarkIcon = document.querySelector('svg.text-mustard')
       expect(bookmarkIcon).toBeInTheDocument()
     })
 
@@ -377,13 +378,14 @@ describe('StreamingMessage', () => {
       )
 
       const detailsButton = screen.getByText('Message details')
-      
-      // Should be focusable
+
+      // Native button: focusable, and activation toggles the panel (jsdom
+      // doesn't synthesize click from keydown on buttons, so click stands in
+      // for keyboard activation).
       detailsButton.focus()
       expect(detailsButton).toHaveFocus()
 
-      // Should toggle on Enter key
-      fireEvent.keyDown(detailsButton, { key: 'Enter' })
+      fireEvent.click(detailsButton)
       expect(screen.getByText('450')).toBeInTheDocument()
     })
 

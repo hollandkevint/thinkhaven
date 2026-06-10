@@ -202,9 +202,11 @@ describe('ConversationContextManager', () => {
     });
 
     it('should prune messages when over token limit', () => {
+      // The six mock messages estimate to ~63 tokens total (4 chars/token),
+      // so the limit must sit below that for pruning to engage.
       const pruned = ConversationContextManager.pruneConversationHistory(
         mockMessages,
-        100 // Low limit
+        30
       );
 
       expect(pruned.length).toBeLessThan(mockMessages.length);
@@ -268,7 +270,8 @@ describe('ConversationContextManager', () => {
       // Access private method for testing
       const extractKeyTopics = (ConversationContextManager as any).extractKeyTopics;
       
-      const content = 'We need to discuss market strategy, competitive analysis, and revenue growth for our business model.';
+      // Keyword matching is literal substring — 'competition' must appear verbatim.
+      const content = 'We need to discuss market strategy, the competition, and revenue growth.';
       const topics = extractKeyTopics(content);
 
       expect(topics).toContain('market');
