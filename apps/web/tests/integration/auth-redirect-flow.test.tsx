@@ -1,39 +1,41 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
-import Dashboard from '../../app/dashboard/page'
+import DashboardRedirect from '../../app/dashboard/page'
+import AppDashboardPage from '../../app/app/page'
 import { useAuth } from '../../lib/auth/AuthContext'
 import { supabase } from '../../lib/supabase/client'
+import { SessionMigration } from '../../lib/guest/session-migration'
 
-// Mock Next.js navigation
+// Integration coverage for the dashboard route family:
+// - /dashboard is a legacy client shim that replaces to /app
+// - /app (AppDashboardPage) owns session loading, empty/error states, and retry
+// Auth gating itself is server-side in app/app/layout.tsx (redirect to /login),
+// so it is not assertable from these client components.
+
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn()
 }))
 
-// Mock auth context
 vi.mock('../../lib/auth/AuthContext', () => ({
   useAuth: vi.fn()
 }))
 
-// Mock Supabase
 vi.mock('../../lib/supabase/client', () => ({
   supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          order: vi.fn(() => ({
-            // Return mock data by default
-            then: vi.fn((callback) => callback({ data: [], error: null }))
-          }))
-        }))
-      }))
-    }))
+    from: vi.fn()
   }
 }))
 
-// Mock UI components
+vi.mock('../../lib/guest/session-migration', () => ({
+  SessionMigration: {
+    hasGuestSession: vi.fn(() => false),
+    migrateToUserWorkspace: vi.fn()
+  }
+}))
+
 vi.mock('../../app/components/ui/ErrorState', () => ({
-  default: ({ error, onRetry }: any) => (
+  ErrorState: ({ error, onRetry }: { error: string; onRetry: () => void }) => (
     <div data-testid="error-state">
       <p>{error}</p>
       <button onClick={onRetry}>Retry</button>
@@ -41,241 +43,161 @@ vi.mock('../../app/components/ui/ErrorState', () => ({
   )
 }))
 
-vi.mock('../../app/components/ui/OfflineNotice', () => ({
-  default: () => <div data-testid="offline-notice">Offline</div>
+vi.mock('../../app/components/feedback/FeedbackButton', () => ({
+  FeedbackButton: () => <div data-testid="feedback-button" />
 }))
 
-vi.mock('../../app/components/ui/ErrorBoundary', () => ({
-  default: ({ children }: any) => <div>{children}</div>
-}))
+const mockUseRouter = vi.mocked(useRouter)
+const mockUseAuth = vi.mocked(useAuth)
+const mockSupabase = vi.mocked(supabase)
+const mockMigration = vi.mocked(SessionMigration)
 
-describe('Authentication and Dashboard Integration', () => {
+const mockUser = {
+  id: 'test-user',
+  email: 'test@example.com',
+  user_metadata: { full_name: 'Test User' }
+}
+
+const sampleSession = {
+  id: 'session-1',
+  user_id: 'test-user',
+  pathway: 'new-idea',
+  title: 'Pricing decision',
+  current_phase: 'CHALLENGE',
+  message_count: 4,
+  message_limit: 30,
+  status: 'active',
+  created_at: '2026-06-01T00:00:00Z',
+  updated_at: new Date().toISOString()
+}
+
+// Builds the .from('bmad_sessions').select().eq().order().limit() chain.
+function mockSessionsQuery(result: { data: unknown[] | null; error: unknown }) {
+  const limit = vi.fn(() => Promise.resolve(result))
+  const order = vi.fn(() => ({ limit }))
+  const eq = vi.fn(() => ({ order }))
+  const select = vi.fn(() => ({ eq }))
+  mockSupabase.from.mockReturnValue({ select } as never)
+  return { select, eq, order, limit }
+}
+
+describe('Dashboard route integration', () => {
   const mockPush = vi.fn()
-  const mockUseRouter = useRouter as any
-  const mockUseAuth = useAuth as any
-  const mockSupabase = supabase as any
+  const mockReplace = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseRouter.mockReturnValue({
-      push: mockPush
+    mockUseRouter.mockReturnValue({ push: mockPush, replace: mockReplace } as never)
+    mockUseAuth.mockReturnValue({
+      user: mockUser,
+      loading: false,
+      signOut: vi.fn()
+    } as never)
+    mockMigration.hasGuestSession.mockReturnValue(false)
+  })
+
+  describe('Legacy /dashboard shim', () => {
+    it('replaces to /app on mount', async () => {
+      render(<DashboardRedirect />)
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith('/app')
+      })
+      expect(screen.getByText('Redirecting...')).toBeInTheDocument()
     })
   })
 
-  describe('Dashboard Authentication Gating', () => {
-    it('should redirect to login when user is not authenticated', async () => {
-      mockUseAuth.mockReturnValue({
-        user: null,
-        loading: false
-      })
+  describe('App dashboard rendering', () => {
+    it('renders nothing when there is no user (layout owns the redirect)', () => {
+      mockUseAuth.mockReturnValue({ user: null, loading: false, signOut: vi.fn() } as never)
+      mockSessionsQuery({ data: [], error: null })
 
-      render(<Dashboard />)
+      const { container } = render(<AppDashboardPage />)
 
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/login')
-      })
+      expect(container.firstChild).toBeNull()
+      expect(mockSupabase.from).not.toHaveBeenCalled()
     })
 
-    it('should not redirect when auth is still loading', () => {
-      mockUseAuth.mockReturnValue({
-        user: null,
-        loading: true
+    it('loads and displays the user sessions', async () => {
+      const { eq, limit } = mockSessionsQuery({ data: [sampleSession], error: null })
+
+      render(<AppDashboardPage />)
+
+      // Title appears in both the sidebar recent list and the session grid.
+      await waitFor(() => {
+        expect(screen.getAllByText('Pricing decision').length).toBeGreaterThan(0)
       })
-
-      render(<Dashboard />)
-
-      expect(mockPush).not.toHaveBeenCalled()
-      expect(screen.getByText('Verifying authentication...')).toBeInTheDocument()
+      expect(mockSupabase.from).toHaveBeenCalledWith('bmad_sessions')
+      expect(eq).toHaveBeenCalledWith('user_id', 'test-user')
+      expect(limit).toHaveBeenCalledWith(50)
     })
 
-    it('should load dashboard when user is authenticated', async () => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'test-user', email: 'test@example.com' },
-        loading: false
-      })
+    it('shows the empty state when the user has no sessions', async () => {
+      mockSessionsQuery({ data: [], error: null })
 
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => Promise.resolve({ data: [], error: null }))
-          }))
-        }))
-      })
-
-      render(<Dashboard />)
+      render(<AppDashboardPage />)
 
       await waitFor(() => {
-        expect(screen.getByText('Your Strategic Sessions')).toBeInTheDocument()
+        expect(
+          screen.getByText('Nothing yet. What are you trying to decide?')
+        ).toBeInTheDocument()
       })
+      expect(screen.getByText('Start a session')).toBeInTheDocument()
+    })
 
-      expect(mockPush).not.toHaveBeenCalledWith('/login')
+    it('redirects into a migrated session when a guest session exists', async () => {
+      mockMigration.hasGuestSession.mockReturnValue(true)
+      mockMigration.migrateToUserWorkspace.mockResolvedValue({
+        success: true,
+        sessionId: 'migrated-1'
+      } as never)
+      mockSessionsQuery({ data: [], error: null })
+
+      render(<AppDashboardPage />)
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/app/session/migrated-1')
+      })
+      expect(mockMigration.migrateToUserWorkspace).toHaveBeenCalledWith('test-user')
     })
   })
 
-  describe('Database Error Handling', () => {
-    beforeEach(() => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'test-user', email: 'test@example.com' },
-        loading: false
-      })
-    })
+  describe('Error handling and retry', () => {
+    it('shows the error state when the sessions query fails', async () => {
+      mockSessionsQuery({ data: null, error: new Error('relation does not exist') })
 
-    it('should handle PGRST205 schema errors', async () => {
-      const mockError = {
-        code: 'PGRST205',
-        message: 'column "dual_pane_state" does not exist',
-        details: 'schema error'
-      }
-
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => Promise.resolve({ data: null, error: mockError }))
-          }))
-        }))
-      })
-
-      render(<Dashboard />)
+      render(<AppDashboardPage />)
 
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument()
-        expect(screen.getByText(/Database schema mismatch detected/)).toBeInTheDocument()
       })
+      expect(screen.getByText('relation does not exist')).toBeInTheDocument()
     })
 
-    it('should handle authentication errors', async () => {
-      const mockError = {
-        code: 'PGRST001',
-        message: 'JWT expired'
-      }
+    it('retry refetches and recovers to the loaded view', async () => {
+      const limit = vi
+        .fn()
+        .mockResolvedValueOnce({ data: null, error: new Error('Network request failed') })
+        .mockResolvedValueOnce({ data: [sampleSession], error: null })
+      const order = vi.fn(() => ({ limit }))
+      const eq = vi.fn(() => ({ order }))
+      const select = vi.fn(() => ({ eq }))
+      mockSupabase.from.mockReturnValue({ select } as never)
 
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => Promise.resolve({ data: null, error: mockError }))
-          }))
-        }))
-      })
-
-      render(<Dashboard />)
+      render(<AppDashboardPage />)
 
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument()
-        expect(screen.getByText(/Authentication error/)).toBeInTheDocument()
-      })
-    })
-
-    it('should handle network errors with retry', async () => {
-      const mockError = new Error('Network error')
-
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => Promise.reject(mockError))
-          }))
-        }))
       })
 
-      render(<Dashboard />)
+      act(() => {
+        screen.getByText('Retry').click()
+      })
 
       await waitFor(() => {
-        expect(screen.getByTestId('error-state')).toBeInTheDocument()
-        expect(screen.getByText(/Network error/)).toBeInTheDocument()
+        expect(screen.getAllByText('Pricing decision').length).toBeGreaterThan(0)
       })
-    })
-  })
-
-  describe('Retry Mechanism', () => {
-    beforeEach(() => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'test-user', email: 'test@example.com' },
-        loading: false
-      })
-    })
-
-    it('should retry failed requests with exponential backoff', async () => {
-      const mockError = {
-        code: 'PGRST001',
-        message: 'Connection timeout'
-      }
-
-      let callCount = 0
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => {
-              callCount++
-              if (callCount <= 2) {
-                return Promise.resolve({ data: null, error: mockError })
-              }
-              return Promise.resolve({ data: [], error: null })
-            })
-          }))
-        }))
-      })
-
-      render(<Dashboard />)
-
-      // Wait for retries to complete
-      await waitFor(() => {
-        expect(callCount).toBeGreaterThan(1)
-      }, { timeout: 5000 })
-
-      // Should eventually succeed
-      await waitFor(() => {
-        expect(screen.getByText('Your Strategic Sessions')).toBeInTheDocument()
-      }, { timeout: 10000 })
-    })
-  })
-
-  describe('Workspace Loading', () => {
-    beforeEach(() => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'test-user', email: 'test@example.com' },
-        loading: false
-      })
-    })
-
-    it('should load and display workspaces', async () => {
-      const mockWorkspaces = [
-        {
-          id: '1',
-          name: 'Test Workspace',
-          description: 'Test Description',
-          dual_pane_state: { left_width: 50 },
-          created_at: '2025-01-01'
-        }
-      ]
-
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => Promise.resolve({ data: mockWorkspaces, error: null }))
-          }))
-        }))
-      })
-
-      render(<Dashboard />)
-
-      await waitFor(() => {
-        expect(screen.getByText('Test Workspace')).toBeInTheDocument()
-      })
-    })
-
-    it('should handle empty workspace list', async () => {
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => Promise.resolve({ data: [], error: null }))
-          }))
-        }))
-      })
-
-      render(<Dashboard />)
-
-      await waitFor(() => {
-        expect(screen.getByText(/You haven't created any strategic sessions yet/)).toBeInTheDocument()
-      })
+      expect(limit).toHaveBeenCalledTimes(2)
     })
   })
 })

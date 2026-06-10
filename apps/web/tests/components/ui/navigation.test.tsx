@@ -74,13 +74,14 @@ describe('Navigation Component', () => {
     })
 
     render(<Navigation />)
-    
+
     expect(screen.getByText('ThinkHaven')).toBeInTheDocument()
-    expect(screen.getAllByText('Try a Free Session').length).toBeGreaterThan(0)
+    // Authenticated nav drops the try-free CTA in favor of the user dropdown.
     expect(screen.getByText('test')).toBeInTheDocument() // Username from email
+    expect(screen.getAllByText('Dashboard').length).toBeGreaterThan(0)
   })
 
-  it('navigates to try page when try free button is clicked', () => {
+  it('links the desktop try-free CTA and pushes from the mobile menu item', () => {
     ;(useAuth as any).mockReturnValue({
       user: null,
       loading: false,
@@ -89,7 +90,14 @@ describe('Navigation Component', () => {
 
     render(<Navigation />)
 
-    fireEvent.click(screen.getAllByText('Try a Free Session')[0])
+    const tryElements = screen.getAllByText('Try a Free Session')
+    // Desktop CTA is a real link.
+    const desktopLink = tryElements.map(el => el.closest('a')).find(Boolean)
+    expect(desktopLink).toHaveAttribute('href', '/try')
+    // Mobile menu item navigates programmatically.
+    const mobileItem = tryElements.find(el => el.closest('button'))
+    expect(mobileItem).toBeDefined()
+    fireEvent.click(mobileItem!)
     expect(mockPush).toHaveBeenCalledWith('/try')
   })
 
@@ -148,9 +156,10 @@ describe('Navigation Component', () => {
 
     // Wait for mobile menu items to appear
     await waitFor(() => {
-      expect(screen.getAllByText('Try a Free Session').length).toBeGreaterThanOrEqual(2) // Desktop + mobile
+      expect(screen.getAllByText('Try a Free Session').length).toBeGreaterThanOrEqual(2) // Desktop CTA + mobile item
       expect(screen.getAllByText('Login')).toHaveLength(2) // Desktop + mobile
-      expect(screen.getAllByText('Sign Up')).toHaveLength(2) // Desktop + mobile
+      expect(screen.getAllByText('Sign Up')).toHaveLength(1) // Mobile menu only — desktop has no signup button
+      expect(screen.getAllByText('Pricing').length).toBeGreaterThanOrEqual(2) // Desktop link + mobile item
     })
   })
 

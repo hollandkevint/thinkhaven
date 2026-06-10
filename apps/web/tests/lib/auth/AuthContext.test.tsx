@@ -2,31 +2,55 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, act } from '@testing-library/react'
 import { AuthProvider, useAuth } from '../../../lib/auth/AuthContext'
 import { supabase } from '../../../lib/supabase/client'
-import type { User, AuthResponse, Session } from '@supabase/supabase-js'
+import { authLogger } from '../../../lib/monitoring/auth-logger'
+import posthog from 'posthog-js'
+import type { Session, User } from '@supabase/supabase-js'
 
-// Mock Supabase client
+// Mock Supabase client — surface must match what AuthContext actually calls:
+// getSession, onAuthStateChange, signOut, signInWithOAuth (redirect flow), signInWithPassword.
 vi.mock('../../../lib/supabase/client', () => ({
   supabase: {
     auth: {
       getSession: vi.fn(),
       onAuthStateChange: vi.fn(),
       signOut: vi.fn(),
-      signInWithIdToken: vi.fn(),
+      signInWithOAuth: vi.fn(),
       signInWithPassword: vi.fn()
     }
   }
 }))
 
-const mockSupabase = vi.mocked(supabase)
+vi.mock('../../../lib/monitoring/auth-logger', () => ({
+  authLogger: {
+    logAuthInitiation: vi.fn().mockResolvedValue('corr-test'),
+    logAuthSuccess: vi.fn().mockResolvedValue(undefined),
+    logAuthFailure: vi.fn().mockResolvedValue(undefined),
+    logLogout: vi.fn().mockResolvedValue(undefined),
+    logSessionRefresh: vi.fn().mockResolvedValue(undefined)
+  }
+}))
 
-// Test component that uses the Auth hook
+vi.mock('posthog-js', () => ({
+  default: { identify: vi.fn(), reset: vi.fn() }
+}))
+
+const mockSupabase = vi.mocked(supabase)
+const mockAuthLogger = vi.mocked(authLogger)
+const mockPosthog = vi.mocked(posthog)
+
+// Captures the auth API so tests can call methods directly and assert rejections,
+// instead of clicking buttons whose handlers swallow promises.
+let authApi: ReturnType<typeof useAuth> | undefined
+
 function TestComponent() {
-  const { user, loading, signOut, signInWithGoogle, signInWithEmail } = useAuth()
-  
+  const auth = useAuth()
+  authApi = auth
+  const { user, loading, signOut } = auth
+
   if (loading) {
     return <div data-testid="loading">Loading...</div>
   }
-  
+
   return (
     <div data-testid="auth-component">
       {user ? (
@@ -37,21 +61,7 @@ function TestComponent() {
           </button>
         </div>
       ) : (
-        <div>
-          <span data-testid="no-user">No user</span>
-          <button 
-            data-testid="google-signin-btn" 
-            onClick={() => signInWithGoogle('mock-token')}
-          >
-            Sign In with Google
-          </button>
-          <button 
-            data-testid="email-signin-btn" 
-            onClick={() => signInWithEmail('test@example.com', 'password')}
-          >
-            Sign In with Email
-          </button>
-        </div>
+        <span data-testid="no-user">No user</span>
       )}
     </div>
   )
@@ -80,48 +90,65 @@ describe('AuthContext', () => {
     expires_at: Date.now() + 3600000
   }
 
-  const mockAuthResponse: AuthResponse = {
-    data: { user: mockUser, session: mockSession },
-    error: null
-  }
-
-  let mockSubscription: { unsubscribe: vi.Mock }
+  let mockSubscription: { unsubscribe: ReturnType<typeof vi.fn> }
+  let mockLocation: { origin: string; href: string }
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+    authApi = undefined
+
     mockSubscription = { unsubscribe: vi.fn() }
-    
-    // Default mocks
+    mockAuthLogger.logAuthInitiation.mockResolvedValue('corr-test')
+
+    // signInWithGoogle assigns window.location.href on success; jsdom can't navigate.
+    mockLocation = { origin: 'http://localhost:3000', href: 'http://localhost:3000/' }
+    vi.stubGlobal('location', mockLocation)
+
     mockSupabase.auth.getSession.mockResolvedValue({
       data: { session: null },
       error: null
     })
-    
     mockSupabase.auth.onAuthStateChange.mockReturnValue({
       data: { subscription: mockSubscription }
     })
-    
     mockSupabase.auth.signOut.mockResolvedValue({ error: null })
-    mockSupabase.auth.signInWithIdToken.mockResolvedValue(mockAuthResponse)
-    mockSupabase.auth.signInWithPassword.mockResolvedValue(mockAuthResponse)
+    mockSupabase.auth.signInWithOAuth.mockResolvedValue({
+      data: { provider: 'google', url: 'https://accounts.google.com/oauth-redirect' },
+      error: null
+    })
+    mockSupabase.auth.signInWithPassword.mockResolvedValue({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    })
   })
 
   afterEach(() => {
+    vi.unstubAllGlobals()
     vi.clearAllMocks()
   })
 
+  function renderProvider() {
+    return render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+  }
+
+  async function waitForReady() {
+    await waitFor(() => {
+      expect(screen.queryByTestId('loading')).not.toBeInTheDocument()
+    })
+  }
+
   describe('Provider Initialization', () => {
     it('renders children and initializes with loading state', async () => {
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
+      renderProvider()
 
       expect(screen.getByTestId('loading')).toBeInTheDocument()
       expect(mockSupabase.auth.getSession).toHaveBeenCalled()
       expect(mockSupabase.auth.onAuthStateChange).toHaveBeenCalled()
+      await waitForReady()
     })
 
     it('sets initial session when user is authenticated', async () => {
@@ -130,11 +157,7 @@ describe('AuthContext', () => {
         error: null
       })
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
+      renderProvider()
 
       await waitFor(() => {
         expect(screen.getByTestId('user-email')).toHaveTextContent('test@example.com')
@@ -143,11 +166,7 @@ describe('AuthContext', () => {
     })
 
     it('sets null user when no session exists', async () => {
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
+      renderProvider()
 
       await waitFor(() => {
         expect(screen.getByTestId('no-user')).toBeInTheDocument()
@@ -157,417 +176,257 @@ describe('AuthContext', () => {
   })
 
   describe('Authentication State Changes', () => {
-    it('handles SIGNED_IN event', async () => {
+    function captureAuthCallback() {
       let authCallback: ((event: string, session: Session | null) => void) | undefined
-
       mockSupabase.auth.onAuthStateChange.mockImplementation((callback) => {
         authCallback = callback
         return { data: { subscription: mockSubscription } }
       })
+      return () => authCallback!
+    }
 
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    it('handles SIGNED_IN event: sets user and identifies in PostHog', async () => {
+      const getCallback = captureAuthCallback()
+      renderProvider()
+      await waitForReady()
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
-
-      // Wait for initialization
-      await waitFor(() => {
-        expect(screen.queryByTestId('loading')).not.toBeInTheDocument()
-      })
-
-      // Simulate SIGNED_IN event
       act(() => {
-        authCallback!('SIGNED_IN', mockSession)
+        getCallback()('SIGNED_IN', mockSession)
       })
 
       await waitFor(() => {
         expect(screen.getByTestId('user-email')).toHaveTextContent('test@example.com')
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('User signed in successfully:'),
-          expect.objectContaining({
-            provider: 'google',
-            email: 'test@example.com'
-          })
-        )
       })
-
-      consoleSpy.mockRestore()
+      expect(mockPosthog.identify).toHaveBeenCalledWith('test-user-id', {
+        auth_provider: 'google'
+      })
+      // OAuth signins are logged in the OAuth callback route, not here.
+      expect(mockAuthLogger.logAuthSuccess).not.toHaveBeenCalled()
     })
 
-    it('handles SIGNED_OUT event', async () => {
-      let authCallback: ((event: string, session: Session | null) => void) | undefined
+    it('logs auth success on SIGNED_IN for email/password sessions', async () => {
+      const getCallback = captureAuthCallback()
+      renderProvider()
+      await waitForReady()
 
-      mockSupabase.auth.onAuthStateChange.mockImplementation((callback) => {
-        authCallback = callback
-        return { data: { subscription: mockSubscription } }
+      const emailSession: Session = {
+        ...mockSession,
+        user: { ...mockUser, app_metadata: { provider: 'email' } }
+      }
+      act(() => {
+        getCallback()('SIGNED_IN', emailSession)
       })
 
-      // Start with user signed in
+      await waitFor(() => {
+        expect(mockAuthLogger.logAuthSuccess).toHaveBeenCalledWith(
+          'email_password',
+          'test-user-id',
+          'test@example.com',
+          0,
+          expect.stringContaining('context_signin_'),
+          expect.stringContaining('...')
+        )
+      })
+    })
+
+    it('handles SIGNED_OUT event: clears user and resets PostHog', async () => {
+      const getCallback = captureAuthCallback()
       mockSupabase.auth.getSession.mockResolvedValue({
         data: { session: mockSession },
         error: null
       })
 
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
-
-      // Wait for initialization with user
+      renderProvider()
       await waitFor(() => {
         expect(screen.getByTestId('user-email')).toBeInTheDocument()
       })
 
-      // Simulate SIGNED_OUT event
       act(() => {
-        authCallback!('SIGNED_OUT', null)
+        getCallback()('SIGNED_OUT', null)
       })
 
       await waitFor(() => {
         expect(screen.getByTestId('no-user')).toBeInTheDocument()
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('User signed out:'),
-          expect.objectContaining({
-            timestamp: expect.any(String)
-          })
-        )
       })
-
-      consoleSpy.mockRestore()
+      expect(mockPosthog.reset).toHaveBeenCalled()
     })
 
-    it('handles TOKEN_REFRESHED event', async () => {
-      let authCallback: ((event: string, session: Session | null) => void) | undefined
+    it('handles TOKEN_REFRESHED event: logs session refresh', async () => {
+      const getCallback = captureAuthCallback()
+      renderProvider()
+      await waitForReady()
 
-      mockSupabase.auth.onAuthStateChange.mockImplementation((callback) => {
-        authCallback = callback
-        return { data: { subscription: mockSubscription } }
-      })
-
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
-
-      await waitFor(() => {
-        expect(screen.queryByTestId('loading')).not.toBeInTheDocument()
-      })
-
-      // Simulate TOKEN_REFRESHED event
       act(() => {
-        authCallback!('TOKEN_REFRESHED', mockSession)
+        getCallback()('TOKEN_REFRESHED', mockSession)
       })
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Token refreshed for user:'),
-          expect.objectContaining({
-            email: 'test@example.com'
-          })
+        expect(mockAuthLogger.logSessionRefresh).toHaveBeenCalledWith(
+          'test-user-id',
+          expect.stringContaining('...')
         )
       })
-
-      consoleSpy.mockRestore()
     })
   })
 
-  describe('Google Sign In', () => {
-    it('handles successful Google signin', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  describe('Google Sign In (OAuth redirect flow)', () => {
+    it('initiates OAuth with the default callback redirect and follows the URL', async () => {
+      renderProvider()
+      await waitForReady()
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
-
-      await waitFor(() => {
-        expect(screen.getByTestId('google-signin-btn')).toBeInTheDocument()
+      await act(async () => {
+        await authApi!.signInWithGoogle()
       })
 
-      act(() => {
-        screen.getByTestId('google-signin-btn').click()
+      expect(mockSupabase.auth.signInWithOAuth).toHaveBeenCalledWith({
+        provider: 'google',
+        options: { redirectTo: 'http://localhost:3000/auth/callback' }
       })
-
-      await waitFor(() => {
-        expect(mockSupabase.auth.signInWithIdToken).toHaveBeenCalledWith({
-          provider: 'google',
-          token: 'mock-token'
-        })
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Google signin successful:'),
-          expect.objectContaining({
-            email: 'test@example.com',
-            provider: 'google'
-          })
-        )
-      })
-
-      consoleSpy.mockRestore()
+      expect(mockLocation.href).toBe('https://accounts.google.com/oauth-redirect')
+      expect(mockAuthLogger.logAuthInitiation).toHaveBeenCalledWith('oauth_google')
     })
 
-    it('handles Google signin with invalid token error', async () => {
-      const mockError = {
-        message: 'Invalid token signature',
-        status: 401,
-        name: 'AuthInvalidTokenSignature'
-      }
+    it('honors a custom redirectTo', async () => {
+      renderProvider()
+      await waitForReady()
 
-      mockSupabase.auth.signInWithIdToken.mockResolvedValue({
-        data: { user: null, session: null },
-        error: mockError
+      await act(async () => {
+        await authApi!.signInWithGoogle('http://localhost:3000/after-login')
       })
 
+      expect(mockSupabase.auth.signInWithOAuth).toHaveBeenCalledWith({
+        provider: 'google',
+        options: { redirectTo: 'http://localhost:3000/after-login' }
+      })
+    })
+
+    it('throws and logs failure when OAuth initiation returns an error', async () => {
+      mockSupabase.auth.signInWithOAuth.mockResolvedValue({
+        data: { provider: 'google', url: null },
+        error: { message: 'Provider not configured', status: 400, name: 'ProviderError' }
+      })
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
+      renderProvider()
+      await waitForReady()
+
+      await expect(authApi!.signInWithGoogle()).rejects.toThrow('Provider not configured')
+      expect(mockAuthLogger.logAuthFailure).toHaveBeenCalledWith(
+        'oauth_google',
+        'oauth_initiation_error',
+        'Provider not configured',
+        expect.any(Number),
+        'corr-test'
       )
-
-      await waitFor(() => {
-        expect(screen.getByTestId('google-signin-btn')).toBeInTheDocument()
-      })
-
-      await expect(async () => {
-        act(() => {
-          screen.getByTestId('google-signin-btn').click()
-        })
-        
-        await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Google ID token signin error:'),
-            expect.objectContaining({
-              message: 'Invalid token signature',
-              status: 401
-            })
-          )
-        })
-      }).rejects.toThrow('Google signin token is invalid or expired')
 
       consoleErrorSpy.mockRestore()
     })
 
-    it('handles Google signin network error', async () => {
-      const mockError = {
-        message: 'Network request failed',
-        status: 500,
-        name: 'NetworkError'
-      }
-
-      mockSupabase.auth.signInWithIdToken.mockResolvedValue({
-        data: { user: null, session: null },
-        error: mockError
-      })
-
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
-
-      await waitFor(() => {
-        expect(screen.getByTestId('google-signin-btn')).toBeInTheDocument()
-      })
-
-      await expect(async () => {
-        act(() => {
-          screen.getByTestId('google-signin-btn').click()
-        })
-        
-        await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalled()
-        })
-      }).rejects.toThrow('Network error during Google signin. Please try again.')
-
-      consoleErrorSpy.mockRestore()
-    })
-
-    it('handles Google signin provider configuration error', async () => {
-      const mockError = {
-        message: 'Provider not configured',
-        status: 400,
-        name: 'ProviderError'
-      }
-
-      mockSupabase.auth.signInWithIdToken.mockResolvedValue({
-        data: { user: null, session: null },
-        error: mockError
-      })
-
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
-
-      await waitFor(() => {
-        expect(screen.getByTestId('google-signin-btn')).toBeInTheDocument()
-      })
-
-      await expect(async () => {
-        act(() => {
-          screen.getByTestId('google-signin-btn').click()
-        })
-        
-        await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalled()
-        })
-      }).rejects.toThrow('Google signin is not properly configured')
-
-      consoleErrorSpy.mockRestore()
-    })
-
-    it('handles missing user data in response', async () => {
-      mockSupabase.auth.signInWithIdToken.mockResolvedValue({
-        data: { user: null, session: null },
+    it('throws when no redirect URL is returned', async () => {
+      mockSupabase.auth.signInWithOAuth.mockResolvedValue({
+        data: { provider: 'google', url: null },
         error: null
       })
-
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
+      renderProvider()
+      await waitForReady()
+
+      await expect(authApi!.signInWithGoogle()).rejects.toThrow(
+        'Failed to initiate Google signin - no redirect URL received'
       )
-
-      await waitFor(() => {
-        expect(screen.getByTestId('google-signin-btn')).toBeInTheDocument()
-      })
-
-      await expect(async () => {
-        act(() => {
-          screen.getByTestId('google-signin-btn').click()
-        })
-        
-        await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            expect.stringContaining('No user data received from Google signin')
-          )
-        })
-      }).rejects.toThrow('No user information received from Google')
+      expect(mockAuthLogger.logAuthFailure).toHaveBeenCalledWith(
+        'oauth_google',
+        'unexpected_error',
+        'Failed to initiate Google signin - no redirect URL received',
+        expect.any(Number),
+        'corr-test'
+      )
 
       consoleErrorSpy.mockRestore()
     })
 
-    it('handles unexpected errors during Google signin', async () => {
-      mockSupabase.auth.signInWithIdToken.mockRejectedValue(new Error('Unexpected error'))
-
+    it('rethrows unexpected errors and logs them', async () => {
+      mockSupabase.auth.signInWithOAuth.mockRejectedValue(new Error('Network down'))
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
+      renderProvider()
+      await waitForReady()
+
+      await expect(authApi!.signInWithGoogle()).rejects.toThrow('Network down')
+      expect(mockAuthLogger.logAuthFailure).toHaveBeenCalledWith(
+        'oauth_google',
+        'unexpected_error',
+        'Network down',
+        expect.any(Number),
+        'corr-test'
       )
-
-      await waitFor(() => {
-        expect(screen.getByTestId('google-signin-btn')).toBeInTheDocument()
-      })
-
-      await expect(async () => {
-        act(() => {
-          screen.getByTestId('google-signin-btn').click()
-        })
-        
-        await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Unexpected error during Google signin:'),
-            expect.objectContaining({
-              error: expect.any(Error)
-            })
-          )
-        })
-      }).rejects.toThrow('Unexpected error')
 
       consoleErrorSpy.mockRestore()
     })
   })
 
   describe('Email Sign In', () => {
-    it('handles successful email signin', async () => {
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
+    it('signs in with credentials and logs success', async () => {
+      renderProvider()
+      await waitForReady()
+
+      let result: { error: unknown } | undefined
+      await act(async () => {
+        result = await authApi!.signInWithEmail('test@example.com', 'password')
+      })
+
+      expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password'
+      })
+      expect(result!.error).toBeNull()
+      expect(mockAuthLogger.logAuthSuccess).toHaveBeenCalledWith(
+        'email_password',
+        'test-user-id',
+        'test@example.com',
+        expect.any(Number),
+        'corr-test',
+        expect.stringContaining('...')
       )
-
-      await waitFor(() => {
-        expect(screen.getByTestId('email-signin-btn')).toBeInTheDocument()
-      })
-
-      act(() => {
-        screen.getByTestId('email-signin-btn').click()
-      })
-
-      await waitFor(() => {
-        expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
-          email: 'test@example.com',
-          password: 'password'
-        })
-      })
     })
 
-    it('returns error for failed email signin', async () => {
-      const mockError = { message: 'Invalid credentials' }
-
+    it('returns the error and logs categorized failure for invalid credentials', async () => {
+      const mockError = { message: 'Invalid login credentials' }
       mockSupabase.auth.signInWithPassword.mockResolvedValue({
         data: { user: null, session: null },
         error: mockError
       })
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
+      renderProvider()
+      await waitForReady()
+
+      let result: { error: unknown } | undefined
+      await act(async () => {
+        result = await authApi!.signInWithEmail('test@example.com', 'wrong')
+      })
+
+      expect(result!.error).toBe(mockError)
+      expect(mockAuthLogger.logAuthFailure).toHaveBeenCalledWith(
+        'email_password',
+        'invalid_credentials',
+        'Invalid login credentials',
+        expect.any(Number),
+        'corr-test',
+        undefined
       )
-
-      await waitFor(() => {
-        expect(screen.getByTestId('email-signin-btn')).toBeInTheDocument()
-      })
-
-      act(() => {
-        screen.getByTestId('email-signin-btn').click()
-      })
-
-      await waitFor(() => {
-        expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
-          email: 'test@example.com',
-          password: 'password'
-        })
-      })
     })
   })
 
   describe('Sign Out', () => {
     it('handles successful sign out', async () => {
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
-
-      // Start with user signed in
+      // Session must be mocked before render so the signout button appears.
       mockSupabase.auth.getSession.mockResolvedValue({
         data: { session: mockSession },
         error: null
       })
 
+      renderProvider()
       await waitFor(() => {
         expect(screen.getByTestId('signout-btn')).toBeInTheDocument()
       })
@@ -584,11 +443,7 @@ describe('AuthContext', () => {
 
   describe('Component Cleanup', () => {
     it('unsubscribes from auth state changes on unmount', async () => {
-      const { unmount } = render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
+      const { unmount } = renderProvider()
 
       await waitFor(() => {
         expect(mockSupabase.auth.onAuthStateChange).toHaveBeenCalled()
@@ -602,7 +457,6 @@ describe('AuthContext', () => {
 
   describe('Hook Usage Outside Provider', () => {
     it('throws error when useAuth is used outside AuthProvider', () => {
-      // Mock console.error to prevent error output in tests
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       expect(() => {
@@ -622,11 +476,7 @@ describe('AuthContext', () => {
         error: null
       })
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
+      renderProvider()
 
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith(
@@ -640,7 +490,6 @@ describe('AuthContext', () => {
 
     it('logs auth state changes with proper metadata', async () => {
       let authCallback: ((event: string, session: Session | null) => void) | undefined
-
       mockSupabase.auth.onAuthStateChange.mockImplementation((callback) => {
         authCallback = callback
         return { data: { subscription: mockSubscription } }
@@ -648,17 +497,12 @@ describe('AuthContext', () => {
 
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-      render(
-        <AuthProvider>
-          <TestComponent />
-        </AuthProvider>
-      )
+      renderProvider()
 
       await waitFor(() => {
         expect(mockSupabase.auth.onAuthStateChange).toHaveBeenCalled()
       })
 
-      // Simulate auth state change
       act(() => {
         authCallback!('SIGNED_IN', mockSession)
       })
