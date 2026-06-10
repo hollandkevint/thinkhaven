@@ -1,29 +1,37 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ConversationExporter } from '@/lib/ai/conversation-export'
+import { ConversationQueries } from '@/lib/supabase/conversation-queries'
 
-// Mock Supabase
-const mockSupabase = {
-  from: vi.fn(() => ({
-    select: vi.fn(() => ({
-      eq: vi.fn(() => ({
-        order: vi.fn(() => ({
-          data: [],
-          error: null
-        }))
-      }))
-    }))
-  }))
-}
-
-// Mock data
-const mockConversations = [
-  {
-    id: '1',
-    title: 'Strategic Planning Session',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T01:00:00Z'
+// The exporter reads through static ConversationQueries methods and the bookmark
+// manager factory — those are the seams to mock (it takes no injected client).
+vi.mock('@/lib/supabase/conversation-queries', () => ({
+  ConversationQueries: {
+    getUserConversations: vi.fn(),
+    getConversation: vi.fn(),
+    getConversationMessages: vi.fn(),
+    getConversationContext: vi.fn(),
+    getConversationReferences: vi.fn()
   }
-]
+}))
+
+const mockGetBookmarks = vi.fn()
+vi.mock('@/lib/ai/bookmark-reference-manager', () => ({
+  createBookmarkReferenceManager: () => ({ getBookmarks: mockGetBookmarks })
+}))
+
+vi.mock('@/lib/ai/conversation-summarizer', () => ({
+  createConversationSummarizer: vi.fn()
+}))
+
+const mockQueries = vi.mocked(ConversationQueries)
+
+const mockConversation = {
+  id: '1',
+  title: 'Strategic Planning Session',
+  message_count: 2,
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T01:00:00Z'
+}
 
 const mockMessages = [
   {
@@ -33,7 +41,7 @@ const mockMessages = [
     content: 'How can I improve my business strategy?',
     created_at: '2024-01-01T00:00:00Z',
     message_index: 0,
-    token_usage: { input_tokens: 10, output_tokens: 0, total_tokens: 10, cost_estimate_usd: 0.001 }
+    metadata: { tokens_used: 10 }
   },
   {
     id: 'msg-2',
@@ -42,7 +50,7 @@ const mockMessages = [
     content: 'Let me help you explore strategic improvements...',
     created_at: '2024-01-01T00:05:00Z',
     message_index: 1,
-    token_usage: { input_tokens: 15, output_tokens: 50, total_tokens: 65, cost_estimate_usd: 0.005 }
+    metadata: { tokens_used: 65 }
   }
 ]
 
@@ -53,7 +61,8 @@ const mockBookmarks = [
     title: 'Key Strategic Insight',
     description: 'Important strategic framework discussion',
     tags: ['strategy', 'framework'],
-    color: 'blue'
+    color: 'blue',
+    conversation: { id: '1' }
   }
 ]
 
@@ -62,508 +71,159 @@ describe('ConversationExporter', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    exporter = new ConversationExporter(mockSupabase as any, 'user-123', 'workspace-456')
-  })
+    exporter = new ConversationExporter('user-123', 'workspace-456')
 
-  afterEach(() => {
-    vi.restoreAllMocks()
+    mockQueries.getUserConversations.mockResolvedValue([mockConversation] as never)
+    mockQueries.getConversation.mockResolvedValue(mockConversation as never)
+    mockQueries.getConversationMessages.mockResolvedValue(mockMessages as never)
+    mockQueries.getConversationContext.mockResolvedValue([] as never)
+    mockQueries.getConversationReferences.mockResolvedValue([] as never)
+    mockGetBookmarks.mockResolvedValue(mockBookmarks)
   })
 
   describe('JSON Export', () => {
     it('should export conversations as JSON with all metadata', async () => {
-      // Mock the database queries
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'conversations') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: mockConversations,
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        if (table === 'messages') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: mockMessages,
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              data: [],
-              error: null
-            }))
-          }))
-        }
-      })
-
-      const options = {
-        format: 'json' as const,
+      const result = await exporter.exportConversations({
+        format: 'json',
         includeMetadata: true,
         includeBookmarks: true,
         includeReferences: true,
         includeContext: true
-      }
+      })
 
-      const result = await exporter.exportConversations(options)
-
-      expect(result.success).toBe(true)
       expect(result.format).toBe('json')
-      expect(result.filename).toMatch(/conversations_.*\.json/)
-      
+      expect(result.filename).toMatch(/conversations_\d+\.json/)
+
       const content = JSON.parse(result.content as string)
       expect(content.conversations).toHaveLength(1)
-      expect(content.conversations[0].id).toBe('1')
+      expect(content.conversations[0].conversation.id).toBe('1')
       expect(content.conversations[0].messages).toHaveLength(2)
-      expect(content.metadata).toBeDefined()
-      expect(content.metadata.totalConversations).toBe(1)
-      expect(content.metadata.totalMessages).toBe(2)
+      expect(content.conversations[0].bookmarks).toHaveLength(1)
+      expect(content.metadata.total_conversations).toBe(1)
+      expect(content.metadata.total_messages).toBe(2)
+      expect(content.metadata.exported_by).toBe('user-123')
+      expect(content.metadata.workspace_id).toBe('workspace-456')
     })
 
     it('should handle empty conversation data gracefully', async () => {
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => ({
-              data: [],
-              error: null
-            }))
-          }))
-        }))
-      })
+      mockQueries.getUserConversations.mockResolvedValue([] as never)
 
-      const options = {
-        format: 'json' as const,
-        includeMetadata: true
-      }
+      const result = await exporter.exportConversations({ format: 'json' })
 
-      const result = await exporter.exportConversations(options)
-
-      expect(result.success).toBe(true)
       const content = JSON.parse(result.content as string)
       expect(content.conversations).toHaveLength(0)
-      expect(content.metadata.totalConversations).toBe(0)
-      expect(content.metadata.totalMessages).toBe(0)
+      expect(content.metadata.total_conversations).toBe(0)
+      expect(content.metadata.total_messages).toBe(0)
     })
   })
 
   describe('CSV Export', () => {
     it('should export conversations as CSV with proper formatting', async () => {
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'conversations') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: mockConversations,
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        if (table === 'messages') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: mockMessages,
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              data: [],
-              error: null
-            }))
-          }))
-        }
-      })
+      const result = await exporter.exportConversations({ format: 'csv' })
 
-      const options = {
-        format: 'csv' as const,
-        includeMetadata: true
-      }
-
-      const result = await exporter.exportConversations(options)
-
-      expect(result.success).toBe(true)
-      expect(result.format).toBe('csv')
-      expect(result.filename).toMatch(/conversations_.*\.csv/)
-      
-      const content = result.content as string
-      expect(content).toContain('conversation_id,message_id,role,content,timestamp')
-      expect(content).toContain('How can I improve my business strategy?')
-      expect(content).toContain('Let me help you explore strategic improvements...')
+      const lines = (result.content as string).split('\n')
+      expect(lines[0]).toBe(
+        'conversation_id,conversation_title,message_id,role,content,timestamp,message_index,tokens_used'
+      )
+      expect(lines).toHaveLength(3) // header + 2 message rows
+      expect(lines[1]).toContain('msg-1')
+      expect(lines[1]).toContain('user')
+      expect(lines[2]).toContain('msg-2')
+      expect(lines[2]).toContain('assistant')
     })
 
     it('should properly escape CSV special characters', async () => {
-      const messagesWithSpecialChars = [
+      mockQueries.getConversationMessages.mockResolvedValue([
         {
           ...mockMessages[0],
-          content: 'Question with "quotes" and, commas'
-        },
-        {
-          ...mockMessages[1],
-          content: 'Response with\nnewlines and "quotes"'
+          content: 'Contains, commas and "quotes" here'
         }
-      ]
+      ] as never)
 
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'messages') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: messagesWithSpecialChars,
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn(() => ({
-                data: table === 'conversations' ? mockConversations : [],
-                error: null
-              }))
-            }))
-          }))
-        }
-      })
+      const result = await exporter.exportConversations({ format: 'csv' })
 
-      const options = {
-        format: 'csv' as const,
-        includeMetadata: true
-      }
-
-      const result = await exporter.exportConversations(options)
-      const content = result.content as string
-      
-      // Check that quotes are properly escaped
-      expect(content).toContain('\"Question with \"\"quotes\"\" and, commas\"')
-      expect(content).toContain('\"Response with\nnewlines and \"\"quotes\"\"\"')
+      expect(result.content as string).toContain('"Contains, commas and ""quotes"" here"')
     })
   })
 
   describe('Markdown Export', () => {
     it('should export conversations as properly formatted Markdown', async () => {
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'conversations') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: mockConversations,
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        if (table === 'messages') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: mockMessages,
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        if (table === 'message_bookmarks') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                data: mockBookmarks,
-                error: null
-              }))
-            }))
-          }
-        }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              data: [],
-              error: null
-            }))
-          }))
-        }
+      const result = await exporter.exportConversations({
+        format: 'markdown',
+        includeBookmarks: true
       })
 
-      const options = {
-        format: 'markdown' as const,
-        includeMetadata: true,
-        includeBookmarks: true
-      }
-
-      const result = await exporter.exportConversations(options)
-
-      expect(result.success).toBe(true)
-      expect(result.format).toBe('markdown')
-      expect(result.filename).toMatch(/conversations_.*\.md/)
-      
       const content = result.content as string
-      expect(content).toContain('# Strategic Planning Session')
-      expect(content).toContain('## User')
-      expect(content).toContain('## Mary (Assistant)')
-      expect(content).toContain('**🔖 Key Strategic Insight**')
-      expect(content).toContain('How can I improve my business strategy?')
+      expect(content).toContain('# Conversation Export')
+      expect(content).toContain('## Strategic Planning Session')
+      expect(content).toContain('**You:**')
+      expect(content).toContain('**Mary (AI Assistant):**')
+      expect(content).toContain('📌 **Bookmarked:** Key Strategic Insight')
+      expect(result.filename).toMatch(/conversations_\d+\.md/)
     })
   })
 
   describe('Export Preview', () => {
     it('should generate accurate export preview statistics', async () => {
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'conversations') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: mockConversations,
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        if (table === 'messages') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                data: mockMessages,
-                error: null,
-                count: mockMessages.length
-              }))
-            }))
-          }
-        }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              data: [],
-              error: null
-            }))
-          }))
-        }
-      })
-
-      const options = {
-        format: 'json' as const,
-        includeMetadata: true
-      }
-
-      const preview = await exporter.getExportPreview(options)
+      const preview = await exporter.getExportPreview({ format: 'json' })
 
       expect(preview.conversationCount).toBe(1)
-      expect(preview.messageCount).toBe(2)
-      expect(preview.estimatedSize).toBeDefined()
-      expect(preview.dateRange).toBeDefined()
-      expect(new Date(preview.dateRange!.start)).toEqual(new Date('2024-01-01T00:00:00Z'))
-      expect(new Date(preview.dateRange!.end)).toEqual(new Date('2024-01-01T00:05:00Z'))
+      expect(preview.messageCount).toBe(2) // from conversation.message_count
+      expect(preview.dateRange?.start).toEqual(new Date('2024-01-01T00:00:00Z'))
+      expect(preview.dateRange?.end).toEqual(new Date('2024-01-01T01:00:00Z'))
     })
 
     it('should calculate estimated file sizes accurately', async () => {
-      const largeMessages = Array.from({ length: 100 }, (_, i) => ({
-        ...mockMessages[0],
-        id: `msg-${i}`,
-        content: 'A'.repeat(1000), // 1KB per message
-        message_index: i
-      }))
+      const preview = await exporter.getExportPreview({ format: 'json' })
 
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'messages') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                data: largeMessages,
-                error: null,
-                count: largeMessages.length
-              }))
-            }))
-          }
-        }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn(() => ({
-                data: table === 'conversations' ? mockConversations : [],
-                error: null
-              }))
-            }))
-          }))
-        }
-      })
-
-      const options = {
-        format: 'json' as const,
-        includeMetadata: true
-      }
-
-      const preview = await exporter.getExportPreview(options)
-
-      expect(preview.messageCount).toBe(100)
-      expect(preview.estimatedSize).toMatch(/\d+\.?\d*\s*(KB|MB)/)
-      
-      // Should be at least 100KB given the content size
-      const sizeMatch = preview.estimatedSize.match(/(\d+\.?\d*)\s*(KB|MB)/)
-      if (sizeMatch) {
-        const [, size, unit] = sizeMatch
-        const sizeInKB = unit === 'MB' ? parseFloat(size) * 1024 : parseFloat(size)
-        expect(sizeInKB).toBeGreaterThan(50) // Allow for JSON overhead
-      }
+      // 2 messages * 500 + 1 conversation * 1000 = 2000 bytes -> "1.95 KB"
+      expect(preview.estimatedSize).toBe('1.95 KB')
     })
   })
 
   describe('Date Range Filtering', () => {
     it('should filter conversations by date range', async () => {
-      const messagesWithDifferentDates = [
-        {
-          ...mockMessages[0],
-          created_at: '2024-01-01T00:00:00Z' // Include
-        },
-        {
-          ...mockMessages[1],
-          created_at: '2024-01-05T00:00:00Z' // Exclude
-        }
-      ]
-
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'messages') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                gte: vi.fn(() => ({
-                  lte: vi.fn(() => ({
-                    order: vi.fn(() => ({
-                      data: [messagesWithDifferentDates[0]], // Only the first message
-                      error: null
-                    }))
-                  }))
-                }))
-              }))
-            }))
-          }
-        }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn(() => ({
-                data: mockConversations,
-                error: null
-              }))
-            }))
-          }))
+      const result = await exporter.exportConversations({
+        format: 'json',
+        dateRange: {
+          start: new Date('2024-01-01T00:03:00Z'),
+          end: new Date('2024-01-01T02:00:00Z')
         }
       })
 
-      const options = {
-        format: 'json' as const,
-        includeMetadata: true,
-        dateRange: {
-          start: new Date('2024-01-01'),
-          end: new Date('2024-01-02')
-        }
-      }
-
-      const result = await exporter.exportConversations(options)
-
-      expect(result.success).toBe(true)
       const content = JSON.parse(result.content as string)
+      // Only msg-2 (00:05) falls inside the range; msg-1 (00:00) is filtered out.
       expect(content.conversations[0].messages).toHaveLength(1)
-      expect(content.conversations[0].messages[0].created_at).toBe('2024-01-01T00:00:00Z')
+      expect(content.conversations[0].messages[0].id).toBe('msg-2')
+      expect(content.metadata.date_range).toBeDefined()
     })
   })
 
   describe('Error Handling', () => {
     it('should handle database errors gracefully', async () => {
-      mockSupabase.from.mockReturnValue({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            order: vi.fn(() => ({
-              data: null,
-              error: { message: 'Database connection failed' }
-            }))
-          }))
-        }))
-      })
+      mockQueries.getUserConversations.mockRejectedValue(
+        new Error('Failed to get user conversations')
+      )
 
-      const options = {
-        format: 'json' as const,
-        includeMetadata: true
-      }
-
-      const result = await exporter.exportConversations(options)
-
-      expect(result.success).toBe(false)
-      expect(result.error).toContain('Database connection failed')
+      await expect(exporter.exportConversations({ format: 'json' })).rejects.toThrow(
+        'Failed to get user conversations'
+      )
     })
 
     it('should validate export options', async () => {
-      const options = {
-        format: 'invalid' as any,
-        includeMetadata: true
-      }
-
-      const result = await exporter.exportConversations(options)
-
-      expect(result.success).toBe(false)
-      expect(result.error).toContain('Unsupported export format')
+      await expect(
+        exporter.exportConversations({ format: 'docx' as never })
+      ).rejects.toThrow('Unsupported export format: docx')
     })
 
     it('should handle missing conversation data', async () => {
-      mockSupabase.from.mockImplementation((table) => {
-        if (table === 'conversations') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: [],
-                  error: null
-                }))
-              }))
-            }))
-          }
-        }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              data: [],
-              error: null
-            }))
-          }))
-        }
-      })
+      mockQueries.getConversationMessages.mockResolvedValue([] as never)
 
-      const options = {
-        format: 'json' as const,
-        includeMetadata: true
-      }
+      const result = await exporter.exportConversations({ format: 'json' })
 
-      const result = await exporter.exportConversations(options)
-
-      expect(result.success).toBe(true)
       const content = JSON.parse(result.content as string)
-      expect(content.conversations).toHaveLength(0)
-      expect(content.metadata.exportedAt).toBeDefined()
+      expect(content.conversations[0].messages).toHaveLength(0)
+      expect(content.metadata.total_messages).toBe(0)
     })
   })
 })
