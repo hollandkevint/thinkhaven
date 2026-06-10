@@ -7,7 +7,7 @@ type TextBlock = Anthropic.Messages.TextBlock;
 import { maryPersona, type CoachingContext } from './mary-persona';
 import { MARY_TOOLS } from './tools/index';
 import { isOpenRouterConfigured, openRouterComplete } from './openrouter-client';
-import { modelFor, samplingFor, estimateCostUsd } from './model-config';
+import { modelFor, samplingFor, effortConfigFor, estimateCostUsd } from './model-config';
 
 // Initialize Anthropic client (lazy initialization to avoid build-time errors)
 let anthropic: Anthropic | null = null;
@@ -245,6 +245,7 @@ export class ClaudeClient {
       model,
       max_tokens: options.maxTokens ?? 2048,
       ...samplingFor(model, options.temperature ?? 0.4),
+      ...effortConfigFor(model, 'synthesis'),
       system: options.system,
       messages: [{ role: 'user', content: options.prompt }],
     }, { timeout: 60_000 }); // Override the SDK's 10-minute default so a hung call cannot pin a serverless function.
@@ -290,6 +291,7 @@ export class ClaudeClient {
         model,
         max_tokens: options?.maxTokens || 4096,
         ...samplingFor(model, 0.7),
+        ...effortConfigFor(model, 'board'),
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages,
         tools: tools,
@@ -365,6 +367,7 @@ export class ClaudeClient {
         model,
         max_tokens: options?.maxTokens || 4096,
         ...samplingFor(model, 0.7),
+        ...effortConfigFor(model, 'board'),
         system: maryPersona.generateSystemPrompt(coachingContext),
         messages: messages as Anthropic.MessageParam[],
         tools: tools,

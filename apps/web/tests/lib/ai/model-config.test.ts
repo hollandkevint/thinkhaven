@@ -3,6 +3,9 @@ import {
   modelFor,
   rejectsSamplingParams,
   samplingFor,
+  supportsEffort,
+  effortFor,
+  effortConfigFor,
   estimateCostUsd,
 } from '@/lib/ai/model-config';
 
@@ -69,6 +72,64 @@ describe('model-config', () => {
     it('keeps temperature for models that accept it', () => {
       expect(samplingFor('claude-sonnet-4-6', 0.7)).toEqual({ temperature: 0.7 });
       expect(samplingFor('claude-haiku-4-5', 0.4)).toEqual({ temperature: 0.4 });
+    });
+  });
+
+  describe('supportsEffort', () => {
+    it('supports effort on Fable 5, Opus 4.5+, and Sonnet 4.6', () => {
+      expect(supportsEffort('claude-fable-5')).toBe(true);
+      expect(supportsEffort('claude-opus-4-8')).toBe(true);
+      expect(supportsEffort('claude-opus-4-5')).toBe(true);
+      expect(supportsEffort('claude-sonnet-4-6')).toBe(true);
+    });
+
+    it('rejects effort on Haiku, Sonnet 4.5, and legacy models (would error)', () => {
+      expect(supportsEffort('claude-haiku-4-5')).toBe(false);
+      expect(supportsEffort('claude-sonnet-4-5')).toBe(false);
+      expect(supportsEffort('claude-sonnet-4-20250514')).toBe(false);
+    });
+  });
+
+  describe('effortFor', () => {
+    it('defaults synthesis and board to high; chat and util get none', () => {
+      expect(effortFor('synthesis')).toBe('high');
+      expect(effortFor('board')).toBe('high');
+      expect(effortFor('chat')).toBeUndefined();
+      expect(effortFor('util')).toBeUndefined();
+    });
+
+    it('honors a valid env override (case-insensitive)', () => {
+      vi.stubEnv('ANTHROPIC_EFFORT_SYNTHESIS', 'MAX');
+      expect(effortFor('synthesis')).toBe('max');
+    });
+
+    it('ignores invalid env values and falls back to the default', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.stubEnv('ANTHROPIC_EFFORT_BOARD', 'xhigh'); // not in SDK 0.80.0's union
+      expect(effortFor('board')).toBe('high');
+      expect(warn).toHaveBeenCalledOnce();
+      warn.mockRestore();
+    });
+  });
+
+  describe('effortConfigFor', () => {
+    it('emits output_config.effort for supported model + effort-bearing workload', () => {
+      expect(effortConfigFor('claude-fable-5', 'synthesis')).toEqual({
+        output_config: { effort: 'high' },
+      });
+      expect(effortConfigFor('claude-opus-4-8', 'board')).toEqual({
+        output_config: { effort: 'high' },
+      });
+    });
+
+    it('emits nothing when the model does not support effort (kill-switch safety)', () => {
+      vi.stubEnv('ANTHROPIC_MODEL', 'claude-haiku-4-5');
+      expect(effortConfigFor(modelFor('synthesis'), 'synthesis')).toEqual({});
+    });
+
+    it('emits nothing for workloads without an effort default', () => {
+      expect(effortConfigFor('claude-sonnet-4-6', 'chat')).toEqual({});
+      expect(effortConfigFor('claude-haiku-4-5', 'util')).toEqual({});
     });
   });
 

@@ -66,6 +66,62 @@ export function samplingFor(model: string, temperature: number): { temperature?:
   return rejectsSamplingParams(model) ? {} : { temperature };
 }
 
+/** Effort levels typed by the installed SDK (0.80.0). `xhigh` is not in this SDK's union. */
+export type Effort = 'low' | 'medium' | 'high' | 'max';
+
+const EFFORT_VALUES: ReadonlySet<string> = new Set(['low', 'medium', 'high', 'max']);
+
+/**
+ * Built-in effort defaults. Only the reasoning-heavy tiers get one — chat stays
+ * latency-lean and util is throwaway, so they omit `output_config` entirely
+ * (omitting = API default `high` without pinning it).
+ */
+const EFFORT_DEFAULTS: Partial<Record<Workload, Effort>> = {
+  synthesis: 'high',
+  board: 'high',
+};
+
+const EFFORT_ENV_KEYS: Record<Workload, string> = {
+  chat: 'ANTHROPIC_EFFORT_CHAT',
+  board: 'ANTHROPIC_EFFORT_BOARD',
+  synthesis: 'ANTHROPIC_EFFORT_SYNTHESIS',
+  util: 'ANTHROPIC_EFFORT_UTIL',
+};
+
+/**
+ * `output_config.effort` is supported on Fable 5, Opus 4.5+, and Sonnet 4.6.
+ * It errors on Haiku 4.5, Sonnet 4.5, and earlier — so the effort slice must be
+ * gated by model, not just by workload (a kill-switch can move any workload onto
+ * a non-supporting model).
+ */
+export function supportsEffort(model: string): boolean {
+  return /^claude-(fable-5|opus-4-(5|6|7|8)|sonnet-4-6)/.test(model);
+}
+
+/** Resolve the effort for a workload: validated env override > built-in default > none. */
+export function effortFor(workload: Workload): Effort | undefined {
+  const fromEnv = process.env[EFFORT_ENV_KEYS[workload]]?.trim().toLowerCase();
+  if (fromEnv) {
+    if (EFFORT_VALUES.has(fromEnv)) return fromEnv as Effort;
+    console.warn(`[model-config] Ignoring invalid ${EFFORT_ENV_KEYS[workload]}="${fromEnv}" (expected low|medium|high|max)`);
+  }
+  return EFFORT_DEFAULTS[workload];
+}
+
+/**
+ * Build the `output_config` slice for `messages.create()`. Spread the result into
+ * the request: it carries `{ output_config: { effort } }` when the workload has an
+ * effort and the model supports it, and nothing otherwise.
+ */
+export function effortConfigFor(
+  model: string,
+  workload: Workload,
+): { output_config?: { effort: Effort } } {
+  const effort = effortFor(workload);
+  if (!effort || !supportsEffort(model)) return {};
+  return { output_config: { effort } };
+}
+
 /** Per-token USD prices, matched by model-id prefix (input/output). */
 const PRICES: Array<{ test: RegExp; input: number; output: number }> = [
   { test: /^claude-fable-5/, input: 10e-6, output: 50e-6 },
