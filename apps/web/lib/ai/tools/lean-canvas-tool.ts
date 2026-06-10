@@ -6,7 +6,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
-import { LEAN_CANVAS_FIELDS, type LeanCanvas, type LeanCanvasField } from '@/lib/canvas/lean-canvas-schema';
+import { LEAN_CANVAS_FIELDS, type LeanCanvas } from '@/lib/canvas/lean-canvas-schema';
 import type { ToolResult } from './index';
 
 export interface UpdateLeanCanvasInput {
@@ -54,7 +54,6 @@ export async function updateLeanCanvas(
     if (!updatedCanvas) return { success: false, error: 'Session not found or access denied' };
 
     const canvas = updatedCanvas as LeanCanvas;
-    const filledBoxes = LEAN_CANVAS_FIELDS.filter(f => canvas[f]);
     const emptyBoxes = LEAN_CANVAS_FIELDS.filter(f => !canvas[f]);
 
     return {

@@ -1,5 +1,4 @@
 import { ConversationQueries } from '@/lib/supabase/conversation-queries'
-import { createConversationSummarizer } from './conversation-summarizer'
 import { createBookmarkReferenceManager } from './bookmark-reference-manager'
 import { 
   ConversationRow, 
@@ -170,7 +169,7 @@ export class ConversationExporter {
         })
       }
 
-      const conversationData: any = {
+      const conversationData: ExportData['conversations'][number] = {
         conversation,
         messages
       }

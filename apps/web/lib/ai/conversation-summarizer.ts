@@ -1,4 +1,4 @@
-import { MessageRow, ConversationContextInsert } from '@/lib/supabase/conversation-schema'
+import { MessageRow, ConversationContextInsert, ConversationContextRow } from '@/lib/supabase/conversation-schema'
 import { ConversationQueries } from '@/lib/supabase/conversation-queries'
 
 export interface SummarizationOptions {
@@ -214,8 +214,8 @@ Please provide the summary in the exact format shown above, with clear section h
    * Build prompt for conversation overview
    */
   private buildOverviewPrompt(
-    summaries: any[], 
-    insights: any[]
+    summaries: ConversationContextRow[],
+    insights: ConversationContextRow[]
   ): string {
     const summaryTexts = summaries.map(s => s.content).join('\n\n---\n\n')
     const insightTexts = insights.map(i => i.content).join('\n\n')
@@ -306,7 +306,12 @@ Provide the response in the exact format shown above.`
   /**
    * Parse overview response
    */
-  private parseOverviewResponse(overviewText: string): any {
+  private parseOverviewResponse(overviewText: string): {
+    overallSummary: string
+    keyThemes: string[]
+    progressTimeline: Array<{phase: string, insights: string[], timestamp: string}>
+    strategicOutcomes: string[]
+  } {
     const sections = this.extractSections(overviewText)
     
     return {
@@ -322,7 +327,7 @@ Provide the response in the exact format shown above.`
    */
   private extractSections(text: string): Record<string, string> {
     const sections: Record<string, string> = {}
-    const sectionRegex = /([A-Z\s]+):\s*\n(.*?)(?=\n[A-Z\s]+:|$)/gs
+    const sectionRegex = /([A-Z\s]+):\s*\n([\s\S]*?)(?=\n[A-Z\s]+:|$)/g
     let match
 
     while ((match = sectionRegex.exec(text)) !== null) {

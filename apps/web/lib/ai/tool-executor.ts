@@ -52,6 +52,85 @@ export interface ToolExecutionResult {
 }
 
 // =============================================================================
+// Input Narrowing
+// =============================================================================
+// Tool inputs arrive from Claude as Record<string, unknown>. These guards
+// verify the required fields exist before dispatching to typed handlers.
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(item => typeof item === 'string');
+}
+
+const SWITCH_MODES: ReadonlyArray<SwitchModeInput['new_mode']> = [
+  'inquisitive',
+  'devil_advocate',
+  'encouraging',
+  'realistic',
+];
+
+const DOCUMENT_TYPES: ReadonlyArray<GenerateDocumentInput['document_type']> = [
+  'lean_canvas',
+  'business_model_canvas',
+  'prd',
+  'feature_brief',
+  'concept_document',
+  'domain_context',
+  'decision_record',
+];
+
+function isCompletePhaseInput(input: unknown): input is CompletePhaseInput {
+  return isRecord(input) && isString(input.reason);
+}
+
+function isSwitchModeInput(input: unknown): input is SwitchModeInput {
+  return (
+    isRecord(input) &&
+    isString(input.new_mode) &&
+    (SWITCH_MODES as readonly string[]).includes(input.new_mode) &&
+    isString(input.reason)
+  );
+}
+
+function isSwitchSpeakerInput(input: unknown): input is SwitchSpeakerInput {
+  return isRecord(input) && isString(input.speaker_key) && isString(input.handoff_reason);
+}
+
+function isRecommendActionInput(input: unknown): input is RecommendActionInput {
+  return isRecord(input) && isStringArray(input.concerns) && isStringArray(input.strengths);
+}
+
+function isGenerateDocumentInput(input: unknown): input is GenerateDocumentInput {
+  return (
+    isRecord(input) &&
+    isString(input.document_type) &&
+    (DOCUMENT_TYPES as readonly string[]).includes(input.document_type)
+  );
+}
+
+function isUpdateLeanCanvasInput(input: unknown): input is UpdateLeanCanvasInput {
+  return isRecord(input) && isRecord(input.updates);
+}
+
+function isUpdateContextInput(input: unknown): input is UpdateContextInput {
+  return isRecord(input) && isString(input.insight);
+}
+
+function invalidToolInput(toolName: string): ToolResult {
+  return {
+    success: false,
+    error: `Invalid input for tool: ${toolName}`,
+  };
+}
+
+// =============================================================================
 // Tool Executor
 // =============================================================================
 
@@ -85,56 +164,48 @@ export class ToolExecutor {
           break;
 
         case TOOL_NAMES.COMPLETE_PHASE:
-          result = await completePhase(
-            this.context.sessionId,
-            toolCall.input as CompletePhaseInput
-          );
+          result = isCompletePhaseInput(toolCall.input)
+            ? await completePhase(this.context.sessionId, toolCall.input)
+            : invalidToolInput(toolCall.name);
           break;
 
         case TOOL_NAMES.SWITCH_PERSONA_MODE:
-          result = await switchPersonaMode(
-            this.context.sessionId,
-            toolCall.input as SwitchModeInput
-          );
+          result = isSwitchModeInput(toolCall.input)
+            ? await switchPersonaMode(this.context.sessionId, toolCall.input)
+            : invalidToolInput(toolCall.name);
           break;
 
         case TOOL_NAMES.SWITCH_SPEAKER:
-          result = await switchSpeaker(
-            this.context.sessionId,
-            toolCall.input as SwitchSpeakerInput
-          );
+          result = isSwitchSpeakerInput(toolCall.input)
+            ? await switchSpeaker(this.context.sessionId, toolCall.input)
+            : invalidToolInput(toolCall.name);
           if (result.success && !this.boardActivated) {
             this.boardActivated = true;
           }
           break;
 
         case TOOL_NAMES.RECOMMEND_ACTION:
-          result = await recommendAction(
-            this.context.sessionId,
-            toolCall.input as RecommendActionInput
-          );
+          result = isRecommendActionInput(toolCall.input)
+            ? await recommendAction(this.context.sessionId, toolCall.input)
+            : invalidToolInput(toolCall.name);
           break;
 
         case TOOL_NAMES.GENERATE_DOCUMENT:
-          result = await generateDocument(
-            this.context.sessionId,
-            this.context.userId,
-            toolCall.input as GenerateDocumentInput
-          );
+          result = isGenerateDocumentInput(toolCall.input)
+            ? await generateDocument(this.context.sessionId, this.context.userId, toolCall.input)
+            : invalidToolInput(toolCall.name);
           break;
 
         case TOOL_NAMES.UPDATE_LEAN_CANVAS:
-          result = await updateLeanCanvas(
-            this.context.sessionId,
-            toolCall.input as UpdateLeanCanvasInput
-          );
+          result = isUpdateLeanCanvasInput(toolCall.input)
+            ? await updateLeanCanvas(this.context.sessionId, toolCall.input)
+            : invalidToolInput(toolCall.name);
           break;
 
         case TOOL_NAMES.UPDATE_SESSION_CONTEXT:
-          result = await updateSessionContext(
-            this.context.sessionId,
-            toolCall.input as UpdateContextInput
-          );
+          result = isUpdateContextInput(toolCall.input)
+            ? await updateSessionContext(this.context.sessionId, toolCall.input)
+            : invalidToolInput(toolCall.name);
           break;
 
         default:

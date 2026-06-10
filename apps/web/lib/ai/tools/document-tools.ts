@@ -145,6 +145,7 @@ export async function generateDocument(
 ): Promise<GenerateDocumentResult> {
   try {
     const supabase = await createClient();
+    if (!supabase) return { success: false, error: 'Service unavailable' };
 
     // Get the template
     const template = DOCUMENT_TEMPLATES[input.document_type];

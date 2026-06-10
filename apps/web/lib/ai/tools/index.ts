@@ -363,7 +363,7 @@ export function getAllToolNames(): string[] {
 
 export function getToolDescriptions(): Record<string, string> {
   return MARY_TOOLS.reduce((acc, tool) => {
-    acc[tool.name] = tool.description;
+    acc[tool.name] = tool.description ?? tool.name;
     return acc;
   }, {} as Record<string, string>);
 }

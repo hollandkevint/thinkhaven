@@ -118,7 +118,7 @@ export class BookmarkReferenceManager {
     return bookmarks.length > 0
   }
 
-  async getBookmarksByTag(tag: string, workspaceId?: string): Promise<BookmarkWithContext[]> {
+  async getBookmarksByTag(tag: string): Promise<BookmarkWithContext[]> {
     return this.searchBookmarks('', [tag])
   }
 
@@ -184,7 +184,7 @@ export class BookmarkReferenceManager {
       .filter(word => word.length > 3)
 
     // Common strategic keywords that might appear in coaching conversations
-    const strategicKeywords = {
+    const strategicKeywords: Record<string, string> = {
       'strategy': 'blue',
       'market': 'green',
       'customer': 'purple',

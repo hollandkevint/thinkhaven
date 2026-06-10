@@ -11,11 +11,9 @@ import { createClient } from '@/lib/supabase/server';
 import { maryPersona, SubPersonaSessionState } from '../mary-persona';
 import {
   loadSessionState,
-  persistSessionState,
   completePhase as completePhasePrivmitive,
   recordInsight,
   getSessionInsights,
-  PHASE_ORDER,
 } from '@/lib/session/session-primitives';
 import { resolveSpeakerKey } from '../board-members';
 import type {
@@ -53,6 +51,7 @@ export async function readSessionState(sessionId: string): Promise<ReadSessionSt
 
     // Get sub-persona state from database
     const supabase = await createClient();
+    if (!supabase) return { success: false, error: 'Service unavailable' };
     const { data: sessionData } = await supabase
       .from('bmad_sessions')
       .select('sub_persona_state')
@@ -134,6 +133,7 @@ export async function switchPersonaMode(
 ): Promise<SwitchModeResult> {
   try {
     const supabase = await createClient();
+    if (!supabase) return { success: false, error: 'Service unavailable' };
 
     // Get current sub-persona state
     const { data: session, error: fetchError } = await supabase
@@ -207,6 +207,7 @@ export async function switchSpeaker(
 ): Promise<SwitchSpeakerResult> {
   try {
     const supabase = await createClient();
+    if (!supabase) return { success: false, error: 'Service unavailable' };
 
     // Resolve and validate the speaker key
     const newMember = resolveSpeakerKey(input.speaker_key);
@@ -272,6 +273,7 @@ export async function recommendAction(
 ): Promise<RecommendActionResult> {
   try {
     const supabase = await createClient();
+    if (!supabase) return { success: false, error: 'Service unavailable' };
 
     // Get current session state for viability assessment
     const { data: session, error: fetchError } = await supabase

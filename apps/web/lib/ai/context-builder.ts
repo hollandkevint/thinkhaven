@@ -76,6 +76,10 @@ export class ContextBuilder {
   static async buildSessionContext(sessionId: string): Promise<SessionContext | null> {
     try {
       const supabase = await createClient();
+      if (!supabase) {
+        console.warn('[ContextBuilder] Supabase client unavailable');
+        return null;
+      }
 
       const { data: session, error } = await supabase
         .from('bmad_sessions')
@@ -144,6 +148,10 @@ export class ContextBuilder {
   static async buildUserContext(userId: string): Promise<UserContext | null> {
     try {
       const supabase = await createClient();
+      if (!supabase) {
+        console.warn('[ContextBuilder] Supabase client unavailable');
+        return null;
+      }
 
       // Get user's workspace data
       const { data: workspace } = await supabase

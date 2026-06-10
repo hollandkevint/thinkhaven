@@ -1,5 +1,4 @@
 import { ConversationQueries } from '@/lib/supabase/conversation-queries'
-import { MessageRow, ConversationRow, ConversationContextRow } from '@/lib/supabase/conversation-schema'
 
 export interface SearchResult {
   type: 'message' | 'conversation' | 'context'
@@ -73,7 +72,7 @@ export class ConversationSearchService {
     try {
       // Determine what to search based on filters
       const resultTypes = filters.resultTypes || ['message', 'conversation', 'context']
-      const searchPromises: Promise<any>[] = []
+      const searchPromises: Promise<Awaited<ReturnType<typeof ConversationQueries.advancedSearch>>>[] = []
 
       // Advanced search covers all types
       searchPromises.push(
