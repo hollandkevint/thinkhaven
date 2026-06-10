@@ -7,11 +7,14 @@
  * that the product actually ships. This module maps each workload to the right
  * tier and shapes model-specific request params.
  *
- * Tiers (see STRATEGY.md):
- *   - synthesis → Fable 5   : the decision-record artifact; batch, low-volume, highest-stakes reasoning.
- *   - board     → Opus 4.8  : the multi-round adversarial board loop (the moat), but volume + some latency.
+ * Tiers — cost-preservation posture (2026-06-10): every user-facing workload runs
+ * Sonnet 4.6; frontier models (Fable 5, Opus 4.8) are opt-in via the per-workload
+ * env overrides, never defaults. Synthesis additionally falls back to OpenRouter
+ * (see openrouter-client.ts) on Anthropic failures.
+ *   - synthesis → Sonnet 4.6: the decision-record artifact.
+ *   - board     → Sonnet 4.6: the multi-round adversarial board loop (≤5 rounds/message).
  *   - chat      → Sonnet 4.6: latency-sensitive streaming elicitation (authed + guest).
- *   - util      → Haiku 4.5 : connection tests, throwaway/utility calls.
+ *   - util      → Haiku 4.5 : connection tests, throwaway/utility calls (cheaper than Sonnet).
  *
  * Model-id precedence (most specific wins):
  *   ANTHROPIC_MODEL_<WORKLOAD>  >  ANTHROPIC_MODEL (global kill-switch / rollback)  >  built-in tier default.
@@ -26,8 +29,8 @@ export type Workload = 'chat' | 'board' | 'synthesis' | 'util';
 /** Built-in tier map. Overridable per-workload or globally via env (see precedence above). */
 const TIER_DEFAULTS: Record<Workload, string> = {
   chat: 'claude-sonnet-4-6',
-  board: 'claude-opus-4-8',
-  synthesis: 'claude-fable-5',
+  board: 'claude-sonnet-4-6',
+  synthesis: 'claude-sonnet-4-6',
   util: 'claude-haiku-4-5',
 };
 

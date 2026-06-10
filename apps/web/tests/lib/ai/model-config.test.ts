@@ -19,11 +19,17 @@ describe('model-config', () => {
   });
 
   describe('modelFor — tier defaults', () => {
-    it('maps each workload to its frontier-aware tier default', () => {
-      expect(modelFor('synthesis')).toBe('claude-fable-5');
-      expect(modelFor('board')).toBe('claude-opus-4-8');
+    it('defaults every user-facing workload to Sonnet 4.6 (cost preservation); util stays on Haiku', () => {
+      expect(modelFor('synthesis')).toBe('claude-sonnet-4-6');
+      expect(modelFor('board')).toBe('claude-sonnet-4-6');
       expect(modelFor('chat')).toBe('claude-sonnet-4-6');
       expect(modelFor('util')).toBe('claude-haiku-4-5');
+    });
+
+    it('never defaults any workload to a frontier model — frontier is env-opt-in only', () => {
+      for (const workload of ['chat', 'board', 'synthesis', 'util'] as const) {
+        expect(modelFor(workload)).not.toMatch(/fable|opus/);
+      }
     });
   });
 
@@ -35,16 +41,16 @@ describe('model-config', () => {
       expect(modelFor('chat')).toBe('claude-sonnet-4-6');
     });
 
-    it('per-workload override beats both the global and the default', () => {
-      vi.stubEnv('ANTHROPIC_MODEL', 'claude-sonnet-4-6');
+    it('per-workload override beats both the global and the default (frontier opt-in path)', () => {
+      vi.stubEnv('ANTHROPIC_MODEL', 'claude-haiku-4-5');
       vi.stubEnv('ANTHROPIC_MODEL_SYNTHESIS', 'claude-fable-5');
       expect(modelFor('synthesis')).toBe('claude-fable-5'); // per-workload wins
-      expect(modelFor('board')).toBe('claude-sonnet-4-6'); // falls back to global
+      expect(modelFor('board')).toBe('claude-haiku-4-5'); // falls back to global
     });
 
     it('ignores blank/whitespace env values', () => {
       vi.stubEnv('ANTHROPIC_MODEL_BOARD', '   ');
-      expect(modelFor('board')).toBe('claude-opus-4-8');
+      expect(modelFor('board')).toBe('claude-sonnet-4-6');
     });
   });
 
