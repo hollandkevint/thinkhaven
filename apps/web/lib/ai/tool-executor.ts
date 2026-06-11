@@ -124,6 +124,9 @@ function isUpdateContextInput(input: unknown): input is UpdateContextInput {
 }
 
 function invalidToolInput(toolName: string): ToolResult {
+  // Log the rejection: a model emitting malformed tool input repeatedly can burn
+  // all MAX_TOOL_ROUNDS in the agentic loop, and without this it leaves no trace.
+  console.warn(`[ToolExecutor] Rejected malformed input for tool: ${toolName}`);
   return {
     success: false,
     error: `Invalid input for tool: ${toolName}`,
