@@ -1,0 +1,18 @@
+{
+  // Build-time type-check config: next.config.ts points typescript.tsconfigPath here.
+  // Excludes test files so `next build` enforces zero type errors on SOURCE without
+  // blocking on the test-harness type debt (tracked as follow-up in
+  // docs/plans/2026-06-10-001-refactor-type-safety-burndown-plan.md).
+  // The base tsconfig.json (used by the IDE and `npx tsc --noEmit`) still includes tests.
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "tests",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "playwright.prod.config.ts"
+  ]
+}

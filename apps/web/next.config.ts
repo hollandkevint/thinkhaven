@@ -15,7 +15,9 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    // Type errors fail the build. Test files are excluded via tsconfig.build.json
+    // (their type debt is tracked separately); source must stay at zero errors.
+    tsconfigPath: 'tsconfig.build.json',
   },
   async rewrites() {
     return [
