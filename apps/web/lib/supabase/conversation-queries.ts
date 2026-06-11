@@ -14,6 +14,22 @@ import type {
   MessageReferenceInsert
 } from './conversation-schema'
 
+/** Joined conversation fields selected alongside messages/contexts. */
+interface JoinedConversation {
+  id: string
+  title?: string
+  user_id: string
+  workspace_id: string
+}
+
+type MessageWithConversation = MessageRow & {
+  conversation?: JoinedConversation | null
+}
+
+type ContextWithConversation = ConversationContextRow & {
+  conversation?: JoinedConversation | null
+}
+
 export class ConversationQueries {
   // Conversation CRUD operations
   static async createConversation(data: ConversationInsert): Promise<ConversationRow> {
@@ -216,7 +232,7 @@ export class ConversationQueries {
       throw new Error(`Failed to search all messages: ${error.message}`)
     }
 
-    return (results || []).map(result => ({
+    return (results || []).map((result: MessageWithConversation) => ({
       ...result,
       conversation_title: result.conversation?.title || 'Untitled Conversation',
       conversation_id: result.conversation?.id || result.conversation_id
@@ -344,7 +360,7 @@ export class ConversationQueries {
       throw new Error(`Conversation search failed: ${conversationResults.error.message}`)
     }
 
-    let contextResults: any = { data: [], error: null }
+    let contextResults: { data: ContextWithConversation[] | null; error: { message: string } | null } = { data: [], error: null }
 
     // Search conversation context if requested
     if (includeContext) {
@@ -372,13 +388,13 @@ export class ConversationQueries {
     }
 
     return {
-      messages: (messageResults.data || []).map(result => ({
+      messages: (messageResults.data || []).map((result: MessageWithConversation) => ({
         ...result,
         conversation_title: result.conversation?.title || 'Untitled Conversation',
         conversation_id: result.conversation?.id || result.conversation_id
       })),
       conversations: conversationResults.data || [],
-      contexts: (contextResults.data || []).map((result: any) => ({
+      contexts: (contextResults.data || []).map((result: ContextWithConversation) => ({
         ...result,
         conversation_title: result.conversation?.title || 'Untitled Conversation'
       }))
@@ -463,7 +479,7 @@ export class ConversationQueries {
     }
 
     if (contexts && contexts.length > 0) {
-      const idsToDelete = contexts.map(c => c.id)
+      const idsToDelete = contexts.map((c: { id: string }) => c.id)
       await supabase
         .from('conversation_context')
         .delete()
@@ -510,7 +526,12 @@ export class ConversationQueries {
       query = query.eq('conversation.workspace_id', workspaceId)
     }
 
-    const { data: bookmarks, error } = await query
+    // overrideTypes: the dotted rename syntax in the select string is not
+    // understood by the postgrest-js type parser, so the result is typed here.
+    const { data: bookmarks, error } = await query.overrideTypes<
+      Array<MessageBookmarkRow & { message: MessageRow; conversation: ConversationRow }>,
+      { merge: false }
+    >()
 
     if (error) {
       throw new Error(`Failed to get user bookmarks: ${error.message}`)
@@ -582,7 +603,11 @@ export class ConversationQueries {
       query = query.contains('tags', tags)
     }
 
-    const { data: bookmarks, error } = await query
+    // overrideTypes: dotted rename syntax is not parseable by postgrest-js types
+    const { data: bookmarks, error } = await query.overrideTypes<
+      Array<MessageBookmarkRow & { message: MessageRow; conversation: ConversationRow }>,
+      { merge: false }
+    >()
 
     if (error) {
       throw new Error(`Failed to search bookmarks: ${error.message}`)
@@ -633,7 +658,16 @@ export class ConversationQueries {
       query = query.or(`from_message_id.eq.${messageId},to_message_id.eq.${messageId}`)
     }
 
-    const { data: references, error } = await query
+    // overrideTypes: dotted rename syntax is not parseable by postgrest-js types
+    const { data: references, error } = await query.overrideTypes<
+      Array<MessageReferenceRow & {
+        from_message?: MessageRow
+        to_message?: MessageRow
+        from_conversation?: ConversationRow
+        to_conversation?: ConversationRow
+      }>,
+      { merge: false }
+    >()
 
     if (error) {
       throw new Error(`Failed to get message references: ${error.message}`)
@@ -678,6 +712,15 @@ export class ConversationQueries {
       `)
       .eq('user_id', userId)
       .or(`from_message_id.in.(${messageIds.join(',')}),to_message_id.in.(${messageIds.join(',')})`)
+      // overrideTypes: dotted rename syntax is not parseable by postgrest-js types
+      .overrideTypes<
+        Array<MessageReferenceRow & {
+          from_message?: MessageRow
+          to_message?: MessageRow
+          related_conversation?: ConversationRow
+        }>,
+        { merge: false }
+      >()
 
     if (error) {
       throw new Error(`Failed to get conversation references: ${error.message}`)

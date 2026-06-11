@@ -55,7 +55,6 @@ const ALTERNATIVE_DIRECTIONS = [
 export default function BranchDialog({
   isOpen,
   onClose,
-  messageId,
   messageContent,
   conversationTitle,
   onCreateBranch,
@@ -240,7 +239,7 @@ export default function BranchDialog({
               <li>• Original conversation remains unchanged</li>
               <li>• You can switch between branches anytime</li>
               <li>• Branches can be merged back into the original conversation</li>
-              <li>• Perfect for exploring "what if" scenarios without losing progress</li>
+              <li>• Perfect for exploring &quot;what if&quot; scenarios without losing progress</li>
             </ul>
           </div>
         </div>

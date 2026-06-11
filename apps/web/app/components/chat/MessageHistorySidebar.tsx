@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { ConversationQueries } from '@/lib/supabase/conversation-queries'
-import { ConversationRow, MessageRow } from '@/lib/supabase/conversation-schema'
-import { createConversationSummarizer } from '@/lib/ai/conversation-summarizer'
 
 export interface ConversationHistoryItem {
   id: string
@@ -25,6 +23,17 @@ export interface MessageHistoryItem {
   messageIndex: number
   conversationId?: string
   conversationTitle?: string
+}
+
+interface MessageSearchResult {
+  id: string
+  content: string
+  timestamp: string
+  conversationId?: string
+  conversationTitle?: string
+  context?: {
+    messageRole?: 'user' | 'assistant'
+  }
 }
 
 interface MessageHistorySidebarProps {
@@ -56,7 +65,7 @@ export default function MessageHistorySidebar({
   const [expandedConversations, setExpandedConversations] = useState<Set<string>>(new Set())
   const [searchStats, setSearchStats] = useState<{ totalCount: number; searchTime: number } | null>(null)
   
-  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   // Load conversation history
@@ -151,7 +160,7 @@ export default function MessageHistorySidebar({
       const data = await response.json()
       
       if (data.success && data.data.results) {
-        const searchResults = data.data.results.map((result: any) => ({
+        const searchResults = data.data.results.map((result: MessageSearchResult) => ({
           id: result.id,
           role: result.context?.messageRole || 'user',
           content: result.content,

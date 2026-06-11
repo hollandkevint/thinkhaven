@@ -142,6 +142,14 @@ export class RateLimiter {
   }
 
   /**
+   * Get the config for a rate limit type (read-only access for helpers
+   * outside the class, e.g. withRateLimit headers).
+   */
+  static getConfig(type: keyof typeof RateLimiter.configs): RateLimitConfig {
+    return this.configs[type];
+  }
+
+  /**
    * Create a 429 Response for rate-limited requests
    */
   static createLimitResponse(resetTime: number): Response {
@@ -163,11 +171,20 @@ export class RateLimiter {
 }
 
 /**
+ * Request shape needed for rate limit identification.
+ * Matches NextRequest plus an optional attached user.
+ */
+interface RateLimitedRequest {
+  user?: { id?: string };
+  headers: Headers;
+}
+
+/**
  * Middleware wrapper for Next.js API routes
  */
-export function withRateLimit<T extends any[]>(
+export function withRateLimit<T extends [RateLimitedRequest, ...unknown[]]>(
   handler: (...args: T) => Promise<Response>,
-  type: keyof typeof RateLimiter['configs'] = 'default'
+  type: string = 'default'
 ) {
   return async (...args: T): Promise<Response> => {
     const [request] = args;
@@ -189,7 +206,7 @@ export function withRateLimit<T extends any[]>(
           status: 429,
           headers: {
             'Content-Type': 'application/json',
-            'X-RateLimit-Limit': String(RateLimiter.configs[type].maxRequests),
+            'X-RateLimit-Limit': String(RateLimiter.getConfig(type).maxRequests),
             'X-RateLimit-Remaining': String(remainingRequests),
             'X-RateLimit-Reset': resetDate.toISOString(),
             'Retry-After': String(Math.ceil((resetTime - Date.now()) / 1000))
@@ -201,7 +218,7 @@ export function withRateLimit<T extends any[]>(
     const response = await handler(...args);
 
     // Add rate limit headers to successful responses
-    response.headers.set('X-RateLimit-Limit', String(RateLimiter.configs[type].maxRequests));
+    response.headers.set('X-RateLimit-Limit', String(RateLimiter.getConfig(type).maxRequests));
     response.headers.set('X-RateLimit-Remaining', String(remainingRequests));
     response.headers.set('X-RateLimit-Reset', new Date(resetTime).toISOString());
 
@@ -212,7 +229,7 @@ export function withRateLimit<T extends any[]>(
 /**
  * Extract identifier for rate limiting
  */
-function getRateLimitIdentifier(request: any): string {
+function getRateLimitIdentifier(request: RateLimitedRequest): string {
   // Try to get user ID from authenticated request
   const userId = request.user?.id;
   if (userId) {

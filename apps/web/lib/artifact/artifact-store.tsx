@@ -94,7 +94,8 @@ function artifactReducer(
     }
 
     case 'REMOVE_ARTIFACT': {
-      const { [action.id]: removed, ...remaining } = state.artifacts;
+      const remaining = { ...state.artifacts };
+      delete remaining[action.id];
       return {
         ...state,
         artifacts: remaining,

@@ -2,7 +2,7 @@
  * Visual Suggestion Parser Tests
  */
 
-import { VisualSuggestionParser, filterByConfidence } from '../visual-suggestion-parser'
+import { VisualSuggestionParser, filterByConfidence, type VisualSuggestion } from '../visual-suggestion-parser'
 
 describe('VisualSuggestionParser', () => {
   describe('Explicit Mermaid Diagrams', () => {
@@ -153,10 +153,10 @@ Transitions happen based on actions taken.`
   describe('Confidence Filtering', () => {
     it('should filter suggestions by confidence', () => {
       const suggestions = [
-        { id: '1', confidence: 0.9, type: 'flowchart' } as any,
-        { id: '2', confidence: 0.6, type: 'sequence' } as any,
-        { id: '3', confidence: 0.3, type: 'gantt' } as any,
-      ]
+        { id: '1', confidence: 0.9, type: 'flowchart' },
+        { id: '2', confidence: 0.6, type: 'sequence' },
+        { id: '3', confidence: 0.3, type: 'gantt' },
+      ] as Partial<VisualSuggestion>[] as VisualSuggestion[]
 
       const filtered = filterByConfidence(suggestions, 0.5)
 

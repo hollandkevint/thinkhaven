@@ -8,13 +8,12 @@ interface StateBridgeProps {
   className?: string
 }
 
-export default function StateBridge({ workspaceId, className = '' }: StateBridgeProps) {
-  const { 
-    sync, 
-    chat, 
+export default function StateBridge({ className = '' }: StateBridgeProps) {
+  const {
+    sync,
+    chat,
     canvas,
-    syncChatToCanvas, 
-    syncCanvasToChat,
+    syncChatToCanvas,
     createContextBridge
   } = useDualPaneStore()
   

@@ -45,7 +45,7 @@ interface StreamingTextProps {
 function StreamingText({ content, isStreaming, sessionId, onComplete, typingSpeed = 30, onPopOutArtifact }: StreamingTextProps) {
   const [displayedContent, setDisplayedContent] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const intervalRef = useRef<NodeJS.Timeout>()
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const indexRef = useRef(0)
 
   useEffect(() => {

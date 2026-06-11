@@ -165,8 +165,10 @@ export async function POST(request: NextRequest) {
               }
             }
           } else {
-            // Fallback: Send full content with simulated streaming
-            fullContent = claudeResponse.content as string;
+            // Fallback: Send full content with simulated streaming (only
+            // reachable if the content is not an async iterable, i.e. a string)
+            const rawContent: unknown = claudeResponse.content;
+            fullContent = typeof rawContent === 'string' ? rawContent : '';
 
             const words = fullContent.split(' ');
 

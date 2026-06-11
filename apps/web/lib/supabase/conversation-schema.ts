@@ -11,7 +11,7 @@ export interface ConversationRow {
   updated_at: string
   message_count: number
   total_tokens: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface ConversationInsert {
@@ -25,7 +25,7 @@ export interface ConversationInsert {
   updated_at?: string
   message_count?: number
   total_tokens?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface ConversationUpdate {
@@ -39,7 +39,7 @@ export interface ConversationUpdate {
   updated_at?: string
   message_count?: number
   total_tokens?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface MessageRow {
@@ -53,7 +53,7 @@ export interface MessageRow {
     total_tokens: number
     cost_estimate_usd: number
   }
-  coaching_context?: any
+  coaching_context?: unknown
   metadata?: {
     tokens_used?: number
     response_time?: number
@@ -80,7 +80,7 @@ export interface MessageInsert {
     total_tokens: number
     cost_estimate_usd: number
   }
-  coaching_context?: any
+  coaching_context?: unknown
   metadata?: {
     tokens_used?: number
     response_time?: number
@@ -107,7 +107,7 @@ export interface MessageUpdate {
     total_tokens: number
     cost_estimate_usd: number
   }
-  coaching_context?: any
+  coaching_context?: unknown
   metadata?: {
     tokens_used?: number
     response_time?: number
@@ -204,7 +204,7 @@ export interface ConversationBranchRow {
   alternative_direction?: string
   created_by: string
   created_at: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface ConversationBranchInsert {
@@ -215,7 +215,7 @@ export interface ConversationBranchInsert {
   description?: string
   alternative_direction?: string
   created_by: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 // Extended database type with conversation tables

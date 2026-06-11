@@ -91,7 +91,7 @@ class AuthLogger {
 
     // Log to console with structured format
     const logLevel = event.event_type === 'auth_failure' ? 'error' : 'info'
-    const logMessage = `AUTH_EVENT: ${event.event_type.toUpperCase()}`
+    const logMessage = `AUTH_EVENT: ${authEvent.event_type.toUpperCase()}`
 
     console[logLevel](logMessage, {
       ...authEvent,
@@ -103,9 +103,11 @@ class AuthLogger {
     })
 
     // Send to Vercel Analytics if available
-    if (typeof window !== 'undefined' && (window as Record<string, unknown>).va) {
+    const va = typeof window !== 'undefined'
+      ? (window as Window & { va?: (action: string, event: string, data: Record<string, unknown>) => void }).va
+      : undefined
+    if (va) {
       try {
-        const va = (window as Record<string, unknown>).va as (action: string, event: string, data: Record<string, unknown>) => void
         va('track', 'auth_event', {
           event_type: authEvent.event_type,
           auth_method: authEvent.auth_method,

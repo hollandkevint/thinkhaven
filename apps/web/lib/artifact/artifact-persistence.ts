@@ -102,6 +102,7 @@ export async function deleteArtifact(artifactId: string): Promise<void> {
 function rowToArtifact(row: ArtifactRow): Artifact {
   return {
     id: row.id,
+    sessionId: row.session_id,
     type: row.type as ArtifactType,
     title: row.title,
     content: row.content,

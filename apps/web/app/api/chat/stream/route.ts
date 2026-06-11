@@ -206,6 +206,12 @@ export async function POST(request: NextRequest) {
 
     // Get user context
     const supabase = await createClient();
+    if (!supabase) {
+      return new Response(JSON.stringify({ error: 'Service unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -366,8 +372,10 @@ export async function POST(request: NextRequest) {
       // Include recent messages for user state detection
       finalCoachingContext.recentMessages = managedHistory.slice(-10);
 
-      // Only auto-shift tone if user hasn't explicitly set it via UI
-      if (finalCoachingContext.subPersonaState.userOverride) {
+      // Only auto-shift tone if user hasn't explicitly set it via UI.
+      // userOverride is not part of SubPersonaSessionState; it may appear in
+      // DB-loaded JSON state, so check for it structurally.
+      if ('userOverride' in finalCoachingContext.subPersonaState && finalCoachingContext.subPersonaState.userOverride) {
         updatedSubPersonaState = finalCoachingContext.subPersonaState;
         updatedSubPersonaState.exchangeCount = (updatedSubPersonaState.exchangeCount || 0) + 1;
       } else {
@@ -387,8 +395,11 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // Send initial metadata (including sub-persona mode for UI)
-          controller.enqueue(encoder.encodeMetadata({
+          // Send initial metadata (including sub-persona mode for UI).
+          // Built as a variable (not an inline literal) because useTools/
+          // sessionMode/bmadSessionId are extra wire fields beyond
+          // StreamChunk['metadata'] — structural typing permits them here.
+          const initialMetadata = {
             coachingContext: finalCoachingContext,
             messageId: `msg-${Date.now()}`,
             timestamp: new Date().toISOString(),
@@ -400,10 +411,13 @@ export async function POST(request: NextRequest) {
               userControlEnabled: updatedSubPersonaState.userControlEnabled,
             } : undefined,
             useTools: !!useTools,
-            // Session mode + ID for client sync
-            sessionMode: finalCoachingContext?.sessionMode || 'assessment',
+            // Session mode + ID for client sync.
+            // CoachingContext has no sessionMode field, so this is always
+            // 'assessment' today (kept for wire-format stability).
+            sessionMode: 'assessment',
             bmadSessionId: bmadSessionForUpdate?.id || sessionId || null,
-          }));
+          };
+          controller.enqueue(encoder.encodeMetadata(initialMetadata));
 
           let fullContent = '';
           let toolsExecuted: Array<{ name: string; success: boolean }> = [];
@@ -480,8 +494,10 @@ export async function POST(request: NextRequest) {
                 }
               }
             } else {
-              // Fallback: Send full content at once
-              fullContent = claudeResponse.content as string;
+              // Fallback: Send full content at once (only reachable if the
+              // response content is not an async iterable, i.e. a plain string)
+              const rawContent: unknown = claudeResponse.content;
+              fullContent = typeof rawContent === 'string' ? rawContent : '';
 
               // Send full content in sentence chunks
               const sentences = fullContent.match(/[^.!?\n]+[.!?\n]?\s*/g) || [fullContent];
@@ -500,10 +516,12 @@ export async function POST(request: NextRequest) {
               .update({ title: autoTitle })
               .eq('id', sessionId)
               .eq('user_id', user.id)
-              .then(({ error: titleErr }) => {
-                if (titleErr) console.warn('[Chat Stream] Auto-title failed:', titleErr.message)
-              })
-              .catch(() => {}) // Best-effort, never block the stream
+              .then(
+                ({ error: titleErr }) => {
+                  if (titleErr) console.warn('[Chat Stream] Auto-title failed:', titleErr.message)
+                },
+                () => {} // Best-effort, never block the stream
+              )
           }
 
           // Persist updated sub-persona state to database

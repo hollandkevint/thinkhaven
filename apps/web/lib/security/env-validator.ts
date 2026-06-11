@@ -89,7 +89,8 @@ export class EnvironmentValidator {
     }
 
     // Warn about potentially insecure configurations
-    if (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length < 100) {
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (anonKey && anonKey.length < 100) {
       result.warnings.push('Supabase anon key appears unusually short - verify it\'s correct');
     }
   }
@@ -143,7 +144,8 @@ export class EnvironmentValidator {
   }
 
   private static getSecurityLevel(): 'development' | 'staging' | 'production' {
-    const nodeEnv = process.env.NODE_ENV;
+    // Widen beyond Next's NODE_ENV union: deploys can set 'staging' at runtime
+    const nodeEnv: string | undefined = process.env.NODE_ENV;
 
     if (nodeEnv === 'production') {
       return 'production';

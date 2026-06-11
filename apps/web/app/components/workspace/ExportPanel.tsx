@@ -23,7 +23,6 @@ interface ExportPanelProps {
 export default function ExportPanel({
   messages,
   workspaceName,
-  workspaceId,
 }: ExportPanelProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);

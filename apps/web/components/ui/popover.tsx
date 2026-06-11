@@ -54,7 +54,7 @@ const PopoverTrigger = React.forwardRef<
     onOpenChange?.(!isOpen)
   }
 
-  if (asChild && React.isValidElement(children)) {
+  if (asChild && React.isValidElement<Record<string, unknown>>(children)) {
     return React.cloneElement(children, {
       ref,
       onClick: handleClick,
@@ -86,7 +86,9 @@ const PopoverContent = React.forwardRef<
     isOpen?: boolean
     onOpenChange?: (open: boolean) => void
   }
->(({ className, align = "center", isOpen, onOpenChange, children, ...props }, ref) => {
+// Forwarded ref is intentionally not consumed: PopoverContent manages its own
+// internal ref for outside-click detection.
+>(({ className, align = "center", isOpen, onOpenChange, children, ...props }) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {

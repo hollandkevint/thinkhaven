@@ -24,8 +24,8 @@ export function ArtifactEditor({
   const { updateArtifact } = useArtifacts();
   const [content, setContent] = useState(initialContent);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle');
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const resetTimeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const resetTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Sync initial content when it changes externally
   useEffect(() => {

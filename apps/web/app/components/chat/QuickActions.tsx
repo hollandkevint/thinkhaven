@@ -153,7 +153,6 @@ export default function QuickActions({
   disabled = false,
   className = ''
 }: QuickActionsProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
 
   // Get contextual actions based on coaching context
@@ -179,7 +178,6 @@ export default function QuickActions({
 
   const handleActionClick = (action: string) => {
     onActionSelect(action)
-    setSelectedCategory(null)
     setShowAll(false)
   }
 

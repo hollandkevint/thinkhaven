@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { CoachingContext } from '@/lib/ai/mary-persona'
-import { WorkspaceContextBuilder } from '@/lib/ai/workspace-context'
+import { WorkspaceContextBuilder, type BmadSessionData } from '@/lib/ai/workspace-context'
 import { StreamConnectionManager } from '@/lib/ai/streaming'
 import StreamingMessage from './StreamingMessage'
 import MessageInput from './MessageInput'
@@ -29,7 +29,7 @@ interface ChatInterfaceProps {
   workspaceId: string
   userId?: string
   initialContext?: CoachingContext
-  bmadSessionData?: any
+  bmadSessionData?: BmadSessionData
   onContextUpdate?: (context: CoachingContext) => void
   className?: string
 }
@@ -189,7 +189,6 @@ I'm here to help you think through strategic challenges, validate your assumptio
           const reader = response.body.getReader()
           const decoder = new TextDecoder()
           let fullContent = ''
-          let currentMetadata: any = null
 
           try {
             while (true) {
@@ -223,7 +222,6 @@ I'm here to help you think through strategic challenges, validate your assumptio
                     // Handle different chunk types
                     switch (parsed.type) {
                       case 'metadata':
-                        currentMetadata = parsed.metadata
                         if (parsed.metadata?.coachingContext) {
                           setCoachingContext(parsed.metadata.coachingContext)
                         }
@@ -265,7 +263,7 @@ I'm here to help you think through strategic challenges, validate your assumptio
                       case 'error':
                         throw new Error(parsed.error || 'Unknown streaming error')
                     }
-                  } catch (e) {
+                  } catch {
                     // Skip malformed JSON chunks
                     continue
                   }
@@ -277,22 +275,23 @@ I'm here to help you think through strategic challenges, validate your assumptio
           }
         },
         // Retry callback
-        (attempt, error) => {
+        (attempt) => {
           setConnectionStatus('retrying')
           setRetryCount(attempt)
           // Retry state tracked via setRetryCount
         }
       )
-    } catch (error: any) {
+    } catch (error) {
       setConnectionStatus('disconnected')
+      const err = error instanceof Error ? error : new Error(String(error))
 
-      if (error.name === 'AbortError') {
+      if (err.name === 'AbortError') {
         // Request was cancelled
         setMessages(prev => prev.filter(msg => msg.id !== assistantMessage.id))
       } else {
         // Track failed message for retry
         setLastFailedMessage(messageContent)
-        setError(error.message || 'Unknown error occurred')
+        setError(err.message || 'Unknown error occurred')
 
         // Remove the failed assistant message placeholder
         setMessages(prev => prev.filter(msg => msg.id !== assistantMessage.id))
@@ -347,8 +346,9 @@ I'm here to help you think through strategic challenges, validate your assumptio
 
   // Cleanup on unmount
   useEffect(() => {
+    const manager = connectionManager.current
     return () => {
-      connectionManager.current.abort()
+      manager.abort()
     }
   }, [])
 

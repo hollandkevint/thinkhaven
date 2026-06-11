@@ -26,7 +26,6 @@ export function Artifact({ artifact, onPopOut, className = '' }: ArtifactProps) 
     toggleViewMode,
     toggleRenderMode,
     setViewMode,
-    setRenderMode,
     copyToClipboard,
     exportArtifact,
     availableExportFormats,

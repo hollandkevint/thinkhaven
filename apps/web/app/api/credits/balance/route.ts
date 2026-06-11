@@ -13,6 +13,12 @@ export async function GET(request: NextRequest) {
   try {
     // Authenticate user
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
     const {
       data: { user },
       error: authError,

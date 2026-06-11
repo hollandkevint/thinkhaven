@@ -13,6 +13,12 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      );
+    }
 
     // Store assessment results
     const { error } = await supabase

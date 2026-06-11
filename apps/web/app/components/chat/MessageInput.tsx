@@ -17,7 +17,7 @@ interface FormatAction {
   icon: React.ReactNode
   label: string
   shortcut?: string
-  action: (textarea: HTMLTextAreaElement) => void
+  action: () => void
 }
 
 export default function MessageInput({

@@ -4,7 +4,7 @@ import React, { Component, ReactNode } from 'react'
 
 interface Props {
   children: ReactNode
-  paneName: 'chat' | 'canvas'
+  paneName: 'chat' | 'canvas' | 'board'
   fallback?: ReactNode
 }
 

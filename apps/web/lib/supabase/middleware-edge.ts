@@ -8,7 +8,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  * lightweight cookie management to maintain auth sessions.
  */
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },

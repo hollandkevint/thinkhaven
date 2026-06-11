@@ -39,8 +39,12 @@ export function CreditGuard({ userId, onCreditsUpdated, expanded = false }: Cred
   const [showFeedback, setShowFeedback] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // fetchCredits reads userId via the /api route's auth context; re-fetch when it
+  // changes. The callback isn't memoized, so depending on it would refire every
+  // render — userId is the real dependency.
   useEffect(() => {
     fetchCredits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const fetchCredits = async () => {
@@ -104,7 +108,7 @@ export function CreditGuard({ userId, onCreditsUpdated, expanded = false }: Cred
                 <h3 className="font-display font-semibold text-ink">Trial Complete</h3>
               </div>
               <p className="text-sm text-slate-blue">
-                You've used all {credits.total_granted} free sessions
+                You&rsquo;ve used all {credits.total_granted} free sessions
               </p>
               <div className="bg-cream rounded-lg p-3 border border-ink/5">
                 <p className="text-xs text-slate-blue font-display uppercase tracking-wide mb-2">Unlocked features</p>
@@ -146,7 +150,7 @@ export function CreditGuard({ userId, onCreditsUpdated, expanded = false }: Cred
               Trial Complete
             </CardTitle>
             <CardDescription className="text-slate-blue">
-              You've used all {credits.total_granted} free sessions
+              You&rsquo;ve used all {credits.total_granted} free sessions
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -154,7 +158,7 @@ export function CreditGuard({ userId, onCreditsUpdated, expanded = false }: Cred
               Ready to continue your strategic thinking journey?
             </p>
             <div className="bg-cream rounded-lg p-4 border border-ink/5">
-              <p className="text-xs text-slate-blue font-display uppercase tracking-wide mb-3">What you've unlocked</p>
+              <p className="text-xs text-slate-blue font-display uppercase tracking-wide mb-3">What you&rsquo;ve unlocked</p>
               <ul className="text-sm space-y-2">
                 <li className="flex items-center gap-3">
                   <CheckCircle className="w-4 h-4 text-forest flex-shrink-0" />

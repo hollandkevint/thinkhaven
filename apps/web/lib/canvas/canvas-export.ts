@@ -99,10 +99,24 @@ const DEFAULT_OPTIONS: Partial<ExportOptions> = {
 }
 
 /**
+ * Minimal structural surface of the tldraw editor used by the export helpers.
+ * Kept structural (not imported from tldraw) so this module stays type-light.
+ */
+interface TldrawEditorLike {
+  getSelectedShapeIds(): string[]
+  getCurrentPageShapeIds(): string[]
+  exportShapes(
+    shapeIds: string[],
+    format: 'png' | 'svg',
+    opts: { scale: number; background: boolean }
+  ): Promise<Blob | null>
+}
+
+/**
  * Export tldraw canvas as PNG
  */
 export async function exportTldrawAsPNG(
-  editor: any, // Tldraw editor instance
+  editor: TldrawEditorLike, // Tldraw editor instance
   options: Partial<ExportOptions> = {},
   metadata?: ExportMetadata
 ): Promise<ExportResult> {
@@ -162,7 +176,7 @@ export async function exportTldrawAsPNG(
  * Export tldraw canvas as SVG
  */
 export async function exportTldrawAsSVG(
-  editor: any,
+  editor: TldrawEditorLike,
   options: Partial<ExportOptions> = {},
   metadata?: ExportMetadata
 ): Promise<ExportResult> {

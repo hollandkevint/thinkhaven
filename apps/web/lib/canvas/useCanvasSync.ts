@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   VisualSuggestionParser,
   VisualSuggestion,
-  ParsedMessageVisuals,
   filterByConfidence,
 } from './visual-suggestion-parser'
 
@@ -73,6 +72,27 @@ export function useCanvasSync(options: UseCanvasSyncOptions): CanvasSyncHookRetu
   const processedMessages = useRef(new Set<string>())
 
   /**
+   * Apply a suggestion to the canvas
+   */
+  const applySuggestion = useCallback(
+    (suggestionId: string) => {
+      const suggestion = suggestions.find(s => s.id === suggestionId)
+
+      if (suggestion) {
+        setActiveSuggestion(suggestion)
+        setAppliedCount(prev => prev + 1)
+
+        // Remove from suggestions list
+        setSuggestions(prev => prev.filter(s => s.id !== suggestionId))
+
+        // Callback
+        onSuggestionApplied?.(suggestion)
+      }
+    },
+    [suggestions, onSuggestionApplied]
+  )
+
+  /**
    * Parse a message and extract visual suggestions
    */
   const parseMessage = useCallback(
@@ -108,28 +128,7 @@ export function useCanvasSync(options: UseCanvasSyncOptions): CanvasSyncHookRetu
         }
       }
     },
-    [syncEnabled, minConfidence, autoPopulateEnabled]
-  )
-
-  /**
-   * Apply a suggestion to the canvas
-   */
-  const applySuggestion = useCallback(
-    (suggestionId: string) => {
-      const suggestion = suggestions.find(s => s.id === suggestionId)
-
-      if (suggestion) {
-        setActiveSuggestion(suggestion)
-        setAppliedCount(prev => prev + 1)
-
-        // Remove from suggestions list
-        setSuggestions(prev => prev.filter(s => s.id !== suggestionId))
-
-        // Callback
-        onSuggestionApplied?.(suggestion)
-      }
-    },
-    [suggestions, onSuggestionApplied]
+    [syncEnabled, minConfidence, autoPopulateEnabled, applySuggestion]
   )
 
   /**

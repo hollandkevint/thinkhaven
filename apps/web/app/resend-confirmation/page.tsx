@@ -30,7 +30,7 @@ export default function ResendConfirmationPage() {
       } else {
         setMessage('Confirmation email sent! Please check your inbox.')
       }
-    } catch (_err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)

@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { getBoardMember } from '@/lib/ai/board-members'
-import type { ChatMessage, BoardState } from '@/lib/ai/board-types'
+import { BOARD_MEMBERS, getBoardMember } from '@/lib/ai/board-members'
+import type { BoardMemberId, ChatMessage, BoardState } from '@/lib/ai/board-types'
 import type { MessageLimitStatus } from '@/lib/session/message-limit-manager'
 import type { LeanCanvas } from '@/lib/canvas/lean-canvas-schema'
 
@@ -24,7 +24,7 @@ export interface SessionData {
   lean_canvas: LeanCanvas | null
 }
 
-const VALID_ROLES = ['user', 'assistant', 'system'] as const
+const VALID_ROLES: readonly string[] = ['user', 'assistant', 'system']
 
 /**
  * Validates JSONB chat_context from Supabase (typed as Json | null).
@@ -33,19 +33,28 @@ const VALID_ROLES = ['user', 'assistant', 'system'] as const
  */
 export function parseChatContext(raw: unknown): ChatMessage[] {
   if (!Array.isArray(raw)) return []
-  return raw.filter((msg): msg is ChatMessage =>
-    typeof msg === 'object' && msg !== null &&
-    typeof (msg as any).id === 'string' &&
-    typeof (msg as any).content === 'string' &&
-    typeof (msg as any).timestamp === 'string' &&
-    VALID_ROLES.includes((msg as any).role)
-  )
+  return raw.filter((msg): msg is ChatMessage => {
+    if (typeof msg !== 'object' || msg === null) return false
+    const candidate = msg as Record<string, unknown>
+    return (
+      typeof candidate.id === 'string' &&
+      typeof candidate.content === 'string' &&
+      typeof candidate.timestamp === 'string' &&
+      typeof candidate.role === 'string' &&
+      VALID_ROLES.includes(candidate.role)
+    )
+  })
+}
+
+/** Narrow an unknown stream value to a valid board member id. */
+function isBoardMemberId(value: unknown): value is BoardMemberId {
+  return typeof value === 'string' && BOARD_MEMBERS.some(member => member.id === value)
 }
 
 interface UseStreamingChatReturn {
   session: SessionData | null
   messageInput: string
-  setMessageInput: (input: string) => void
+  setMessageInput: React.Dispatch<React.SetStateAction<string>>
   sendingMessage: boolean
   limitStatus: MessageLimitStatus | null
   boardState: BoardState | null
@@ -55,8 +64,7 @@ interface UseStreamingChatReturn {
 }
 
 export function useStreamingChat(
-  initialSession: SessionData | null,
-  userId: string | undefined
+  initialSession: SessionData | null
 ): UseStreamingChatReturn {
   const [session, setSession] = useState<SessionData | null>(initialSession)
   const [messageInput, setMessageInput] = useState('')
@@ -131,7 +139,7 @@ export function useStreamingChat(
     }
   }, [])
 
-  const updateStreamingMessage = useCallback((messageId: string, content: string, speaker?: string) => {
+  const updateStreamingMessage = useCallback((messageId: string, content: string, speaker?: BoardMemberId) => {
     const current = sessionRef.current
     if (!current) return
 
@@ -144,7 +152,7 @@ export function useStreamingChat(
         content,
         metadata: {
           ...updatedChatContext[existingIndex].metadata,
-          ...(speaker ? { speaker: speaker as any } : {}),
+          ...(speaker ? { speaker } : {}),
         },
       }
     } else {
@@ -153,7 +161,7 @@ export function useStreamingChat(
         role: 'assistant',
         content,
         timestamp: new Date().toISOString(),
-        metadata: speaker ? { speaker: speaker as any } : undefined,
+        metadata: speaker ? { speaker } : undefined,
       })
     }
 
@@ -237,7 +245,7 @@ export function useStreamingChat(
 
       let assistantContent = ''
       let assistantMessageId = crypto.randomUUID()
-      let currentSpeaker: string | undefined = undefined
+      let currentSpeaker: BoardMemberId | undefined = undefined
 
       while (true) {
         const { done, value } = await reader.read()
@@ -258,20 +266,20 @@ export function useStreamingChat(
                 const newSpeaker = data.metadata?.speaker
                 const handoffReason = data.metadata?.handoffReason
 
-                if (newSpeaker && newSpeaker !== currentSpeaker) {
+                if (isBoardMemberId(newSpeaker) && newSpeaker !== currentSpeaker) {
                   if (assistantContent.trim()) {
                     await finalizeAssistantMessage(assistantContent, assistantMessageId)
                   }
 
                   // Insert handoff annotation (persisted via RPC)
                   if (currentSpeaker && handoffReason) {
-                    const fromMember = getBoardMember(currentSpeaker as any)
-                    const toMember = getBoardMember(newSpeaker as any)
+                    const fromMember = getBoardMember(currentSpeaker)
+                    const toMember = getBoardMember(newSpeaker)
                     await addChatMessage({
                       role: 'system',
                       content: `__handoff__${fromMember.name}__${toMember.name}__${handoffReason}`,
                       metadata: {
-                        speaker: currentSpeaker as any,
+                        speaker: currentSpeaker,
                         handoff_reason: handoffReason,
                       },
                     })
@@ -282,17 +290,17 @@ export function useStreamingChat(
                   assistantMessageId = crypto.randomUUID()
 
                   setBoardState(prev => prev
-                    ? { ...prev, activeSpeaker: newSpeaker as any }
-                    : { activeSpeaker: newSpeaker as any, taylorOptedIn: false }
+                    ? { ...prev, activeSpeaker: newSpeaker }
+                    : { activeSpeaker: newSpeaker, taylorOptedIn: false }
                   )
                 }
               } else if (data.type === 'content') {
                 const contentSpeaker = data.metadata?.speaker
-                if (contentSpeaker && !currentSpeaker) {
+                if (isBoardMemberId(contentSpeaker) && !currentSpeaker) {
                   currentSpeaker = contentSpeaker
                 }
                 assistantContent += data.content
-                updateStreamingMessage(assistantMessageId, assistantContent, currentSpeaker as any)
+                updateStreamingMessage(assistantMessageId, assistantContent, currentSpeaker)
               } else if (data.type === 'complete') {
                 if (data.limitStatus) {
                   setLimitStatus(data.limitStatus)

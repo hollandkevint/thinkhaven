@@ -1,4 +1,4 @@
-import { AuthMetrics } from './auth-metrics'
+import { AuthMetrics } from './auth-logger'
 
 export interface AlertConfig {
   enabled: boolean

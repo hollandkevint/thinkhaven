@@ -134,7 +134,7 @@ export function FeedbackForm({ userId, onSubmitted }: FeedbackFormProps) {
                     : 'border-ink/8 hover:border-ink/8'
                 }`}
               >
-                Yes, I'd pay
+                Yes, I&rsquo;d pay
               </button>
               <button
                 type="button"

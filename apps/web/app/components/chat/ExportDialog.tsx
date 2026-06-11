@@ -8,7 +8,7 @@ interface ExportDialogProps {
   onClose: () => void
   workspaceId: string
   conversationIds?: string[]
-  onExport: (options: ExportOptions) => void
+  onExport: (options: ExportRequestOptions) => void
   className?: string
 }
 
@@ -26,7 +26,17 @@ interface ExportOptions {
   maxMessages?: number
 }
 
-interface ExportFormat {
+/** Wire payload handed to onExport: dates are serialized to ISO strings. */
+interface ExportRequestOptions extends Omit<ExportOptions, 'dateRange' | 'maxMessages'> {
+  dateRange?: {
+    start: string
+    end: string
+  }
+  maxMessages?: number
+  conversationIds?: string[]
+}
+
+interface ExportFormatInfo {
   key: ExportFormat
   name: string
   description: string
@@ -59,7 +69,7 @@ export default function ExportDialog({
     includeContext: true,
     includeSummaries: true
   })
-  const [availableFormats, setAvailableFormats] = useState<Record<string, ExportFormat>>({})
+  const [availableFormats, setAvailableFormats] = useState<Record<string, ExportFormatInfo>>({})
   const [preview, setPreview] = useState<ExportPreview | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [exporting, setExporting] = useState(false)
@@ -131,7 +141,7 @@ export default function ExportDialog({
     setOptions(prev => ({ ...prev, format }))
   }
 
-  const handleOptionChange = (key: keyof ExportOptions, value: any) => {
+  const handleOptionChange = <K extends keyof ExportOptions>(key: K, value: ExportOptions[K]) => {
     setOptions(prev => ({ ...prev, [key]: value }))
   }
 
@@ -153,7 +163,7 @@ export default function ExportDialog({
     try {
       setExporting(true)
       
-      const exportOptions = {
+      const exportOptions: ExportRequestOptions = {
         ...options,
         dateRange: dateRangeEnabled && options.dateRange ? {
           start: options.dateRange.start.toISOString(),

@@ -25,6 +25,7 @@ import { useStreamingChat, parseChatContext } from './useStreamingChat'
 import type { SessionData } from './useStreamingChat'
 import LeanCanvas from '@/app/components/canvas/LeanCanvas'
 import { isNonEmptyCanvas, type LeanCanvas as LeanCanvasType } from '@/lib/canvas/lean-canvas-schema'
+import type { SubPersonaMode } from '@/lib/ai/mary-persona'
 
 function parseSubPersonaState(raw: unknown): Record<string, unknown> | null {
   if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
@@ -32,6 +33,14 @@ function parseSubPersonaState(raw: unknown): Record<string, unknown> | null {
   }
 
   return null
+}
+
+const SUB_PERSONA_MODES: readonly string[] = ['inquisitive', 'devil_advocate', 'encouraging', 'realistic']
+
+function parseSubPersonaMode(raw: unknown): SubPersonaMode | null {
+  return typeof raw === 'string' && SUB_PERSONA_MODES.includes(raw)
+    ? (raw as SubPersonaMode)
+    : null
 }
 
 export default function SessionPage() {
@@ -59,7 +68,7 @@ export default function SessionPage() {
     streamError,
     dismissError,
     handleSendMessage,
-  } = useStreamingChat(fetchedSession, user?.id)
+  } = useStreamingChat(fetchedSession)
   const isOnline = useOnlineStatus()
 
   const canvasAutoOpenedRef = useRef(false)
@@ -243,7 +252,7 @@ export default function SessionPage() {
           }}
           userEmail={user.email || ''}
           onSignOut={signOut}
-          subPersonaMode={session.sub_persona_state?.currentMode ?? null}
+          subPersonaMode={parseSubPersonaMode(session.sub_persona_state?.currentMode)}
         />
 
         {/* Chat Content */}

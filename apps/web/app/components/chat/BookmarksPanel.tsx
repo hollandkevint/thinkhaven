@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { BookmarkWithContext, BOOKMARK_COLORS } from '@/lib/ai/bookmark-reference-manager'
 
 interface BookmarksPanelProps {
@@ -12,7 +12,6 @@ interface BookmarksPanelProps {
 
 export default function BookmarksPanel({
   workspaceId,
-  userId,
   onNavigateToMessage,
   className = ''
 }: BookmarksPanelProps) {
@@ -27,7 +26,7 @@ export default function BookmarksPanel({
   } | null>(null)
 
   // Load bookmarks
-  const loadBookmarks = async () => {
+  const loadBookmarks = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
@@ -52,10 +51,10 @@ export default function BookmarksPanel({
     } finally {
       setLoading(false)
     }
-  }
+  }, [workspaceId, searchQuery, selectedTags])
 
   // Load available tags
-  const loadTags = async () => {
+  const loadTags = useCallback(async () => {
     try {
       const response = await fetch(`/api/bookmarks?action=tags&workspaceId=${workspaceId}`)
       const data = await response.json()
@@ -66,10 +65,10 @@ export default function BookmarksPanel({
     } catch (error) {
       console.error('Failed to load tags:', error)
     }
-  }
+  }, [workspaceId])
 
   // Load stats
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const response = await fetch(`/api/bookmarks?action=stats&workspaceId=${workspaceId}`)
       const data = await response.json()
@@ -83,7 +82,7 @@ export default function BookmarksPanel({
     } catch (error) {
       console.error('Failed to load stats:', error)
     }
-  }
+  }, [workspaceId])
 
   // Delete bookmark
   const deleteBookmark = async (bookmarkId: string) => {
@@ -132,12 +131,12 @@ export default function BookmarksPanel({
 
   useEffect(() => {
     loadBookmarks()
-  }, [searchQuery, selectedTags, workspaceId])
+  }, [loadBookmarks])
 
   useEffect(() => {
     loadTags()
     loadStats()
-  }, [workspaceId])
+  }, [loadTags, loadStats])
 
   return (
     <div className={`bookmarks-panel flex flex-col h-full bg-cream ${className}`}>

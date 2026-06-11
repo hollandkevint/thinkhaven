@@ -1,4 +1,5 @@
-import { createBrowserClient, type SupabaseClient } from '@supabase/ssr'
+import { createBrowserClient } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Lazy initialization to avoid build-time errors
 let _supabaseClient: SupabaseClient | null = null

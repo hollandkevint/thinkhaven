@@ -21,12 +21,9 @@ interface MessageActionMenuProps {
 export default function MessageActionMenu({
   messageId,
   messageContent,
-  conversationId,
-  conversationTitle,
   isBookmarked = false,
   bookmarks = [],
   onBookmark,
-  onCreateReference,
   onViewReferences,
   onCreateBranch,
   className = ''
@@ -63,6 +60,7 @@ export default function MessageActionMenu({
     if (showBookmarkForm && !bookmarkData.title) {
       loadBookmarkSuggestions()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only when the form opens; adding title/loader would refetch (and clobber input) mid-edit
   }, [showBookmarkForm])
 
   const loadBookmarkSuggestions = async () => {

@@ -3,12 +3,10 @@
 import { useState } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { supabase } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function AccountPage() {
-  const { user, signOut } = useAuth()
-  const router = useRouter()
+  const { user } = useAuth()
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -46,7 +44,7 @@ export default function AccountPage() {
         setNewPassword('')
         setConfirmPassword('')
       }
-    } catch (_err) {
+    } catch {
       setError('Failed to update password')
     } finally {
       setLoading(false)

@@ -80,7 +80,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <div>
                 {isDatabaseError && (
                   <p className="text-sm text-ink-light">
-                    We're having trouble connecting to the database. This is usually temporary.
+                    We&rsquo;re having trouble connecting to the database. This is usually temporary.
                   </p>
                 )}
                 {isNetworkError && (

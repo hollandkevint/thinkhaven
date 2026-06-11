@@ -75,16 +75,6 @@ const VISUAL_PATTERNS = {
 }
 
 /**
- * Explicit visual markers in assistant responses
- */
-const EXPLICIT_MARKERS = [
-  /```mermaid\n([\s\S]*?)```/g,
-  /\[diagram:([^\]]+)\]/gi,
-  /\[flowchart:([^\]]+)\]/gi,
-  /\[sketch:([^\]]+)\]/gi,
-]
-
-/**
  * Numbered/bulleted list patterns (potential flowcharts)
  */
 const LIST_PATTERNS = {
@@ -192,7 +182,7 @@ export class VisualSuggestionParser {
           type: type as VisualSuggestionType,
           title: `Suggested ${this.formatType(type as VisualSuggestionType)}`,
           description: this.generateDescription(type as VisualSuggestionType, content),
-          diagramCode: this.generateTemplateDiagram(type as VisualSuggestionType, content),
+          diagramCode: this.generateTemplateDiagram(type as VisualSuggestionType),
           confidence,
           messageId,
           timestamp: new Date(),
@@ -268,21 +258,18 @@ export class VisualSuggestionParser {
   /**
    * Generate template diagram code based on content
    */
-  private static generateTemplateDiagram(
-    type: VisualSuggestionType,
-    content: string
-  ): string {
+  private static generateTemplateDiagram(type: VisualSuggestionType): string {
     switch (type) {
       case 'flowchart':
-        return this.generateFlowchartTemplate(content)
+        return this.generateFlowchartTemplate()
       case 'sequence':
-        return this.generateSequenceTemplate(content)
+        return this.generateSequenceTemplate()
       case 'gantt':
-        return this.generateGanttTemplate(content)
+        return this.generateGanttTemplate()
       case 'state':
-        return this.generateStateTemplate(content)
+        return this.generateStateTemplate()
       case 'user-journey':
-        return this.generateJourneyTemplate(content)
+        return this.generateJourneyTemplate()
       default:
         return `graph LR\n  Start --> End`
     }
@@ -314,7 +301,7 @@ export class VisualSuggestionParser {
   /**
    * Generate flowchart template
    */
-  private static generateFlowchartTemplate(content: string): string {
+  private static generateFlowchartTemplate(): string {
     return `flowchart TD
   Start([Start])
   Decision{Decision?}
@@ -332,7 +319,7 @@ export class VisualSuggestionParser {
   /**
    * Generate sequence diagram template
    */
-  private static generateSequenceTemplate(content: string): string {
+  private static generateSequenceTemplate(): string {
     return `sequenceDiagram
   participant User
   participant System
@@ -347,7 +334,7 @@ export class VisualSuggestionParser {
   /**
    * Generate Gantt chart template
    */
-  private static generateGanttTemplate(content: string): string {
+  private static generateGanttTemplate(): string {
     return `gantt
   title Project Timeline
   dateFormat YYYY-MM-DD
@@ -364,7 +351,7 @@ export class VisualSuggestionParser {
   /**
    * Generate state diagram template
    */
-  private static generateStateTemplate(content: string): string {
+  private static generateStateTemplate(): string {
     return `stateDiagram-v2
   [*] --> Draft
   Draft --> Review
@@ -377,7 +364,7 @@ export class VisualSuggestionParser {
   /**
    * Generate user journey template
    */
-  private static generateJourneyTemplate(content: string): string {
+  private static generateJourneyTemplate(): string {
     return `journey
   title User Journey
   section Discovery
