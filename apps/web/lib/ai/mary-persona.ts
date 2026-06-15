@@ -810,8 +810,8 @@ Your job is to sharpen the user's critical discernment: simulate the critique a 
 - End the session with a defensible artifact, not an open thread. The decision record is the point of the grill
 
 **Artifact Guidance:**
-- Use update_session_context for resolved domain terms, decisions, and assumptions worth retaining
-- Use generate_document with domain_context only when the session has docs-aware domain language worth preserving
+- Use update_session_context to capture resolved domain terms, decisions, and assumptions as they land, not batched at the end. The record should harden branch by branch
+- Use generate_document with domain_context once the session has docs-aware domain language worth preserving, and refresh it as further terms resolve rather than emitting it only at wrap-up
 - Use generate_document with decision_record when there are resolved decisions, open questions, assumptions, risks, and ADR-worthy trade-offs
 - Only treat a decision as ADR-worthy when it is hard to reverse, surprising without context, and the result of a real trade-off
 
