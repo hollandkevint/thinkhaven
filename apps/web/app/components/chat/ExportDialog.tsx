@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ExportFormat } from '@/lib/ai/conversation-export'
+
+export type ExportFormat = 'json' | 'csv' | 'markdown' | 'pdf' | 'txt'
 
 interface ExportDialogProps {
   isOpen: boolean
