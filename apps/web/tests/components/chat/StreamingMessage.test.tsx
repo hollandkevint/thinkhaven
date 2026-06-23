@@ -16,19 +16,13 @@ vi.mock('@/app/components/chat/ArtifactAwareContent', () => ({
 
 // Mock the MessageActionMenu component
 vi.mock('@/app/components/chat/MessageActionMenu', () => ({
-  default: ({ messageId, onBookmark, onCreateBranch }: any) => (
+  default: ({ onBookmark }: any) => (
     <div data-testid="action-menu">
-      <button 
-        data-testid="bookmark-button" 
+      <button
+        data-testid="bookmark-button"
         onClick={() => onBookmark({ title: 'Test Bookmark', tags: [], color: 'blue' })}
       >
         Bookmark
-      </button>
-      <button 
-        data-testid="branch-button" 
-        onClick={() => onCreateBranch?.(messageId)}
-      >
-        Branch
       </button>
     </div>
   )
@@ -65,8 +59,7 @@ describe('StreamingMessage', () => {
     timestamp: new Date('2024-01-01T12:00:00Z'),
     onBookmark: vi.fn(),
     onCreateReference: vi.fn(),
-    onViewReferences: vi.fn(),
-    onCreateBranch: vi.fn()
+    onViewReferences: vi.fn()
   }
 
   beforeEach(() => {
@@ -315,38 +308,6 @@ describe('StreamingMessage', () => {
         tags: [],
         color: 'blue'
       })
-    })
-  })
-
-  describe('Branch Functionality', () => {
-    it('should call onCreateBranch when branch is created', () => {
-      const onCreateBranch = vi.fn()
-      render(
-        <StreamingMessage
-          {...defaultProps}
-          conversationId="conv-123"
-          conversationTitle="Strategy Session"
-          onCreateBranch={onCreateBranch}
-        />
-      )
-
-      const branchButton = screen.getByTestId('branch-button')
-      fireEvent.click(branchButton)
-
-      expect(onCreateBranch).toHaveBeenCalledWith('msg-123')
-    })
-
-    it('should pass conversation context to action menu', () => {
-      render(
-        <StreamingMessage
-          {...defaultProps}
-          conversationId="conv-123"
-          conversationTitle="Strategy Session"
-        />
-      )
-
-      // Action menu should receive conversation context
-      expect(screen.getByTestId('action-menu')).toBeInTheDocument()
     })
   })
 

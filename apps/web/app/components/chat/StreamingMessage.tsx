@@ -23,14 +23,11 @@ export interface StreamingMessageProps {
   coachingContext?: CoachingContext
   className?: string
   bookmarks?: MessageBookmarkRow[]
-  conversationId?: string
-  conversationTitle?: string
   sessionId?: string
   onComplete?: () => void
   onBookmark?: (data: { title: string; description?: string; tags: string[]; color: string }) => void
   onCreateReference?: (toMessageId: string, type: string) => void
   onViewReferences?: () => void
-  onCreateBranch?: (messageId: string) => void
 }
 
 interface StreamingTextProps {
@@ -115,14 +112,11 @@ export default function StreamingMessage({
   coachingContext,
   className = '',
   bookmarks = [],
-  conversationId,
-  conversationTitle,
   sessionId,
   onComplete,
   onBookmark,
   onCreateReference,
-  onViewReferences,
-  onCreateBranch
+  onViewReferences
 }: StreamingMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const messageRef = useRef<HTMLDivElement>(null)
@@ -219,18 +213,15 @@ export default function StreamingMessage({
           )}
           
           {/* Action Menu */}
-          {(onBookmark || onCreateReference || onViewReferences || onCreateBranch) && !isStreaming && (
+          {(onBookmark || onCreateReference || onViewReferences) && !isStreaming && (
             <MessageActionMenu
               messageId={id}
               messageContent={content}
-              conversationId={conversationId}
-              conversationTitle={conversationTitle}
               isBookmarked={bookmarks.length > 0}
               bookmarks={bookmarks}
               onBookmark={onBookmark || (() => {})}
               onCreateReference={onCreateReference || (() => {})}
               onViewReferences={onViewReferences || (() => {})}
-              onCreateBranch={onCreateBranch}
             />
           )}
         </div>

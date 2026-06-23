@@ -4,8 +4,7 @@
   "description": "Decision architecture platform for adaptive strategic pressure-testing and defensible artifacts",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=apps/web",
