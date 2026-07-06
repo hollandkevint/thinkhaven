@@ -1,5 +1,7 @@
 # Strategy–Product Drift Report
 
+Produced alongside `2026-07-05-beta-gate-readiness.md` by `docs/plans/2026-07-05-001-feat-fable-briefs-gtm-audits-plan.md`.
+
 Date: 2026-07-05
 Scope: Does the shipped product still ENFORCE STRATEGY.md's core promises after the ~15k-line dead-code purge (PR #43)?
 Method: Read-only audit of the enforcing code paths plus execution of the covering unit tests (all commands recorded below). Verdict bar: CONFIRMED requires a mechanism (tool schema, control flow, gate, not prompt text) AND a discriminating test executed in this run, with a named assertion that fails if the mechanism is removed.

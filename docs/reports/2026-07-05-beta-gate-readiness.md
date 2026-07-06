@@ -2,6 +2,8 @@
 
 *2026-07-05 — read-only instrumentation audit. No code changed. No queries executed against prod; every query below is runnable-but-not-executed.*
 
+Produced alongside `2026-07-05-strategy-product-drift.md` by `docs/plans/2026-07-05-001-feat-fable-briefs-gtm-audits-plan.md`.
+
 ## Bottom line
 
 One of the three gate metrics is measurable today from the database (engagement, with caveats). One is half-measurable (portability: share links yes, exports only as unjoinable client events). One is not instrumented at all and cannot be, by design, until payments go live (WTP). No gate can be scored from PostHog alone because half the defined events have zero call sites and the authenticated app fires almost nothing.

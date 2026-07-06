@@ -19,7 +19,7 @@
 | No method-kit story | Open method kit as a distribution track | STRATEGY.md "Open method distribution" |
 | Claims about product behavior asserted from memory | Current-behavior claims trace to U2 CONFIRMED rows; everything weaker is future-framed or method/vision language | Plan R4; drift audit found the "session won't close without an artifact" promise is NOT enforced (U2 claim 7, MISSING), so no post makes it |
 
-**Claim traceability key (U2 drift audit):**
+**Claim traceability key (U2 drift audit):** This table goes stale the moment the audited code changes. Before adding a new shipped-behavior claim, re-verify it against a fresh drift audit, not this snapshot.
 - CONFIRMED, safe to state as shipped behavior: earned-recommendation gate (no kill/commit verdict before exchange 5), skepticism escalation on overconfidence (devil's-advocate mode shift), shareable decision-record link (public share path with token, caps, RLS).
 - Exists but WEAK (mechanism present, coverage weak): board registry + speaker switching, anti-sycophancy prompt posture, challenge-loop phases. Posts describe these as what a session *is* (consistent with the live landing page), never as guaranteed enforcement.
 - MISSING: artifact-gated session close. No post promises "won't let you finish without an artifact."
