@@ -85,6 +85,7 @@ See `.env.example`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_
 25. **Heavy libraries must be dynamically imported** - Mermaid (~250KB gzip), Excalidraw (~500KB), and similar large packages must use `next/dynamic` with `ssr: false`. Never import at module scope in components rendered on every page. Gate behind user action or lazy-load on first use.
 26. **Sanitize dangerouslySetInnerHTML from third-party libs** - Any `dangerouslySetInnerHTML` with output from mermaid, markdown renderers, or similar must be sanitized with DOMPurify. Mermaid's `securityLevel: 'strict'` has had bypasses (CVE-2023-20052). Defense in depth.
 27. **Radix Dialog for all new modals** - Hand-rolled modals lack focus trap, Escape handling, and aria-modal. `@radix-ui/react-dialog` is installed. Use it for all new modals. Existing hand-rolled modals (SignupPromptModal, ExportDialog, BranchDialog) are tracked for migration.
+28. **Session close has NO artifact gate** - `completePhase` (`session-primitives.ts:405-481`) sets `status: 'completed'` with zero check that a decision artifact exists, despite STRATEGY.md promising sessions won't close without one. Don't claim or assume this behavior until fixed. Audit: `docs/reports/2026-07-05-strategy-product-drift.md` (claim 7, MISSING).
 
 ## Production Deployment
 

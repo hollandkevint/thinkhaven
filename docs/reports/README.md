@@ -1,26 +1,19 @@
 # Reports
 
-This directory contains various analysis reports and audits.
+Analysis reports and audits. Point-in-time snapshots: each report is dated and describes the repo as of that date; line-number citations rot as code moves, so trust the date, not the anchors.
 
-## Structure
+## Naming convention
 
-- `archive/YYYY-MM/` - Archived reports by month
-- Current reports should be moved to archive after review
+`YYYY-MM-DD-<topic>.md`, flat in this directory. Reports produced by a plan should link back to it.
 
-## Report Types
+## Live reports
 
-- Security audits
-- Data integrity reports  
-- Performance analysis
-- Code reviews
-- System analysis
+- `2026-07-05-beta-gate-readiness.md` - Can the 60/50/40 beta-gate metrics be measured today? (instrumentation audit)
+- `2026-07-05-strategy-product-drift.md` - Does shipped code enforce STRATEGY.md's promises? (test-backed CONFIRMED/WEAK/MISSING verdicts)
 
-## Current Archive
+Both produced by `docs/plans/2026-07-05-001-feat-fable-briefs-gtm-audits-plan.md`.
 
-### December 2025
-- `DATA_INTEGRITY_REPORT.md` - Critical data consistency analysis
-- `SECURITY_AUDIT_FINAL.md` - Comprehensive system security audit
+## Archive
 
-## Archiving
-
-Reports older than 30 days should be moved to the appropriate archive folder.
+- `archive/YYYY-MM/` - older reports by month
+- December 2025: `DATA_INTEGRITY_REPORT.md` (data consistency analysis), `SECURITY_AUDIT_FINAL.md` (system security audit)
