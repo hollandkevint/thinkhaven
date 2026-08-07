@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-*Last Updated: 2026-03-26*
+**Canonical AI-instructions file for this repo.** `AGENTS.md` mirrors the load-bearing rules for non-Claude agents; if the two conflict, this file wins.
+
+*Last Updated: 2026-07-09*
 
 ## Project Context
 **ThinkHaven** - Decision accelerator for structured AI sessions
