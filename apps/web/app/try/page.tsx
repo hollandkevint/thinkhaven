@@ -7,6 +7,9 @@ import { SessionMigration, type MigrationResult } from '@/lib/guest/session-migr
 import { useAuth } from '@/lib/auth/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FeedbackButton } from '@/app/components/feedback/FeedbackButton'
+import { track } from '@/lib/analytics/events'
+import { readUtm } from '@/lib/analytics/utm'
+import { GuestSessionStore } from '@/lib/guest/session-store'
 import {
   BETA_INVITE_PARAM,
   BETA_INVITE_SOURCE,
@@ -15,6 +18,12 @@ import {
   readBetaInviteContext,
   storeBetaInviteContext,
 } from '@/lib/beta/invite-destinations'
+
+interface SharedRecordReference {
+  title: string
+  decision: string | null
+  weakestAssumption: string | null
+}
 
 interface BetaAccessStatusResponse {
   betaApproved: boolean
@@ -30,6 +39,17 @@ async function recordBetaEvent(payload: Record<string, unknown>) {
     })
   } catch {
     // Beta event telemetry should never block the guest conversion path.
+  }
+}
+
+async function readSharedRecord(token: string): Promise<SharedRecordReference | null> {
+  try {
+    const response = await fetch(`/api/artifact/${encodeURIComponent(token)}`)
+    if (!response.ok) return null
+    return (await response.json()) as SharedRecordReference
+  } catch {
+    // An unresolvable ref just means a generic opener, never a blocked trial.
+    return null
   }
 }
 
@@ -92,6 +112,35 @@ function TryPageContent() {
   const isPlanGrill = trialMode === 'plan-grill'
   const signupPath = inviteContext ? buildSignupPath(inviteContext) : '/signup?from=guest'
   const inviteArrivalLoggedRef = useRef<string | null>(null)
+  const refToken = searchParams.get('ref')
+  const [sharedRecord, setSharedRecord] = useState<SharedRecordReference | null>(null)
+  const arrivalLoggedRef = useRef(false)
+
+  // Arrival attribution: capture UTMs once per mount, attach first-touch to the guest
+  // session so it survives into the migrated session row.
+  useEffect(() => {
+    if (arrivalLoggedRef.current) return
+    arrivalLoggedRef.current = true
+
+    const utm = readUtm(new URLSearchParams(searchParams.toString()))
+    GuestSessionStore.setUtm(utm)
+    track({
+      event: 'try_arrived',
+      properties: { mode: trialMode, from_share: Boolean(utm.ref_token), ...utm },
+    })
+  }, [searchParams, trialMode])
+
+  // Resolve the shared record server-side so the opener quotes the DB, not the URL.
+  useEffect(() => {
+    if (!refToken) return
+    let active = true
+    readSharedRecord(refToken).then((record) => {
+      if (active) setSharedRecord(record)
+    })
+    return () => {
+      active = false
+    }
+  }, [refToken])
 
   useEffect(() => {
     const context = inviteId
@@ -236,16 +285,18 @@ function TryPageContent() {
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm">
             <strong>Try before you sign up.</strong>{' '}
-            {isPlanGrill
-              ? 'Get 10 free messages to grill a pasted plan with Mary.'
-              : 'Get 10 free messages to pressure-test a real decision with ThinkHaven\'s board.'}
+            {sharedRecord
+              ? `You arrived from \u201c${sharedRecord.title}\u201d. Get 10 free messages to grill your own version.`
+              : isPlanGrill
+                ? 'Get 10 free messages to grill a pasted plan with Mary.'
+                : 'Get 10 free messages to pressure-test a real decision with ThinkHaven\'s board.'}
           </p>
         </div>
       </div>
 
       {/* Chat interface */}
       <div className="flex-1 min-w-0 max-w-5xl mx-auto w-full overflow-hidden">
-        <GuestChatInterface pathway={trialMode} />
+        <GuestChatInterface pathway={trialMode} sharedRecord={sharedRecord} />
       </div>
     </div>
   )

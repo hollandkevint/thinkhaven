@@ -75,6 +75,8 @@ export class SessionMigration {
           message_count: chatMessages.filter(m => m.role === 'user').length,
           message_limit: planGrillConfig?.messageLimit || 10,
           chat_context: chatMessages,
+          // First-touch attribution from /try arrival (migration 034).
+          utm: guestData.utm && Object.keys(guestData.utm).length > 0 ? guestData.utm : null,
         })
         .select('id')
         .single()

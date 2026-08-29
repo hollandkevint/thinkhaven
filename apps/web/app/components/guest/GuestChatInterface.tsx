@@ -22,8 +22,16 @@ interface Message {
 
 type GuestPathway = 'new-idea' | 'plan-grill'
 
+export interface SharedRecordReference {
+  title: string
+  decision: string | null
+  weakestAssumption: string | null
+}
+
 interface GuestChatInterfaceProps {
   pathway?: GuestPathway
+  /** Set when the visitor arrived from a /share decision record (?ref=<token>). */
+  sharedRecord?: SharedRecordReference | null
 }
 
 function getWelcomeMessage(pathway: GuestPathway) {
@@ -42,7 +50,19 @@ function getWelcomeMessage(pathway: GuestPathway) {
 **What are you trying to decide?**`
 }
 
-export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatInterfaceProps) {
+function getSharedRecordWelcome(record: SharedRecordReference) {
+  const weakness = record.weakestAssumption
+    ? `The weakest assumption in it: ${record.weakestAssumption}\n\n`
+    : ''
+
+  return `I'm Mary. You came here from **${record.title}**.${record.decision ? ` That record framed it this way: ${record.decision}` : ''}
+
+${weakness}That was someone else's plan. **You have 10 free messages** - paste yours and I will grill the terminology, assumptions, and decisions one branch at a time.
+
+**What plan should we grill?**`
+}
+
+export default function GuestChatInterface({ pathway = 'new-idea', sharedRecord = null }: GuestChatInterfaceProps) {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([])
   const [currentInput, setCurrentInput] = useState('')
@@ -107,6 +127,16 @@ export default function GuestChatInterface({ pathway = 'new-idea' }: GuestChatIn
       setMessages([welcomeMessage])
     }
   }, [pathway])
+
+  // The shared record resolves after mount, so rewrite the opener in place -- but only
+  // while it is still the untouched welcome, never over a real exchange.
+  useEffect(() => {
+    if (!sharedRecord) return
+    setMessages((current) => {
+      if (current.length !== 1 || current[0].id !== 'welcome') return current
+      return [{ ...current[0], content: getSharedRecordWelcome(sharedRecord) }]
+    })
+  }, [sharedRecord])
 
   const sendMessage = async (messageContent: string) => {
     if (!messageContent.trim() || isLoading) return

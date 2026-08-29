@@ -468,7 +468,7 @@ export default function SessionPage() {
             </button>
           </div>
           {session?.lean_canvas && isNonEmptyCanvas(session.lean_canvas) && (
-            <LeanCanvas canvas={session.lean_canvas} title={session.title || undefined} />
+            <LeanCanvas canvas={session.lean_canvas} title={session.title || undefined} sessionId={session.id} />
           )}
           {boardPanelOpen && !boardState && (
             <div className="px-6 py-8 text-center">
