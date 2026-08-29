@@ -74,6 +74,21 @@ describe('summarizeRecord', () => {
     expect(decision!.endsWith('…')).toBe(true)
   })
 
+  it('removes bare urls and emails, which remark-gfm would autolink without any syntax', () => {
+    const gfm = [
+      '# T',
+      '',
+      '> Details at https://evil.example/steal and www.evil.example, or mail a@evil.example.',
+      '',
+    ].join('\n')
+
+    const { decision } = summarizeRecord(gfm)
+    expect(decision).not.toContain('evil.example')
+    expect(decision).not.toContain('https')
+    expect(decision).not.toContain('@')
+    expect(decision).toContain('Details at')
+  })
+
   it('collapses images and stray markdown punctuation in toPlainText', () => {
     expect(toPlainText('![alt](https://evil.example/x.png) and `code`')).toBe('alt and code')
   })

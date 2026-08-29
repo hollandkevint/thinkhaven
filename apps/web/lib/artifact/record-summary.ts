@@ -33,12 +33,19 @@ const MAX_LEN = 220
  * Link and image syntax collapse to their label, so `[click](https://evil)` becomes
  * `click`. Remaining markdown punctuation is dropped rather than escaped: these
  * strings are display-only, never re-parsed for structure.
+ *
+ * Bare URLs and emails are removed outright, not just unlinked. MarkdownRenderer
+ * runs remark-gfm, whose autolink-literal rule turns a plain `https://evil.example`
+ * into a clickable anchor with no link syntax present -- so stripping `[]()` alone
+ * would leave the vector open.
  */
 export function toPlainText(text: string, maxLen = MAX_LEN): string {
   const flat = text
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1') // images -> alt text
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links -> label
     .replace(/<[^>]*>/g, '') // autolinks and raw html
+    .replace(/\b(?:https?:\/\/|www\.)\S+/gi, '') // gfm autolink literals
+    .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, '') // gfm email autolinks
     .replace(/[[\]()`*_~>|#]/g, '') // leftover markdown punctuation
     .replace(/\s+/g, ' ')
     .trim()
