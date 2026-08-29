@@ -66,6 +66,14 @@ describe('summarizeRecord', () => {
     expect(summarizeRecord(offTemplate).decision).toBeNull()
   })
 
+  it('does not mistake an H2 for the H1 when anchoring the quote', () => {
+    expect(summarizeRecord('## Not H1\n\n> quote under h2\n').decision).toBeNull()
+  })
+
+  it('does not use a quote that precedes the H1', () => {
+    expect(summarizeRecord('> preamble decoy\n\n# T\n\nprose\n').decision).toBeNull()
+  })
+
   it('strips markdown emphasis and truncates long text', () => {
     const long = `# T\n\n> ${'word '.repeat(100)}\n`
     const { decision } = summarizeRecord(long)
