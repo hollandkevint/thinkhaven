@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { summarizeRecord } from '@/lib/artifact/record-summary'
+import { summarizeRecord, toPlainText } from '@/lib/artifact/record-summary'
 
 const RECORD = `# Sunset the legacy importer
 
@@ -35,11 +35,46 @@ describe('summarizeRecord', () => {
     expect(summarizeRecord('just some prose')).toEqual({ decision: null, weakestAssumption: null })
   })
 
+  it('flattens link syntax so a crafted record cannot plant a clickable link', () => {
+    const hostile = [
+      '# Pwn',
+      '',
+      '> Read [the full brief](https://evil.example/steal) before deciding.',
+      '',
+      '## Assumptions',
+      '- <https://evil.example/autolink> is trustworthy.',
+      '',
+    ].join('\n')
+
+    const { decision, weakestAssumption } = summarizeRecord(hostile)
+    expect(decision).toBe('Read the full brief before deciding.')
+    expect(decision).not.toContain('evil.example')
+    expect(weakestAssumption).not.toContain('evil.example')
+    expect(weakestAssumption).not.toContain('<')
+  })
+
+  it('ignores a blockquote that is not the H1 blockquote', () => {
+    const offTemplate = [
+      '# Title',
+      '',
+      'Some prose that is not a quote.',
+      '',
+      '> An unrelated pull quote from later in the document.',
+      '',
+    ].join('\n')
+
+    expect(summarizeRecord(offTemplate).decision).toBeNull()
+  })
+
   it('strips markdown emphasis and truncates long text', () => {
     const long = `# T\n\n> ${'word '.repeat(100)}\n`
     const { decision } = summarizeRecord(long)
     expect(decision).not.toBeNull()
     expect(decision!.length).toBeLessThanOrEqual(220)
     expect(decision!.endsWith('…')).toBe(true)
+  })
+
+  it('collapses images and stray markdown punctuation in toPlainText', () => {
+    expect(toPlainText('![alt](https://evil.example/x.png) and `code`')).toBe('alt and code')
   })
 })

@@ -124,9 +124,10 @@ function TryPageContent() {
 
     const utm = readUtm(new URLSearchParams(searchParams.toString()))
     GuestSessionStore.setUtm(utm)
+    // from_share is a boolean, never the ref token itself -- see UtmProperties.
     track({
       event: 'try_arrived',
-      properties: { mode: trialMode, from_share: Boolean(utm.ref_token), ...utm },
+      properties: { mode: trialMode, from_share: Boolean(searchParams.get('ref')), ...utm },
     })
   }, [searchParams, trialMode])
 

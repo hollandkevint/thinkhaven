@@ -2,9 +2,15 @@ import { describe, it, expect } from 'vitest'
 import { readUtm } from '@/lib/analytics/utm'
 
 describe('readUtm', () => {
-  it('reads utm params and the share ref token', () => {
-    const utm = readUtm(new URLSearchParams('utm_source=share&utm_medium=decision_record&ref=abc123'))
-    expect(utm).toEqual({ utm_source: 'share', utm_medium: 'decision_record', ref_token: 'abc123' })
+  it('reads utm params', () => {
+    const utm = readUtm(new URLSearchParams('utm_source=share&utm_medium=decision_record'))
+    expect(utm).toEqual({ utm_source: 'share', utm_medium: 'decision_record' })
+  })
+
+  it('never carries the share ref token, which is the record access secret', () => {
+    const utm = readUtm(new URLSearchParams('utm_source=share&ref=deadbeefdeadbeef'))
+    expect(JSON.stringify(utm)).not.toContain('deadbeef')
+    expect(utm).toEqual({ utm_source: 'share' })
   })
 
   it('omits absent and blank params so an unattributed arrival is empty', () => {

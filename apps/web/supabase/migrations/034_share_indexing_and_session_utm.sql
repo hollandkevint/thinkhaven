@@ -7,6 +7,8 @@
 --      opt-in per record, and there is deliberately no UI toggle yet (DB-only).
 --   2. bmad_sessions.utm -- UTM params captured on /try arrival, carried through guest
 --      migration so a saved session can be attributed to the link that produced it.
+--      Never holds the /share ref token: that token is the record's only access
+--      control, so it stays out of analytics and out of this column.
 --
 -- Rollback:
 --   ALTER TABLE public.public_artifacts DROP COLUMN indexable;
@@ -20,4 +22,4 @@ COMMENT ON COLUMN public.public_artifacts.indexable IS 'Opt-in search indexing. 
 ALTER TABLE public.bmad_sessions
   ADD COLUMN IF NOT EXISTS utm jsonb;
 
-COMMENT ON COLUMN public.bmad_sessions.utm IS 'UTM params (utm_source/medium/campaign/content/term) plus optional ref token, captured on /try arrival and carried through guest migration.';
+COMMENT ON COLUMN public.bmad_sessions.utm IS 'UTM params (utm_source/medium/campaign/content/term) captured on /try arrival and carried through guest migration. Never contains the /share ref token.';

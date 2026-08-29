@@ -58,6 +58,8 @@ export class SessionMigration {
         ? getPathwayConfig('plan-grill')
         : undefined
 
+      const hasUtm = !!guestData.utm && Object.keys(guestData.utm).length > 0
+
       const { data: newSession, error: createError } = await supabase
         .from('bmad_sessions')
         .insert({
@@ -75,8 +77,11 @@ export class SessionMigration {
           message_count: chatMessages.filter(m => m.role === 'user').length,
           message_limit: planGrillConfig?.messageLimit || 10,
           chat_context: chatMessages,
-          // First-touch attribution from /try arrival (migration 034).
-          utm: guestData.utm && Object.keys(guestData.utm).length > 0 ? guestData.utm : null,
+          // First-touch attribution from /try arrival (migration 034). Spread in only
+          // when there is attribution to record: Vercel auto-deploys on merge while 034
+          // is applied by hand, so an unattributed conversion must not send a column
+          // that may not exist yet and fail the whole insert.
+          ...(hasUtm ? { utm: guestData.utm } : {}),
         })
         .select('id')
         .single()

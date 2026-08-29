@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { summarizeRecord } from '@/lib/artifact/record-summary'
+import { summarizeRecord, toPlainText } from '@/lib/artifact/record-summary'
 
 /**
  * Public decision-record reference lookup.
@@ -36,8 +36,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
   const record = data as { title: string; content: string }
   const { decision, weakestAssumption } = summarizeRecord(record.content)
 
+  // The title is attacker-authored too, and lands in the same markdown-rendered opener.
   return Response.json(
-    { title: record.title, decision, weakestAssumption },
+    { title: toPlainText(record.title, 120), decision, weakestAssumption },
     { headers: { 'Cache-Control': 'private, max-age=60' } }
   )
 }
