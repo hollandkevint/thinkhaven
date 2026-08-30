@@ -46,11 +46,15 @@ BEGIN
     -- any signed-in caller may only deduct from their own balance.
     v_caller := auth.uid();
     IF v_caller IS NOT NULL AND v_caller <> p_user_id THEN
-        RETURN jsonb_build_object(
-            'success', FALSE,
-            'message', 'Not authorized',
-            'balance', 0
-        );
+        -- RAISE, not a success:false return. app/api/session/route.ts maps any
+        -- success:false to a 402 NO_CREDITS ("You've used all your session credits"),
+        -- deletes the session, and logs nothing -- which would make a cross-user
+        -- attempt indistinguishable from a spent balance. Raising surfaces through
+        -- supabase.rpc() as an error that credit-manager.deductCredit console.errors
+        -- before degrading to the same 402, so the user-facing result is unchanged
+        -- while a real attempt becomes visible.
+        RAISE EXCEPTION 'deduct_credit_transaction: caller % may not deduct credits for %', v_caller, p_user_id
+            USING ERRCODE = '42501';
     END IF;
 
     SELECT balance INTO v_balance
