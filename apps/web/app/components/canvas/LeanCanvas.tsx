@@ -8,6 +8,7 @@ import { downloadCanvasMarkdown } from '@/lib/export/canvas-export-md';
 interface LeanCanvasProps {
   canvas: LeanCanvasType;
   title?: string;
+  sessionId?: string;
 }
 
 const CANVAS_LAYOUT: Array<{ field: LeanCanvasField; label: string }> = [
@@ -45,14 +46,14 @@ function CanvasBox({ label, content }: { label: string; content?: string }) {
   );
 }
 
-function LeanCanvasInner({ canvas, title }: LeanCanvasProps) {
+function LeanCanvasInner({ canvas, title, sessionId }: LeanCanvasProps) {
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-display text-sm font-semibold text-ink">Lean Canvas</h3>
         {isNonEmptyCanvas(canvas) && (
           <button
-            onClick={() => downloadCanvasMarkdown(canvas, title)}
+            onClick={() => downloadCanvasMarkdown(canvas, title, sessionId)}
             className="text-xs text-terracotta hover:text-terracotta-hover font-medium flex items-center gap-1"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,6 +74,7 @@ function LeanCanvasInner({ canvas, title }: LeanCanvasProps) {
 
 export default React.memo(LeanCanvasInner, (prev, next) => {
   if (prev.title !== next.title) return false;
+  if (prev.sessionId !== next.sessionId) return false;
   for (const { field } of CANVAS_LAYOUT) {
     if (prev.canvas[field] !== next.canvas[field]) return false;
   }

@@ -90,7 +90,12 @@ test.describe('Smoke Tests - Public Routes Render', () => {
     // An unknown token renders the branded unavailable state (no auth wall, no crash) and keeps the marketing CTA.
     await page.goto('/share/nonexistent-token-smoke');
     await expect(page.getByRole('heading', { name: /this decision record is not available/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /grill your own plan/i })).toHaveAttribute('href', '/try?mode=plan-grill');
+    await expect(page.getByRole('link', { name: /grill your own plan/i })).toHaveAttribute(
+      'href',
+      /^\/try\?mode=plan-grill(&|$)/
+    );
+    // Share links go to clients. They must never be indexable by default.
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 
   test('assessment results has a restart path without stored quiz state', async ({ page }) => {

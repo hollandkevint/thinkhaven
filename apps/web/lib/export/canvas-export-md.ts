@@ -41,14 +41,14 @@ export function canvasToMarkdown(canvas: LeanCanvas, title?: string): string {
   return lines.join('\n')
 }
 
-export function downloadCanvasMarkdown(canvas: LeanCanvas, title?: string) {
+export function downloadCanvasMarkdown(canvas: LeanCanvas, title?: string, sessionId?: string) {
   const markdown = canvasToMarkdown(canvas, title)
   const blob = new Blob([markdown], { type: 'text/markdown' })
   const url = URL.createObjectURL(blob)
   const filename = `${(title || 'lean-canvas').toLowerCase().replace(/\s+/g, '-')}.md`
 
   const filledBoxes = LEAN_CANVAS_FIELDS.filter(f => canvas[f]?.trim()).length
-  track({ event: 'canvas_exported', properties: { format: 'markdown', filled_boxes: filledBoxes } })
+  track({ event: 'canvas_exported', properties: { format: 'markdown', filled_boxes: filledBoxes, session_id: sessionId } })
 
   const a = document.createElement('a')
   a.href = url

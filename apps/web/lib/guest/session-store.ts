@@ -1,3 +1,5 @@
+import type { UtmProperties } from '@/lib/analytics/utm'
+
 /**
  * Guest Session Store
  *
@@ -19,6 +21,8 @@ export interface GuestSession {
   messageCount: number
   createdAt: string
   lastActivityAt: string
+  /** First-touch attribution captured on /try arrival. */
+  utm?: UtmProperties
 }
 
 const STORAGE_KEY = 'thinkhaven_guest_session'
@@ -82,6 +86,20 @@ export class GuestSessionStore {
     }
 
     return existing
+  }
+
+  /**
+   * Record arrival attribution. First touch wins: a visitor who lands from a share
+   * link and later reloads /try without params keeps the original attribution.
+   */
+  static setUtm(utm: UtmProperties): void {
+    if (Object.keys(utm).length === 0) return
+
+    const session = this.getOrCreateSession()
+    if (session.utm && Object.keys(session.utm).length > 0) return
+
+    session.utm = utm
+    this.saveSession(session)
   }
 
   /**
@@ -161,6 +179,7 @@ export class GuestSessionStore {
     messages: GuestMessage[]
     messageCount: number
     pathway: GuestPathway
+    utm?: UtmProperties
   } | null {
     const session = this.getSession()
     if (!session) return null
@@ -169,7 +188,8 @@ export class GuestSessionStore {
       sessionId: session.id,
       pathway: session.pathway,
       messages: session.messages,
-      messageCount: session.messageCount
+      messageCount: session.messageCount,
+      utm: session.utm
     }
   }
 }
