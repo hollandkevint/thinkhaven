@@ -15,10 +15,22 @@ permissions:
   id-token: write
 
 jobs:
-  # Automated review on new PRs
-  # Known issue: claude-code-action@v1 intermittently crashes on PR open
-  # with exit code 1 (ajv schema validation). See:
-  # https://github.com/anthropics/claude-code-action/issues/911
+  # Automated review on new PRs. Advisory only -- it must never gate a merge.
+  #
+  # continue-on-error is set on the STEP, not just the job. Job-level alone stops the
+  # workflow run from failing but still reports the job as failed, so the "auto-review"
+  # check renders red on every PR and every push. That is a false alarm on a check that
+  # is not a gate, and it trains people to ignore CI.
+  #
+  # Two ways this step legitimately fails:
+  #   1. claude-code-action@v1 crashes on PR open (exit 1, ajv schema validation)
+  #      https://github.com/anthropics/claude-code-action/issues/911
+  #   2. The Anthropic API rejects the request before any model turn -- the result
+  #      payload shows num_turns:1, total_cost_usd:0, modelUsage:{} after ~180s.
+  #      That is an API key problem (credit exhausted, key disabled), not a code problem.
+  #
+  # In both cases the review simply does not post. Nothing about the PR is validated by
+  # this job, so a red check communicates nothing a green one does not.
   auto-review:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -31,7 +43,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      # The step's `outcome` stays `failure` even though `conclusion` is masked, so a
+      # follow-on step can read `steps.review.outcome` to surface the signal as a comment
+      # or annotation without turning the check red again. Not wired up: while the API key
+      # is unusable that would fire on every PR and just relocate the noise.
       - name: Claude Code Review
+        id: review
+        continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
