@@ -202,6 +202,15 @@ export async function deductCredit(
  * @param description - Optional description for transaction log
  * @returns Result with success status and new balance
  */
+/**
+ * Add credits to a user.
+ *
+ * Currently unused. Migration 035 restricted add_credits_transaction to service_role,
+ * because it mints credits from a caller-supplied user_id and amount and was reachable
+ * with the public anon key. This helper uses the cookie-scoped client, so it will fail
+ * on permissions until it is rewired to an admin client behind a trusted trigger such
+ * as a verified Stripe webhook.
+ */
 export async function addCredits(options: {
   userId: string;
   amount: number;
