@@ -43,7 +43,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      # The step's `outcome` stays `failure` even though `conclusion` is masked, so a
+      # follow-on step can read `steps.review.outcome` to surface the signal as a comment
+      # or annotation without turning the check red again. Not wired up: while the API key
+      # is unusable that would fire on every PR and just relocate the noise.
       - name: Claude Code Review
+        id: review
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
