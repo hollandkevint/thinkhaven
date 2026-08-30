@@ -24,7 +24,12 @@
 --   GRANT EXECUTE ON FUNCTION public.deduct_credit_transaction(uuid,uuid) TO anon;
 --   -- and remove the ownership guard below.
 
+-- Grants are stated explicitly rather than left to whatever default privileges the
+-- platform applied at creation time. REVOKE ... FROM public strips the implicit
+-- everyone-grant, so on a database provisioned without Supabase's usual default
+-- service_role grant this function would otherwise end up callable by nobody.
 REVOKE EXECUTE ON FUNCTION public.add_credits_transaction(uuid, integer, text, text, text) FROM anon, authenticated, public;
+GRANT EXECUTE ON FUNCTION public.add_credits_transaction(uuid, integer, text, text, text) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.deduct_credit_transaction(p_user_id uuid, p_session_id uuid DEFAULT NULL::uuid)
  RETURNS jsonb
@@ -81,4 +86,4 @@ END;
 $function$;
 
 REVOKE EXECUTE ON FUNCTION public.deduct_credit_transaction(uuid, uuid) FROM anon, public;
-GRANT EXECUTE ON FUNCTION public.deduct_credit_transaction(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.deduct_credit_transaction(uuid, uuid) TO authenticated, service_role;
