@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDatabasePool } from '@/lib/db/pool';
 import { RateLimiter } from '@/lib/security/rate-limiter';
 import { logBetaEvent } from '@/lib/monitoring/beta-event-logger';
 
@@ -33,43 +33,75 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const supabase = createAdminClient();
-  if (!supabase) {
+  let pool: ReturnType<typeof getDatabasePool>;
+  let duplicate = false;
+  try {
+    pool = getDatabasePool();
+  } catch {
     return NextResponse.json(
       { error: 'Waitlist service unavailable' },
       { status: 503 }
     );
   }
 
-  const { data, error } = await supabase
-    .from('beta_access')
-    .insert({ email, source })
-    .select('id, user_id, email')
-    .single();
+  try {
+    const { rows } = await pool.query<{ id: string; user_id: string | null; email: string }>(
+      `
+        insert into "public"."beta_access" ("email", "source")
+        values ($1, $2)
+        returning "id", "user_id", "email"
+      `,
+      [email, source],
+    );
+    const data = rows[0];
 
-  if (!error && data) {
-    await logBetaEvent({
-      eventType: 'waitlist_joined',
-      targetUserId: data.user_id,
-      betaAccessId: data.id,
-      targetEmail: data.email,
-      requestPath,
-      metadata: { source },
-    });
+    if (data) {
+      await logBetaEvent({
+        eventType: 'waitlist_joined',
+        targetUserId: data.user_id,
+        betaAccessId: data.id,
+        targetEmail: data.email,
+        requestPath,
+        metadata: { source },
+      });
 
-    return NextResponse.json({
-      success: true,
-      duplicate: false,
-      message: "You're on the list! We'll email you when your spot opens up.",
-    });
+      return NextResponse.json({
+        success: true,
+        duplicate: false,
+        message: "You're on the list! We'll email you when your spot opens up.",
+      });
+    }
+  } catch (error) {
+    duplicate = isUniqueViolation(error);
+    if (!duplicate) {
+      console.error('Waitlist signup error:', {
+        code: getDatabaseErrorCode(error),
+        message: error instanceof Error ? error.message : 'Unknown database error',
+      });
+
+      return NextResponse.json(
+        { error: 'Something went wrong. Please try again.' },
+        { status: 500 }
+      );
+    }
   }
 
-  if (error?.code === '23505') {
-    const { data: existing } = await supabase
-      .from('beta_access')
-      .select('id, user_id, email')
-      .eq('email', email)
-      .maybeSingle();
+  if (duplicate) {
+    let existing: { id: string; user_id: string | null; email: string } | undefined;
+    try {
+      const result = await pool.query<{ id: string; user_id: string | null; email: string }>(
+        `
+          select "id", "user_id", "email"
+          from "public"."beta_access"
+          where "email" = $1
+          limit 1
+        `,
+        [email],
+      );
+      existing = result.rows[0];
+    } catch {
+      // Preserve the duplicate response even if the follow-up lookup is unavailable.
+    }
 
     await logBetaEvent({
       eventType: 'waitlist_duplicate',
@@ -87,13 +119,19 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  console.error('Waitlist signup error:', {
-    code: error?.code,
-    message: error?.message,
-  });
-
+  console.error('Waitlist signup error: insert returned no row');
   return NextResponse.json(
     { error: 'Something went wrong. Please try again.' },
     { status: 500 }
   );
+}
+
+function getDatabaseErrorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') return undefined;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === 'string' ? code : undefined;
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  return getDatabaseErrorCode(error) === '23505';
 }

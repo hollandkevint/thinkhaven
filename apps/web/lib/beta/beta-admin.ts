@@ -1,6 +1,6 @@
 import 'next/dist/compiled/server-only';
 
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDatabasePool } from '@/lib/db/pool';
 import type {
   BetaAccessRecord,
   BetaAccessSummary,
@@ -59,7 +59,7 @@ const BETA_RECORD_COLUMNS = [
 
 export class BetaAdminUnavailableError extends Error {
   constructor() {
-    super('Supabase admin client unavailable');
+    super('Railway database unavailable');
     this.name = 'BetaAdminUnavailableError';
   }
 }
@@ -71,14 +71,12 @@ export class BetaAccessNotFoundError extends Error {
   }
 }
 
-function getRequiredAdminClient() {
-  const supabase = createAdminClient();
-
-  if (!supabase) {
+function getRequiredDatabasePool() {
+  try {
+    return getDatabasePool();
+  } catch {
     throw new BetaAdminUnavailableError();
   }
-
-  return supabase;
 }
 
 function summarizeRecord(record: BetaAccessRecord): BetaAccessSummary {
@@ -107,59 +105,61 @@ export function buildBetaInviteUrl(record: Pick<BetaAccessRecord, 'id'>): string
 }
 
 export async function listBetaAccessRecords(): Promise<BetaAccessSummary[]> {
-  const supabase = getRequiredAdminClient();
-  const { data, error } = await supabase
-    .from('beta_access')
-    .select(BETA_RECORD_COLUMNS)
-    .order('created_at', { ascending: false });
+  const { rows } = await getRequiredDatabasePool().query<BetaAccessRecord>(
+    `
+      select ${BETA_RECORD_COLUMNS}
+      from "public"."beta_access"
+      order by "created_at" desc
+    `,
+  );
 
-  if (error) {
-    throw error;
-  }
-
-  return ((data ?? []) as unknown as BetaAccessRecord[]).map(summarizeRecord);
+  return rows.map(summarizeRecord);
 }
 
 async function fetchBetaAccessRecord(id: string): Promise<BetaAccessRecord> {
-  const supabase = getRequiredAdminClient();
-  const { data, error } = await supabase
-    .from('beta_access')
-    .select(BETA_RECORD_COLUMNS)
-    .eq('id', id)
-    .maybeSingle();
+  const { rows } = await getRequiredDatabasePool().query<BetaAccessRecord>(
+    `
+      select ${BETA_RECORD_COLUMNS}
+      from "public"."beta_access"
+      where "id" = $1
+      limit 1
+    `,
+    [id],
+  );
+  const record = rows[0];
 
-  if (error) {
-    throw error;
-  }
-
-  if (!data) {
+  if (!record) {
     throw new BetaAccessNotFoundError(id);
   }
 
-  return data as unknown as BetaAccessRecord;
+  return record;
 }
 
 async function updateBetaAccessRecord(
   id: string,
   update: BetaAccessUpdate
 ): Promise<BetaAccessRecord> {
-  const supabase = getRequiredAdminClient();
-  const { data, error } = await supabase
-    .from('beta_access')
-    .update(update)
-    .eq('id', id)
-    .select(BETA_RECORD_COLUMNS)
-    .maybeSingle();
+  const entries = Object.entries(update);
+  const assignments = entries.map(([column], index) => `"${column}" = $${index + 1}`);
+  const values = entries.map(([, value]) => value);
+  values.push(id);
 
-  if (error) {
-    throw error;
-  }
+  const { rows } = await getRequiredDatabasePool().query<BetaAccessRecord>(
+    `
+      update "public"."beta_access"
+      set ${assignments.join(', ')}
+      where "id" = $${values.length}
+      returning ${BETA_RECORD_COLUMNS}
+    `,
+    values,
+  );
+  const record = rows[0];
 
-  if (!data) {
+  if (!record) {
     throw new BetaAccessNotFoundError(id);
   }
 
-  return data as unknown as BetaAccessRecord;
+  return record;
 }
 
 export async function approveBetaAccessRecord(

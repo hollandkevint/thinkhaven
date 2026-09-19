@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { NextRequest } from 'next/server';
 import { POST } from '@/app/api/beta/waitlist/route';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDatabasePool } from '@/lib/db/pool';
 import { logBetaEvent } from '@/lib/monitoring/beta-event-logger';
 
-vi.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: vi.fn(),
+vi.mock('@/lib/db/pool', () => ({
+  getDatabasePool: vi.fn(),
 }));
 
 vi.mock('@/lib/monitoring/beta-event-logger', () => ({
@@ -16,29 +17,21 @@ function request(body: unknown) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  }) as any;
+  }) as unknown as NextRequest;
 }
 
-function mockInsert(result: unknown) {
-  const single = vi.fn().mockResolvedValue(result);
-  const selectAfterInsert = vi.fn(() => ({ single }));
-  const insert = vi.fn(() => ({ select: selectAfterInsert }));
-  return { insert, selectAfterInsert, single };
-}
+const query = vi.fn();
 
 describe('beta waitlist API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getDatabasePool).mockReturnValue({ query } as never);
   });
 
   it('creates a waitlist row and records a durable event', async () => {
-    const insertChain = mockInsert({
-      data: { id: 'beta-1', user_id: null, email: 'person@example.com' },
-      error: null,
+    query.mockResolvedValueOnce({
+      rows: [{ id: 'beta-1', user_id: null, email: 'person@example.com' }],
     });
-    vi.mocked(createAdminClient).mockReturnValue({
-      from: vi.fn(() => ({ insert: insertChain.insert })),
-    } as any);
 
     const response = await POST(request({ email: ' Person@Example.com ' }));
 
@@ -46,10 +39,10 @@ describe('beta waitlist API', () => {
       success: true,
       duplicate: false,
     });
-    expect(insertChain.insert).toHaveBeenCalledWith({
-      email: 'person@example.com',
-      source: 'landing_page',
-    });
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('insert into "public"."beta_access"'),
+      ['person@example.com', 'landing_page'],
+    );
     expect(logBetaEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'waitlist_joined',
@@ -60,23 +53,10 @@ describe('beta waitlist API', () => {
   });
 
   it('returns friendly success for duplicate waitlist emails', async () => {
-    const insertChain = mockInsert({
-      data: null,
-      error: { code: '23505', message: 'duplicate' },
+    query.mockRejectedValueOnce({ code: '23505', message: 'duplicate' });
+    query.mockResolvedValueOnce({
+      rows: [{ id: 'beta-existing', user_id: 'user-1', email: 'person@example.com' }],
     });
-    const maybeSingle = vi.fn().mockResolvedValue({
-      data: { id: 'beta-existing', user_id: 'user-1', email: 'person@example.com' },
-      error: null,
-    });
-    const eq = vi.fn(() => ({ maybeSingle }));
-    const select = vi.fn(() => ({ eq }));
-
-    vi.mocked(createAdminClient).mockReturnValue({
-      from: vi.fn(() => ({
-        insert: insertChain.insert,
-        select,
-      })),
-    } as any);
 
     const response = await POST(request({ email: 'person@example.com' }));
 
@@ -93,20 +73,19 @@ describe('beta waitlist API', () => {
   });
 
   it('rejects malformed email before database insert', async () => {
-    const from = vi.fn();
-    vi.mocked(createAdminClient).mockReturnValue({ from } as any);
-
     const response = await POST(request({ email: 'not-an-email' }));
 
     await expect(response.json()).resolves.toEqual({
       error: 'Enter a valid email address',
     });
     expect(response.status).toBe(400);
-    expect(from).not.toHaveBeenCalled();
+    expect(query).not.toHaveBeenCalled();
   });
 
-  it('returns service unavailable when the admin client is missing', async () => {
-    vi.mocked(createAdminClient).mockReturnValue(null);
+  it('returns service unavailable when the database is missing', async () => {
+    vi.mocked(getDatabasePool).mockImplementation(() => {
+      throw new Error('DATABASE_URL is missing');
+    });
 
     const response = await POST(request({ email: 'person@example.com' }));
 
