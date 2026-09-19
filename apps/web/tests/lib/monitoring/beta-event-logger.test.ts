@@ -1,33 +1,25 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { getDatabasePool } from '@/lib/db/pool'
 import {
   getBetaEventCounts,
   logBetaEvent,
   recordBetaGateEvaluation,
-} from '@/lib/monitoring/beta-event-logger';
+} from '@/lib/monitoring/beta-event-logger'
 
-vi.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: vi.fn(),
-}));
+vi.mock('@/lib/db/pool', () => ({
+  getDatabasePool: vi.fn(),
+}))
 
-const insert = vi.fn();
-const select = vi.fn();
-const gte = vi.fn();
-const from = vi.fn();
+const query = vi.fn()
 
 describe('beta event logger', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    insert.mockResolvedValue({ error: null });
-    gte.mockResolvedValue({ data: [], error: null });
-    select.mockReturnValue({ gte });
-    from.mockReturnValue({ insert, select });
-    vi.mocked(createAdminClient).mockReturnValue(
-      { from } as unknown as NonNullable<ReturnType<typeof createAdminClient>>
-    );
-  });
+    vi.clearAllMocks()
+    query.mockResolvedValue({ rows: [], rowCount: 1 })
+    vi.mocked(getDatabasePool).mockReturnValue({ query } as never)
+  })
 
-  it('persists sanitized durable beta events', async () => {
+  it('persists sanitized events with parameterized pg values', async () => {
     await expect(
       logBetaEvent({
         eventType: 'invite_copied',
@@ -41,91 +33,96 @@ describe('beta event logger', () => {
           accessToken: 'secret',
           nested: { unsafe: true },
         },
-      })
-    ).resolves.toBe(true);
+      }),
+    ).resolves.toBe(true)
 
-    expect(from).toHaveBeenCalledWith('beta_auth_events');
-    expect(insert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event_type: 'invite_copied',
-        actor_user_id: 'admin-1',
-        target_user_id: 'user-1',
-        beta_access_id: 'beta-1',
-        request_path: '/api/admin/beta-access/beta-1/invite',
-        metadata: { destination: '/try' },
-      })
-    );
-    expect(insert.mock.calls[0][0].target_email_hash).toMatch(/^[a-f0-9]{64}$/);
-  });
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('insert into "public"."beta_auth_events"'),
+      [
+        'invite_copied',
+        'admin-1',
+        'user-1',
+        'beta-1',
+        expect.stringMatching(/^[a-f0-9]{64}$/),
+        '/api/admin/beta-access/beta-1/invite',
+        { destination: '/try' },
+      ],
+    )
+  })
 
-  it('is non-fatal when the admin client is unavailable', async () => {
-    vi.mocked(createAdminClient).mockReturnValue(null);
+  it('is non-fatal when the database pool is unavailable', async () => {
+    vi.mocked(getDatabasePool).mockImplementation(() => {
+      throw new Error('DATABASE_URL is missing')
+    })
 
-    await expect(logBetaEvent({ eventType: 'waitlist_joined' })).resolves.toBe(false);
-  });
+    await expect(logBetaEvent({ eventType: 'waitlist_joined' })).resolves.toBe(false)
+    await expect(getBetaEventCounts(60_000)).resolves.toBeNull()
+    await expect(
+      recordBetaGateEvaluation({ userId: 'user-1', status: 'pending' }),
+    ).resolves.toBe(false)
+  })
 
-  it('aggregates beta event counts for admin monitoring', async () => {
-    gte.mockResolvedValue({
-      data: [
+  it('aggregates event counts with a parameterized time bound', async () => {
+    query.mockResolvedValue({
+      rows: [
         { event_type: 'invite_copied' },
         { event_type: 'invite_copied' },
         { event_type: 'beta_gate_pending' },
       ],
-      error: null,
-    });
+    })
 
     await expect(getBetaEventCounts(60_000)).resolves.toEqual({
       invite_copied: 2,
       beta_gate_pending: 1,
-    });
-  });
+    })
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('where "created_at" >= $1'),
+      [expect.any(String)],
+    )
+  })
 
   it('records gate state and first approved app access', async () => {
-    const maybeSingle = vi.fn().mockResolvedValue({
-      data: {
-        id: 'beta-1',
-        email: 'person@example.com',
-        first_access_at: null,
-      },
-      error: null,
-    });
-    const updateEq = vi.fn().mockResolvedValue({ error: null });
-    const update = vi.fn(() => ({ eq: updateEq }));
-    const betaSelectEq = vi.fn(() => ({ maybeSingle }));
-    const betaSelect = vi.fn(() => ({ eq: betaSelectEq }));
-    const gateInsert = vi.fn().mockResolvedValue({ error: null });
-    const gateFrom = vi.fn((table: string) => {
-      if (table === 'beta_access') {
-        return { select: betaSelect, update };
+    const eventValues: unknown[][] = []
+    query.mockImplementation(async (sql: string, values: unknown[]) => {
+      if (sql.includes('from "public"."beta_access"')) {
+        return {
+          rows: [{
+            id: 'beta-1',
+            email: 'person@example.com',
+            first_access_at: null,
+          }],
+        }
       }
 
-      return { insert: gateInsert };
-    });
-    vi.mocked(createAdminClient).mockReturnValue(
-      { from: gateFrom } as unknown as NonNullable<ReturnType<typeof createAdminClient>>
-    );
+      if (sql.includes('insert into "public"."beta_auth_events"')) {
+        eventValues.push(values)
+      }
+
+      return { rows: [], rowCount: 1 }
+    })
 
     await expect(
       recordBetaGateEvaluation({
         userId: 'user-1',
         email: 'person@example.com',
         status: 'approved',
-      })
-    ).resolves.toBe(true);
+      }),
+    ).resolves.toBe(true)
 
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        last_gate_status: 'approved',
-        first_access_at: expect.any(String),
-        last_access_at: expect.any(String),
-      })
-    );
-    expect(updateEq).toHaveBeenCalledWith('id', 'beta-1');
-    expect(gateInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ event_type: 'beta_gate_approved' })
-    );
-    expect(gateInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ event_type: 'first_app_access' })
-    );
-  });
-});
+    const updateCall = query.mock.calls.find(([sql]) =>
+      String(sql).includes('update "public"."beta_access"'),
+    )
+    expect(updateCall?.[1]).toEqual([
+      expect.any(String),
+      'approved',
+      expect.any(String),
+      expect.any(String),
+      'beta-1',
+    ])
+    expect(eventValues).toHaveLength(2)
+    expect(eventValues.map(([eventType]) => eventType)).toEqual([
+      'beta_gate_approved',
+      'first_app_access',
+    ])
+  })
+})

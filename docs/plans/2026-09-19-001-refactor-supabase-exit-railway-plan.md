@@ -62,7 +62,7 @@ Gate: a restorable source backup and an explicit rollback window exist before ta
 - [x] Create app-owned auth schema and import-safe UUID identifiers.
 - [x] Add Better Auth route without switching existing production routes.
 - [x] Add `/api/health` and `/api/ready`.
-- [ ] Add focused tests for configuration failures, session resolution, and route wiring. Configuration tests pass; live session and route tests require the target database.
+- [x] Add focused tests for configuration failures, session resolution, readiness, beta access, and beta event persistence. Live browser flows still require the deployed target.
 
 Gate: the new foundation builds and tests without changing current Supabase production behavior.
 
@@ -81,7 +81,7 @@ Gate: schema, IDs, row counts, constraints, and representative JSON match the so
 
 Migrate in this order:
 
-1. Auth, beta access, waitlist, and admin checks.
+1. Auth, beta access, waitlist, and admin checks. Better Auth session resolution, beta gate lookup, and beta event persistence are migrated; waitlist and admin mutation routes remain.
 2. Dashboard, workspace, sessions, and guest-session migration.
 3. Streaming chat, message persistence, counters, canvas, artifacts, and AI tools.
 4. Feedback, legacy conversations, monitoring, public sharing, and exports.
@@ -151,5 +151,7 @@ The exit is complete only when all of the following pass:
 - Counts match the source inventory: 9 users, 11 sessions, 13 phase outputs, 9 credit balances, 10 credit transactions, 14 beta-access rows, and 3 beta-auth events.
 - All restored constraints validate; 45 source RLS policies and 3 source signup triggers are present for behavior comparison.
 - Better Auth `app_auth` schema contains all 9 user UUIDs and 4 Google identities, with zero UUID mismatches and zero imported sessions.
+- Beta access now uses the Better Auth server session plus parameterized PostgreSQL. Beta gate events, counts, and first-access timestamps use PostgreSQL without blocking user access when telemetry fails.
+- Focused Railway auth/readiness/beta tests pass (13 tests), targeted lint is clean, `git diff --check` is clean, and the production Next.js build succeeds.
 - The source-only `vector(1536)` column belongs to an empty table and is represented as portable text in the rehearsal. The canonical schema must decide whether to delete the unused column or add pgvector later.
 - Temporary TCP proxies used for the import were deleted after verification; the database is private-only again.
