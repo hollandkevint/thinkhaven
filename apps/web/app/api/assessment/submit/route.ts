@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getDatabasePool } from '@/lib/db/pool';
+
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,8 +14,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-    if (!supabase) {
+    let pool: ReturnType<typeof getDatabasePool>;
+    try {
+      pool = getDatabasePool();
+    } catch {
       return NextResponse.json(
         { error: 'Service unavailable' },
         { status: 503 }
@@ -21,17 +25,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Store assessment results
-    const { error } = await supabase
-      .from('assessment_submissions')
-      .insert({
-        email,
-        scores,
-        answers,
-        completed_at: completedAt,
-        created_at: new Date().toISOString()
-      });
-
-    if (error) {
+    try {
+      await pool.query(
+        `
+          insert into "public"."assessment_submissions" (
+            "email",
+            "scores",
+            "answers",
+            "completed_at",
+            "created_at"
+          )
+          values ($1, $2::jsonb, $3::jsonb, $4, $5)
+        `,
+        [
+          email,
+          JSON.stringify(scores),
+          JSON.stringify(answers),
+          completedAt,
+          new Date().toISOString(),
+        ],
+      );
+    } catch (error) {
       console.error('Error storing assessment:', error);
       // Don't fail the request - we still have localStorage
       return NextResponse.json(

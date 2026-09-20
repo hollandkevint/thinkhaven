@@ -6,8 +6,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { getRailwaySession } from '@/lib/auth/railway-session';
+import { getDatabasePool } from '@/lib/db/pool';
+import { insertTrialFeedback } from '@/lib/db/repositories/feedback-repository';
+
+export const runtime = 'nodejs';
 
 interface FeedbackPayload {
   userId: string;
@@ -20,8 +23,10 @@ interface FeedbackPayload {
 export async function POST(request: NextRequest) {
   try {
     // Authenticate user
-    const supabase = await createClient();
-    if (!supabase) {
+    let pool: ReturnType<typeof getDatabasePool>;
+    try {
+      pool = getDatabasePool();
+    } catch {
       return NextResponse.json(
         { error: 'Service unavailable' },
         { status: 503 }
@@ -55,17 +60,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Store feedback — always use authenticated user.id, never caller-supplied
-    const { error: insertError } = await supabase.from('trial_feedback').insert({
-      user_id: user.id,
-      rating: payload.rating,
-      would_pay: payload.wouldPay,
-      feedback_text: payload.feedback,
-      user_email: user.email,
-      submitted_at: payload.timestamp,
-    });
-
-    if (insertError) {
-      console.error('Trial feedback insert failed:', insertError.code);
+    try {
+      await insertTrialFeedback({
+        userId: user.id,
+        rating: payload.rating,
+        wouldPay: payload.wouldPay,
+        feedback: payload.feedback,
+        userEmail: user.email,
+        submittedAt: payload.timestamp,
+      }, pool);
+    } catch (error) {
+      console.error('Trial feedback insert failed:', getDatabaseErrorCode(error));
       return NextResponse.json(
         { error: 'Internal Server Error' },
         { status: 500 }
@@ -83,4 +88,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function getDatabaseErrorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') return undefined;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === 'string' ? code : undefined;
 }

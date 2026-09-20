@@ -7,14 +7,22 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { getRailwaySession } from '@/lib/auth/railway-session'
+import { getDatabasePool } from '@/lib/db/pool'
+import {
+  hasOwnedSession,
+  insertFeedback,
+} from '@/lib/db/repositories/feedback-repository'
 import { FeedbackSchema } from '@/lib/feedback/feedback-schema'
+
+export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    if (!supabase) {
+    let pool: ReturnType<typeof getDatabasePool>
+    try {
+      pool = getDatabasePool()
+    } catch {
       return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
     }
 
@@ -40,38 +48,31 @@ export async function POST(request: NextRequest) {
 
     // IDOR check: verify user owns the referenced session
     if (session_id) {
-      const { data: session } = await supabase
-        .from('bmad_sessions')
-        .select('id')
-        .eq('id', session_id)
-        .eq('user_id', user.id)
-        .single()
-
-      if (!session) {
+      if (!await hasOwnedSession(session_id, user.id, pool)) {
         return NextResponse.json({ error: 'Session not found' }, { status: 404 })
       }
     }
 
     // Insert — always use authenticated user.id, never from request body
-    const { error: insertError } = await supabase.from('feedback').insert({
-      user_id: user.id,
-      session_id: session_id ?? null,
-      feedback_type,
-      free_text,
-      source,
-      would_recommend: would_recommend ?? null,
-      disappear_alternative: disappear_alternative ?? null,
-    })
-
-    if (insertError) {
+    try {
+      await insertFeedback({
+        userId: user.id,
+        sessionId: session_id ?? null,
+        feedbackType: feedback_type,
+        freeText: free_text,
+        source,
+        wouldRecommend: would_recommend ?? null,
+        disappearAlternative: disappear_alternative ?? null,
+      }, pool)
+    } catch (error) {
       // UNIQUE violation = already submitted for this session
-      if (insertError.code === '23505') {
+      if (getDatabaseErrorCode(error) === '23505') {
         return NextResponse.json(
           { error: 'Feedback already submitted for this session' },
           { status: 409 }
         )
       }
-      console.error('Feedback insert failed:', insertError.code)
+      console.error('Feedback insert failed:', getDatabaseErrorCode(error))
       return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 
@@ -80,4 +81,10 @@ export async function POST(request: NextRequest) {
     console.error('Error in POST /api/feedback:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
+}
+
+function getDatabaseErrorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') return undefined
+  const code = (error as { code?: unknown }).code
+  return typeof code === 'string' ? code : undefined
 }
