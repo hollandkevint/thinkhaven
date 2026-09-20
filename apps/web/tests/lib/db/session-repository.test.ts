@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  appendSessionMessage,
   createSession,
   deleteSession,
   getSession,
@@ -84,6 +85,29 @@ describe('session repository', () => {
     expect(query).toHaveBeenCalledWith(
       expect.stringMatching(/where id = \$2\s+and user_id = \$3/),
       [JSON.stringify({ currentMode: 'realistic' }), 'session-1', 'user-1'],
+    )
+  })
+
+  it('appends messages idempotently to an actor-owned session', async () => {
+    query
+      .mockResolvedValueOnce({ rows: [{ owned: true, appended: true }] })
+      .mockResolvedValueOnce({ rows: [{ owned: true, appended: false }] })
+      .mockResolvedValueOnce({ rows: [{ owned: false, appended: false }] })
+    const message = {
+      id: 'message-1',
+      role: 'user',
+      content: 'Hello',
+      timestamp: '2026-09-19T12:00:00.000Z',
+    }
+
+    await expect(appendSessionMessage('session-1', 'user-1', message, pool)).resolves.toBe('appended')
+    await expect(appendSessionMessage('session-1', 'user-1', message, pool)).resolves.toBe('duplicate')
+    await expect(appendSessionMessage('session-1', 'user-2', message, pool)).resolves.toBe('not-found')
+
+    expect(query).toHaveBeenNthCalledWith(
+      1,
+      expect.stringMatching(/where id = \$1 and user_id = \$2/),
+      ['session-1', 'user-1', JSON.stringify([message]), 'message-1'],
     )
   })
 

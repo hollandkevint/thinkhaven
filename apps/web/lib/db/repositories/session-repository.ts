@@ -17,6 +17,8 @@ export type CreateSessionResult =
   | { status: 'created'; id: string }
   | { status: 'insufficient-credits' }
 
+export type AppendMessageResult = 'appended' | 'duplicate' | 'not-found'
+
 export interface SessionSummary {
   id: string
   user_id: string
@@ -208,6 +210,41 @@ export async function updateSessionSubPersonaState(
   )
 
   return rowCount === 1
+}
+
+export async function appendSessionMessage(
+  sessionId: string,
+  userId: string,
+  message: { id: string } & Record<string, unknown>,
+  pool: Queryable = getDatabasePool(),
+): Promise<AppendMessageResult> {
+  const { rows } = await pool.query<{ owned: boolean; appended: boolean }>(
+    `
+      with owned as (
+        select id
+        from public.bmad_sessions
+        where id = $1 and user_id = $2
+      ), updated as (
+        update public.bmad_sessions
+        set chat_context = coalesce(chat_context, '[]'::jsonb) || $3::jsonb,
+            updated_at = now()
+        where id in (select id from owned)
+          and not exists (
+            select 1
+            from jsonb_array_elements(coalesce(chat_context, '[]'::jsonb)) as existing
+            where existing->>'id' = $4
+          )
+        returning id
+      )
+      select
+        exists(select 1 from owned) as owned,
+        exists(select 1 from updated) as appended
+    `,
+    [sessionId, userId, JSON.stringify([message]), message.id],
+  )
+
+  if (!rows[0]?.owned) return 'not-found'
+  return rows[0].appended ? 'appended' : 'duplicate'
 }
 
 export async function renameSession(

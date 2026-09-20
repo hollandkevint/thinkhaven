@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { NextRequest } from 'next/server'
 import { getRailwaySession } from '@/lib/auth/railway-session'
 import {
+  appendSessionMessage,
   deleteSession,
   getSession,
   listSessions,
@@ -12,6 +13,7 @@ import {
   DELETE,
   GET,
   PATCH,
+  POST,
 } from '@/app/api/sessions/[id]/route'
 
 vi.mock('@/lib/auth/railway-session', () => ({
@@ -19,6 +21,7 @@ vi.mock('@/lib/auth/railway-session', () => ({
 }))
 
 vi.mock('@/lib/db/repositories/session-repository', () => ({
+  appendSessionMessage: vi.fn(),
   deleteSession: vi.fn(),
   getSession: vi.fn(),
   listSessions: vi.fn(),
@@ -85,6 +88,30 @@ describe('session API', () => {
     const deleteResponse = await DELETE(request('DELETE', { userId: 'attacker' }), context())
     await expect(deleteResponse.json()).resolves.toEqual({ success: true })
     expect(deleteSession).toHaveBeenCalledWith('session-1', 'user-1')
+  })
+
+  it('appends a validated message using authenticated ownership', async () => {
+    vi.mocked(appendSessionMessage).mockResolvedValue('appended')
+    const message = {
+      id: 'message-1',
+      role: 'user' as const,
+      content: 'Hello',
+      timestamp: '2026-09-19T12:00:00.000Z',
+    }
+
+    const response = await POST(request('POST', { message, userId: 'attacker' }), context())
+
+    await expect(response.json()).resolves.toEqual({ success: true, duplicate: false })
+    expect(appendSessionMessage).toHaveBeenCalledWith('session-1', 'user-1', message)
+  })
+
+  it('rejects malformed messages before touching the database', async () => {
+    const response = await POST(request('POST', {
+      message: { id: '', role: 'owner', content: 'bad', timestamp: 'never' },
+    }), context())
+
+    expect(response.status).toBe(400)
+    expect(appendSessionMessage).not.toHaveBeenCalled()
   })
 
   it('returns not found for a session the actor does not own', async () => {

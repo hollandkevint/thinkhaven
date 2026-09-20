@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { supabase } from '@/lib/supabase/client'
 import { BOARD_MEMBERS, getBoardMember } from '@/lib/ai/board-members'
 import type { BoardMemberId, ChatMessage, BoardState } from '@/lib/ai/board-types'
 import type { MessageLimitStatus } from '@/lib/session/message-limit-manager'
@@ -103,6 +102,18 @@ export function useStreamingChat(
     }
   }, [initialSession])
 
+  const persistMessage = useCallback(async (sessionId: string, message: ChatMessage) => {
+    const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    })
+    if (!response.ok) {
+      const data = await response.json().catch(() => null)
+      throw new Error(data?.error || 'Message append failed')
+    }
+  }, [])
+
   /**
    * Append a message using the atomic RPC (no read-modify-write race).
    * Also updates local state optimistically.
@@ -124,20 +135,11 @@ export function useStreamingChat(
     setSession(updated)
 
     try {
-      // Atomic append via RPC (server-side, race-free, uses auth.uid() for ownership)
-      const { data: success, error } = await supabase.rpc('append_chat_message', {
-        p_session_id: current.id,
-        p_message: newMessage as unknown as Record<string, unknown>,
-      })
-
-      if (error) throw error
-      if (success === false) {
-        console.error('Message append failed: session not found or ownership mismatch')
-      }
+      await persistMessage(current.id, newMessage)
     } catch (error) {
       console.error('Error saving message:', error)
     }
-  }, [])
+  }, [persistMessage])
 
   const updateStreamingMessage = useCallback((messageId: string, content: string, speaker?: BoardMemberId) => {
     const current = sessionRef.current
@@ -196,16 +198,11 @@ export function useStreamingChat(
         metadata: existingMessage.metadata,
       }
 
-      const { error } = await supabase.rpc('append_chat_message', {
-        p_session_id: current.id,
-        p_message: finalMessage as unknown as Record<string, unknown>,
-      })
-
-      if (error) throw error
+      await persistMessage(current.id, finalMessage)
     } catch (error) {
       console.error('[Session] Error finalizing message:', error)
     }
-  }, [addChatMessage])
+  }, [addChatMessage, persistMessage])
 
   const streamClaudeResponse = useCallback(async (message: string) => {
     const current = sessionRef.current
