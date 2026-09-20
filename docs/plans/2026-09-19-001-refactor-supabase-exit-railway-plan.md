@@ -82,7 +82,7 @@ Gate: schema, IDs, row counts, constraints, and representative JSON match the so
 Migrate in this order:
 
 1. Auth, beta access, waitlist, and admin checks. Better Auth session resolution, browser provider, email/Google sign-in, signup, verification resend, password reset/change, beta gate lookup, beta event persistence, waitlist writes, admin mutations, middleware, and server API identity checks are migrated. Remaining Supabase use in these routes is data-plane only.
-2. Dashboard, workspace, sessions, and guest-session migration. Actor-scoped dashboard list/read/rename/delete now use authenticated Railway API routes and parameterized PostgreSQL. Session creation, workspace, and guest migration remain.
+2. Dashboard, workspace, sessions, and guest-session migration. Actor-scoped dashboard list/read/rename/delete and session creation now use authenticated Railway API routes and parameterized PostgreSQL. Session creation and an enabled credit deduction commit in one transaction. Workspace and guest migration remain.
 3. Streaming chat, message persistence, counters, canvas, artifacts, and AI tools.
 4. Feedback, legacy conversations, monitoring, public sharing, and exports. Public artifact creation and exact-token reads now use parameterized PostgreSQL with session ownership checks; feedback and legacy paths remain.
 5. Credits and verified Stripe webhook processing only if billing is confirmed active. Balance/history and atomic deduct/add operations now use row-locked PostgreSQL transactions; Stripe settlement remains deliberately deferred.
@@ -157,6 +157,7 @@ The exit is complete only when all of the following pass:
 - Middleware now only forwards request path/search context. The Node server layout remains the authoritative `/app` Better Auth and beta gate, and legacy Supabase cookies no longer establish identity.
 - Ten API routes now resolve identity from Better Auth sessions. Existing Supabase table calls remain temporarily in place until their data repositories migrate.
 - Dashboard session list/read/rename/delete, credit balance/history/deduct/add, beta operations, and public artifact sharing now use parameterized PostgreSQL. Cross-user session access is denied by actor-scoped queries.
+- Session creation no longer calls Supabase. The session row, row-locked credit decrement, and credit audit record commit or roll back together; focused tests, lint, and the production build pass.
 - `session_artifacts` is still absent from the verified source schema. The unused persistence helper now fails closed and is kept server-only instead of inventing a new table during the cutover.
 - Focused Railway auth/readiness/beta tests pass, targeted lint is clean, `git diff --check` is clean, and the production Next.js build succeeds.
 - The source-only `vector(1536)` column belongs to an empty table and is represented as portable text in the rehearsal. The canonical schema must decide whether to delete the unused column or add pgvector later.
