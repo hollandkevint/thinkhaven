@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '../../lib/supabase/client'
+import { railwayAuthClient } from '../../lib/auth/railway-auth-client'
 import Link from 'next/link'
 
 export default function ResendConfirmationPage() {
@@ -17,21 +17,14 @@ export default function ResendConfirmationPage() {
     setMessage('')
 
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
+      await railwayAuthClient.sendVerificationEmail({
         email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/app`
-        }
+        callbackURL: `${window.location.origin}/app`,
       })
-
-      if (error) {
-        setError(error.message)
-      } else {
-        setMessage('Confirmation email sent! Please check your inbox.')
-      }
+      setMessage('If an account exists, a confirmation email will arrive shortly.')
     } catch {
-      setError('An unexpected error occurred')
+      // Keep the response generic so the form does not reveal account state.
+      setMessage('If an account exists, a confirmation email will arrive shortly.')
     } finally {
       setLoading(false)
     }

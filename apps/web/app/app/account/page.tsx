@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
-import { supabase } from '@/lib/supabase/client'
+import { railwayAuthClient } from '@/lib/auth/railway-auth-client'
 import Link from 'next/link'
 
 export default function AccountPage() {
   const { user } = useAuth()
 
+  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -33,14 +34,20 @@ export default function AccountPage() {
     }
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
+      const { error } = await railwayAuthClient.changePassword({
+        currentPassword,
+        newPassword,
       })
 
       if (error) {
-        setError(error.message)
+        if (error.code === 'CREDENTIAL_ACCOUNT_NOT_FOUND') {
+          setError('This account uses Google sign-in and does not have a ThinkHaven password yet. Use Forgot password on the sign-in page to set one.')
+        } else {
+          setError(error.message || 'Failed to update password')
+        }
       } else {
         setMessage('Password updated successfully!')
+        setCurrentPassword('')
         setNewPassword('')
         setConfirmPassword('')
       }
@@ -117,41 +124,65 @@ export default function AccountPage() {
         <div className="bg-card border border-divider rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Change Password</h2>
 
+          <p className="mb-4 text-muted-foreground">
+            If this account uses Google sign-in without a ThinkHaven password, use{' '}
+            <Link href="/login" className="text-primary hover:underline">
+              Forgot password
+            </Link>{' '}
+            on the sign-in page to set one.
+          </p>
+
           <form onSubmit={handlePasswordChange} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                New Password (min 8 characters)
-              </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-divider rounded focus:ring-primary focus:border-primary"
-                required
-                minLength={8}
-              />
-            </div>
+              <div>
+                <label htmlFor="current-password" className="block text-sm font-medium text-foreground mb-1">
+                  Current Password
+                </label>
+                <input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-divider rounded focus:ring-primary focus:border-primary"
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Confirm New Password
-              </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-divider rounded focus:ring-primary focus:border-primary"
-                required
-              />
-            </div>
+              <div>
+                <label htmlFor="new-password" className="block text-sm font-medium text-foreground mb-1">
+                  New Password (min 8 characters)
+                </label>
+                <input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-divider rounded focus:ring-primary focus:border-primary"
+                  required
+                  minLength={8}
+                />
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-terracotta text-cream font-medium rounded hover:bg-terracotta-hover disabled:opacity-50"
-            >
-              {loading ? 'Updating...' : 'Update Password'}
-            </button>
+              <div>
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-foreground mb-1">
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-divider rounded focus:ring-primary focus:border-primary"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 bg-terracotta text-cream font-medium rounded hover:bg-terracotta-hover disabled:opacity-50"
+              >
+                {loading ? 'Updating...' : 'Update Password'}
+              </button>
           </form>
         </div>
 

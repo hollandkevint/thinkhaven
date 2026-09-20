@@ -4,9 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { useAuth } from '../../lib/auth/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '../../lib/supabase/client'
+import { railwayAuthClient } from '../../lib/auth/railway-auth-client'
 import {
-  buildAuthCallbackUrl,
   buildPostAuthDestination,
   buildSignupPath,
   readBetaInviteContext,
@@ -69,11 +68,7 @@ function LoginPageContent() {
     setError('')
 
     try {
-      await signInWithGoogle(buildAuthCallbackUrl(
-        window.location.origin,
-        inviteContext,
-        redirectPath || '/app'
-      ))
+      await signInWithGoogle(buildPostAuthDestination(inviteContext, redirectPath || '/app'))
     } catch (err) {
       console.error('Google sign-in error:', err)
       setError('Google sign-in failed. Please try again.')
@@ -90,8 +85,9 @@ function LoginPageContent() {
     setResetLoading(true)
     setError('')
     try {
-      await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback`,
+      await railwayAuthClient.requestPasswordReset({
+        email,
+        redirectTo: `${window.location.origin}/reset-password`,
       })
       // Always show success to prevent email enumeration
       setResetSent(true)

@@ -3,11 +3,11 @@
 import { Suspense, useState } from 'react'
 import { useAuth } from '../../lib/auth/AuthContext'
 import { useSearchParams } from 'next/navigation'
-import { supabase } from '../../lib/supabase/client'
+import { railwayAuthClient } from '../../lib/auth/railway-auth-client'
 import Link from 'next/link'
 import {
-  buildAuthCallbackUrl,
   buildLoginPath,
+  buildPostAuthDestination,
   readBetaInviteContext,
 } from '@/lib/beta/invite-destinations'
 
@@ -59,19 +59,18 @@ function SignUpPageContent() {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error } = await railwayAuthClient.signUp.email({
+        name: email.split('@')[0],
         email,
         password,
-        options: {
-          emailRedirectTo: buildAuthCallbackUrl(window.location.origin, inviteContext),
-        }
+        callbackURL: buildPostAuthDestination(inviteContext),
       })
 
       if (error) {
-        if (error.message.includes('already registered')) {
+        if (error.message?.includes('already registered')) {
           setError('This email is already registered. Please log in instead.')
         } else {
-          setError(error.message)
+          setError(error.message || 'Unable to create your account. Please try again.')
         }
       } else {
         setMessage('Check your email for a confirmation link!')
@@ -88,7 +87,7 @@ function SignUpPageContent() {
     setError('')
 
     try {
-      await signInWithGoogle(buildAuthCallbackUrl(window.location.origin, inviteContext))
+      await signInWithGoogle(buildPostAuthDestination(inviteContext))
     } catch (err) {
       console.error('Google sign-up error:', err)
       setError('Google sign-up failed. Please try again.')
