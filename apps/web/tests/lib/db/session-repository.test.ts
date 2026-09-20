@@ -5,6 +5,7 @@ import {
   getSession,
   listSessions,
   renameSession,
+  updateSessionSubPersonaState,
 } from '@/lib/db/repositories/session-repository'
 
 const query = vi.fn()
@@ -67,6 +68,22 @@ describe('session repository', () => {
     expect(query).toHaveBeenLastCalledWith(
       expect.stringMatching(/where id = \$1\s+and user_id = \$2/),
       ['session-1', 'user-2'],
+    )
+  })
+
+  it('updates sub-persona state only for the actor-owned session', async () => {
+    query.mockResolvedValueOnce({ rowCount: 1 })
+
+    await expect(updateSessionSubPersonaState(
+      'session-1',
+      'user-1',
+      { currentMode: 'realistic' },
+      pool,
+    )).resolves.toBe(true)
+
+    expect(query).toHaveBeenCalledWith(
+      expect.stringMatching(/where id = \$2\s+and user_id = \$3/),
+      [JSON.stringify({ currentMode: 'realistic' }), 'session-1', 'user-1'],
     )
   })
 

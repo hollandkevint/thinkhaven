@@ -1,9 +1,13 @@
 import { NextRequest } from 'next/server';
 import { claudeClient, type ConversationMessage } from '@/lib/ai/claude-client';
 import { StreamEncoder, createStreamHeaders } from '@/lib/ai/streaming';
-import { createClient } from '@/lib/supabase/server';
 import { getRailwaySession } from '@/lib/auth/railway-session';
 import { isAdminEmail } from '@/lib/auth/admin';
+import {
+  getSession,
+  renameSession,
+  updateSessionSubPersonaState,
+} from '@/lib/db/repositories/session-repository';
 import { CoachingContext, SubPersonaSessionState } from '@/lib/ai/mary-persona';
 import { WorkspaceContextBuilder, ConversationContextManager, BmadSessionData } from '@/lib/ai/workspace-context';
 import { ContextBuilder } from '@/lib/ai/context-builder';
@@ -206,13 +210,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user context
-    const supabase = await createClient();
-    if (!supabase) {
-      return new Response(JSON.stringify({ error: 'Service unavailable' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
     const railwaySession = await getRailwaySession(request);
     const user = railwaySession?.user;
 
@@ -238,14 +235,9 @@ export async function POST(request: NextRequest) {
     // Validate session ownership
     let limitStatus: MessageLimitStatus | null = null;
 
-    const { data: bmadSession, error: sessionError } = await supabase
-      .from('bmad_sessions')
-      .select('id, pathway, current_phase, overall_completion, sub_persona_state, message_count, message_limit')
-      .eq('id', sessionId)
-      .eq('user_id', user.id)
-      .single();
+    const bmadSession = await getSession(sessionId, user.id);
 
-    if (sessionError || !bmadSession) {
+    if (!bmadSession) {
       return new Response(JSON.stringify({
         error: 'Session not found',
         details: 'The session does not exist or you do not have access.',
@@ -260,7 +252,7 @@ export async function POST(request: NextRequest) {
     // ATOMIC: Increment message count FIRST to prevent race conditions
     // Skip entirely for admin users to avoid DB state drift
     if (sessionId && !isAdmin) {
-      const incrementResult = await incrementMessageCount(sessionId);
+      const incrementResult = await incrementMessageCount(sessionId, user.id);
 
       // Fail closed: If tracking fails, reject the request
       if (!incrementResult) {
@@ -513,30 +505,22 @@ export async function POST(request: NextRequest) {
           // Auto-title session on first message (fire-and-forget)
           if (cachedBmadSession.message_count === 0) {
             const autoTitle = message.split(/\s+/).slice(0, 6).join(' ').slice(0, 100)
-            supabase
-              .from('bmad_sessions')
-              .update({ title: autoTitle })
-              .eq('id', sessionId)
-              .eq('user_id', user.id)
-              .then(
-                ({ error: titleErr }) => {
-                  if (titleErr) console.warn('[Chat Stream] Auto-title failed:', titleErr.message)
-                },
-                () => {} // Best-effort, never block the stream
-              )
+            renameSession(sessionId, user.id, autoTitle).catch(() => {
+              // Best-effort, never block the stream.
+            })
           }
 
           // Persist updated sub-persona state to database
           if (updatedSubPersonaState && bmadSessionForUpdate?.id) {
             try {
-              const { error: updateError } = await supabase
-                .from('bmad_sessions')
-                .update({ sub_persona_state: updatedSubPersonaState })
-                .eq('id', bmadSessionForUpdate.id)
-                .eq('user_id', user.id);
+              const updated = await updateSessionSubPersonaState(
+                bmadSessionForUpdate.id,
+                user.id,
+                updatedSubPersonaState,
+              );
 
-              if (updateError) {
-                console.error('[Chat Stream] Failed to persist sub-persona state:', updateError);
+              if (!updated) {
+                console.error('[Chat Stream] Failed to persist sub-persona state');
               }
             } catch (persistError) {
               console.error('[Chat Stream] Error persisting sub-persona state:', persistError);
@@ -556,14 +540,9 @@ export async function POST(request: NextRequest) {
           // Attach lean canvas state if update_lean_canvas tool ran
           if (toolsExecuted.some(t => t.name === TOOL_NAMES.UPDATE_LEAN_CANVAS && t.success)) {
             try {
-              const { data: canvasRow } = await supabase
-                .from('bmad_sessions')
-                .select('lean_canvas')
-                .eq('id', sessionId)
-                .eq('user_id', user.id)
-                .single();
-              if (canvasRow?.lean_canvas) {
-                additionalData.leanCanvas = canvasRow.lean_canvas;
+              const canvasSession = await getSession(sessionId, user.id);
+              if (canvasSession?.lean_canvas) {
+                additionalData.leanCanvas = canvasSession.lean_canvas;
               }
             } catch (canvasErr) {
               console.warn('[Chat Stream] Failed to fetch canvas state:', canvasErr);

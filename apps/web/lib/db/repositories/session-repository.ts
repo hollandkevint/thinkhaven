@@ -31,6 +31,7 @@ export interface SessionSummary {
 }
 
 export interface SessionRecord extends SessionSummary {
+  overall_completion: number
   chat_context: unknown
   sub_persona_state: unknown
   lean_canvas: unknown
@@ -174,6 +175,7 @@ export async function getSession(
     `
       select
         ${SUMMARY_COLUMNS},
+        overall_completion,
         chat_context,
         sub_persona_state,
         lean_canvas
@@ -186,6 +188,26 @@ export async function getSession(
   )
 
   return rows[0] ?? null
+}
+
+export async function updateSessionSubPersonaState(
+  sessionId: string,
+  userId: string,
+  state: unknown,
+  pool: Queryable = getDatabasePool(),
+): Promise<boolean> {
+  const { rowCount } = await pool.query(
+    `
+      update public.bmad_sessions
+      set sub_persona_state = $1::jsonb,
+          updated_at = now()
+      where id = $2
+        and user_id = $3
+    `,
+    [JSON.stringify(state), sessionId, userId],
+  )
+
+  return rowCount === 1
 }
 
 export async function renameSession(

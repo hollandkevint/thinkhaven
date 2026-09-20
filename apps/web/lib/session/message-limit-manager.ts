@@ -8,7 +8,7 @@
  * After Stripe integration, this can be removed or integrated with credit tiers.
  */
 
-import { createClient } from '@/lib/supabase/server';
+import { getDatabasePool } from '@/lib/db/pool';
 
 // ============================================================================
 // CONSTANTS
@@ -50,7 +50,7 @@ export function isMessageLimitEnabled(): boolean {
 /**
  * Check current message limit status for a session
  */
-export async function checkMessageLimit(sessionId: string): Promise<MessageLimitStatus | null> {
+export async function checkMessageLimit(sessionId: string, userId: string): Promise<MessageLimitStatus | null> {
   if (!isMessageLimitEnabled()) {
     // Message limits disabled - return unlimited status
     return {
@@ -62,31 +62,34 @@ export async function checkMessageLimit(sessionId: string): Promise<MessageLimit
     };
   }
 
-  const supabase = await createClient();
-  if (!supabase) return null;
-
   try {
-    const { data, error } = await supabase.rpc('check_message_limit', {
-      p_session_id: sessionId,
-    });
+    const { rows } = await getDatabasePool().query<{
+      current_count: number;
+      message_limit: number;
+    }>(
+      `
+        SELECT message_count AS current_count, message_limit
+        FROM public.bmad_sessions
+        WHERE id = $1 AND user_id = $2
+        LIMIT 1
+      `,
+      [sessionId, userId],
+    );
 
-    if (error) {
-      console.error('Error checking message limit:', error);
-      return null;
-    }
-
-    if (!data || data.length === 0) {
+    if (!rows[0]) {
       console.error('No data returned from check_message_limit');
       return null;
     }
 
-    const status = data[0];
+    const status = rows[0];
+    const remaining = Math.max(0, status.message_limit - status.current_count);
+    const limitReached = status.current_count >= status.message_limit;
     return {
       currentCount: status.current_count,
       messageLimit: status.message_limit,
-      remaining: status.remaining,
-      limitReached: status.limit_reached,
-      warningThreshold: status.remaining <= WARNING_THRESHOLD && !status.limit_reached,
+      remaining,
+      limitReached,
+      warningThreshold: remaining <= WARNING_THRESHOLD && !limitReached,
     };
   } catch (error) {
     console.error('Unexpected error checking message limit:', error);
@@ -98,7 +101,7 @@ export async function checkMessageLimit(sessionId: string): Promise<MessageLimit
  * Increment message count for a session
  * Should be called for each user message sent
  */
-export async function incrementMessageCount(sessionId: string): Promise<IncrementResult | null> {
+export async function incrementMessageCount(sessionId: string, userId: string): Promise<IncrementResult | null> {
   if (!isMessageLimitEnabled()) {
     // Message limits disabled - return success without incrementing
     return {
@@ -108,25 +111,36 @@ export async function incrementMessageCount(sessionId: string): Promise<Incremen
     };
   }
 
-  const supabase = await createClient();
-  if (!supabase) return null;
-
   try {
-    const { data, error } = await supabase.rpc('increment_message_count', {
-      p_session_id: sessionId,
-    });
+    const { rows } = await getDatabasePool().query<{
+      new_count: number;
+      message_limit: number;
+      limit_reached: boolean;
+    }>(
+      `
+        UPDATE public.bmad_sessions
+        SET message_count = message_count + 1,
+            updated_at = NOW(),
+            limit_reached_at = CASE
+              WHEN message_count + 1 >= message_limit AND limit_reached_at IS NULL
+              THEN NOW()
+              ELSE limit_reached_at
+            END
+        WHERE id = $1 AND user_id = $2
+        RETURNING
+          message_count AS new_count,
+          message_limit,
+          message_count >= message_limit AS limit_reached
+      `,
+      [sessionId, userId],
+    );
 
-    if (error) {
-      console.error('Error incrementing message count:', error);
-      return null;
-    }
-
-    if (!data || data.length === 0) {
+    if (!rows[0]) {
       console.error('No data returned from increment_message_count');
       return null;
     }
 
-    const result = data[0];
+    const result = rows[0];
     console.log('[MESSAGE_LIMIT]', {
       sessionId,
       newCount: result.new_count,
@@ -148,8 +162,8 @@ export async function incrementMessageCount(sessionId: string): Promise<Incremen
 /**
  * Check if session can accept more messages
  */
-export async function canSendMessage(sessionId: string): Promise<boolean> {
-  const status = await checkMessageLimit(sessionId);
+export async function canSendMessage(sessionId: string, userId: string): Promise<boolean> {
+  const status = await checkMessageLimit(sessionId, userId);
   if (!status) {
     // If we can't check the limit, allow the message (fail open)
     console.warn('Could not check message limit, allowing message');
