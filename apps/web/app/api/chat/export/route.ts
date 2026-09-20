@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { getRailwaySession } from '@/lib/auth/railway-session';
+import { getSession } from '@/lib/db/repositories/session-repository';
 import {
   exportChatToMarkdown,
   exportChatToText,
@@ -23,25 +23,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-    if (!supabase) {
-      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
-    }
-
     const railwaySession = await getRailwaySession(request);
     const user = railwaySession?.user;
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data: session, error: sessionError } = await supabase
-      .from('bmad_sessions')
-      .select('chat_context, title')
-      .eq('id', sessionId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (sessionError || !session) {
+    const session = await getSession(sessionId, user.id);
+    if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 

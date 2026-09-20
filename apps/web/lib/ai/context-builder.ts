@@ -8,9 +8,15 @@
  * - Available capabilities (tools Mary can use)
  */
 
-import { createClient } from '@/lib/supabase/server';
 import type { SubPersonaSessionState, CoachingContext } from './mary-persona';
 import { MARY_TOOLS } from './tools';
+import {
+  countCompletedSessions,
+  getLastCompletedSession,
+  getOwnedContextInsights,
+  getOwnedContextSession,
+  getUserWorkspace,
+} from '@/lib/db/repositories/context-repository';
 
 // =============================================================================
 // Types
@@ -73,43 +79,20 @@ export class ContextBuilder {
   /**
    * Build complete session context from database
    */
-  static async buildSessionContext(sessionId: string): Promise<SessionContext | null> {
+  static async buildSessionContext(sessionId: string, userId: string): Promise<SessionContext | null> {
     try {
-      const supabase = await createClient();
-      if (!supabase) {
-        console.warn('[ContextBuilder] Supabase client unavailable');
-        return null;
-      }
-
-      const { data: session, error } = await supabase
-        .from('bmad_sessions')
-        .select(`
-          id,
-          pathway,
-          current_phase,
-          overall_completion,
-          sub_persona_state,
-          created_at
-        `)
-        .eq('id', sessionId)
-        .single();
-
-      if (error || !session) {
-        console.warn('[ContextBuilder] Could not load session:', error?.message);
+      const session = await getOwnedContextSession(sessionId, userId);
+      if (!session) {
+        console.warn('[ContextBuilder] Could not load session');
         return null;
       }
 
       const subPersonaState = session.sub_persona_state as SubPersonaSessionState | null;
 
       // Get recent insights from phase outputs
-      const { data: insights } = await supabase
-        .from('bmad_phase_outputs')
-        .select('output_data')
-        .eq('session_id', sessionId)
-        .order('created_at', { ascending: false })
-        .limit(5);
+      const insights = await getOwnedContextInsights(sessionId, userId);
 
-      const recentInsights = insights?.flatMap(i => {
+      const recentInsights = insights.flatMap(i => {
         const data = i.output_data as Record<string, unknown>;
         if (Array.isArray(data?.insights)) {
           return data.insights.filter((value): value is string => typeof value === 'string');
@@ -119,7 +102,7 @@ export class ContextBuilder {
           return [`${category}: ${data.insight}`];
         }
         return [];
-      }).slice(0, 5) || [];
+      }).slice(0, 5);
 
       return {
         sessionId: session.id,
@@ -147,43 +130,19 @@ export class ContextBuilder {
    */
   static async buildUserContext(userId: string): Promise<UserContext | null> {
     try {
-      const supabase = await createClient();
-      if (!supabase) {
-        console.warn('[ContextBuilder] Supabase client unavailable');
-        return null;
-      }
-
-      // Get user's workspace data
-      const { data: workspace } = await supabase
-        .from('user_workspace')
-        .select('workspace_state')
-        .eq('user_id', userId)
-        .single();
-
-      // Count previous sessions
-      const { count: sessionCount } = await supabase
-        .from('bmad_sessions')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('status', 'completed');
-
-      // Get last completed session summary
-      const { data: lastSession } = await supabase
-        .from('bmad_sessions')
-        .select('pathway, current_phase, overall_completion, created_at')
-        .eq('user_id', userId)
-        .eq('status', 'completed')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+      const [workspace, sessionCount, lastSession] = await Promise.all([
+        getUserWorkspace(userId),
+        countCompletedSessions(userId),
+        getLastCompletedSession(userId),
+      ]);
 
       const workspaceState = workspace?.workspace_state as Record<string, unknown> | null;
 
       // Infer experience level from session count and workspace data
       let experienceLevel: UserContext['experienceLevel'] = 'beginner';
-      if ((sessionCount || 0) >= 5) {
+      if (sessionCount >= 5) {
         experienceLevel = 'expert';
-      } else if ((sessionCount || 0) >= 2) {
+      } else if (sessionCount >= 2) {
         experienceLevel = 'intermediate';
       }
 
@@ -193,7 +152,7 @@ export class ContextBuilder {
         experienceLevel,
         industry: workspaceState?.industry as string | undefined,
         role: workspaceState?.role as string | undefined,
-        previousSessionCount: sessionCount || 0,
+        previousSessionCount: sessionCount,
         lastSessionSummary: lastSession
           ? `${lastSession.pathway} session (${lastSession.overall_completion}% complete)`
           : undefined,
@@ -290,7 +249,9 @@ export class ContextBuilder {
     currentPhase?: string
   ): Promise<DynamicContext> {
     const [session, user] = await Promise.all([
-      sessionId ? this.buildSessionContext(sessionId) : Promise.resolve(null),
+      sessionId && userId
+        ? this.buildSessionContext(sessionId, userId)
+        : Promise.resolve(null),
       userId ? this.buildUserContext(userId) : Promise.resolve(null),
     ]);
 
