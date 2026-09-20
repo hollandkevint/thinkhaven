@@ -48,6 +48,27 @@ describe('AppLayout', () => {
     )
   })
 
+  it('keeps unauthenticated /app protected in the server layout', async () => {
+    vi.mocked(headers).mockResolvedValue(
+      new Headers([
+        ['x-th-pathname', '/app'],
+        ['x-th-search', ''],
+      ]) as never
+    )
+    vi.mocked(checkBetaAccess).mockResolvedValue({
+      user: null,
+      betaApproved: false,
+      status: 'unauthenticated',
+      isAdmin: false,
+      error: 'No authenticated user',
+    })
+
+    await expect(AppLayout({ children: <div /> })).rejects.toThrow(
+      'redirect:/login?redirect=%2Fapp'
+    )
+    expect(redirect).toHaveBeenCalledWith('/login?redirect=%2Fapp')
+  })
+
   it('renders a protected recovery state when access cannot be verified', async () => {
     vi.mocked(checkBetaAccess).mockResolvedValue({
       user: null,
