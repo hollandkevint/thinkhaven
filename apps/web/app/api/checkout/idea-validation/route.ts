@@ -5,25 +5,16 @@
  * Creates a Stripe checkout session for the $99 idea validation product
  */
 
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getRailwaySession } from '@/lib/auth/railway-session';
 import { createIdeaValidationCheckout } from '@/lib/monetization/stripe-service';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    if (!supabase) {
-      return NextResponse.json(
-        { error: 'Service unavailable' },
-        { status: 503 }
-      );
-    }
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const railwaySession = await getRailwaySession(request);
+    const user = railwaySession?.user;
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json(
         {
           error: 'Unauthorized',

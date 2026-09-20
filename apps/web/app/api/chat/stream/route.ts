@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { claudeClient, type ConversationMessage } from '@/lib/ai/claude-client';
 import { StreamEncoder, createStreamHeaders } from '@/lib/ai/streaming';
 import { createClient } from '@/lib/supabase/server';
+import { getRailwaySession } from '@/lib/auth/railway-session';
 import { isAdminEmail } from '@/lib/auth/admin';
 import { CoachingContext, SubPersonaSessionState } from '@/lib/ai/mary-persona';
 import { WorkspaceContextBuilder, ConversationContextManager, BmadSessionData } from '@/lib/ai/workspace-context';
@@ -212,14 +213,15 @@ export async function POST(request: NextRequest) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const railwaySession = await getRailwaySession(request);
+    const user = railwaySession?.user;
 
-    if (authError || !user) {
+    if (!user) {
       console.error('[Chat Stream] Authentication failed:', {
-        error: authError?.message || 'No user',
+        error: 'No user',
         timestamp: new Date().toISOString()
       });
-      return new Response(JSON.stringify({ error: 'Unauthorized', details: authError?.message }), {
+      return new Response(JSON.stringify({ error: 'Unauthorized', details: undefined }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });

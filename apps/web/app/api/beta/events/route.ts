@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getRailwaySession } from '@/lib/auth/railway-session';
 import { RateLimiter } from '@/lib/security/rate-limiter';
 import { logBetaEvent } from '@/lib/monitoring/beta-event-logger';
 import { isBetaEventType, type BetaEventType } from '@/lib/beta/beta-events';
@@ -59,12 +59,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unsupported beta event type' }, { status: 400 });
   }
 
-  const supabase = await createClient();
-  const { data } = supabase
-    ? await supabase.auth.getUser()
-    : { data: { user: null } };
+  const railwaySession = await getRailwaySession(request);
+  const user = railwaySession?.user;
 
-  if (requiresAuth && !data.user) {
+  if (requiresAuth && !user) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
 
@@ -75,9 +73,9 @@ export async function POST(request: NextRequest) {
 
   const recorded = await logBetaEvent({
     eventType,
-    targetUserId: data.user?.id,
+    targetUserId: user?.id,
     betaAccessId: betaInviteId,
-    targetEmail: data.user?.email,
+    targetEmail: user?.email,
     requestPath: new URL(request.url).pathname,
     metadata: readMetadata(body as Record<string, unknown>),
   });

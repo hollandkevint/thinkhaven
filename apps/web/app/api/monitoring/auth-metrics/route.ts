@@ -1,34 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authMetricsCollector } from '@/lib/monitoring/auth-metrics'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { isAdminEmail } from '@/lib/auth/admin'
 import { getBetaEventCounts } from '@/lib/monitoring/beta-event-logger'
+import { getRailwaySession } from '@/lib/auth/railway-session'
 
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication (only allow authenticated users to access metrics)
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          }
-        }
-      }
-    )
+    const railwaySession = await getRailwaySession(request)
+    const user = railwaySession?.user
 
-    const { data: { user }, error } = await supabase.auth.getUser()
-
-    if (error || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -90,27 +72,10 @@ export async function POST(request: NextRequest) {
   try {
     // This endpoint allows external systems to submit auth events
     // Verify authentication first
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          }
-        }
-      }
-    )
+    const railwaySession = await getRailwaySession(request)
+    const user = railwaySession?.user
 
-    const { data: { user }, error } = await supabase.auth.getUser()
-
-    if (error || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getRailwaySession } from '@/lib/auth/railway-session';
 
 interface FeedbackPayload {
   userId: string;
@@ -26,12 +27,10 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const railwaySession = await getRailwaySession(request);
+    const user = railwaySession?.user;
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json(
         {
           error: 'Unauthorized',

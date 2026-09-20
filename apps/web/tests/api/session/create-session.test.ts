@@ -5,11 +5,16 @@ import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
 
 const mocks = vi.hoisted(() => ({
   createClient: vi.fn(),
+  getRailwaySession: vi.fn(),
   insertedSessions: [] as Record<string, unknown>[],
 }));
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: mocks.createClient,
+}));
+
+vi.mock('@/lib/auth/railway-session', () => ({
+  getRailwaySession: mocks.getRailwaySession,
 }));
 
 vi.mock('@/lib/monetization/credit-manager', () => ({
@@ -69,6 +74,9 @@ describe('POST /api/session', () => {
   beforeEach(() => {
     mocks.insertedSessions.length = 0;
     mocks.createClient.mockResolvedValue(buildSupabaseMock());
+    mocks.getRailwaySession.mockResolvedValue({
+      user: { id: 'user-plan-grill', email: 'planner@example.com' },
+    });
     vi.mocked(hasCredits).mockResolvedValue(true);
     vi.mocked(deductCredit).mockResolvedValue({
       success: true,
@@ -83,10 +91,20 @@ describe('POST /api/session', () => {
     expect(response.status).toBe(201);
     await expect(response.json()).resolves.toEqual({ id: 'session-plan-grill' });
     expect(mocks.insertedSessions[0]).toMatchObject({
+      user_id: 'user-plan-grill',
       pathway: 'plan-grill',
       title: 'Plan Grill',
       current_phase: 'intake',
       message_limit: 20,
     });
+  });
+
+  it('rejects requests without a Railway session', async () => {
+    mocks.getRailwaySession.mockResolvedValue(null);
+
+    const response = await POST(request({ pathway: 'plan-grill' }));
+
+    expect(response.status).toBe(401);
+    expect(mocks.insertedSessions).toHaveLength(0);
   });
 });

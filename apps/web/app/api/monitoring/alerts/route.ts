@@ -1,37 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { alertService } from '@/lib/monitoring/alert-service'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { isAdminEmail } from '@/lib/auth/admin'
+import { getRailwaySession } from '@/lib/auth/railway-session'
 
-async function verifyAuth() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options)
-          })
-        }
-      }
-    }
-  )
-
-  const { data: { user }, error } = await supabase.auth.getUser()
-  return { user, error }
+async function verifyAuth(request: NextRequest) {
+  const session = await getRailwaySession(request)
+  return session?.user ?? null
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const { user, error } = await verifyAuth()
+    const user = await verifyAuth(request)
 
-    if (error || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -87,9 +68,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, error } = await verifyAuth()
+    const user = await verifyAuth(request)
 
-    if (error || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getRailwaySession } from '@/lib/auth/railway-session';
 import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
 import { RateLimiter } from '@/lib/security/rate-limiter';
 import { getPathwayConfig } from '@/lib/session/pathway-config';
@@ -20,8 +21,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+    const railwaySession = await getRailwaySession(request);
+    const user = railwaySession?.user;
+    if (!user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getRailwaySession } from '@/lib/auth/railway-session';
 import { getCreditBalance, getCreditHistory } from '@/lib/monetization/credit-manager';
 
 export async function GET(request: NextRequest) {
@@ -19,12 +20,10 @@ export async function GET(request: NextRequest) {
         { status: 503 }
       );
     }
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const railwaySession = await getRailwaySession(request);
+    const user = railwaySession?.user;
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json(
         {
           error: 'Unauthorized',

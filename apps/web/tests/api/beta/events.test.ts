@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getRailwaySession } from '@/lib/auth/railway-session';
 import { logBetaEvent } from '@/lib/monitoring/beta-event-logger';
 import { POST } from '@/app/api/beta/events/route';
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(),
+vi.mock('@/lib/auth/railway-session', () => ({
+  getRailwaySession: vi.fn(),
 }));
 
 vi.mock('@/lib/security/rate-limiter', () => ({
@@ -32,11 +32,7 @@ function request(body: unknown) {
 describe('beta event API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(createClient).mockResolvedValue({
-      auth: {
-        getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
-      },
-    } as unknown as Awaited<ReturnType<typeof createClient>>);
+    vi.mocked(getRailwaySession).mockResolvedValue(null);
   });
 
   it('records public invite arrival without authentication', async () => {
@@ -72,19 +68,12 @@ describe('beta event API', () => {
   });
 
   it('records authenticated guest migration metadata without raw content', async () => {
-    vi.mocked(createClient).mockResolvedValue({
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: {
-            user: {
-              id: 'user-1',
-              email: 'person@example.com',
-            },
-          },
-          error: null,
-        }),
+    vi.mocked(getRailwaySession).mockResolvedValue({
+      user: {
+        id: 'user-1',
+        email: 'person@example.com',
       },
-    } as unknown as Awaited<ReturnType<typeof createClient>>);
+    } as never);
 
     const response = await POST(
       request({
