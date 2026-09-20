@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  createSession,
   deleteSession,
   getSession,
   listSessions,
@@ -67,5 +68,65 @@ describe('session repository', () => {
       expect.stringMatching(/where id = \$1\s+and user_id = \$2/),
       ['session-1', 'user-2'],
     )
+  })
+
+  it('creates and charges a session in one transaction', async () => {
+    const client = {
+      query: vi.fn()
+        .mockResolvedValueOnce({})
+        .mockResolvedValueOnce({ rows: [{ balance: 2 }] })
+        .mockResolvedValueOnce({ rows: [{ id: 'session-1' }] })
+        .mockResolvedValueOnce({})
+        .mockResolvedValueOnce({})
+        .mockResolvedValueOnce({}),
+      release: vi.fn(),
+    }
+    const transactionPool = { connect: vi.fn().mockResolvedValue(client) } as never
+
+    await expect(createSession({
+      userId: 'user-1',
+      pathway: 'explore',
+      title: 'New Session',
+      currentPhase: 'discovery',
+      messageLimit: 20,
+      chargeCredit: true,
+    }, transactionPool)).resolves.toEqual({ status: 'created', id: 'session-1' })
+
+    expect(client.query).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(/for update/),
+      ['user-1'],
+    )
+    expect(client.query).toHaveBeenNthCalledWith(
+      5,
+      expect.stringMatching(/credit_transactions/),
+      ['user-1', 1, 'session-1'],
+    )
+    expect(client.query).toHaveBeenLastCalledWith('COMMIT')
+    expect(client.release).toHaveBeenCalledOnce()
+  })
+
+  it('rolls back without creating a session when credits are insufficient', async () => {
+    const client = {
+      query: vi.fn()
+        .mockResolvedValueOnce({})
+        .mockResolvedValueOnce({ rows: [{ balance: 0 }] })
+        .mockResolvedValueOnce({}),
+      release: vi.fn(),
+    }
+    const transactionPool = { connect: vi.fn().mockResolvedValue(client) } as never
+
+    await expect(createSession({
+      userId: 'user-1',
+      pathway: 'explore',
+      title: 'New Session',
+      currentPhase: 'discovery',
+      messageLimit: 20,
+      chargeCredit: true,
+    }, transactionPool)).resolves.toEqual({ status: 'insufficient-credits' })
+
+    expect(client.query).toHaveBeenCalledTimes(3)
+    expect(client.query).toHaveBeenLastCalledWith('ROLLBACK')
+    expect(client.release).toHaveBeenCalledOnce()
   })
 })
