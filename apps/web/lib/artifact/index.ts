@@ -34,11 +34,3 @@ export { ArtifactProvider, useArtifacts, useSafeArtifacts } from './artifact-sto
 // Hooks
 export { useArtifact } from './useArtifact';
 export { useArtifactKeyboard } from './useArtifactKeyboard';
-
-// Persistence
-export {
-  saveArtifact,
-  loadArtifacts,
-  deleteArtifact,
-  saveArtifacts,
-} from './artifact-persistence';

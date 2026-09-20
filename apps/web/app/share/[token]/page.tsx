@@ -2,12 +2,15 @@ import { cache } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import MarkdownRenderer from '@/app/components/chat/MarkdownRenderer'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { getDatabasePool } from '@/lib/db/pool'
 import { summarizeRecord } from '@/lib/artifact/record-summary'
 import ShareCta from './ShareCta'
 import ShareViewTracker from './ShareViewTracker'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+const TOKEN_RE = /^[a-f0-9]{16,64}$/
 
 interface ShareArtifact {
   id: string
@@ -17,20 +20,36 @@ interface ShareArtifact {
   indexable: boolean
 }
 
+interface ShareArtifactRow extends Omit<ShareArtifact, 'created_at'> {
+  created_at: string | Date
+}
+
+function timestamp(value: string | Date): string {
+  return value instanceof Date ? value.toISOString() : value
+}
+
 // cache() dedupes the read across generateMetadata + the page render (one request).
 const getArtifact = cache(async (token: string): Promise<ShareArtifact | null> => {
-  const admin = createAdminClient()
-  if (!admin) return null
-  const { data } = await admin
-    .from('public_artifacts')
-    .select('id, title, content, created_at, indexable')
-    .eq('token', token)
-    .maybeSingle()
-  return (data as ShareArtifact | null) ?? null
+  if (!TOKEN_RE.test(token)) return null
+
+  try {
+    const { rows } = await getDatabasePool().query<ShareArtifactRow>(
+      `
+        SELECT "id", "title", "content", "created_at", "indexable"
+        FROM "public"."public_artifacts"
+        WHERE "token" = $1
+        LIMIT 1
+      `,
+      [token],
+    )
+    const row = rows[0]
+    return row ? { ...row, created_at: timestamp(row.created_at) } : null
+  } catch (error) {
+    console.error('[Artifact Share Page] Database lookup failed:', error instanceof Error ? error.message : 'Unknown error')
+    return null
+  }
 })
 
-// Share links are sent to clients. They are noindex unless a record is explicitly
-// opted in (public_artifacts.indexable), and there is no UI to opt in yet.
 const NOINDEX = { index: false, follow: false, nocache: true } as const
 
 export async function generateMetadata({
