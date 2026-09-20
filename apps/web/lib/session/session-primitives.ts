@@ -8,14 +8,16 @@
  * Phase 4 of Agent-Native Evolution
  */
 
-import { createClient } from '@/lib/supabase/server';
-import { hasCredits, deductCredit } from '@/lib/monetization/credit-manager';
+import type { Pool } from 'pg';
+import { getDatabasePool } from '@/lib/db/pool';
 import { PATHWAY_PHASE_ORDER } from './pathway-config';
 import type { PathwayType } from './pathway-config';
 
 // Re-export from client-safe modules (session-primitives imports server-only code)
 export { PATHWAY_LABELS } from './pathway-labels';
 export type { PathwayType } from './pathway-config';
+
+type Queryable = Pick<Pool, 'query'>;
 
 export class BmadMethodError extends Error {
   constructor(
@@ -105,65 +107,74 @@ export interface CreateSessionOptions {
 export async function createSessionRecord(
   options: CreateSessionOptions
 ): Promise<string> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
+  const client = await getDatabasePool().connect();
+  try {
+    await client.query('BEGIN');
+    let balance: number | undefined;
+    if (options.requireCredits !== false) {
+      const creditResult = await client.query<{ balance: number }>(
+        'SELECT balance FROM public.user_credits WHERE user_id = $1 FOR UPDATE',
+        [options.userId],
+      );
+      balance = creditResult.rows[0]?.balance;
+      if (balance === undefined || balance < 1) {
+        throw new BmadMethodError(
+          'Insufficient credits to start a new session',
+          'INSUFFICIENT_CREDITS',
+          { userId: options.userId, required: 1 },
+        );
+      }
+    }
 
-  // Credit check (optional, defaults to true)
-  if (options.requireCredits !== false) {
-    const userHasCredits = await hasCredits(options.userId, 1);
-    if (!userHasCredits) {
-      throw new BmadMethodError(
-        'Insufficient credits to start a new session',
-        'INSUFFICIENT_CREDITS',
-        { userId: options.userId, required: 1 }
+    const { rows } = await client.query<{ id: string }>(
+      `
+        INSERT INTO public.bmad_sessions (
+          user_id, workspace_id, pathway, templates, current_phase,
+          current_template, current_step, overall_completion, status
+        ) VALUES ($1, $2, $3, $4, $5, $6, 'session_initialized', 0, 'active')
+        RETURNING id
+      `,
+      [
+        options.userId,
+        options.workspaceId,
+        options.pathway,
+        options.templates,
+        options.initialPhase,
+        options.initialTemplate,
+      ],
+    );
+    const sessionId = rows[0]?.id;
+    if (!sessionId) throw new Error('Session creation returned no id');
+
+    if (balance !== undefined) {
+      const newBalance = balance - 1;
+      await client.query(
+        `UPDATE public.user_credits
+         SET balance = $1, total_used = total_used + 1, updated_at = NOW()
+         WHERE user_id = $2`,
+        [newBalance, options.userId],
+      );
+      await client.query(
+        `INSERT INTO public.credit_transactions (
+           user_id, transaction_type, amount, balance_after, session_id, description
+         ) VALUES ($1, 'deduct', -1, $2, $3, 'Credit deducted for session start')`,
+        [options.userId, newBalance, sessionId],
       );
     }
-  }
 
-  const { data, error } = await supabase
-    .from('bmad_sessions')
-    .insert({
-      user_id: options.userId,
-      workspace_id: options.workspaceId,
-      pathway: options.pathway,
-      templates: options.templates,
-      current_phase: options.initialPhase,
-      current_template: options.initialTemplate,
-      current_step: 'session_initialized',
-      overall_completion: 0,
-      status: 'active',
-    })
-    .select('id')
-    .single();
-
-  if (error) {
+    await client.query('COMMIT');
+    return sessionId;
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+    if (error instanceof BmadMethodError) throw error;
     throw new BmadMethodError(
-      `Failed to create session record: ${error.message}`,
+      `Failed to create session record: ${error instanceof Error ? error.message : 'Unknown error'}`,
       'SESSION_CREATION_ERROR',
-      { options, originalError: error }
+      { options },
     );
+  } finally {
+    client.release();
   }
-
-  // Deduct credit after successful creation
-  if (options.requireCredits !== false) {
-    const deductResult = await deductCredit(options.userId, data.id);
-    if (!deductResult.success) {
-      // Rollback: Delete the session
-      await supabase.from('bmad_sessions').delete().eq('id', data.id);
-      throw new BmadMethodError(
-        deductResult.message || 'Failed to deduct credit',
-        'CREDIT_DEDUCTION_FAILED',
-        { userId: options.userId, sessionId: data.id }
-      );
-    }
-  }
-
-  return data.id;
 }
 
 /**
@@ -171,45 +182,29 @@ export async function createSessionRecord(
  * Returns null if session not found.
  */
 export async function loadSessionState(
-  sessionId: string
+  sessionId: string,
+  userId: string,
+  db: Queryable = getDatabasePool(),
 ): Promise<SessionRecord | null> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
-
-  const { data, error } = await supabase
-    .from('bmad_sessions')
-    .select(`
-      id,
-      user_id,
-      workspace_id,
-      pathway,
-      current_phase,
-      current_template,
-      status,
-      overall_completion,
-      current_step,
-      next_steps,
-      start_time,
-      end_time,
-      created_at,
-      updated_at
-    `)
-    .eq('id', sessionId)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') return null; // Not found
-    throw new BmadMethodError(
-      `Failed to load session: ${error.message}`,
-      'SESSION_LOAD_ERROR',
-      { sessionId, originalError: error }
-    );
-  }
+  const { rows } = await db.query<{
+    id: string; user_id: string; workspace_id: string; pathway: PathwayType;
+    current_phase: string; current_template: string; status: SessionRecord['status'];
+    overall_completion: number | string; current_step: string; next_steps: string[] | null;
+    start_time: string | Date; end_time: string | Date | null;
+    created_at: string | Date; updated_at: string | Date;
+  }>(
+    `
+      SELECT id, user_id, workspace_id, pathway, current_phase, current_template,
+             status, overall_completion, current_step, next_steps, start_time,
+             end_time, created_at, updated_at
+      FROM public.bmad_sessions
+      WHERE id = $1 AND user_id = $2
+      LIMIT 1
+    `,
+    [sessionId, userId],
+  );
+  const data = rows[0];
+  if (!data) return null;
 
   return {
     id: data.id,
@@ -219,7 +214,7 @@ export async function loadSessionState(
     currentPhase: data.current_phase,
     currentTemplate: data.current_template,
     status: data.status,
-    overallCompletion: data.overall_completion || 0,
+    overallCompletion: Number(data.overall_completion) || 0,
     currentStep: data.current_step || '',
     nextSteps: data.next_steps || [],
     startTime: new Date(data.start_time),
@@ -235,6 +230,7 @@ export async function loadSessionState(
  */
 export async function persistSessionState(
   sessionId: string,
+  userId: string,
   updates: Partial<{
     currentPhase: string;
     currentTemplate: string;
@@ -243,38 +239,40 @@ export async function persistSessionState(
     currentStep: string;
     nextSteps: string[];
     endTime: Date;
-  }>
+  }>,
+  db: Queryable = getDatabasePool(),
 ): Promise<void> {
-  const supabase = await createClient();
-  if (!supabase) {
+  const { rowCount } = await db.query(
+    `
+      UPDATE public.bmad_sessions
+      SET current_phase = COALESCE($1, current_phase),
+          current_template = COALESCE($2, current_template),
+          status = COALESCE($3, status),
+          overall_completion = COALESCE($4, overall_completion),
+          current_step = COALESCE($5, current_step),
+          next_steps = COALESCE($6, next_steps),
+          end_time = COALESCE($7, end_time),
+          updated_at = NOW()
+      WHERE id = $8 AND user_id = $9
+    `,
+    [
+      updates.currentPhase ?? null,
+      updates.currentTemplate ?? null,
+      updates.status ?? null,
+      updates.overallCompletion ?? null,
+      updates.currentStep ?? null,
+      updates.nextSteps ?? null,
+      updates.endTime ?? null,
+      sessionId,
+      userId,
+    ],
+  );
+
+  if (rowCount !== 1) {
     throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
-
-  const updateData: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
-  };
-
-  if (updates.currentPhase !== undefined) updateData.current_phase = updates.currentPhase;
-  if (updates.currentTemplate !== undefined) updateData.current_template = updates.currentTemplate;
-  if (updates.status !== undefined) updateData.status = updates.status;
-  if (updates.overallCompletion !== undefined) updateData.overall_completion = updates.overallCompletion;
-  if (updates.currentStep !== undefined) updateData.current_step = updates.currentStep;
-  if (updates.nextSteps !== undefined) updateData.next_steps = updates.nextSteps;
-  if (updates.endTime !== undefined) updateData.end_time = updates.endTime.toISOString();
-
-  const { error } = await supabase
-    .from('bmad_sessions')
-    .update(updateData)
-    .eq('id', sessionId);
-
-  if (error) {
-    throw new BmadMethodError(
-      `Failed to persist session state: ${error.message}`,
+      'Failed to persist session state: session not found',
       'SESSION_PERSIST_ERROR',
-      { sessionId, updates, originalError: error }
+      { sessionId, userId, updates }
     );
   }
 }
@@ -282,25 +280,17 @@ export async function persistSessionState(
 /**
  * Delete a session (for rollback scenarios).
  */
-export async function deleteSession(sessionId: string): Promise<void> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
+export async function deleteSession(sessionId: string, userId: string): Promise<void> {
+  const { rowCount } = await getDatabasePool().query(
+    'DELETE FROM public.bmad_sessions WHERE id = $1 AND user_id = $2',
+    [sessionId, userId],
+  );
 
-  const { error } = await supabase
-    .from('bmad_sessions')
-    .delete()
-    .eq('id', sessionId);
-
-  if (error) {
+  if (rowCount !== 1) {
     throw new BmadMethodError(
-      `Failed to delete session: ${error.message}`,
+      'Failed to delete session: session not found',
       'SESSION_DELETE_ERROR',
-      { sessionId, originalError: error }
+      { sessionId, userId }
     );
   }
 }
@@ -359,36 +349,29 @@ export function calculateProgress(pathway: string, currentPhase: string): number
  */
 export async function readPhaseState(
   sessionId: string,
+  userId: string,
   phaseId: string
 ): Promise<PhaseState | null> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
-
-  const { data, error } = await supabase
-    .from('bmad_session_progress')
-    .select('*')
-    .eq('session_id', sessionId)
-    .eq('phase_id', phaseId)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') return null;
-    throw new BmadMethodError(
-      `Failed to read phase state: ${error.message}`,
-      'PHASE_READ_ERROR',
-      { sessionId, phaseId, originalError: error }
-    );
-  }
+  const { rows } = await getDatabasePool().query<{
+    phase_id: string; template_id: string; completion_percentage: number | string;
+    started_at: string | Date | null; completed_at: string | Date | null;
+  }>(
+    `
+      SELECT p.phase_id, p.template_id, p.completion_percentage, p.started_at, p.completed_at
+      FROM public.bmad_session_progress p
+      JOIN public.bmad_sessions s ON s.id = p.session_id
+      WHERE p.session_id = $1 AND s.user_id = $2 AND p.phase_id = $3
+      LIMIT 1
+    `,
+    [sessionId, userId, phaseId],
+  );
+  const data = rows[0];
+  if (!data) return null;
 
   return {
     phaseId: data.phase_id,
     templateId: data.template_id,
-    completion: data.completion_percentage,
+    completion: Number(data.completion_percentage),
     startedAt: data.started_at ? new Date(data.started_at) : undefined,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
   };
@@ -404,29 +387,25 @@ export async function readPhaseState(
  */
 export async function completePhase(
   sessionId: string,
+  userId: string,
   reason: string,
   keyOutcomes?: string[]
 ): Promise<PhaseCompletionResult> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
-
-  // Load current session state
-  const session = await loadSessionState(sessionId);
-  if (!session) {
-    return {
-      success: false,
-      previousPhase: '',
-      nextPhase: null,
-      isSessionComplete: false,
-      newProgress: 0,
-      error: 'Session not found',
-    };
-  }
+  const client = await getDatabasePool().connect();
+  try {
+    await client.query('BEGIN');
+    const session = await loadSessionState(sessionId, userId, client);
+    if (!session) {
+      await client.query('ROLLBACK');
+      return {
+        success: false,
+        previousPhase: '',
+        nextPhase: null,
+        isSessionComplete: false,
+        newProgress: 0,
+        error: 'Session not found',
+      };
+    }
 
   const previousPhase = session.currentPhase;
   const nextPhase = getNextPhase(session.pathway, previousPhase);
@@ -439,23 +418,26 @@ export async function completePhase(
     ? Math.round(((currentIndex + 1) / phases.length) * 100)
     : session.overallCompletion;
 
-  // Record phase completion in outputs
-  await supabase.from('bmad_phase_outputs').insert({
-    session_id: sessionId,
-    phase_id: previousPhase,
-    output_id: `completion-${Date.now()}`,
-    output_name: 'Phase Completion',
-    output_type: 'document',
-    output_data: {
-      reason,
-      key_outcomes: keyOutcomes || [],
-      completed_at: new Date().toISOString(),
-    },
-    is_required: false,
-  });
+    await client.query(
+      `
+        INSERT INTO public.bmad_phase_outputs (
+          session_id, phase_id, output_id, output_name, output_type, output_data, is_required
+        ) VALUES ($1, $2, $3, 'Phase Completion', 'document', $4::jsonb, false)
+      `,
+      [
+        sessionId,
+        previousPhase,
+        `completion-${Date.now()}`,
+        JSON.stringify({
+          reason,
+          key_outcomes: keyOutcomes || [],
+          completed_at: new Date().toISOString(),
+        }),
+      ],
+    );
 
   // Update session state
-  const updates: Parameters<typeof persistSessionState>[1] = {
+  const updates: Parameters<typeof persistSessionState>[2] = {
     overallCompletion: newProgress,
     currentStep: isSessionComplete
       ? 'Session complete'
@@ -469,68 +451,95 @@ export async function completePhase(
     updates.endTime = new Date();
   }
 
-  await persistSessionState(sessionId, updates);
+    await persistSessionState(sessionId, userId, updates, client);
+    await client.query('COMMIT');
 
-  return {
-    success: true,
-    previousPhase,
-    nextPhase,
-    isSessionComplete,
-    newProgress,
-  };
+    return {
+      success: true,
+      previousPhase,
+      nextPhase,
+      isSessionComplete,
+      newProgress,
+    };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 // =============================================================================
 // Insight Management Primitives
 // =============================================================================
 
+export async function recordPhaseOutput(options: {
+  sessionId: string;
+  userId: string;
+  phaseId: string;
+  outputId: string;
+  outputName: string;
+  outputType: string;
+  outputData: Record<string, unknown>;
+}): Promise<string> {
+  const { rows } = await getDatabasePool().query<{ id: string }>(
+    `
+      INSERT INTO public.bmad_phase_outputs (
+        session_id, phase_id, output_id, output_name, output_type, output_data, is_required
+      )
+      SELECT s.id, $3, $4, $5, $6, $7::jsonb, false
+      FROM public.bmad_sessions s
+      WHERE s.id = $1 AND s.user_id = $2
+      RETURNING id
+    `,
+    [
+      options.sessionId,
+      options.userId,
+      options.phaseId,
+      options.outputId,
+      options.outputName,
+      options.outputType,
+      JSON.stringify(options.outputData),
+    ],
+  );
+  if (!rows[0]) throw new BmadMethodError('Session not found', 'SESSION_NOT_FOUND');
+  return rows[0].id;
+}
+
 /**
  * Record an insight from the conversation.
  */
 export async function recordInsight(
   sessionId: string,
+  userId: string,
   insight: string,
   category: SessionInsight['category'] = 'general'
 ): Promise<string> {
-  const supabase = await createClient();
-  if (!supabase) {
+  const { rows } = await getDatabasePool().query<{ id: string }>(
+    `
+      INSERT INTO public.bmad_phase_outputs (
+        session_id, phase_id, output_id, output_name, output_type, output_data, is_required
+      )
+      SELECT s.id, s.current_phase, $3, 'Session Insight', 'text', $4::jsonb, false
+      FROM public.bmad_sessions s
+      WHERE s.id = $1 AND s.user_id = $2
+      RETURNING id
+    `,
+    [
+      sessionId,
+      userId,
+      `insight-${Date.now()}`,
+      JSON.stringify({ insight, category, recorded_at: new Date().toISOString() }),
+    ],
+  );
+  if (!rows[0]) {
     throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
-
-  // Get current phase
-  const session = await loadSessionState(sessionId);
-  const phaseId = session?.currentPhase || 'general';
-
-  const { data, error } = await supabase
-    .from('bmad_phase_outputs')
-    .insert({
-      session_id: sessionId,
-      phase_id: phaseId,
-      output_id: `insight-${Date.now()}`,
-      output_name: 'Session Insight',
-      output_type: 'text',
-      output_data: {
-        insight,
-        category,
-        recorded_at: new Date().toISOString(),
-      },
-      is_required: false,
-    })
-    .select('id')
-    .single();
-
-  if (error) {
-    throw new BmadMethodError(
-      `Failed to record insight: ${error.message}`,
+      'Failed to record insight: session not found',
       'INSIGHT_RECORD_ERROR',
-      { sessionId, insight, originalError: error }
+      { sessionId, userId, insight }
     );
   }
-
-  return data.id;
+  return rows[0].id;
 }
 
 /**
@@ -538,45 +547,35 @@ export async function recordInsight(
  */
 export async function getSessionInsights(
   sessionId: string,
+  userId: string,
   category?: SessionInsight['category'],
   limit: number = 50
 ): Promise<SessionInsight[]> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
+  const safeLimit = Math.max(1, Math.min(limit, 100));
+  const { rows } = await getDatabasePool().query<{
+    id: string; session_id: string; phase_id: string;
+    output_data: { category?: SessionInsight['category']; insight?: string };
+    created_at: string | Date;
+  }>(
+    `
+      SELECT o.id, o.session_id, o.phase_id, o.output_data, o.created_at
+      FROM public.bmad_phase_outputs o
+      JOIN public.bmad_sessions s ON s.id = o.session_id
+      WHERE o.session_id = $1 AND s.user_id = $2
+        AND o.output_name = 'Session Insight'
+        AND ($3::text IS NULL OR o.output_data @> jsonb_build_object('category', $3::text))
+      ORDER BY o.created_at DESC
+      LIMIT $4
+    `,
+    [sessionId, userId, category || null, safeLimit],
+  );
 
-  let query = supabase
-    .from('bmad_phase_outputs')
-    .select('*')
-    .eq('session_id', sessionId)
-    .eq('output_name', 'Session Insight')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (category) {
-    query = query.contains('output_data', { category });
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new BmadMethodError(
-      `Failed to get insights: ${error.message}`,
-      'INSIGHT_GET_ERROR',
-      { sessionId, originalError: error }
-    );
-  }
-
-  return (data || []).map(row => ({
+  return rows.map(row => ({
     id: row.id,
     sessionId: row.session_id,
     phaseId: row.phase_id,
-    category: (row.output_data as { category?: string })?.category as SessionInsight['category'] || 'general',
-    content: (row.output_data as { insight?: string })?.insight || '',
+    category: row.output_data?.category || 'general',
+    content: row.output_data?.insight || '',
     createdAt: new Date(row.created_at),
   }));
 }
@@ -590,6 +589,7 @@ export async function getSessionInsights(
  */
 export async function recordUserResponse(
   sessionId: string,
+  userId: string,
   phaseId: string,
   promptId: string,
   response: {
@@ -597,29 +597,30 @@ export async function recordUserResponse(
     data?: Record<string, unknown>;
   }
 ): Promise<void> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
+  const { rowCount } = await getDatabasePool().query(
+    `
+      INSERT INTO public.bmad_user_responses (
+        session_id, phase_id, prompt_id, response_text, response_data
+      )
+      SELECT s.id, $3, $4, $5, $6::jsonb
+      FROM public.bmad_sessions s
+      WHERE s.id = $1 AND s.user_id = $2
+    `,
+    [
+      sessionId,
+      userId,
+      phaseId,
+      promptId,
+      response.text || null,
+      JSON.stringify(response.data || null),
+    ],
+  );
 
-  const { error } = await supabase
-    .from('bmad_user_responses')
-    .insert({
-      session_id: sessionId,
-      phase_id: phaseId,
-      prompt_id: promptId,
-      response_text: response.text,
-      response_data: response.data,
-    });
-
-  if (error) {
+  if (rowCount !== 1) {
     throw new BmadMethodError(
-      `Failed to record user response: ${error.message}`,
+      'Failed to record user response: session not found',
       'RESPONSE_RECORD_ERROR',
-      { sessionId, phaseId, promptId, originalError: error }
+      { sessionId, userId, phaseId, promptId }
     );
   }
 }
@@ -635,36 +636,26 @@ export async function getActiveSessions(
   userId: string,
   workspaceId?: string
 ): Promise<SessionRecord[]> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
+  const { rows } = await getDatabasePool().query<{
+    id: string; user_id: string; workspace_id: string; pathway: PathwayType;
+    current_phase: string; current_template: string; status: SessionRecord['status'];
+    overall_completion: number | string; current_step: string; next_steps: string[] | null;
+    start_time: string | Date; end_time: string | Date | null;
+    created_at: string | Date; updated_at: string | Date;
+  }>(
+    `
+      SELECT id, user_id, workspace_id, pathway, current_phase, current_template,
+             status, overall_completion, current_step, next_steps, start_time,
+             end_time, created_at, updated_at
+      FROM public.bmad_sessions
+      WHERE user_id = $1 AND status = 'active'
+        AND ($2::uuid IS NULL OR workspace_id = $2)
+      ORDER BY updated_at DESC
+    `,
+    [userId, workspaceId || null],
+  );
 
-  let query = supabase
-    .from('bmad_sessions')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .order('updated_at', { ascending: false });
-
-  if (workspaceId) {
-    query = query.eq('workspace_id', workspaceId);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new BmadMethodError(
-      `Failed to get active sessions: ${error.message}`,
-      'SESSION_QUERY_ERROR',
-      { userId, workspaceId, originalError: error }
-    );
-  }
-
-  return (data || []).map(row => ({
+  return rows.map(row => ({
     id: row.id,
     userId: row.user_id,
     workspaceId: row.workspace_id,
@@ -672,7 +663,7 @@ export async function getActiveSessions(
     currentPhase: row.current_phase,
     currentTemplate: row.current_template,
     status: row.status,
-    overallCompletion: row.overall_completion || 0,
+    overallCompletion: Number(row.overall_completion) || 0,
     currentStep: row.current_step || '',
     nextSteps: row.next_steps || [],
     startTime: new Date(row.start_time),
@@ -689,29 +680,9 @@ export async function sessionBelongsToUser(
   sessionId: string,
   userId: string
 ): Promise<boolean> {
-  const supabase = await createClient();
-  if (!supabase) {
-    throw new BmadMethodError(
-      'Supabase client unavailable',
-      'SUPABASE_UNAVAILABLE'
-    );
-  }
-
-  const { data, error } = await supabase
-    .from('bmad_sessions')
-    .select('id')
-    .eq('id', sessionId)
-    .eq('user_id', userId)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') return false;
-    throw new BmadMethodError(
-      `Failed to check session ownership: ${error.message}`,
-      'SESSION_CHECK_ERROR',
-      { sessionId, userId, originalError: error }
-    );
-  }
-
-  return !!data;
+  const { rowCount } = await getDatabasePool().query(
+    'SELECT 1 FROM public.bmad_sessions WHERE id = $1 AND user_id = $2',
+    [sessionId, userId],
+  );
+  return rowCount === 1;
 }

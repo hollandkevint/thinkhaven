@@ -7,14 +7,17 @@
  * Updated in Phase 4 to use session primitives.
  */
 
-import { createClient } from '@/lib/supabase/server';
 import { maryPersona, SubPersonaSessionState } from '../mary-persona';
 import {
-  loadSessionState,
   completePhase as completePhasePrivmitive,
+  recordPhaseOutput,
   recordInsight,
   getSessionInsights,
 } from '@/lib/session/session-primitives';
+import {
+  getSession,
+  updateSessionSubPersonaState,
+} from '@/lib/db/repositories/session-repository';
 import { resolveSpeakerKey } from '../board-members';
 import type {
   CompletePhaseInput,
@@ -37,10 +40,9 @@ import type {
 /**
  * Read the current session state
  */
-export async function readSessionState(sessionId: string): Promise<ReadSessionStateResult> {
+export async function readSessionState(sessionId: string, userId: string): Promise<ReadSessionStateResult> {
   try {
-    // Use primitive to load session
-    const session = await loadSessionState(sessionId);
+    const session = await getSession(sessionId, userId);
 
     if (!session) {
       return {
@@ -49,19 +51,10 @@ export async function readSessionState(sessionId: string): Promise<ReadSessionSt
       };
     }
 
-    // Get sub-persona state from database
-    const supabase = await createClient();
-    if (!supabase) return { success: false, error: 'Service unavailable' };
-    const { data: sessionData } = await supabase
-      .from('bmad_sessions')
-      .select('sub_persona_state')
-      .eq('id', sessionId)
-      .single();
-
-    const subPersonaState = sessionData?.sub_persona_state as SubPersonaSessionState | null;
+    const subPersonaState = session.sub_persona_state as SubPersonaSessionState | null;
 
     // Get recent insights using primitive
-    const insights = await getSessionInsights(sessionId, undefined, 5);
+    const insights = await getSessionInsights(sessionId, userId, undefined, 5);
     const recentInsights = insights.map(i => i.content);
 
     return {
@@ -69,8 +62,8 @@ export async function readSessionState(sessionId: string): Promise<ReadSessionSt
       data: {
         sessionId: session.id,
         pathway: session.pathway,
-        currentPhase: session.currentPhase,
-        progress: session.overallCompletion,
+        currentPhase: session.current_phase,
+        progress: session.overall_completion,
         currentMode: subPersonaState?.currentMode || 'inquisitive',
         exchangeCount: subPersonaState?.exchangeCount || 0,
         insights: recentInsights,
@@ -90,12 +83,14 @@ export async function readSessionState(sessionId: string): Promise<ReadSessionSt
  */
 export async function completePhase(
   sessionId: string,
+  userId: string,
   input: CompletePhaseInput
 ): Promise<CompletePhaseResult> {
   try {
     // Use the primitive for phase completion
     const result = await completePhasePrivmitive(
       sessionId,
+      userId,
       input.reason,
       input.key_outcomes
     );
@@ -129,23 +124,15 @@ export async function completePhase(
  */
 export async function switchPersonaMode(
   sessionId: string,
+  userId: string,
   input: SwitchModeInput
 ): Promise<SwitchModeResult> {
   try {
-    const supabase = await createClient();
-    if (!supabase) return { success: false, error: 'Service unavailable' };
-
-    // Get current sub-persona state
-    const { data: session, error: fetchError } = await supabase
-      .from('bmad_sessions')
-      .select('sub_persona_state, pathway')
-      .eq('id', sessionId)
-      .single();
-
-    if (fetchError || !session) {
+    const session = await getSession(sessionId, userId);
+    if (!session) {
       return {
         success: false,
-        error: `Failed to fetch session: ${fetchError?.message || 'Session not found'}`,
+        error: 'Failed to fetch session: Session not found',
       };
     }
 
@@ -165,18 +152,11 @@ export async function switchPersonaMode(
     ];
 
     // Update database
-    const { error: updateError } = await supabase
-      .from('bmad_sessions')
-      .update({
-        sub_persona_state: updatedState,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', sessionId);
-
-    if (updateError) {
+    const updated = await updateSessionSubPersonaState(sessionId, userId, updatedState);
+    if (!updated) {
       return {
         success: false,
-        error: `Failed to update mode: ${updateError.message}`,
+        error: 'Failed to update mode: Session not found',
       };
     }
 
@@ -203,26 +183,19 @@ export async function switchPersonaMode(
  */
 export async function switchSpeaker(
   sessionId: string,
+  userId: string,
   input: SwitchSpeakerInput
 ): Promise<SwitchSpeakerResult> {
   try {
-    const supabase = await createClient();
-    if (!supabase) return { success: false, error: 'Service unavailable' };
-
     // Resolve and validate the speaker key
     const newMember = resolveSpeakerKey(input.speaker_key);
 
     // Get current board state from sub_persona_state
-    const { data: session, error: fetchError } = await supabase
-      .from('bmad_sessions')
-      .select('sub_persona_state')
-      .eq('id', sessionId)
-      .single();
-
-    if (fetchError || !session) {
+    const session = await getSession(sessionId, userId);
+    if (!session) {
       return {
         success: false,
-        error: `Failed to fetch session: ${fetchError?.message || 'Session not found'}`,
+        error: 'Failed to fetch session: Session not found',
       };
     }
 
@@ -230,21 +203,14 @@ export async function switchSpeaker(
     const previousSpeaker = (sps.activeSpeaker as string) || 'mary';
 
     // Update board state within sub_persona_state
-    const { error: updateError } = await supabase
-      .from('bmad_sessions')
-      .update({
-        sub_persona_state: {
-          ...sps,
-          activeSpeaker: newMember.id,
-        },
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', sessionId);
-
-    if (updateError) {
+    const updated = await updateSessionSubPersonaState(sessionId, userId, {
+      ...sps,
+      activeSpeaker: newMember.id,
+    });
+    if (!updated) {
       return {
         success: false,
-        error: `Failed to switch speaker: ${updateError.message}`,
+        error: 'Failed to switch speaker: Session not found',
       };
     }
 
@@ -269,23 +235,15 @@ export async function switchSpeaker(
  */
 export async function recommendAction(
   sessionId: string,
+  userId: string,
   input: RecommendActionInput
 ): Promise<RecommendActionResult> {
   try {
-    const supabase = await createClient();
-    if (!supabase) return { success: false, error: 'Service unavailable' };
-
-    // Get current session state for viability assessment
-    const { data: session, error: fetchError } = await supabase
-      .from('bmad_sessions')
-      .select('sub_persona_state, pathway')
-      .eq('id', sessionId)
-      .single();
-
-    if (fetchError || !session) {
+    const session = await getSession(sessionId, userId);
+    if (!session) {
       return {
         success: false,
-        error: `Failed to fetch session: ${fetchError?.message || 'Session not found'}`,
+        error: 'Failed to fetch session: Session not found',
       };
     }
 
@@ -306,23 +264,17 @@ export async function recommendAction(
         true // A recommendation counts as a probe
       );
 
-      await supabase
-        .from('bmad_sessions')
-        .update({
-          sub_persona_state: updatedState,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', sessionId);
+      await updateSessionSubPersonaState(sessionId, userId, updatedState);
     }
 
-    // Record the recommendation
-    await supabase.from('bmad_phase_outputs').insert({
-      session_id: sessionId,
-      phase_id: 'viability_assessment',
-      output_id: `recommendation-${Date.now()}`,
-      output_name: 'Strategic Recommendation',
-      output_type: 'analysis',
-      output_data: {
+    await recordPhaseOutput({
+      sessionId,
+      userId,
+      phaseId: 'viability_assessment',
+      outputId: `recommendation-${Date.now()}`,
+      outputName: 'Strategic Recommendation',
+      outputType: 'analysis',
+      outputData: {
         recommendation: assessment.recommendation,
         viability_score: assessment.score,
         concerns: input.concerns,
@@ -331,7 +283,6 @@ export async function recommendAction(
         additional_context: input.additional_context,
         assessed_at: new Date().toISOString(),
       },
-      is_required: false,
     });
 
     return {
@@ -358,18 +309,20 @@ export async function recommendAction(
  */
 export async function updateSessionContext(
   sessionId: string,
+  userId: string,
   input: UpdateContextInput
 ): Promise<UpdateContextResult> {
   try {
     // Use the primitive to record insight
     await recordInsight(
       sessionId,
+      userId,
       input.insight,
       input.category || 'general'
     );
 
     // Get total insights count using primitive
-    const insights = await getSessionInsights(sessionId);
+    const insights = await getSessionInsights(sessionId, userId);
 
     return {
       success: true,

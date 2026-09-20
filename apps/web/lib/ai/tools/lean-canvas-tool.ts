@@ -1,12 +1,12 @@
 /**
  * Lean Canvas Tool Handler
  *
- * Validates input, calls merge_lean_canvas RPC, returns updated canvas state.
+ * Validates input, merges the owned session canvas, and returns its state.
  * Matches existing tool handler patterns (try/catch, ToolResult shape).
  */
 
-import { createClient } from '@/lib/supabase/server';
 import { LEAN_CANVAS_FIELDS, type LeanCanvas } from '@/lib/canvas/lean-canvas-schema';
+import { updateOwnedLeanCanvas } from '@/lib/db/repositories/ai-artifact-repository';
 import type { ToolResult } from './index';
 
 export interface UpdateLeanCanvasInput {
@@ -33,6 +33,7 @@ function validateLeanCanvasUpdates(raw: Record<string, unknown>): Partial<LeanCa
 
 export async function updateLeanCanvas(
   sessionId: string,
+  userId: string,
   input: UpdateLeanCanvasInput
 ): Promise<UpdateLeanCanvasResult> {
   try {
@@ -42,15 +43,13 @@ export async function updateLeanCanvas(
       return { success: false, error: 'No valid canvas fields in updates' };
     }
 
-    const supabase = await createClient();
-    if (!supabase) return { success: false, error: 'Service unavailable' };
+    let updatedCanvas: LeanCanvas | null;
+    try {
+      updatedCanvas = await updateOwnedLeanCanvas(sessionId, userId, validated);
+    } catch (error) {
+      return { success: false, error: `Canvas update failed: ${error instanceof Error ? error.message : 'Unknown error'}` };
+    }
 
-    const { data: updatedCanvas, error } = await supabase.rpc('merge_lean_canvas', {
-      p_session_id: sessionId,
-      p_updates: validated,
-    });
-
-    if (error) return { success: false, error: `Canvas update failed: ${error.message}` };
     if (!updatedCanvas) return { success: false, error: 'Session not found or access denied' };
 
     const canvas = updatedCanvas as LeanCanvas;

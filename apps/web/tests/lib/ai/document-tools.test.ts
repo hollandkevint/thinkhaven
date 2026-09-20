@@ -2,97 +2,48 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateDocument } from '@/lib/ai/tools/document-tools';
 
 const mocks = vi.hoisted(() => ({
-  createClient: vi.fn(),
-  insertedDocuments: [] as Record<string, unknown>[],
-  insertedArtifacts: [] as Record<string, unknown>[],
+  getDatabasePool: vi.fn(),
+  query: vi.fn(),
 }));
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: mocks.createClient,
+vi.mock('@/lib/db/pool', () => ({
+  getDatabasePool: mocks.getDatabasePool,
 }));
 
-function buildSupabaseMock() {
-  return {
-    from: vi.fn((table: string) => {
-      if (table === 'bmad_sessions') {
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              single: vi.fn(() => Promise.resolve({
-                data: { pathway: 'plan-grill', current_phase: 'intake' },
-                error: null,
-              })),
-            })),
-          })),
-        };
-      }
+function buildPoolMock() {
+  mocks.query
+    .mockResolvedValueOnce({ rows: [{ pathway: 'plan-grill', current_phase: 'intake' }] })
+    .mockResolvedValueOnce({
+      rows: [
+        {
+          output_data: {
+            insight: 'Use Customer for the buyer and User for the authenticated identity.',
+            category: 'domain',
+          },
+          phase_id: 'intake',
+          output_name: 'Session Insight',
+        },
+        {
+          output_data: {
+            insight: 'Use pasted docs only; no repo ingestion in V1.',
+            category: 'decision',
+          },
+          phase_id: 'intake',
+          output_name: 'Session Insight',
+        },
+        {
+          output_data: {
+            insight: 'Users will paste enough context to make terminology checks useful.',
+            category: 'assumption',
+          },
+          phase_id: 'intake',
+          output_name: 'Session Insight',
+        },
+      ],
+    })
+    .mockResolvedValueOnce({ rows: [{ id: 'document-123' }] });
 
-      if (table === 'bmad_phase_outputs') {
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn(() => Promise.resolve({
-                data: [
-                  {
-                    output_data: {
-                      insight: 'Use Customer for the buyer and User for the authenticated identity.',
-                      category: 'domain',
-                    },
-                    phase_id: 'intake',
-                    output_name: 'Session Insight',
-                  },
-                  {
-                    output_data: {
-                      insight: 'Use pasted docs only; no repo ingestion in V1.',
-                      category: 'decision',
-                    },
-                    phase_id: 'intake',
-                    output_name: 'Session Insight',
-                  },
-                  {
-                    output_data: {
-                      insight: 'Users will paste enough context to make terminology checks useful.',
-                      category: 'assumption',
-                    },
-                    phase_id: 'intake',
-                    output_name: 'Session Insight',
-                  },
-                ],
-                error: null,
-              })),
-            })),
-          })),
-        };
-      }
-
-      if (table === 'bmad_generated_documents') {
-        return {
-          insert: vi.fn((document: Record<string, unknown>) => {
-            mocks.insertedDocuments.push(document);
-            return {
-              select: vi.fn(() => ({
-                single: vi.fn(() => Promise.resolve({
-                  data: { id: 'document-123' },
-                  error: null,
-                })),
-              })),
-            };
-          }),
-        };
-      }
-
-      if (table === 'session_artifacts') {
-        return {
-          insert: vi.fn((artifact: Record<string, unknown>) => {
-            mocks.insertedArtifacts.push(artifact);
-            return Promise.resolve({ error: null });
-          }),
-        };
-      }
-
-      throw new Error(`Unexpected table: ${table}`);
-    }),
-  };
+  return { query: mocks.query };
 }
 
 function sectionContent(content: string, heading: string): string {
@@ -105,9 +56,8 @@ function sectionContent(content: string, heading: string): string {
 
 describe('generateDocument', () => {
   beforeEach(() => {
-    mocks.insertedDocuments.length = 0;
-    mocks.insertedArtifacts.length = 0;
-    mocks.createClient.mockResolvedValue(buildSupabaseMock());
+    mocks.query.mockReset();
+    mocks.getDatabasePool.mockReturnValue(buildPoolMock());
   });
 
   it('generates a domain context document from domain insights', async () => {
@@ -117,21 +67,24 @@ describe('generateDocument', () => {
     });
 
     expect(result.success).toBe(true);
-    const document = mocks.insertedDocuments[0];
-    const artifact = mocks.insertedArtifacts[0];
-    expect(document.document_type).toBe('domain_context');
-    expect(artifact).toMatchObject({
-      id: 'document-123',
-      type: 'domain-context',
-      title: 'Plan Glossary',
-    });
+    const documentInsert = mocks.query.mock.calls[2];
+    expect(documentInsert[1]).toEqual([
+      'session-123',
+      'Plan Glossary',
+      'domain_context',
+      expect.any(String),
+      'user-123',
+    ]);
+    expect(documentInsert[0]).toContain('bmad_generated_documents');
+    expect(documentInsert[0]).not.toContain('session_artifacts');
     expect(result.data?.artifact?.type).toBe('domain-context');
-    expect(document.content).toContain('# Domain Context');
-    expect(document.content).toContain('## Language');
-    expect(document.content).toContain('## Flagged Ambiguities');
-    expect(sectionContent(document.content as string, 'Language')).toContain('Use Customer for the buyer');
-    expect(sectionContent(document.content as string, 'Flagged Ambiguities')).toContain('Users will paste enough context');
-    expect(sectionContent(document.content as string, 'Flagged Ambiguities')).not.toContain('Use pasted docs only');
+    const content = result.data?.artifact?.content || '';
+    expect(content).toContain('# Domain Context');
+    expect(content).toContain('## Language');
+    expect(content).toContain('## Flagged Ambiguities');
+    expect(sectionContent(content, 'Language')).toContain('Use Customer for the buyer');
+    expect(sectionContent(content, 'Flagged Ambiguities')).toContain('Users will paste enough context');
+    expect(sectionContent(content, 'Flagged Ambiguities')).not.toContain('Use pasted docs only');
   });
 
   it('generates a decision record document from decision and assumption insights', async () => {
@@ -141,20 +94,23 @@ describe('generateDocument', () => {
     });
 
     expect(result.success).toBe(true);
-    const document = mocks.insertedDocuments[0];
-    const artifact = mocks.insertedArtifacts[0];
-    expect(document.document_type).toBe('decision_record');
-    expect(artifact).toMatchObject({
-      id: 'document-123',
-      type: 'decision-record',
-      title: 'Plan Decisions',
-    });
+    const documentInsert = mocks.query.mock.calls[2];
+    expect(documentInsert[1]).toEqual([
+      'session-123',
+      'Plan Decisions',
+      'decision_record',
+      expect.any(String),
+      'user-123',
+    ]);
+    expect(documentInsert[0]).toContain('bmad_generated_documents');
+    expect(documentInsert[0]).not.toContain('session_artifacts');
     expect(result.data?.artifact?.type).toBe('decision-record');
-    expect(document.content).toContain('# Decision Record');
-    expect(document.content).toContain('## Resolved Decisions');
-    expect(document.content).toContain('## ADR-Worthy Decisions');
-    expect(sectionContent(document.content as string, 'Resolved Decisions')).toContain('Use pasted docs only');
-    expect(sectionContent(document.content as string, 'Assumptions')).toContain('Users will paste enough context');
-    expect(sectionContent(document.content as string, 'Risks')).toContain('*No insights captured yet for this section.*');
+    const content = result.data?.artifact?.content || '';
+    expect(content).toContain('# Decision Record');
+    expect(content).toContain('## Resolved Decisions');
+    expect(content).toContain('## ADR-Worthy Decisions');
+    expect(sectionContent(content, 'Resolved Decisions')).toContain('Use pasted docs only');
+    expect(sectionContent(content, 'Assumptions')).toContain('Users will paste enough context');
+    expect(sectionContent(content, 'Risks')).toContain('*No insights captured yet for this section.*');
   });
 });

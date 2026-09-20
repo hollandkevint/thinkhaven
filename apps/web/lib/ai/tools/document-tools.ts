@@ -5,7 +5,11 @@
  * Generates structured outputs like Lean Canvas, PRD, Feature Brief, etc.
  */
 
-import { createClient } from '@/lib/supabase/server';
+import {
+  getOwnedDocumentSession,
+  getOwnedSessionInsights,
+  insertOwnedGeneratedDocument,
+} from '@/lib/db/repositories/ai-artifact-repository';
 import type { GenerateDocumentInput, GenerateDocumentResult } from './index';
 
 // =============================================================================
@@ -144,9 +148,6 @@ export async function generateDocument(
   input: GenerateDocumentInput
 ): Promise<GenerateDocumentResult> {
   try {
-    const supabase = await createClient();
-    if (!supabase) return { success: false, error: 'Service unavailable' };
-
     // Get the template
     const template = DOCUMENT_TEMPLATES[input.document_type];
     if (!template) {
@@ -157,25 +158,24 @@ export async function generateDocument(
     }
 
     // Get session data and insights
-    const { data: session, error: sessionError } = await supabase
-      .from('bmad_sessions')
-      .select('pathway, current_phase')
-      .eq('id', sessionId)
-      .single();
-
-    if (sessionError || !session) {
+    let session: Awaited<ReturnType<typeof getOwnedDocumentSession>>;
+    try {
+      session = await getOwnedDocumentSession(sessionId, userId);
+    } catch (error) {
       return {
         success: false,
-        error: `Failed to fetch session: ${sessionError?.message || 'Session not found'}`,
+        error: `Failed to fetch session: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+    if (!session) {
+      return {
+        success: false,
+        error: 'Failed to fetch session: Session not found',
       };
     }
 
     // Get all insights from the session
-    const { data: outputs } = await supabase
-      .from('bmad_phase_outputs')
-      .select('output_data, phase_id, output_name')
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true });
+    const outputs = await getOwnedSessionInsights(sessionId, userId);
 
     // Collect insights by category
     const insights: Record<string, string[]> = {
@@ -210,43 +210,30 @@ export async function generateDocument(
     const documentContent = buildDocumentContent(template, sectionsToInclude, insights);
 
     // Store the document
-    const { data: documentRow, error: insertError } = await supabase.from('bmad_generated_documents').insert({
-      session_id: sessionId,
-      document_name: documentTitle,
-      document_type: input.document_type,
-      content: documentContent,
-      format: 'markdown',
-    }).select('id').single();
-
-    if (insertError || !documentRow) {
+    let documentId: string | null;
+    try {
+      documentId = await insertOwnedGeneratedDocument(sessionId, userId, {
+        name: documentTitle,
+        type: input.document_type,
+        content: documentContent,
+      });
+    } catch (error) {
       return {
         success: false,
-        error: `Failed to save document: ${insertError?.message || 'No document id returned'}`,
+        error: `Failed to save document: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+
+    if (!documentId) {
+      return {
+        success: false,
+        error: 'Failed to save document: No document id returned',
       };
     }
 
     const artifactType = DOCUMENT_ARTIFACT_TYPES[input.document_type] || 'working-document';
-    const { error: artifactError } = await supabase.from('session_artifacts').insert({
-      id: documentRow.id,
-      session_id: sessionId,
-      type: artifactType,
-      title: documentTitle,
-      content: documentContent,
-      metadata: {
-        source: 'generate_document',
-        document_type: input.document_type,
-        generated_document_id: documentRow.id,
-      },
-      view_mode: 'inline',
-      render_mode: 'rendered',
-    });
-
-    if (artifactError) {
-      return {
-        success: false,
-        error: `Failed to save document artifact: ${artifactError.message}`,
-      };
-    }
+    // session_artifacts is absent from the verified Railway schema; the artifact
+    // stays in this response for the current chat flow and is not persisted.
 
     // Generate preview (first 500 chars)
     const preview = documentContent.slice(0, 500) + (documentContent.length > 500 ? '...' : '');
@@ -255,7 +242,7 @@ export async function generateDocument(
       success: true,
       data: {
         documentType: input.document_type,
-        documentId: documentRow.id,
+        documentId,
         title: documentTitle,
         preview,
         artifact: {

@@ -163,24 +163,24 @@ export class ToolExecutor {
     try {
       switch (toolCall.name) {
         case TOOL_NAMES.READ_SESSION_STATE:
-          result = await readSessionState(this.context.sessionId);
+          result = await readSessionState(this.context.sessionId, this.context.userId);
           break;
 
         case TOOL_NAMES.COMPLETE_PHASE:
           result = isCompletePhaseInput(toolCall.input)
-            ? await completePhase(this.context.sessionId, toolCall.input)
+            ? await completePhase(this.context.sessionId, this.context.userId, toolCall.input)
             : invalidToolInput(toolCall.name);
           break;
 
         case TOOL_NAMES.SWITCH_PERSONA_MODE:
           result = isSwitchModeInput(toolCall.input)
-            ? await switchPersonaMode(this.context.sessionId, toolCall.input)
+            ? await switchPersonaMode(this.context.sessionId, this.context.userId, toolCall.input)
             : invalidToolInput(toolCall.name);
           break;
 
         case TOOL_NAMES.SWITCH_SPEAKER:
           result = isSwitchSpeakerInput(toolCall.input)
-            ? await switchSpeaker(this.context.sessionId, toolCall.input)
+            ? await switchSpeaker(this.context.sessionId, this.context.userId, toolCall.input)
             : invalidToolInput(toolCall.name);
           if (result.success && !this.boardActivated) {
             this.boardActivated = true;
@@ -189,7 +189,7 @@ export class ToolExecutor {
 
         case TOOL_NAMES.RECOMMEND_ACTION:
           result = isRecommendActionInput(toolCall.input)
-            ? await recommendAction(this.context.sessionId, toolCall.input)
+            ? await recommendAction(this.context.sessionId, this.context.userId, toolCall.input)
             : invalidToolInput(toolCall.name);
           break;
 
@@ -201,13 +201,13 @@ export class ToolExecutor {
 
         case TOOL_NAMES.UPDATE_LEAN_CANVAS:
           result = isUpdateLeanCanvasInput(toolCall.input)
-            ? await updateLeanCanvas(this.context.sessionId, toolCall.input)
+            ? await updateLeanCanvas(this.context.sessionId, this.context.userId, toolCall.input)
             : invalidToolInput(toolCall.name);
           break;
 
         case TOOL_NAMES.UPDATE_SESSION_CONTEXT:
           result = isUpdateContextInput(toolCall.input)
-            ? await updateSessionContext(this.context.sessionId, toolCall.input)
+            ? await updateSessionContext(this.context.sessionId, this.context.userId, toolCall.input)
             : invalidToolInput(toolCall.name);
           break;
 
