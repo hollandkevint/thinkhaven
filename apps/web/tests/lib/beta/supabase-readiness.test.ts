@@ -1,66 +1,69 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { checkSupabaseReadiness } from '@/lib/beta/supabase-readiness';
+import { getDatabasePool } from '@/lib/db/pool';
+import { checkRailwayReadiness } from '@/lib/beta/supabase-readiness';
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(),
+vi.mock('@/lib/db/pool', () => ({
+  getDatabasePool: vi.fn(),
 }));
 
-vi.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: vi.fn(),
-}));
+const query = vi.fn();
 
-function adminQuery(error: unknown = null) {
-  const limit = vi.fn().mockResolvedValue({ data: [], error });
-  const select = vi.fn(() => ({ limit }));
-  return { select, limit };
-}
-
-describe('checkSupabaseReadiness', () => {
+describe('checkRailwayReadiness', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
     vi.clearAllMocks();
     process.env = {
       ...originalEnv,
-      NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon',
-      SUPABASE_SERVICE_ROLE_KEY: 'service',
+      DATABASE_URL: 'postgres://test',
     };
-
-    vi.mocked(createClient).mockResolvedValue({} as any);
-    vi.mocked(createAdminClient).mockReturnValue({
-      from: vi.fn(() => adminQuery()),
-    } as any);
+    query.mockResolvedValue({ rows: [] });
+    vi.mocked(getDatabasePool).mockReturnValue({ query } as never);
   });
 
-  it('passes required environment and table shape checks when Supabase is ready', async () => {
-    const report = await checkSupabaseReadiness();
+  it('passes the database and beta table checks when Railway is ready', async () => {
+    const report = await checkRailwayReadiness();
 
-    expect(report.status).toBe('warn');
+    expect(report.status).toBe('pass');
     expect(report.checks).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: 'public-env', status: 'pass' }),
-        expect.objectContaining({ id: 'service-role-env', status: 'pass' }),
-        expect.objectContaining({ id: 'server-client', status: 'pass' }),
-        expect.objectContaining({ id: 'admin-client', status: 'pass' }),
-        expect.objectContaining({ id: 'custom-token-hook', status: 'warn' }),
+        expect.objectContaining({ id: 'database-env', status: 'pass' }),
+        expect.objectContaining({ id: 'database-connection', status: 'pass' }),
+        expect.objectContaining({ id: 'beta-table-shape', status: 'pass' }),
+        expect.objectContaining({ id: 'event-table-shape', status: 'pass' }),
       ])
     );
+    expect(query).toHaveBeenCalledWith('select 1');
   });
 
-  it('fails closed when service-role configuration is missing', async () => {
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    vi.mocked(createAdminClient).mockReturnValue(null);
+  it('fails closed when the Railway database configuration is missing', async () => {
+    delete process.env.DATABASE_URL;
 
-    const report = await checkSupabaseReadiness();
+    const report = await checkRailwayReadiness();
 
     expect(report.status).toBe('fail');
     expect(report.checks).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: 'service-role-env', status: 'fail' }),
-        expect.objectContaining({ id: 'admin-client', status: 'fail' }),
+        expect.objectContaining({ id: 'database-env', status: 'fail' }),
+        expect.objectContaining({ id: 'database-connection', status: 'fail' }),
+        expect.objectContaining({ id: 'beta-table-shape', status: 'fail' }),
+      ])
+    );
+    expect(getDatabasePool).not.toHaveBeenCalled();
+  });
+
+  it('does not probe beta tables after the database health query fails', async () => {
+    query.mockRejectedValueOnce(new Error('offline'));
+
+    const report = await checkRailwayReadiness();
+
+    expect(report.status).toBe('fail');
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'database-connection', status: 'fail' }),
+        expect.objectContaining({ id: 'beta-table-shape', status: 'fail' }),
+        expect.objectContaining({ id: 'event-table-shape', status: 'fail' }),
       ])
     );
   });

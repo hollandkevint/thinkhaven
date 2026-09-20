@@ -1,7 +1,6 @@
 import 'next/dist/compiled/server-only';
 
-import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDatabasePool } from '@/lib/db/pool';
 import type { BetaAccessRecord } from './beta-access-types';
 
 const BETA_STATUS_COLUMNS = [
@@ -49,77 +48,55 @@ function deriveStatus(record: BetaAccessRecord | null): UserBetaStatus {
   return 'pending';
 }
 
-async function fetchWithUserClient(userId: string): Promise<BetaAccessRecord | null> {
-  const supabase = await createClient();
-  if (!supabase) return null;
+async function fetchBetaAccessRecord(user: BetaStatusUser): Promise<BetaAccessRecord | null> {
+  const pool = getDatabasePool();
+  const byUserId = await pool.query<BetaAccessRecord>(
+    `
+      select ${BETA_STATUS_COLUMNS}
+      from "public"."beta_access"
+      where "user_id" = $1
+      limit 1
+    `,
+    [user.id],
+  );
 
-  const { data, error } = await supabase
-    .from('beta_access')
-    .select(BETA_STATUS_COLUMNS)
-    .eq('user_id', userId)
-    .maybeSingle();
+  if (byUserId.rows[0]) {
+    return byUserId.rows[0];
+  }
 
-  if (error) {
+  const email = user.email?.trim().toLowerCase();
+  if (!email) {
     return null;
   }
 
-  return (data as unknown as BetaAccessRecord | null) ?? null;
-}
+  const byEmail = await pool.query<BetaAccessRecord>(
+    `
+      select ${BETA_STATUS_COLUMNS}
+      from "public"."beta_access"
+      where "email" = $1
+      limit 1
+    `,
+    [email],
+  );
 
-async function fetchWithAdminClient(
-  user: BetaStatusUser
-): Promise<BetaAccessRecord | null> {
-  const supabase = createAdminClient();
-  if (!supabase) return fetchWithUserClient(user.id);
-
-  const byUserId = await supabase
-    .from('beta_access')
-    .select(BETA_STATUS_COLUMNS)
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (byUserId.error) {
-    throw byUserId.error;
-  }
-
-  if (byUserId.data) {
-    return byUserId.data as unknown as BetaAccessRecord;
-  }
-
-  if (!user.email) {
-    return null;
-  }
-
-  const byEmail = await supabase
-    .from('beta_access')
-    .select(BETA_STATUS_COLUMNS)
-    .eq('email', user.email.trim().toLowerCase())
-    .maybeSingle();
-
-  if (byEmail.error) {
-    throw byEmail.error;
-  }
-
-  return (byEmail.data as unknown as BetaAccessRecord | null) ?? null;
+  return byEmail.rows[0] ?? null;
 }
 
 export async function getUserBetaAccessStatus(
   user: BetaStatusUser
 ): Promise<UserBetaAccessStatus> {
   try {
-    const record = await fetchWithAdminClient(user);
+    const record = await fetchBetaAccessRecord(user);
     return {
       status: deriveStatus(record),
       record,
       unavailable: false,
     };
   } catch {
-    const fallbackRecord = await fetchWithUserClient(user.id);
-
     return {
-      status: deriveStatus(fallbackRecord),
-      record: fallbackRecord,
-      unavailable: !fallbackRecord,
+      status: 'missing',
+      record: null,
+      unavailable: true,
     };
   }
 }

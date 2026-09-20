@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireBetaAdmin } from '@/lib/beta/beta-admin-auth';
-import { checkSupabaseReadiness } from '@/lib/beta/supabase-readiness';
+import { checkRailwayReadiness } from '@/lib/beta/supabase-readiness';
+
+export const runtime = 'nodejs';
 
 export async function GET() {
   const auth = await requireBetaAdmin();
@@ -10,12 +12,12 @@ export async function GET() {
   }
 
   try {
-    const readiness = await checkSupabaseReadiness();
+    const readiness = await checkRailwayReadiness();
     return NextResponse.json(readiness);
   } catch (error) {
-    console.error('Supabase readiness check failed:', error);
+    console.error('Railway readiness check failed:', error);
     return NextResponse.json(
-      { error: 'Supabase readiness check failed' },
+      { error: 'Railway readiness check failed' },
       { status: 500 }
     );
   }

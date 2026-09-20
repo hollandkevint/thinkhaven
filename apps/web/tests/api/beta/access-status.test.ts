@@ -69,7 +69,7 @@ describe('beta access status API', () => {
       betaApproved: false,
       status: 'unavailable',
       isAdmin: false,
-      error: 'No Supabase client',
+      error: 'Beta access lookup failed',
     });
 
     const response = await GET();
