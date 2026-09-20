@@ -81,7 +81,7 @@ Gate: schema, IDs, row counts, constraints, and representative JSON match the so
 
 Migrate in this order:
 
-1. Auth, beta access, waitlist, and admin checks. Better Auth session resolution, browser provider, email/Google sign-in, signup, verification resend, password reset/change, beta gate lookup, beta event persistence, waitlist writes, and admin approval/revocation/invite mutations are migrated. Middleware and server API identity checks remain.
+1. Auth, beta access, waitlist, and admin checks. Better Auth session resolution, browser provider, email/Google sign-in, signup, verification resend, password reset/change, beta gate lookup, beta event persistence, waitlist writes, admin mutations, middleware, and server API identity checks are migrated. Remaining Supabase use in these routes is data-plane only.
 2. Dashboard, workspace, sessions, and guest-session migration.
 3. Streaming chat, message persistence, counters, canvas, artifacts, and AI tools.
 4. Feedback, legacy conversations, monitoring, public sharing, and exports.
@@ -154,6 +154,8 @@ The exit is complete only when all of the following pass:
 - Beta access now uses the Better Auth server session plus parameterized PostgreSQL. Beta gate events, counts, and first-access timestamps use PostgreSQL without blocking user access when telemetry fails.
 - Beta waitlist and admin approval/revocation/invite operations now use parameterized PostgreSQL. Focused mutation tests cover create, duplicate, unavailable, list, not-found, and approval paths.
 - Browser auth now uses Better Auth behind the existing `useAuth()` contract. Login, signup, verification resend, reset, account password change, safe invite redirects, and token-free auth logging are covered by focused tests.
+- Middleware now only forwards request path/search context. The Node server layout remains the authoritative `/app` Better Auth and beta gate, and legacy Supabase cookies no longer establish identity.
+- Ten API routes now resolve identity from Better Auth sessions. Existing Supabase table calls remain temporarily in place until their data repositories migrate.
 - Focused Railway auth/readiness/beta tests pass, targeted lint is clean, `git diff --check` is clean, and the production Next.js build succeeds.
 - The source-only `vector(1536)` column belongs to an empty table and is represented as portable text in the rehearsal. The canonical schema must decide whether to delete the unused column or add pgvector later.
 - Temporary TCP proxies used for the import were deleted after verification; the database is private-only again.
