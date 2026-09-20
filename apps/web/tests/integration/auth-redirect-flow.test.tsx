@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import DashboardRedirect from '../../app/dashboard/page'
 import AppDashboardPage from '../../app/app/page'
 import { useAuth } from '../../lib/auth/AuthContext'
-import { supabase } from '../../lib/supabase/client'
 import { SessionMigration } from '../../lib/guest/session-migration'
 
 // Integration coverage for the dashboard route family:
@@ -19,12 +18,6 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('../../lib/auth/AuthContext', () => ({
   useAuth: vi.fn()
-}))
-
-vi.mock('../../lib/supabase/client', () => ({
-  supabase: {
-    from: vi.fn()
-  }
 }))
 
 vi.mock('../../lib/guest/session-migration', () => ({
@@ -49,8 +42,8 @@ vi.mock('../../app/components/feedback/FeedbackButton', () => ({
 
 const mockUseRouter = vi.mocked(useRouter)
 const mockUseAuth = vi.mocked(useAuth)
-const mockSupabase = vi.mocked(supabase)
 const mockMigration = vi.mocked(SessionMigration)
+const mockFetch = vi.fn()
 
 const mockUser = {
   id: 'test-user',
@@ -71,14 +64,11 @@ const sampleSession = {
   updated_at: new Date().toISOString()
 }
 
-// Builds the .from('bmad_sessions').select().eq().order().limit() chain.
-function mockSessionsQuery(result: { data: unknown[] | null; error: unknown }) {
-  const limit = vi.fn(() => Promise.resolve(result))
-  const order = vi.fn(() => ({ limit }))
-  const eq = vi.fn(() => ({ order }))
-  const select = vi.fn(() => ({ eq }))
-  mockSupabase.from.mockReturnValue({ select } as never)
-  return { select, eq, order, limit }
+function mockSessionsResponse(body: unknown, ok = true) {
+  return {
+    ok,
+    json: () => Promise.resolve(body),
+  }
 }
 
 describe('Dashboard route integration', () => {
@@ -87,6 +77,8 @@ describe('Dashboard route integration', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockFetch.mockReset()
+    vi.stubGlobal('fetch', mockFetch)
     mockUseRouter.mockReturnValue({ push: mockPush, replace: mockReplace } as never)
     mockUseAuth.mockReturnValue({
       user: mockUser,
@@ -110,16 +102,15 @@ describe('Dashboard route integration', () => {
   describe('App dashboard rendering', () => {
     it('renders nothing when there is no user (layout owns the redirect)', () => {
       mockUseAuth.mockReturnValue({ user: null, loading: false, signOut: vi.fn() } as never)
-      mockSessionsQuery({ data: [], error: null })
 
       const { container } = render(<AppDashboardPage />)
 
       expect(container.firstChild).toBeNull()
-      expect(mockSupabase.from).not.toHaveBeenCalled()
+      expect(mockFetch).not.toHaveBeenCalled()
     })
 
     it('loads and displays the user sessions', async () => {
-      const { eq, limit } = mockSessionsQuery({ data: [sampleSession], error: null })
+      mockFetch.mockResolvedValueOnce(mockSessionsResponse([sampleSession]))
 
       render(<AppDashboardPage />)
 
@@ -127,13 +118,13 @@ describe('Dashboard route integration', () => {
       await waitFor(() => {
         expect(screen.getAllByText('Pricing decision').length).toBeGreaterThan(0)
       })
-      expect(mockSupabase.from).toHaveBeenCalledWith('bmad_sessions')
-      expect(eq).toHaveBeenCalledWith('user_id', 'test-user')
-      expect(limit).toHaveBeenCalledWith(50)
+      expect(mockFetch).toHaveBeenCalledWith('/api/sessions', { cache: 'no-store' })
+      // Better Auth scopes the server request; the browser does not submit a user id.
+      expect(JSON.stringify(mockFetch.mock.calls[0])).not.toContain('test-user')
     })
 
     it('shows the empty state when the user has no sessions', async () => {
-      mockSessionsQuery({ data: [], error: null })
+      mockFetch.mockResolvedValueOnce(mockSessionsResponse([]))
 
       render(<AppDashboardPage />)
 
@@ -151,7 +142,6 @@ describe('Dashboard route integration', () => {
         success: true,
         sessionId: 'migrated-1'
       } as never)
-      mockSessionsQuery({ data: [], error: null })
 
       render(<AppDashboardPage />)
 
@@ -164,25 +154,22 @@ describe('Dashboard route integration', () => {
 
   describe('Error handling and retry', () => {
     it('shows the error state when the sessions query fails', async () => {
-      mockSessionsQuery({ data: null, error: new Error('relation does not exist') })
+      mockFetch.mockResolvedValueOnce(
+        mockSessionsResponse({ error: 'Railway database unavailable' }, false),
+      )
 
       render(<AppDashboardPage />)
 
       await waitFor(() => {
         expect(screen.getByTestId('error-state')).toBeInTheDocument()
       })
-      expect(screen.getByText('relation does not exist')).toBeInTheDocument()
+      expect(screen.getByText('Railway database unavailable')).toBeInTheDocument()
     })
 
     it('retry refetches and recovers to the loaded view', async () => {
-      const limit = vi
-        .fn()
-        .mockResolvedValueOnce({ data: null, error: new Error('Network request failed') })
-        .mockResolvedValueOnce({ data: [sampleSession], error: null })
-      const order = vi.fn(() => ({ limit }))
-      const eq = vi.fn(() => ({ order }))
-      const select = vi.fn(() => ({ eq }))
-      mockSupabase.from.mockReturnValue({ select } as never)
+      mockFetch
+        .mockResolvedValueOnce(mockSessionsResponse({ error: 'Network request failed' }, false))
+        .mockResolvedValueOnce(mockSessionsResponse([sampleSession]))
 
       render(<AppDashboardPage />)
 
@@ -197,7 +184,9 @@ describe('Dashboard route integration', () => {
       await waitFor(() => {
         expect(screen.getAllByText('Pricing decision').length).toBeGreaterThan(0)
       })
-      expect(limit).toHaveBeenCalledTimes(2)
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+      expect(mockFetch.mock.calls[0][0]).toBe('/api/sessions')
+      expect(mockFetch.mock.calls[1][0]).toBe('/api/sessions')
     })
   })
 })

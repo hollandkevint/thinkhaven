@@ -8,6 +8,7 @@
     "build": "next build",
     "build:prod": "next build",
     "start": "next start",
+    "type-check": "tsc --noEmit --incremental false -p tsconfig.build.json",
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",
