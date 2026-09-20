@@ -4,9 +4,7 @@
  * Handles migrating guest session data to authenticated user workspace
  */
 
-import { supabase } from '@/lib/supabase/client'
 import { GuestSessionStore } from './session-store'
-import { getPathwayConfig } from '@/lib/session/pathway-config'
 
 export interface MigrationResult {
   success: boolean
@@ -20,8 +18,10 @@ export class SessionMigration {
   /**
    * Migrate guest session to user workspace
    */
-  static async migrateToUserWorkspace(userId: string): Promise<MigrationResult> {
+  static async migrateToUserWorkspace(_userId: string): Promise<MigrationResult> {
     try {
+      // The server derives the actor from Better Auth; this parameter remains for caller compatibility.
+      void _userId
       const guestData = GuestSessionStore.getSessionForMigration()
 
       if (!guestData || guestData.messages.length === 0) {
@@ -32,65 +32,18 @@ export class SessionMigration {
         }
       }
 
-      // Validate and sanitize guest messages before migration
-      const ALLOWED_ROLES = new Set(['user', 'assistant'])
-      const MAX_CONTENT_LENGTH = 4000
-      const MAX_MESSAGES = 10
+      const response = await fetch('/api/guest/migrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ session: guestData }),
+      })
 
-      const validMessages = guestData.messages
-        .filter(msg => ALLOWED_ROLES.has(msg.role))
-        .slice(0, MAX_MESSAGES)
-
-      const chatMessages = validMessages.map(msg => ({
-        id: msg.id || crypto.randomUUID(),
-        role: msg.role as 'user' | 'assistant',
-        content: typeof msg.content === 'string' ? msg.content.slice(0, MAX_CONTENT_LENGTH) : '',
-        timestamp: msg.timestamp || new Date().toISOString(),
-      }))
-
-      // Derive title from first user message (first 6 words)
-      const firstUserMsg = chatMessages.find(m => m.role === 'user')
-      const autoTitle = firstUserMsg
-        ? firstUserMsg.content.split(/\s+/).slice(0, 6).join(' ')
-        : 'Guest Session'
-      const migratedPathway = guestData.pathway === 'plan-grill' ? 'plan-grill' : 'quick-decision'
-      const planGrillConfig = migratedPathway === 'plan-grill'
-        ? getPathwayConfig('plan-grill')
-        : undefined
-
-      const hasUtm = !!guestData.utm && Object.keys(guestData.utm).length > 0
-
-      const { data: newSession, error: createError } = await supabase
-        .from('bmad_sessions')
-        .insert({
-          user_id: userId,
-          workspace_id: userId,
-          pathway: migratedPathway,
-          title: autoTitle,
-          current_phase: planGrillConfig?.phase || 'discovery',
-          current_template: 'general',
-          current_step: 'chat',
-          templates: [],
-          next_steps: [],
-          status: 'active',
-          overall_completion: 0,
-          message_count: chatMessages.filter(m => m.role === 'user').length,
-          message_limit: planGrillConfig?.messageLimit || 10,
-          chat_context: chatMessages,
-          // First-touch attribution from /try arrival (migration 034). Spread in only
-          // when there is attribution to record: Vercel auto-deploys on merge while 034
-          // is applied by hand, so an unattributed conversion must not send a column
-          // that may not exist yet and fail the whole insert.
-          ...(hasUtm ? { utm: guestData.utm } : {}),
-        })
-        .select('id')
-        .single()
-
-      if (createError || !newSession) {
-        console.error('Failed to migrate session:', createError)
+      const result = await response.json().catch(() => null) as MigrationResult | null
+      if (!response.ok || !result?.success) {
         return {
           success: false,
-          error: 'Failed to save migrated session'
+          error: result?.error || 'Failed to save migrated session',
         }
       }
 
@@ -98,10 +51,7 @@ export class SessionMigration {
       GuestSessionStore.clearSession()
 
       return {
-        success: true,
-        sessionId: newSession.id,
-        workspaceId: userId,
-        migratedMessages: chatMessages.length
+        ...result,
       }
     } catch (error) {
       console.error('Migration error:', error)

@@ -22,43 +22,29 @@ function installLocalStorageMock() {
 }
 
 const mocks = vi.hoisted(() => ({
-  insertedSessions: [] as Record<string, unknown>[],
-}))
-
-vi.mock('@/lib/supabase/client', () => ({
-  supabase: {
-    from: vi.fn((table: string) => {
-      if (table !== 'bmad_sessions') {
-        throw new Error(`Unexpected table: ${table}`)
-      }
-
-      return {
-        insert: vi.fn((session: Record<string, unknown>) => {
-          mocks.insertedSessions.push(session)
-          return {
-            select: vi.fn(() => ({
-              single: vi.fn(() => Promise.resolve({
-                data: { id: 'migrated-session' },
-                error: null,
-              })),
-            })),
-          }
-        }),
-      }
-    }),
-  },
+  fetch: vi.fn(),
 }))
 
 describe('SessionMigration', () => {
   beforeEach(() => {
     installLocalStorageMock()
     localStorage.clear()
-    mocks.insertedSessions.length = 0
+    mocks.fetch.mockReset()
+    vi.stubGlobal('fetch', mocks.fetch)
   })
 
   it('preserves plan-grill pathway settings when migrating a guest session', async () => {
     GuestSessionStore.addMessage('user', 'Grill this plan', 'plan-grill')
     GuestSessionStore.addMessage('assistant', 'What docs should I use?', 'plan-grill')
+    mocks.fetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        success: true,
+        sessionId: 'migrated-session',
+        workspaceId: 'user-123',
+        migratedMessages: 2,
+      }),
+    })
 
     const result = await SessionMigration.migrateToUserWorkspace('user-123')
 
@@ -67,12 +53,23 @@ describe('SessionMigration', () => {
       sessionId: 'migrated-session',
       migratedMessages: 2,
     })
-    expect(mocks.insertedSessions[0]).toMatchObject({
-      pathway: 'plan-grill',
-      current_phase: 'intake',
-      message_limit: 20,
-      message_count: 1,
-    })
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/guest/migrate', expect.objectContaining({
+      method: 'POST',
+      body: expect.stringContaining('plan-grill'),
+    }))
     expect(GuestSessionStore.getSession()).toBeNull()
+  })
+
+  it('keeps the guest session when the authenticated migration fails', async () => {
+    GuestSessionStore.addMessage('user', 'Keep this thread', 'new-idea')
+    mocks.fetch.mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({ success: false, error: 'Failed to save migrated session' }),
+    })
+
+    await expect(SessionMigration.migrateToUserWorkspace('user-123')).resolves.toMatchObject({
+      success: false,
+    })
+    expect(GuestSessionStore.getSession()).not.toBeNull()
   })
 })
