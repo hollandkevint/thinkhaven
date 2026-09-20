@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { supabase } from '@/lib/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -123,16 +122,10 @@ export default function AppDashboardPage() {
   const fetchSessions = useCallback(async () => {
     try {
       setError(null);
-      // Select specific columns - exclude chat_context to avoid loading full JSONB blobs
-      const { data, error: fetchError } = await supabase
-        .from('bmad_sessions')
-        .select('id, user_id, pathway, title, current_phase, message_count, message_limit, status, created_at, updated_at')
-        .eq('user_id', user?.id)
-        .order('updated_at', { ascending: false })
-        .limit(50);
-
-      if (fetchError) throw fetchError;
-      setSessions(data || []);
+      const response = await fetch('/api/sessions', { cache: 'no-store' });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || 'Failed to load sessions');
+      setSessions(Array.isArray(data) ? data : []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load sessions';
       console.error('Error fetching sessions:', err);
@@ -141,7 +134,7 @@ export default function AppDashboardPage() {
       setLoading(false);
       setIsRetrying(false);
     }
-  }, [user?.id]);
+  }, []);
 
   // Check for guest session migration on mount
   useEffect(() => {
@@ -188,13 +181,11 @@ export default function AppDashboardPage() {
     setSessions(prev => prev.filter(s => s.id !== sessionId));
 
     try {
-      const { error } = await supabase
-        .from('bmad_sessions')
-        .delete()
-        .eq('id', sessionId)
-        .eq('user_id', user?.id);  // IDOR protection
-
-      if (error) throw error;
+      const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || 'Failed to delete session');
     } catch (error) {
       console.error('Error deleting session:', error);
       // Revert on failure
@@ -210,13 +201,13 @@ export default function AppDashboardPage() {
     setRenamingSession(null);
 
     try {
-      const { error } = await supabase
-        .from('bmad_sessions')
-        .update({ title: trimmed })
-        .eq('id', sessionId)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
+      const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: trimmed }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || 'Failed to rename session');
     } catch (error) {
       console.error('Error renaming session:', error);
       fetchSessions();

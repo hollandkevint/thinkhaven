@@ -3,7 +3,6 @@
 import { useParams } from 'next/navigation'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
-import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Users } from 'lucide-react'
 import { PaneErrorBoundary, OfflineIndicator, useOnlineStatus } from '@/app/components/dual-pane/PaneErrorBoundary'
@@ -101,14 +100,13 @@ export default function SessionPage() {
     if (!user) return
     try {
       setError('')
-      const { data, error: fetchError } = await supabase
-        .from('bmad_sessions')
-        .select('id, user_id, chat_context, title, pathway, current_phase, message_count, message_limit, sub_persona_state, lean_canvas, updated_at')
-        .eq('id', params.id)
-        .eq('user_id', user.id)
-        .single()
-
-      if (fetchError) throw fetchError
+      const sessionId = Array.isArray(params.id) ? params.id[0] : params.id
+      if (!sessionId) throw new Error('Session not found')
+      const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
+        cache: 'no-store',
+      })
+      const data = await response.json().catch(() => null)
+      if (!response.ok || !data) throw new Error(data?.error || 'Session not found')
 
       const sessionData: SessionData = {
         id: data.id,
