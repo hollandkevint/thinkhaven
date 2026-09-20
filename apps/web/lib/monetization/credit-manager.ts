@@ -7,10 +7,11 @@
  * - Credit additions (purchases and grants)
  * - Transaction history
  *
- * Uses Supabase RPC functions for atomic operations.
+ * Uses the application-owned PostgreSQL pool for parameterized queries.
  */
 
-import { createClient } from '@/lib/supabase/server';
+import type { PoolClient } from 'pg';
+import { getDatabasePool } from '@/lib/db/pool';
 import { isAdminEmail } from '@/lib/auth/admin';
 
 // ============================================================================
@@ -52,6 +53,41 @@ export interface AddCreditsResult {
   message: string;
 }
 
+type CreditBalanceRow = Omit<CreditBalance, 'created_at' | 'updated_at'> & {
+  created_at: string | Date;
+  updated_at: string | Date;
+};
+
+type CreditTransactionRow = Omit<CreditTransaction, 'created_at'> & {
+  created_at: string | Date;
+};
+
+function normalizeTimestamp(value: string | Date): string {
+  return value instanceof Date ? value.toISOString() : value;
+}
+
+async function withCreditTransaction<T>(
+  work: (client: PoolClient) => Promise<T>,
+): Promise<T> {
+  const client = await getDatabasePool().connect();
+
+  try {
+    await client.query('BEGIN');
+    const result = await work(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      // Preserve the original failure.
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 // ============================================================================
 // CREDIT BALANCE OPERATIONS
 // ============================================================================
@@ -60,21 +96,35 @@ export interface AddCreditsResult {
  * Get user's current credit balance and totals
  */
 export async function getCreditBalance(userId: string): Promise<CreditBalance | null> {
-  const supabase = await createClient();
-  if (!supabase) return null;
+  try {
+    const { rows } = await getDatabasePool().query<CreditBalanceRow>(
+      `
+        SELECT
+          "balance",
+          "total_granted",
+          "total_purchased",
+          "total_used",
+          "created_at",
+          "updated_at"
+        FROM "public"."user_credits"
+        WHERE "user_id" = $1
+        LIMIT 1
+      `,
+      [userId],
+    );
 
-  const { data, error } = await supabase
-    .from('user_credits')
-    .select('balance, total_granted, total_purchased, total_used, created_at, updated_at')
-    .eq('user_id', userId)
-    .single();
+    const row = rows[0];
+    if (!row) return null;
 
-  if (error) {
+    return {
+      ...row,
+      created_at: normalizeTimestamp(row.created_at),
+      updated_at: normalizeTimestamp(row.updated_at),
+    };
+  } catch (error) {
     console.error('Error fetching credit balance:', error);
     return null;
   }
-
-  return data;
 }
 
 /**
@@ -86,15 +136,8 @@ export async function hasCredits(userId: string, required: number = 1, userEmail
   // Skip credit checks when credit system is not enabled
   const creditsDisabled = process.env.CREDIT_SYSTEM_ENABLED !== 'true';
 
-  // Admin bypass — use provided email to avoid extra getUser() round-trip
-  const email = userEmail ?? (await (async () => {
-    const supabase = await createClient();
-    if (!supabase) return undefined;
-    const { data: { user } } = await supabase.auth.getUser();
-    return user?.email;
-  })());
-
-  if (isAdminEmail(email)) {
+  // Server callers provide the authenticated email for the admin bypass.
+  if (isAdminEmail(userEmail)) {
     console.log('[ADMIN] Bypassing credit check');
     return true;
   }
@@ -129,15 +172,8 @@ export async function deductCredit(
   // Skip credit deduction when credit system is not enabled
   const creditsDisabled = process.env.CREDIT_SYSTEM_ENABLED !== 'true';
 
-  // Admin bypass — use provided email to avoid extra getUser() round-trip
-  const email = userEmail ?? (await (async () => {
-    const supabase = await createClient();
-    if (!supabase) return undefined;
-    const { data: { user } } = await supabase.auth.getUser();
-    return user?.email;
-  })());
-
-  if (isAdminEmail(email)) {
+  // Server callers provide the authenticated email for the admin bypass.
+  if (isAdminEmail(userEmail)) {
     console.log('[ADMIN] Bypassing credit deduction');
     return {
       success: true,
@@ -155,29 +191,72 @@ export async function deductCredit(
   }
 
   try {
-    const supabase = await createClient();
-    if (!supabase) {
+    return await withCreditTransaction(async (client) => {
+      const { rows } = await client.query<{ balance: number }>(
+        `
+          SELECT "balance"
+          FROM "public"."user_credits"
+          WHERE "user_id" = $1
+          FOR UPDATE
+        `,
+        [userId],
+      );
+
+      const balance = rows[0]?.balance;
+      if (balance === undefined) {
+        return {
+          success: false,
+          balance: 0,
+          message: 'User credits not found',
+        };
+      }
+
+      if (balance < 1) {
+        return {
+          success: false,
+          balance,
+          message: 'Insufficient credits',
+        };
+      }
+
+      const { rows: updatedRows } = await client.query<{ balance: number }>(
+        `
+          UPDATE "public"."user_credits"
+          SET
+            "balance" = "balance" - 1,
+            "total_used" = "total_used" + 1,
+            "updated_at" = NOW()
+          WHERE "user_id" = $1
+          RETURNING "balance"
+        `,
+        [userId],
+      );
+      const newBalance = updatedRows[0]?.balance;
+      if (newBalance === undefined) {
+        throw new Error('Credit balance update failed');
+      }
+
+      await client.query(
+        `
+          INSERT INTO "public"."credit_transactions" (
+            "user_id",
+            "transaction_type",
+            "amount",
+            "balance_after",
+            "session_id",
+            "description"
+          )
+          VALUES ($1, 'deduct', -1, $2, $3, 'Credit deducted for session start')
+        `,
+        [userId, newBalance, sessionId || null],
+      );
+
       return {
-        success: false,
-        balance: 0,
-        message: 'Service unavailable',
+        success: true,
+        balance: newBalance,
+        message: 'Credit deducted successfully',
       };
-    }
-    const { data, error } = await supabase.rpc('deduct_credit_transaction', {
-      p_user_id: userId,
-      p_session_id: sessionId || null,
     });
-
-    if (error) {
-      console.error('Error deducting credit:', error);
-      return {
-        success: false,
-        balance: 0,
-        message: error.message || 'Failed to deduct credit',
-      };
-    }
-
-    return data as DeductCreditResult;
   } catch (error) {
     console.error('Unexpected error deducting credit:', error);
     return {
@@ -193,7 +272,7 @@ export async function deductCredit(
 // ============================================================================
 
 /**
- * Add credits to user's account (from purchase or grant)
+ * Add credits to a user's account from a trusted server caller.
  *
  * @param userId - User ID
  * @param amount - Number of credits to add (must be positive)
@@ -201,15 +280,6 @@ export async function deductCredit(
  * @param stripePaymentId - Stripe payment intent ID (for purchases)
  * @param description - Optional description for transaction log
  * @returns Result with success status and new balance
- */
-/**
- * Add credits to a user.
- *
- * Currently unused. Migration 035 restricted add_credits_transaction to service_role,
- * because it mints credits from a caller-supplied user_id and amount and was reachable
- * with the public anon key. This helper uses the cookie-scoped client, so it will fail
- * on permissions until it is rewired to an admin client behind a trusted trigger such
- * as a verified Stripe webhook.
  */
 export async function addCredits(options: {
   userId: string;
@@ -228,34 +298,86 @@ export async function addCredits(options: {
     };
   }
 
-  const supabase = await createClient();
-  if (!supabase) {
-    return {
-      success: false,
-      balance: 0,
-      message: 'Service unavailable',
-    };
-  }
-
   try {
-    const { data, error } = await supabase.rpc('add_credits_transaction', {
-      p_user_id: userId,
-      p_amount: amount,
-      p_source: source,
-      p_stripe_payment_id: stripePaymentId || null,
-      p_description: description || null,
-    });
+    return await withCreditTransaction(async (client) => {
+      const transactionType = source === 'purchase' ? 'purchase' : 'grant';
+      const { rows: insertedRows } = await client.query<{ balance: number }>(
+        `
+          INSERT INTO "public"."user_credits" (
+            "user_id",
+            "balance",
+            "total_granted",
+            "total_purchased"
+          )
+          VALUES (
+            $1,
+            $2,
+            CASE WHEN $3 = 'grant' THEN $2 ELSE 0 END,
+            CASE WHEN $3 = 'purchase' THEN $2 ELSE 0 END
+          )
+          ON CONFLICT ("user_id") DO NOTHING
+          RETURNING "balance"
+        `,
+        [userId, amount, transactionType],
+      );
 
-    if (error) {
-      console.error('Error adding credits:', error);
+      let newBalance = insertedRows[0]?.balance;
+      if (newBalance === undefined) {
+        const { rows } = await client.query<{ balance: number }>(
+          `
+            SELECT "balance"
+            FROM "public"."user_credits"
+            WHERE "user_id" = $1
+            FOR UPDATE
+          `,
+          [userId],
+        );
+        if (rows[0] === undefined) {
+          throw new Error('User credits not found');
+        }
+
+        const { rows: updatedRows } = await client.query<{ balance: number }>(
+          `
+            UPDATE "public"."user_credits"
+            SET
+              "balance" = "balance" + $2,
+              "total_granted" = "total_granted" + CASE WHEN $3 = 'grant' THEN $2 ELSE 0 END,
+              "total_purchased" = "total_purchased" + CASE WHEN $3 = 'purchase' THEN $2 ELSE 0 END,
+              "updated_at" = NOW()
+            WHERE "user_id" = $1
+            RETURNING "balance"
+          `,
+          [userId, amount, transactionType],
+        );
+        newBalance = updatedRows[0]?.balance;
+      }
+
+      if (newBalance === undefined) {
+        throw new Error('Credit balance update failed');
+      }
+
+      const transactionDescription = description || `${amount} credits added`;
+      await client.query(
+        `
+          INSERT INTO "public"."credit_transactions" (
+            "user_id",
+            "transaction_type",
+            "amount",
+            "balance_after",
+            "stripe_payment_id",
+            "description"
+          )
+          VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+        [userId, transactionType, amount, newBalance, stripePaymentId || null, transactionDescription],
+      );
+
       return {
-        success: false,
-        balance: 0,
-        message: error.message || 'Failed to add credits',
+        success: true,
+        balance: newBalance,
+        message: `${amount} credits added successfully`,
       };
-    }
-
-    return data as AddCreditsResult;
+    });
   } catch (error) {
     console.error('Unexpected error adding credits:', error);
     return {
@@ -281,21 +403,35 @@ export async function getCreditHistory(
   userId: string,
   limit: number = 50
 ): Promise<CreditTransaction[]> {
-  const supabase = await createClient();
-  if (!supabase) return [];
+  try {
+    const { rows } = await getDatabasePool().query<CreditTransactionRow>(
+      `
+        SELECT
+          "id",
+          "user_id",
+          "transaction_type",
+          "amount",
+          "balance_after",
+          "session_id",
+          "stripe_payment_id",
+          "stripe_checkout_session_id",
+          "description",
+          "metadata",
+          "created_at"
+        FROM "public"."credit_transactions"
+        WHERE "user_id" = $1
+        ORDER BY "created_at" DESC
+        LIMIT $2
+      `,
+      [userId, limit],
+    );
 
-  const { data, error } = await supabase
-    .from('credit_transactions')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (error) {
+    return rows.map((row) => ({
+      ...row,
+      created_at: normalizeTimestamp(row.created_at),
+    }));
+  } catch (error) {
     console.error('Error fetching credit history:', error);
     return [];
   }
-
-  return data || [];
 }
-

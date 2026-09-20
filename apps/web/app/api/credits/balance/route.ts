@@ -6,20 +6,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { getRailwaySession } from '@/lib/auth/railway-session';
 import { getCreditBalance, getCreditHistory } from '@/lib/monetization/credit-manager';
 
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate user
-    const supabase = await createClient();
-    if (!supabase) {
-      return NextResponse.json(
-        { error: 'Service unavailable' },
-        { status: 503 }
-      );
-    }
     const railwaySession = await getRailwaySession(request);
     const user = railwaySession?.user;
 
