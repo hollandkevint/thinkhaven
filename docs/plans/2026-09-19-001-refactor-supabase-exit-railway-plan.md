@@ -75,6 +75,14 @@ Gate: the new foundation builds and tests without changing current Supabase prod
 - [ ] Preserve constraints, indexes, and atomic credit/message/canvas behavior.
 - [ ] Remove `auth.uid()` and Supabase JWT-hook dependencies.
 
+`apps/web/db/migrations/002_railway_schema_cutover.sql` now contains the minimal
+canonical cutover: it preserves delete behavior while repointing all 15 public
+foreign keys, removes the 45 obsolete public RLS policies, disables public RLS,
+and removes the Supabase-auth triggers and RPCs replaced by actor-scoped server
+transactions. It completed successfully on the Railway rehearsal database inside
+a forced rollback transaction. Applying it requires Kevin's explicit approval
+because it changes the database security boundary.
+
 Gate: schema, IDs, row counts, constraints, and representative JSON match the source snapshot.
 
 ### Phase 3: vertical application migration
@@ -144,10 +152,12 @@ The exit is complete only when all of the following pass:
 
 1. The sensitive temporary Auth backup needs a durable encrypted destination and retention period.
 2. Password-reset email needs an approved sender/domain.
+3. Applying the transaction-tested canonical schema migration requires explicit approval because it drops restored Supabase RLS policies, auth triggers, and obsolete RPCs on the non-serving Railway target.
 
 ## Latest rehearsal evidence
 
 - Railway PostgreSQL 18 restore completed with 28 public tables and 27 source Auth tables.
+- Live Railway audit confirms 15 public foreign keys still target `auth.users` and 45 public RLS policies remain before canonical cutover. The new migration completed inside a forced rollback, and post-checks confirmed the target remained unchanged at 15/45.
 - Counts match the source inventory: 9 users, 11 sessions, 13 phase outputs, 9 credit balances, 10 credit transactions, 14 beta-access rows, and 3 beta-auth events.
 - All restored constraints validate; 45 source RLS policies and 3 source signup triggers are present for behavior comparison.
 - Better Auth `app_auth` schema contains all 9 user UUIDs and 4 Google identities, with zero UUID mismatches and zero imported sessions.
