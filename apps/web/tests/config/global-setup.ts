@@ -34,32 +34,7 @@ async function globalSetup(config: FullConfig) {
     }
   }
 
-  // 1. Validate required environment variables
-  console.log('📋 Validating environment variables...')
-  const errors: string[] = []
-
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    errors.push('❌ NEXT_PUBLIC_SUPABASE_URL is required')
-    errors.push('   Add it to apps/web/.env.local or .env.test')
-  } else {
-    console.log(`✅ NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`)
-  }
-
-  if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    errors.push('❌ NEXT_PUBLIC_SUPABASE_ANON_KEY is required')
-    errors.push('   Add it to apps/web/.env.local or .env.test')
-  } else {
-    console.log(`✅ NEXT_PUBLIC_SUPABASE_ANON_KEY: ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20)}...`)
-  }
-
-  if (errors.length > 0) {
-    console.error('\n❌ Test environment validation failed:\n')
-    errors.forEach(err => console.error(`  ${err}`))
-    console.error('\nPlease configure apps/web/.env.local with your Supabase credentials.\n')
-    process.exit(1)
-  }
-
-  // 2. Verify base URL configuration
+  // Verify base URL configuration
   const baseURL = config.use?.baseURL || 'http://localhost:3000'
   console.log(`\n✅ Base URL configured: ${baseURL}`)
 

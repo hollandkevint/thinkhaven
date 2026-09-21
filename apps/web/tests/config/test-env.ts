@@ -31,14 +31,6 @@ export const testConfig = {
     }
   },
 
-  // Supabase test configuration
-  supabase: {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    // Test service role key (for test setup/cleanup)
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  },
-
   // Test timeouts
   timeouts: {
     oauth: 30000, // 30 seconds for OAuth flows
@@ -73,14 +65,6 @@ export const testConfig = {
 // Validate required environment variables
 export function validateTestEnvironment(): string[] {
   const errors: string[] = []
-
-  if (!testConfig.supabase.url) {
-    errors.push('NEXT_PUBLIC_SUPABASE_URL is required for testing')
-  }
-
-  if (!testConfig.supabase.anonKey) {
-    errors.push('NEXT_PUBLIC_SUPABASE_ANON_KEY is required for testing')
-  }
 
   // In CI, validate OAuth test credentials if using real OAuth
   if (testConfig.ci.useSecrets && !testConfig.oauth.useMockProvider) {

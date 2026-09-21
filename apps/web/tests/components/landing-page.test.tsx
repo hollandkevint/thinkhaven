@@ -13,15 +13,6 @@ vi.mock('next/link', () => ({
   )
 }))
 
-// Mock Supabase client (used by WaitlistForm)
-vi.mock('@/lib/supabase/client', () => ({
-  supabase: {
-    from: () => ({
-      insert: vi.fn().mockResolvedValue({ error: null })
-    })
-  }
-}))
-
 // Mock UI components
 vi.mock('@/components/ui/button', () => ({
   Button: ({ children, asChild, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean, children: ReactNode }) => {

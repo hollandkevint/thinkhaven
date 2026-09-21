@@ -4,8 +4,6 @@ import { useState, useEffect, useRef } from 'react'
 import { CoachingContext } from '@/lib/ai/mary-persona'
 import MarkdownRenderer from './MarkdownRenderer'
 import ArtifactAwareContent from './ArtifactAwareContent'
-import MessageActionMenu from './MessageActionMenu'
-import { MessageBookmarkRow } from '@/lib/supabase/conversation-schema'
 import { useSafeArtifacts } from '@/lib/artifact'
 
 export interface StreamingMessageProps {
@@ -22,12 +20,8 @@ export interface StreamingMessageProps {
   }
   coachingContext?: CoachingContext
   className?: string
-  bookmarks?: MessageBookmarkRow[]
   sessionId?: string
   onComplete?: () => void
-  onBookmark?: (data: { title: string; description?: string; tags: string[]; color: string }) => void
-  onCreateReference?: (toMessageId: string, type: string) => void
-  onViewReferences?: () => void
 }
 
 interface StreamingTextProps {
@@ -111,12 +105,8 @@ export default function StreamingMessage({
   tokenUsage,
   coachingContext,
   className = '',
-  bookmarks = [],
   sessionId,
-  onComplete,
-  onBookmark,
-  onCreateReference,
-  onViewReferences
+  onComplete
 }: StreamingMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const messageRef = useRef<HTMLDivElement>(null)
@@ -200,30 +190,6 @@ export default function StreamingMessage({
             </div>
           )}
           
-          {/* Bookmark indicator */}
-          {bookmarks.length > 0 && (
-            <div className="flex items-center gap-1">
-              <svg className="w-3 h-3 text-mustard" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
-              </svg>
-              <span className="text-xs text-mustard font-medium">
-                {bookmarks.length}
-              </span>
-            </div>
-          )}
-          
-          {/* Action Menu */}
-          {(onBookmark || onCreateReference || onViewReferences) && !isStreaming && (
-            <MessageActionMenu
-              messageId={id}
-              messageContent={content}
-              isBookmarked={bookmarks.length > 0}
-              bookmarks={bookmarks}
-              onBookmark={onBookmark || (() => {})}
-              onCreateReference={onCreateReference || (() => {})}
-              onViewReferences={onViewReferences || (() => {})}
-            />
-          )}
         </div>
 
         {/* Message bubble */}

@@ -4,7 +4,7 @@
  * Tests the tool execution engine and helper functions
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   ToolExecutor,
   parseToolUseBlocks,
@@ -12,26 +12,6 @@ import {
   extractTextContent,
   type ToolCall,
 } from '@/lib/ai/tool-executor';
-
-// Mock Supabase
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(() => Promise.resolve({
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-        })),
-      })),
-      insert: vi.fn(() => Promise.resolve({ error: null })),
-      update: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve({ error: null })),
-      })),
-    })),
-  })),
-}));
 
 describe('Tool Executor Helper Functions', () => {
   describe('parseToolUseBlocks', () => {

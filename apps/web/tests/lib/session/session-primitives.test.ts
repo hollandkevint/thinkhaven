@@ -12,33 +12,6 @@ import {
   calculateProgress,
 } from '@/lib/session/session-primitives';
 
-// Mock Supabase - we test the pure functions here, not the DB operations
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(() => Promise.resolve({
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-        })),
-      })),
-      insert: vi.fn(() => ({
-        select: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: { id: 'test-id' }, error: null })),
-        })),
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve({ error: null })),
-      })),
-      delete: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve({ error: null })),
-      })),
-    })),
-  })),
-}));
-
 vi.mock('@/lib/monetization/credit-manager', () => ({
   hasCredits: vi.fn(() => Promise.resolve(true)),
   deductCredit: vi.fn(() => Promise.resolve({ success: true })),

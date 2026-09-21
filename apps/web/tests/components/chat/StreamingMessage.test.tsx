@@ -14,20 +14,6 @@ vi.mock('@/app/components/chat/ArtifactAwareContent', () => ({
   default: ({ content }: { content: string }) => <div data-testid="markdown-content">{content}</div>
 }))
 
-// Mock the MessageActionMenu component
-vi.mock('@/app/components/chat/MessageActionMenu', () => ({
-  default: ({ onBookmark }: any) => (
-    <div data-testid="action-menu">
-      <button
-        data-testid="bookmark-button"
-        onClick={() => onBookmark({ title: 'Test Bookmark', tags: [], color: 'blue' })}
-      >
-        Bookmark
-      </button>
-    </div>
-  )
-}))
-
 const mockCoachingContext: CoachingContext = {
   userProfile: {
     experienceLevel: 'intermediate',
@@ -57,9 +43,6 @@ describe('StreamingMessage', () => {
     role: 'assistant' as const,
     content: 'This is a test message',
     timestamp: new Date('2024-01-01T12:00:00Z'),
-    onBookmark: vi.fn(),
-    onCreateReference: vi.fn(),
-    onViewReferences: vi.fn()
   }
 
   beforeEach(() => {
@@ -143,28 +126,6 @@ describe('StreamingMessage', () => {
       // Check for streaming visual indicator (terracotta ring in the design system)
       const bubble = screen.getByTestId('markdown-content').closest('[class*="rounded-2xl"]')
       expect(bubble).toHaveClass('ring-2', 'ring-terracotta/20')
-    })
-
-    it('should not show action menu when streaming', () => {
-      render(
-        <StreamingMessage
-          {...defaultProps}
-          isStreaming={true}
-        />
-      )
-
-      expect(screen.queryByTestId('action-menu')).not.toBeInTheDocument()
-    })
-
-    it('should show action menu when not streaming', () => {
-      render(
-        <StreamingMessage
-          {...defaultProps}
-          isStreaming={false}
-        />
-      )
-
-      expect(screen.getByTestId('action-menu')).toBeInTheDocument()
     })
 
     it('should call onComplete when the typing animation finishes', async () => {
@@ -258,56 +219,6 @@ describe('StreamingMessage', () => {
       expect(screen.getByText('intermediate')).toBeInTheDocument()
       expect(screen.getByText(/Industry:/)).toBeInTheDocument()
       expect(screen.getByText('technology')).toBeInTheDocument()
-    })
-  })
-
-  describe('Bookmark Functionality', () => {
-    it('should display bookmark indicator when message has bookmarks', () => {
-      const mockBookmarks = [
-        {
-          id: 'bm-1',
-          message_id: 'msg-123',
-          user_id: 'user-456',
-          title: 'Important Insight',
-          tags: ['strategy'],
-          color: 'blue',
-          created_at: '2024-01-01T12:00:00Z',
-          updated_at: '2024-01-01T12:00:00Z'
-        }
-      ]
-
-      render(
-        <StreamingMessage
-          {...defaultProps}
-          bookmarks={mockBookmarks}
-        />
-      )
-
-      // Should show bookmark count
-      expect(screen.getByText('1')).toBeInTheDocument()
-
-      // Should show the mustard bookmark icon (decorative svg, no img role)
-      const bookmarkIcon = document.querySelector('svg.text-mustard')
-      expect(bookmarkIcon).toBeInTheDocument()
-    })
-
-    it('should call onBookmark when bookmark is created', async () => {
-      const onBookmark = vi.fn()
-      render(
-        <StreamingMessage
-          {...defaultProps}
-          onBookmark={onBookmark}
-        />
-      )
-
-      const bookmarkButton = screen.getByTestId('bookmark-button')
-      fireEvent.click(bookmarkButton)
-
-      expect(onBookmark).toHaveBeenCalledWith({
-        title: 'Test Bookmark',
-        tags: [],
-        color: 'blue'
-      })
     })
   })
 
